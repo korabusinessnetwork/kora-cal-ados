@@ -1,1 +1,10 @@
-# Camada de serviços — todo acesso ao backend passa por aqui (nunca no componente).
+# src/lib — camada de serviços
+
+Todo acesso ao backend e toda lógica de domínio pura passam por aqui — nunca dentro de
+componente. O que não vive aqui: JSX, estado de UI, roteamento.
+
+| Pasta | O que vive lá |
+|---|---|
+| `render/` | Motor de render: normalização do asset-base e geração de variante de cor. Módulo puro (texto SVG entra, texto SVG sai), importado pelo editor e pela função serverless |
+
+Pasta nova aqui nasce com README próprio (regra do ADR-003).

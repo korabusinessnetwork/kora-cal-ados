@@ -54,8 +54,8 @@
 
 | ID | Data | Módulo | Descrição | Status | Correção/ADR | ETA |
 |---|---|---|---|---|---|---|
-| BUG-001 | 2026-08-12 | Motor de render | `style` inline e regra CSS de classe (`.st0{fill:...}`) vencem o atributo `fill` que o motor escreve — a zona **não muda de cor** e a API devolve 200 como se tivesse mudado. Export padrão de Illustrator/Figma cai exatamente nesse caso. Viola o princípio nº1 (cor no editor = cor na API) | aberto | ADR-004 (proposto) | — |
-| BUG-003 | 2026-08-12 | Motor de render | Zona inexistente só emite `console.warn` e devolve o SVG normalmente; cor inválida (`"banana"`) é aceita sem validação. Em função serverless, `console.warn` é falha silenciosa — o chamador da API não tem como saber que a variante saiu errada | aberto | ADR-004 (proposto) | — |
+| BUG-001 | 2026-08-12 | Motor de render | `style` inline e regra CSS de classe (`.st0{fill:...}`) vencem o atributo `fill` que o motor escreve — a zona **não muda de cor** e a API devolve 200 como se tivesse mudado. Export padrão de Illustrator/Figma cai exatamente nesse caso. Viola o princípio nº1 (cor no editor = cor na API) | **corrigido** | ADR-004 · `normalizarSvg.ts` | 2026-08-12 |
+| BUG-003 | 2026-08-12 | Motor de render | Zona inexistente só emite `console.warn` e devolve o SVG normalmente; cor inválida (`"banana"`) é aceita sem validação. Em função serverless, `console.warn` é falha silenciosa — o chamador da API não tem como saber que a variante saiu errada | **corrigido** | ADR-004 · `ErroDeVariante` + `validarCor.ts` | 2026-08-12 |
 | BUG-006 | 2026-08-12 | Banco / RLS | `auth_tenant_ids()` é `language sql stable` **sem `security definer`** e a policy de `tenant_members` a invoca — a função relê `tenant_members`, que reaplica a policy. Padrão clássico de `42P17: infinite recursion detected in policy`. **Ainda não reproduzido** (sem Docker local pra `supabase start`) | em_analise | `docs/11_SEGURANCA/proposta-correcao-rls.md` | — |
 
 **Critério de fechamento**: correção + teste que prova a correção rodando em CI
@@ -66,8 +66,8 @@
 
 | ID | Data | Módulo | Descrição | Status | Correção/ADR | ETA |
 |---|---|---|---|---|---|---|
-| BUG-002 | 2026-08-12 | Motor de render | Zona só é endereçável como **um** elemento por `id`: grupo `<g>` não repinta filhos com `fill` próprio, zona com N paths (`zona-cadarco` + `zona-cadarco-2`, presente no próprio `scripts/teste-zona.svg`) só repinta o primeiro, e `id` duplicado idem | aberto | ADR-004 (proposto) | — |
-| BUG-004 | 2026-08-12 | Motor de render / Upload | `<script>` embutido no SVG base sobrevive ao motor e é servido ao navegador do cliente. Não há sanitização no upload, apesar de exigida em `docs/11_SEGURANCA/multi-tenancy-rls.md` | aberto | ADR-004 (proposto) | — |
+| BUG-002 | 2026-08-12 | Motor de render | Zona só é endereçável como **um** elemento por `id`: grupo `<g>` não repinta filhos com `fill` próprio, zona com N paths (`zona-cadarco` + `zona-cadarco-2`, presente no próprio `fixtures/teste-zona.svg`) só repinta o primeiro, e `id` duplicado idem | **corrigido** | ADR-004 · seletor CSS + descendentes pintáveis | 2026-08-12 |
+| BUG-004 | 2026-08-12 | Motor de render / Upload | `<script>` embutido no SVG base sobrevive ao motor e é servido ao navegador do cliente. Não há sanitização no upload, apesar de exigida em `docs/11_SEGURANCA/multi-tenancy-rls.md` | **corrigido** | ADR-004 · `normalizarSvg.ts` → `sanitizar` | 2026-08-12 |
 | BUG-007 | 2026-08-12 | Banco / RLS | Não existe policy de INSERT em `tenants` nem `tenant_members`, nem de UPDATE em `tenants` — criar tenant, convidar membro e editar tema white-label são impossíveis pelo cliente. Onboarding travado antes de existir | aberto | `docs/11_SEGURANCA/proposta-correcao-rls.md` | — |
 | BUG-008 | 2026-08-12 | Storage | Nenhuma policy de Storage definida na migration, apesar de o plano de segurança exigir bucket privado + path particionado por tenant + URL assinada. Hoje o isolamento do asset-base depende só de convenção de path | aberto | `docs/11_SEGURANCA/proposta-correcao-rls.md` | — |
 
@@ -79,7 +79,7 @@
 
 | ID | Data | Módulo | Descrição | Status | Correção/ADR | ETA |
 |---|---|---|---|---|---|---|
-| BUG-005 | 2026-08-12 | Motor de render | Zona pintada com gradiente (`fill="url(#grad)"`) vira cor chapa sem aviso — perde a representação de material/textura silenciosamente | aberto | ADR-004 (proposto) | — |
+| BUG-005 | 2026-08-12 | Motor de render | Zona pintada com gradiente (`fill="url(#grad)"`) vira cor chapa sem aviso — perde a representação de material/textura silenciosamente | **corrigido** (vira erro `ZONA_NAO_RECOLORIVEL`) | ADR-004, decisão 1 | 2026-08-12 |
 | BUG-009 | 2026-08-12 | Banco / RLS | `tenant_members.papel` (`owner`/`membro`) está modelado mas nenhuma policy o usa — todo membro tem escrita total sobre produtos, zonas e variantes | aberto | `docs/11_SEGURANCA/proposta-correcao-rls.md` | — |
 
 ---
@@ -134,7 +134,13 @@ A variante sai com cor errada? Um tenant vê dado de outro? Quantos produtos/zon
 
 | ID | Data Fechamento | Módulo | Referência |
 |---|---|---|---|
-| — | — | — | — |
+| BUG-001 | 2026-08-12 | Motor de render | `src/lib/render/normalizarSvg.ts` (achata CSS em atributo) |
+| BUG-002 | 2026-08-12 | Motor de render | `src/lib/render/gerarVarianteDeCor.ts` (zona = conjunto de elementos) |
+| BUG-003 | 2026-08-12 | Motor de render | `src/lib/render/erros.ts` + `validarCor.ts` |
+| BUG-004 | 2026-08-12 | Upload | `src/lib/render/normalizarSvg.ts` → `sanitizar` |
+| BUG-005 | 2026-08-12 | Motor de render | erro `ZONA_NAO_RECOLORIVEL`; preservar gradiente foi pro backlog |
+
+Todos provados por teste em `src/lib/render/*.test.ts` (30 casos) — não por inspeção.
 
 ---
 
@@ -156,7 +162,11 @@ A variante sai com cor errada? Um tenant vê dado de outro? Quantos produtos/zon
 ## Como estes bugs foram encontrados
 
 BUG-001..005 saíram de validação adversarial do protótipo contra SVGs equivalentes a
-export real de Illustrator/Figma, executada em 2026-08-12 antes de qualquer código de
-Fase 1 ser escrito. Todos estão travados em `scripts/prototipo-recolor-svg.test.mjs`
-como `it.fails` — ao corrigir o motor, o teste acusa e força a atualização.
-BUG-006..010 saíram de revisão estática do schema/migration e das docs na mesma data.
+export real de Illustrator/Figma, executada em 2026-08-12 **antes** de qualquer código de
+Fase 1 ser escrito — e foram corrigidos no mesmo dia pelo ADR-004. Os casos viraram
+`src/lib/render/gerarVarianteDeCor.test.ts`: os mesmos 9 cenários que reprovavam agora
+exigem o comportamento correto, então uma regressão futura reprova o build.
+
+BUG-006..010 saíram de revisão estática do schema/migration e das docs na mesma data e
+seguem abertos — dependem das 3 decisões pendentes em
+`docs/11_SEGURANCA/proposta-correcao-rls.md`.

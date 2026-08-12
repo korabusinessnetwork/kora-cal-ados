@@ -4,6 +4,31 @@
 > entrada tem o mínimo pra não perder a ideia: o que é, por que importa, o que falta
 > decidir.
 
+## Recolor preservando gradiente
+
+**Fase**: 1.5 — depende de dado real (ver "gatilho" abaixo), não de decisão nova.
+
+**O que é**: hoje, zona pintada com gradiente ou pattern é **erro**
+(`ZONA_NAO_RECOLORIVEL`, decisão 1 do ADR-004) — o motor se recusa a achatar em cor
+chapa porque isso apagaria o volume/sombreado do modelo sem avisar. A evolução é
+recolorir **mantendo** o gradiente: trocar as paradas de cor (`<stop>`) preservando a
+variação de luminosidade entre elas.
+
+**Por que importa**: ilustração de calçado usa gradiente justamente onde a marcação de
+zona é mais valiosa — sola e cabedal, pra dar volume. Enquanto isso for erro, esses
+modelos simplesmente não entram no catálogo.
+
+**Gatilho para priorizar**: os primeiros arquivos reais de cliente. Se vierem cheios de
+gradiente, isto deixa de ser evolução e vira barreira de adoção — repriorizar na hora.
+
+**Perguntas em aberto**:
+- A cor pedida vira a parada mais escura, a mais clara, ou a média das paradas?
+- Gradiente compartilhado entre zonas diferentes (mesmo `<linearGradient>` referenciado
+  por duas zonas) precisa ser duplicado antes de recolorir — o normalizador faz isso no
+  upload ou o motor faz na geração?
+
+**Status**: capturada, não especificada.
+
 ## Perfil de Marca — IA que aprende como a marca se comporta
 
 **Fase**: 4+ (pós-MVP, pós-validação do núcleo mecânico) — **não é escopo de Fase 1**

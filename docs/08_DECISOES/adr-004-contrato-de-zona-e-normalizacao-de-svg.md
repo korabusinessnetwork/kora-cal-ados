@@ -1,8 +1,9 @@
 # ADR-004 — Contrato de zona e normalização de SVG
 
-**Status**: 🟡 **Proposto** — aguardando decisão do dono (não implementar antes de aceito)
+**Status**: **Aceito**
 **Data**: 2026-08-12
 **Decisores**: Matheus Bonato
+**Implementado em**: `src/lib/render/` (30 testes verdes, incluindo os 9 casos que reprovaram o protótipo)
 **Supersede**: (nenhum — complementa ADR-001)
 **Supersedido por**: (nenhum)
 
@@ -10,10 +11,10 @@
 
 ## Contexto
 
-O protótipo do motor (`scripts/prototipo-recolor-svg.mjs`) faz `getElementById` +
-`setAttribute('fill', cor)`. Validação adversarial em 2026-08-12 contra SVGs equivalentes
-a export real de Illustrator/Figma reprovou 8 de 9 casos (ver `memory/bugs.md`
-BUG-001..005, travados como teste em `scripts/prototipo-recolor-svg.test.mjs`):
+O protótipo do motor (`scripts/prototipo-recolor-svg.mjs`, aposentado por este ADR) fazia
+`getElementById` + `setAttribute('fill', cor)`. Validação adversarial em 2026-08-12 contra
+SVGs equivalentes a export real de Illustrator/Figma reprovou 8 de 9 casos (ver
+`memory/bugs.md` BUG-001..005; os casos viraram `src/lib/render/gerarVarianteDeCor.test.ts`):
 
 1. **`style="fill:..."` inline vence o atributo `fill`** — a cor não muda.
 2. **Regra CSS de classe (`.st0{fill:...}`) também vence** — export padrão do Illustrator.
@@ -129,21 +130,30 @@ Em vez de reescrever atributos: injetar `#zona-sola, #zona-sola * { fill: #F00 !
 
 ---
 
-## Questões que preciso que você decida
+## Decisões do dono (2026-08-12)
 
-| # | Questão | Recomendação |
-|---|---|---|
-| 1 | Zona com gradiente/pattern: erro, ou vira cor chapa com aviso? | **Erro** na Fase 1 — "cor chapa silenciosa" é o tipo de surpresa que o princípio nº1 proíbe |
-| 2 | SVG que não passa na normalização: rejeitar o upload, ou aceitar e marcar as zonas problemáticas? | **Rejeitar com relatório do que corrigir** — evita produto meio-quebrado no catálogo |
-| 3 | Formato de cor aceito: só hex (`#RRGGBB`), ou também nome CSS (`red`)? | **Só hex** — nome de cor é ambíguo entre renderers, e o roteiro futuro é Pantone/RAL |
-| 4 | Guardar original + canônico, ou só o canônico? | **Ambos** — sem o original não dá pra reprocessar quando o normalizador melhorar |
+Matheus aprovou as quatro recomendações e o caminho estrutural (normalizar no upload):
+
+| # | Questão | Decisão | Onde está no código |
+|---|---|---|---|
+| 0 | Normalizar no upload × injetar CSS `!important` na geração | **Normalizar no upload** | `normalizarSvg.ts` |
+| 1 | Zona com gradiente/pattern | **Erro** `ZONA_NAO_RECOLORIVEL` — não vira cor chapa | `gerarVarianteDeCor.ts` → `alvosPintaveis` |
+| 2 | SVG que não normaliza | **Rejeitar** com motivo explicando o export correto | `normalizarSvg.ts` → `SVG_NAO_NORMALIZAVEL` |
+| 3 | Formato de cor | **Só hex** (`#RGB` expandido para `#RRGGBB`); nome CSS recusado | `validarCor.ts` |
+| 4 | Guardar o original | **Sim**, original + canônico | pendente: é decisão de upload/Storage, entra com a feature de upload |
+
+Consequência registrada da decisão 1: recolorir **preservando** o gradiente (trocar as
+paradas de cor mantendo a variação de luz) é a resposta certa a médio prazo e virou item
+de backlog — hoje o gradiente barra a geração, e se os arquivos reais dos clientes vierem
+cheios deles, isso vira barreira de adoção antes de virar recurso.
 
 ---
 
 ## Referências
 
 - `memory/bugs.md` — BUG-001..005 (defeitos que motivaram este ADR)
-- `scripts/prototipo-recolor-svg.test.mjs` — os 9 casos como teste executável
+- `src/lib/render/` — implementação + os 9 casos como teste executável
+- `docs/09_BACKLOG/features.md` — recolor preservando gradiente (consequência da decisão 1)
 - `CLAUDE.md` — princípio nº1 (fidelidade de cor)
 - `docs/11_SEGURANCA/multi-tenancy-rls.md` — requisito de validação de upload
 - ADR-001 — stack e escopo vetor-only que este contrato detalha

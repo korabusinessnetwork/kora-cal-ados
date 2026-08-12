@@ -38,15 +38,20 @@ quando faz sentido reaproveitar (ex: catálogo público, ou variante muito requi
 ## Fluxo — Editor (setup, feito uma vez por modelo)
 
 1. Time de produto sobe o SVG base do modelo no editor (Fabric.js)
-2. Seleciona cada parte (path/grupo) e marca como zona: `sola`, `cabedal`, `cadarço`, `logo`
-3. Isso grava `product_zones` (zone_key ↔ seletor dentro do SVG)
-4. Preview client-side já mostra a troca de cor em tempo real antes de publicar
+2. **`normalizarSvg` roda no upload** e produz o asset-base canônico — ou recusa o arquivo
+   explicando o que corrigir no export (ADR-004)
+3. Seleciona cada parte (path/grupo) e marca como zona: `sola`, `cabedal`, `cadarço`, `logo`
+4. Isso grava `product_zones` (zone_key ↔ seletor CSS dentro do SVG)
+5. **Relatório de zonas** mostra quantos elementos cada seletor captura, para o time
+   conferir o mapeamento antes de publicar — prevenção de erro > mensagem de erro
+6. Preview client-side mostra a troca de cor em tempo real, usando o mesmo motor da API
 
 ## Fluxo — API (geração, chamado quantas vezes precisar)
 
 1. `POST /products/:id/variants` com `{"sola": "#C0392B", "cabedal": "#111111"}`
-2. Função serverless busca o SVG base no Storage (`tenants/{tenant_id}/products/{id}/base.svg`)
-3. Aplica os seletores de `product_zones` e troca `fill` de cada zona pedida
+2. Função serverless busca o asset-base canônico no Storage (`tenants/{tenant_id}/products/{id}/base.svg`)
+3. Aplica os seletores de `product_zones` e troca `fill` de cada zona pedida — zona
+   ausente, cor inválida ou zona com gradiente devolvem **erro**, nunca 200 "quase certo"
 4. Devolve SVG direto, ou rasteriza pra PNG (`sharp` ou `resvg`) se `?format=png`
 5. Opcionalmente grava em `variants` pra reuso rápido da mesma combinação
 
@@ -58,20 +63,22 @@ quando faz sentido reaproveitar (ex: catálogo público, ou variante muito requi
 - Nenhuma função serverless aceita `product_id` sem validar que pertence ao
   `tenant_id` do token autenticado
 
-## Protótipo — o que está provado e o que não está
+## Motor de render — estado
 
-`scripts/prototipo-recolor-svg.mjs` prova o **caminho feliz** do fluxo API em código real
-(jsdom + `getElementById` + `setAttribute('fill', ...)`), contra `scripts/teste-zona.svg`.
+Implementado em `src/lib/render/` (ver README de lá), seguindo o contrato do **ADR-004**.
+30 testes verdes, incluindo os 9 casos de export real de Illustrator/Figma que reprovaram
+o protótipo original (`memory/bugs.md` BUG-001..005, todos fechados).
 
-⚠️ **Não está pronto pra SVG real.** Validação adversarial em 2026-08-12 (9 casos,
-travados em `scripts/prototipo-recolor-svg.test.mjs`) mostrou que em export de
-Illustrator/Figma o `style` inline e a regra CSS de classe vencem o atributo `fill` —
-a zona não muda de cor e a API responde 200 como se tivesse mudado. Zona também não é
-endereçável como grupo `<g>` nem como conjunto de N paths. Ver `memory/bugs.md`
-BUG-001..005; contrato corrigido proposto em ADR-004.
+Duas peças, nesta ordem obrigatória:
 
-Vira `src/lib/render/gerarVarianteDeCor.ts` quando o projeto Vite for inicializado —
-mesma função, mesmo nome (ver glossário) — **depois** que o contrato de zona for fechado.
+1. **`normalizarSvg`** — roda no upload, uma vez por modelo. Achata CSS/style em atributo
+   de apresentação, sanitiza (`<script>`, handler inline, referência externa) e desambigua
+   `id` duplicado. Recusa o arquivo quando não consegue garantir fidelidade.
+2. **`gerarVarianteDeCor`** — roda na geração. Recebe `{zone_key: cor}`, resolve o seletor
+   de cada zona em `product_zones` e pinta o elemento **e seus descendentes pintáveis**.
+
+O mesmo módulo é importado pelo editor e pela função serverless — nunca duas
+implementações (princípio nº1).
 
 ## O que fica fora do MVP (documentado, não esquecido)
 

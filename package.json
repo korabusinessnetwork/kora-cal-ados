@@ -7,12 +7,14 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "prototipo:recolor": "node scripts/prototipo-recolor-demo.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "jsdom": "^30.0.1"
   },
   "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }
 }

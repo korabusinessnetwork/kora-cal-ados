@@ -39,7 +39,7 @@ create table product_zones (
   product_id uuid not null references products(id) on delete cascade,
   tenant_id uuid not null references tenants(id) on delete cascade,  -- desnormalizado p/ RLS direto
   zone_key text not null,          -- ex: 'sola', 'cabedal', 'cadarco', 'logo'
-  svg_selector text not null,      -- id/classe do path dentro do SVG base
+  svg_selector text not null,      -- seletor CSS; pode capturar N elementos (ADR-004)
   label text,
   cor_default text,
   created_at timestamptz not null default now(),

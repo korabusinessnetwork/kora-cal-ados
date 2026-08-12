@@ -19,6 +19,9 @@
 | **Zona** | `zone_key`, `product_zones` | Parte endereçável de um modelo de calçado (ex: sola, cabedal, cadarço, logo) que pode ter cor/material definidos independentemente | frame, layer, área, region, parte (isolado) |
 | **Produto** / **Modelo** | `products` | Um modelo de calçado cadastrado no sistema, com um asset-base (SVG) e um conjunto de zonas | item, artigo, referência |
 | **Asset-base** | `base_asset_path` | O arquivo SVG original de um produto, antes de qualquer variante ser gerada — sempre vetor/ilustração na Fase 1 (nunca foto real, ver ADR-001) | template, base, original (isolado) |
+| **Asset-base canônico** | saída de `normalizarSvg` | O asset-base depois da normalização: cor em atributo de apresentação, sem `<style>`, sem `<script>`, sem `id` duplicado. É o que o editor e a API leem — nunca o arquivo cru (ADR-004) | SVG limpo, sanitizado (isolado) |
+| **Normalização** | `normalizarSvg` | A etapa de upload que converte o asset-base cru em canônico, ou recusa o arquivo explicando o motivo | limpeza, tratamento, sanitização (isolado — sanitizar é só uma parte) |
+| **Seletor de zona** | `svg_selector` | Seletor CSS que resolve quais elementos do SVG pertencem a uma zona — pode capturar N elementos, não um só | id da zona, path da zona |
 | **Variante** | `variants`, `zone_colors` | Uma combinação específica de cor/material aplicada às zonas de um produto, gerada pela API | versão, opção, combinação |
 | **Tenant** | `tenants`, `tenant_id` | Uma marca/fabricante calçadista cliente da plataforma — unidade de isolamento (ver `docs/11_SEGURANCA/multi-tenancy-rls.md`) | cliente (isolado, sem contexto), empresa, conta |
 | **Membro** | `tenant_members` | Usuário vinculado a um tenant, com um papel (`owner` ou `membro`) | usuário (isolado, sem contexto de tenant), colaborador |
@@ -43,3 +46,4 @@
 ## Atualizações
 
 - **2026-08-12** — versão inicial, termos definidos durante o intake de fundação
+- **2026-08-12** — entram "asset-base canônico", "normalização" e "seletor de zona" (ADR-004)

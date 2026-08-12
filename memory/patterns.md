@@ -178,7 +178,7 @@ Toda tela tem renderização para:
 
 | Padrão | Razão | Data | Sucessor |
 |---|---|---|---|
-| Recolor por `getElementById` + `setAttribute('fill')` | Falha em silêncio em SVG real (style inline/CSS vencem o atributo) — ver BUG-001/002 | 2026-08-12 | Contrato de zona do ADR-004 (proposto) |
+| Recolor por `getElementById` + `setAttribute('fill')` | Falha em silêncio em SVG real (style inline/CSS vencem o atributo) — ver BUG-001/002 | 2026-08-12 | `normalizarSvg` + seletor de zona (ADR-004, aceito) |
 
 ## Checklist de Novo Padrão
 

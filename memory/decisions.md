@@ -66,7 +66,7 @@ Architecture Decision Record (ADR) é um documento que captura uma escolha arqui
 | [ADR-001](../docs/08_DECISOES/adr-001-stack-e-motor-de-render.md) | Stack e motor de renderização (vetor-first) | Aceito | 2026-08-12 | — |
 | [ADR-002](../docs/08_DECISOES/adr-002-multi-tenant-white-label.md) | Estratégia multi-tenant e white-label | Aceito | 2026-08-12 | — |
 | [ADR-003](../docs/08_DECISOES/adr-003-organizacao-para-ia.md) | Organização do projeto para agente de IA | Aceito | 2026-08-12 | — |
-| [ADR-004](../docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md) | Contrato de zona e normalização de SVG | 🟡 Proposto | 2026-08-12 | — |
+| [ADR-004](../docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md) | Contrato de zona e normalização de SVG | Aceito | 2026-08-12 | — |
 
 ## Regra Principal
 
@@ -113,8 +113,8 @@ Proposed / Accepted / Rejected
 ## Decisões Supersedidas / Em Review
 
 - ADR-001 supersede: (nenhuma)
-- **Em revisão (aguardando decisão do dono, 2026-08-12)**:
-  - ADR-004 — contrato de zona e normalização de SVG (motor atual falha em SVG real,
-    ver `memory/bugs.md` BUG-001/002)
+- **Em revisão (aguardando decisão do dono)**:
   - Correção de RLS e caminho de onboarding de tenant —
-    `docs/11_SEGURANCA/proposta-correcao-rls.md` (BUG-006/007/008/009)
+    `docs/11_SEGURANCA/proposta-correcao-rls.md` (BUG-006/007/008/009). 3 perguntas
+    abertas: como nasce um tenant na Fase 1, o que `membro` não pode fazer, TTL da URL
+    assinada
