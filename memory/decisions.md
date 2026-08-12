@@ -113,8 +113,9 @@ Proposed / Accepted / Rejected
 ## Decisões Supersedidas / Em Review
 
 - ADR-001 supersede: (nenhuma)
-- **Em revisão (aguardando decisão do dono)**:
-  - Correção de RLS e caminho de onboarding de tenant —
-    `docs/11_SEGURANCA/proposta-correcao-rls.md` (BUG-006/007/008/009). 3 perguntas
-    abertas: como nasce um tenant na Fase 1, o que `membro` não pode fazer, TTL da URL
-    assinada
+- **Em revisão**: (nenhuma decisão aberta)
+- **Decidido em 2026-08-12, aguardando execução**: correção de RLS, papéis e Storage
+  (`docs/11_SEGURANCA/proposta-correcao-rls.md` → migration
+  `20260812_correcao_rls_e_storage.sql`). Tenant provisionado por `service_role` na
+  Fase 1; membro cria/edita, owner apaga e gerencia membros; URL assinada 300s.
+  Não virou ADR porque implementa o ADR-002, não o altera

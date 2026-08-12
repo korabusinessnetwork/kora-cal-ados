@@ -1,10 +1,38 @@
--- Fonte de verdade do banco. RLS obrigatório em toda tabela (multi-tenant).
+-- SNAPSHOT do estado do banco. Fonte de verdade do HISTÓRICO é supabase/migrations/
+-- (convenção Kora: YYYYMMDD_descricao.sql); este arquivo existe para ler o estado atual
+-- inteiro sem reconstruir migration por migration.
 --
--- Este arquivo é um SNAPSHOT de referência. O histórico real de mudanças de schema
--- vive em supabase/migrations/ (convenção Kora: YYYYMMDD_descricao.sql).
+-- Estado em 2026-08-12, resultante de:
+--   20260812_schema_inicial.sql        — tabelas + RLS inicial
+--   20260812_correcao_rls_e_storage.sql — corrige recursão, papéis e Storage (BUG-006..009)
 --
--- Estado atual: ver supabase/migrations/20260812_schema_inicial.sql
---   Tabelas: tenants, tenant_members, products, product_zones, variants
---   RLS: ativa em todas, isolamento por tenant_id via auth_tenant_ids() — ver ADR-002
+-- ⚠️ Nenhuma das duas foi executada em banco real ainda — ver supabase/tests/README.md.
+-- Ao rodar uma migration nova, atualize este snapshot no mesmo commit.
+
+-- ── Tabelas ─────────────────────────────────────────────────────────────
+-- tenants        (id, nome, slug, tema jsonb, plano, status, created_at)
+-- tenant_members (id, tenant_id, user_id, papel owner|membro, created_at)
+-- products       (id, tenant_id, nome, base_asset_path, created_at)
+-- product_zones  (id, product_id, tenant_id, zone_key, svg_selector, label, cor_default)
+-- variants       (id, product_id, tenant_id, zone_colors jsonb, rendered_path, created_at)
 --
--- Ao rodar uma nova migration, atualize este snapshot pra refletir o estado atual.
+-- DDL completo: 20260812_schema_inicial.sql (não duplicado aqui para não divergir).
+
+-- ── Isolamento (estado final das policies) ──────────────────────────────
+-- RLS ativa nas 5 tabelas. Helpers security definer:
+--   auth_tenant_ids()        → tenants do usuário autenticado
+--   auth_owner_tenant_ids()  → tenants onde ele é owner
+--
+-- | Tabela         | select | insert        | update        | delete |
+-- |----------------|--------|---------------|---------------|--------|
+-- | tenants        | membro | (service_role)| owner         | —      |
+-- | tenant_members | membro | owner         | —             | owner  |
+-- | products       | membro | membro        | membro        | owner  |
+-- | product_zones  | membro | membro        | membro        | owner  |
+-- | variants       | membro | membro        | —             | owner  |
+--
+-- Storage: bucket privado `assets-base`, path tenants/{tenant_id}/products/{id}/base.svg,
+-- leitura/escrita por membro do tenant dono do path, delete só owner.
+--
+-- Criação de tenant é provisionada por script com service_role na Fase 1 (venda manual).
+-- service_role nunca no front — só em servidor/função.

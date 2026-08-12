@@ -1,12 +1,20 @@
 # Proposta — correção de RLS, onboarding e Storage
 
-**Status**: 🟡 Proposta — aguardando decisão do dono
+**Status**: Decidido e escrito — **falta executar**
 **Data**: 2026-08-12
 **Referente a**: `supabase/migrations/20260812_schema_inicial.sql`
 **Bugs**: BUG-006, BUG-007, BUG-008, BUG-009 (`memory/bugs.md`)
 
-> ⚠️ O SQL abaixo **não foi colocado em `supabase/migrations/`** de propósito — vira
-> migration só depois de aprovado, para não ser aplicado por engano.
+> ✅ Decisões tomadas (2026-08-12): **1(a)** tenant provisionado por script com
+> `service_role` na Fase 1 · **2(b)** membro cria e edita, só owner apaga e gerencia
+> membros · **3** URL assinada com 300s.
+>
+> O SQL virou `supabase/migrations/20260812_correcao_rls_e_storage.sql`, e as asserções
+> viraram `supabase/tests/isolamento.test.ts`.
+>
+> ⚠️ **Nada disso foi executado ainda** — não há Postgres local (sem Docker) nem projeto
+> Supabase criado. BUG-006..009 seguem abertos até o teste de isolamento rodar de
+> verdade. SQL revisado não é SQL provado.
 
 ---
 
@@ -53,9 +61,9 @@ dependeria só de a URL não ser adivinhada.
 
 ---
 
-## Decisões que preciso de você
+## Decisões (tomadas em 2026-08-12)
 
-| # | Questão | Opções | Recomendação |
+| # | Questão | Opções | Decisão — foi a recomendação |
 |---|---|---|---|
 | 1 | Como nasce um tenant na Fase 1? | (a) você provisiona por script com `service_role`; (b) função `security definer` que cria tenant + membro `owner` numa transação | **(a)** — venda é manual/contrato; self-serve é Fase 3, e (b) abre superfície de ataque que não precisa existir ainda |
 | 2 | O que `membro` **não** pode fazer? | (a) nada — membro = owner na prática; (b) membro cria/edita produto, zona e variante, mas só `owner` apaga produto e gerencia membros | **(b)** — apagar produto destrói o trabalho de mapeamento de zonas do time inteiro |
@@ -65,11 +73,18 @@ O SQL abaixo assume **1(a) + 2(b) + 3(300s)**. Se você decidir diferente, ajust
 
 ---
 
-## SQL proposto
+## SQL
+
+> **A versão que vale é `supabase/migrations/20260812_correcao_rls_e_storage.sql`.** O
+> bloco abaixo é o raciocínio que originou a migration; ao mudar a policy, mude na
+> migration — este documento é histórico da decisão, não fonte de verdade.
+>
+> Correção encontrada ao escrever a migration: `select auth_tenant_ids()::text` **não
+> compila** — Postgres só aceita função que retorna conjunto no topo do SELECT, e o cast
+> em volta quebra isso. A forma correta é `select t::text from auth_tenant_ids() t`.
 
 ```sql
 -- Kora Calçados — correção de RLS, papéis e Storage
--- Vira supabase/migrations/AAAAMMDD_correcao_rls.sql SÓ depois de aprovado.
 
 -- ── 1. Helper sem recursão ───────────────────────────────────────────────
 -- security definer: a função roda com o dono, então o select interno NÃO reaplica a
@@ -191,7 +206,7 @@ create policy "membro le asset do proprio tenant"
   using (
     bucket_id = 'assets-base'
     and (storage.foldername(name))[1] = 'tenants'
-    and (storage.foldername(name))[2] in (select auth_tenant_ids()::text)
+    and (storage.foldername(name))[2] in (select t::text from auth_tenant_ids() t)
   );
 
 create policy "membro sobe asset no proprio tenant"
@@ -199,7 +214,7 @@ create policy "membro sobe asset no proprio tenant"
   with check (
     bucket_id = 'assets-base'
     and (storage.foldername(name))[1] = 'tenants'
-    and (storage.foldername(name))[2] in (select auth_tenant_ids()::text)
+    and (storage.foldername(name))[2] in (select t::text from auth_tenant_ids() t)
   );
 
 create policy "owner apaga asset do proprio tenant"
@@ -207,7 +222,7 @@ create policy "owner apaga asset do proprio tenant"
   using (
     bucket_id = 'assets-base'
     and (storage.foldername(name))[1] = 'tenants'
-    and (storage.foldername(name))[2] in (select auth_owner_tenant_ids()::text)
+    and (storage.foldername(name))[2] in (select t::text from auth_owner_tenant_ids() t)
   );
 ```
 
