@@ -1,0 +1,9 @@
+<svg width="300" height="150" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- CABEDAL: desenhado primeiro, fica "atrás" -->
+  <ellipse id="zona-cabedal" cx="150" cy="75" rx="130" ry="55" fill="#CCCCCC"/>
+  <!-- SOLA: por cima, na base -->
+  <rect id="zona-sola" x="20" y="115" width="260" height="20" rx="10" fill="#333333"/>
+  <!-- CADARCO: por cima de tudo -->
+  <rect id="zona-cadarco" x="130" y="35" width="12" height="45" fill="#555555"/>
+  <rect id="zona-cadarco-2" x="155" y="30" width="12" height="50" fill="#555555"/>
+</svg>

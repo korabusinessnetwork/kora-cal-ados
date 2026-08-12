@@ -1,0 +1,45 @@
+# 08 — DECISÕES · Kora Calçados (codinome)
+
+> ADRs (Architecture Decision Records): por que escolhemos X em vez de Y.
+
+## O que vive aqui
+
+- **ADRs**: decisões técnicas formalizadas (status, contexto, alternativas, consequências)
+- **Ciclo de vida**: Proposto → Aceito → Supersedido
+- **Arquivo**: um ADR por arquivo (`adr-NNN-titulo.md`)
+- **Histórico**: decisões antigas/supersedidas ficam, marcadas como "Supersedido por"
+- **Rastreabilidade**: quando foi decidido, quem decidiu, qual código implementa
+
+## O que NÃO vive aqui
+
+- Implementação da decisão → `src/`
+- Especificações de API → `07_APIS/`
+- Regras de negócio → `03_REGRAS_DE_NEGOCIO/`
+- Fluxos → `05_FLUXOS/`
+
+## Índice (arquivos reais desta pasta)
+
+| Arquivo | Decisão | Status |
+|---|---|---|
+| `adr-000-template.md` | TEMPLATE — copie para criar um ADR novo | — |
+| `adr-001-stack-e-motor-de-render.md` | React+Vite+Fabric+Supabase+Vercel, MVP vetor-only | Aceito |
+| `adr-002-multi-tenant-white-label.md` | Multi-tenant desde o schema, white-label por tenant | Aceito |
+| `adr-003-organizacao-para-ia.md` | Projeto organizado para leitura de agente, não de humano | Aceito |
+| `adr-004-contrato-de-zona-e-normalizacao-de-svg.md` | Zona = conjunto de elementos; SVG normalizado no upload | 🟡 **Proposto** |
+
+Numeração é sequencial e nunca reciclada. Espelho deste índice em `memory/decisions.md`
+— os dois precisam estar em sync.
+
+## Como preencher
+
+1. **Copie `adr-000-template.md`**: renomeie para `adr-NNN-titulo.md`
+2. **Preencha todas as seções**: Contexto, Decisão, Alternativas, Consequências
+3. **Status começa "Proposto"**: aprovação → "Aceito", depois → "Supersedido"
+4. **Não delete ADRs antigos**: marque como "Supersedido por adr-NNN", arquivo fica no histórico
+5. **Atualize quando decisão muda**: novo ADR que supersede, link bidirecional
+
+## Ligações
+
+- `adr-000-template.md` — comece aqui, clone para novo ADR
+- `01_ARQUITETURA/` — ADRs justificam as escolhas técnicas
+- `03_REGRAS_DE_NEGOCIO/` — se regra é decisão técnica, document em ADR

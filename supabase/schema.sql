@@ -1,0 +1,10 @@
+-- Fonte de verdade do banco. RLS obrigatório em toda tabela (multi-tenant).
+--
+-- Este arquivo é um SNAPSHOT de referência. O histórico real de mudanças de schema
+-- vive em supabase/migrations/ (convenção Kora: YYYYMMDD_descricao.sql).
+--
+-- Estado atual: ver supabase/migrations/20260812_schema_inicial.sql
+--   Tabelas: tenants, tenant_members, products, product_zones, variants
+--   RLS: ativa em todas, isolamento por tenant_id via auth_tenant_ids() — ver ADR-002
+--
+-- Ao rodar uma nova migration, atualize este snapshot pra refletir o estado atual.
