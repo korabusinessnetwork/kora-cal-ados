@@ -1,0 +1,92 @@
+.formulario-de-produto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  background: var(--cor-superficie-elevada);
+}
+
+.formulario-de-produto__titulo {
+  margin: 0;
+  font-size: var(--fonte-tamanho-titulo);
+}
+
+.formulario-de-produto__campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  font-size: var(--fonte-tamanho-pequeno);
+  color: var(--cor-texto-suave);
+}
+
+.formulario-de-produto__campo input {
+  padding: var(--espaco-2) var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--fonte-tamanho-base);
+}
+
+.formulario-de-produto__estado {
+  margin: 0;
+  color: var(--cor-texto-suave);
+  font-size: var(--fonte-tamanho-pequeno);
+}
+
+.formulario-de-produto__erro,
+.formulario-de-produto__sucesso {
+  margin: 0;
+  padding: var(--espaco-3);
+  border-radius: var(--raio-borda);
+  font-size: var(--fonte-tamanho-pequeno);
+}
+
+.formulario-de-produto__erro {
+  background: var(--cor-erro-superficie);
+  color: var(--cor-erro);
+}
+
+.formulario-de-produto__sucesso {
+  background: var(--cor-sucesso-superficie);
+  color: var(--cor-sucesso);
+}
+
+.formulario-de-produto__botao {
+  padding: var(--espaco-3);
+  border: none;
+  border-radius: var(--raio-borda);
+  background: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+.formulario-de-produto__botao:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+/* Relatório de normalização — some junto com o formulário, não tem CSS próprio. */
+.relatorio {
+  padding: var(--espaco-3);
+  border-radius: var(--raio-borda);
+  background: var(--cor-aviso-superficie);
+  color: var(--cor-aviso);
+  font-size: var(--fonte-tamanho-pequeno);
+}
+
+.relatorio__linha {
+  margin: 0;
+}
+
+.relatorio__lista {
+  margin: 0;
+  padding-left: var(--espaco-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
