@@ -8,8 +8,9 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["vitest/globals"],
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "vite/client"],
     "verbatimModuleSyntax": true
   },
-  "include": ["src", "supabase/tests"]
+  "include": ["src", "supabase/tests", "scripts", "vitest.setup.ts", "vite.config.ts", "vitest.config.ts"]
 }
