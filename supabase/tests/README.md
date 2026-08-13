@@ -28,6 +28,13 @@ item técnico: o dano de um vazamento aqui é competitivo (coleção não lança
 concorrente que também é cliente). Por isso o teste tenta o ataque real — pedir o recurso
 alheio pelo id direto — em vez de conferir se a policy "existe".
 
-⚠️ **Enquanto este teste não rodar em um ambiente de verdade, BUG-006..009 continuam
-abertos.** A migration `20260812_correcao_rls_e_storage.sql` foi escrita, revisada e nunca
-executada — SQL que não rodou não é correção provada.
+✅ **Rodado em 2026-08-13** contra projeto Supabase real, 8/8 verde — foi o que fechou
+BUG-006..009. Antes disso a migration `20260812_correcao_rls_e_storage.sql` estava escrita
+e revisada, nunca executada: SQL que não rodou não é correção provada.
+
+⚠️ `npm test` sozinho **pula** este teste: o vitest não carrega `.env.local` para
+`process.env`. Rodar com as variáveis no ambiente:
+
+```bash
+set -a && . ./.env.local && set +a && npx vitest run supabase/tests/isolamento.test.ts
+```

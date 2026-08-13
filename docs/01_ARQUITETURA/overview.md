@@ -80,6 +80,13 @@ Duas peças, nesta ordem obrigatória:
 O mesmo módulo é importado pelo editor e pela função serverless — nunca duas
 implementações (princípio nº1).
 
+**Como o mesmo módulo roda nos dois ambientes** (desde 2026-08-13): o motor não conhece
+mais jsdom. Quem entrega o `Document` é `parsearSvg.ts` — `DOMParser`/`XMLSerializer`
+nativos no navegador, adaptador de jsdom em Node (`analisadorDeNode.ts`, o único arquivo
+do projeto que importa jsdom). Antes disso o `import { JSDOM }` estava dentro do motor, o
+que tornava impossível carregá-lo no editor: a promessa de "um motor só" existia no papel
+e não no código. `parsearSvg.test.ts` prova que os dois caminhos produzem saída idêntica.
+
 ## O que fica fora do MVP (documentado, não esquecido)
 
 - Segmentação de foto real (precisa IA/máscara — Fase 2)
@@ -89,3 +96,6 @@ implementações (princípio nº1).
 ## Atualizações
 
 - **2026-08-12** — versão inicial, gerada na fundação do projeto.
+- **2026-08-13** — motor de render passou a ser agnóstico de ambiente (`parsearSvg`);
+  app React + Vite criado com auth, tenant/tema e cadastro de produto com upload
+  normalizado (rodada 1 da Fase 1).
