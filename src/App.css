@@ -1,0 +1,70 @@
+.app {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: var(--espaco-6) var(--espaco-5);
+}
+
+.app__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  padding-bottom: var(--espaco-4);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.app__titulo {
+  margin: 0;
+  font-size: var(--fonte-tamanho-titulo);
+}
+
+.app__subtitulo {
+  margin: 0 0 var(--espaco-3);
+  font-size: var(--fonte-tamanho-base);
+  color: var(--cor-texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.app__sair {
+  padding: var(--espaco-2) var(--espaco-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-borda);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Editor é ferramenta de precisão em desktop (docs/02_DESIGN_SYSTEM/README.md, item 7):
+   duas colunas por padrão, uma só quando a janela não comporta. */
+.app__conteudo {
+  display: grid;
+  grid-template-columns: 1fr 22rem;
+  gap: var(--espaco-6);
+  margin-top: var(--espaco-6);
+  align-items: start;
+}
+
+@media (max-width: 60rem) {
+  .app__conteudo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app__estado {
+  margin: 0;
+  padding: var(--espaco-7) var(--espaco-5);
+  color: var(--cor-texto-suave);
+  text-align: center;
+}
+
+.app__estado--erro {
+  color: var(--cor-erro);
+}
+
+.estado-carregando {
+  padding: var(--espaco-7);
+  color: var(--cor-texto-suave);
+  text-align: center;
+}

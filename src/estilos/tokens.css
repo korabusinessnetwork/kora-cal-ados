@@ -1,0 +1,65 @@
+/* Tokens de interface — a camada parametrizável do white-label.
+ *
+ * Os valores aqui são NEUTROS de propósito: a identidade visual do produto ainda não
+ * existe (docs/02_DESIGN_SYSTEM/README.md) e, mesmo quando existir, cada tenant
+ * sobrescreve o que quiser via `tenants.tema`. Nenhum componente pode escrever cor
+ * literal — se precisou de uma cor nova, ela nasce aqui como token.
+ *
+ * Regra que não se quebra (regra 6 de docs/02_DESIGN_SYSTEM/README.md): nada daqui pode
+ * ser aplicado como filtro, overlay ou ajuste sobre a cor de uma ZONA. Cor de zona é dado
+ * do cliente e vira calçado fabricado — o tema não encosta nela.
+ */
+
+:root {
+  /* Superfícies e texto */
+  --cor-superficie: #ffffff;
+  --cor-superficie-elevada: #f6f7f8;
+  --cor-borda: #d9dde1;
+  --cor-texto: #1c2126;
+  --cor-texto-suave: #5b6670;
+
+  /* Ação */
+  --cor-primaria: #2f3e4d;
+  --cor-primaria-texto: #ffffff;
+
+  /* Semântica de estado */
+  --cor-erro: #a4271c;
+  --cor-erro-superficie: #fdf1ef;
+  --cor-sucesso: #1f6b45;
+  --cor-sucesso-superficie: #eff7f2;
+  --cor-aviso: #8a6100;
+  --cor-aviso-superficie: #fdf6e7;
+
+  /* Régua de espaçamento */
+  --espaco-1: 0.25rem;
+  --espaco-2: 0.5rem;
+  --espaco-3: 0.75rem;
+  --espaco-4: 1rem;
+  --espaco-5: 1.5rem;
+  --espaco-6: 2rem;
+  --espaco-7: 3rem;
+
+  /* Tipografia — o editor é ferramenta de precisão, contexto desktop */
+  --fonte-base: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fonte-tamanho-pequeno: 0.8125rem;
+  --fonte-tamanho-base: 0.9375rem;
+  --fonte-tamanho-titulo: 1.25rem;
+  --fonte-altura-linha: 1.5;
+
+  /* Forma */
+  --raio-borda: 6px;
+  --sombra-elevada: 0 1px 2px rgb(0 0 0 / 8%), 0 4px 12px rgb(0 0 0 / 6%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-family: var(--fonte-base);
+  font-size: var(--fonte-tamanho-base);
+  line-height: var(--fonte-altura-linha);
+}
