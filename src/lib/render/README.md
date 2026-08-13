@@ -12,6 +12,8 @@ implementação é o que sustenta "cor no editor = cor na API" (princípio nº1 
 | `gerarVarianteDeCor.ts` | Roda na **geração**: aplica `{zone_key: cor}` sobre o canônico | canônico + zonas + cores → SVG da variante |
 | `lerRegrasCss.ts` | Lê o `<style>` do próprio SVG (o jsdom não monta CSSOM em `image/svg+xml`) | texto CSS → regras com especificidade |
 | `validarCor.ts` | Só aceita hex (ADR-004, q3) | `#f00` → `#FF0000`, ou erro |
+| `parsearSvg.ts` | Adaptador de DOM: nativo no navegador, registrado em Node | texto → `Document` |
+| `analisadorDeNode.ts` | Registra o analisador de jsdom. **Único** arquivo que importa jsdom | — |
 | `erros.ts` | `ErroDeVariante` + códigos de erro (contrato de API) | — |
 | `fixtures/teste-zona.svg` | Modelo de teste com sola, cabedal e cadarço (2 paths) | — |
 
@@ -37,5 +39,9 @@ A saída típica para o cliente é uma frase só: exportar do Illustrator com
 - Zona com gradiente/pattern é **erro**, não vira cor chapa (ADR-004, q1). Recolorir
   preservando o gradiente está no backlog (`docs/09_BACKLOG/features.md`).
 - `fill="none"` é pulado: é contorno sem preenchimento, pintá-lo mudaria o desenho.
-- `jsdom` é pesado para função serverless. Confinado ao upload seria o ideal; hoje os dois
-  caminhos usam. Revisitar se o tempo de cold start incomodar.
+- `jsdom` só é usado onde não há DOM nativo. No navegador o motor usa `DOMParser`/
+  `XMLSerializer` do próprio ambiente, e `parsearSvg.test.ts` prova que os dois caminhos
+  produzem a mesma saída byte a byte — se divergissem, editor e API divergiriam.
+- Ambiente Node precisa chamar `registrarAnalisadorDeNode()` uma vez antes de usar o motor
+  (o `vitest.setup.ts` faz isso nos testes). Sem registro, o motor falha alto com mensagem
+  dizendo o que fazer — nunca em silêncio.

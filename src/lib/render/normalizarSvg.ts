@@ -6,9 +6,9 @@
 // do PNG) interpreta igual. Enquanto a cor mora em CSS, quem decide é o renderizador —
 // e editor divergir da API é exatamente o que o princípio nº1 do CLAUDE.md proíbe.
 
-import { JSDOM } from 'jsdom';
 import { ErroDeVariante } from './erros';
 import { lerDeclaracoes, lerRegrasCss, type RegraCss } from './lerRegrasCss';
+import { parsearSvg, serializarSvg } from './parsearSvg';
 
 /** Propriedades CSS que existem como atributo de apresentação SVG e podem ser achatadas. */
 const PROPRIEDADES_ACHATAVEIS = new Set([
@@ -43,8 +43,7 @@ export interface ResultadoDeNormalizacao {
  * rejeitar com explicação é preferível a aceitar um produto meio-quebrado (ADR-004, q2).
  */
 export function normalizarSvg(svgTexto: string): ResultadoDeNormalizacao {
-  const dom = new JSDOM(svgTexto, { contentType: 'image/svg+xml' });
-  const documento = dom.window.document;
+  const documento = parsearSvg(svgTexto);
 
   if (documento.querySelector('parsererror') || !documento.querySelector('svg')) {
     throw new ErroDeVariante('SVG_INVALIDO', 'Arquivo não é um SVG válido.');
@@ -62,7 +61,7 @@ export function normalizarSvg(svgTexto: string): ResultadoDeNormalizacao {
   acharEstilo(documento, relatorio);
   desambiguarIds(documento, relatorio);
 
-  return { svg: dom.serialize(), relatorio };
+  return { svg: serializarSvg(documento), relatorio };
 }
 
 /** Remove o que não pode chegar ao navegador de outro cliente (ver docs/11_SEGURANCA/). */

@@ -6,5 +6,6 @@ componente. O que não vive aqui: JSX, estado de UI, roteamento.
 | Pasta | O que vive lá |
 |---|---|
 | `render/` | Motor de render: normalização do asset-base e geração de variante de cor. Módulo puro (texto SVG entra, texto SVG sai), importado pelo editor e pela função serverless |
+| `supabase/` | Cliente Supabase do navegador (só chave anônima; `service_role` vive em `scripts/`) |
 
 Pasta nova aqui nasce com README próprio (regra do ADR-003).
