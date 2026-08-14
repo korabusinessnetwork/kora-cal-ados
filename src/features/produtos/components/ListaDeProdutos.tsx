@@ -8,9 +8,17 @@ interface Props {
   produtos: Produto[];
   estado: EstadoDaLista;
   aoTentarDeNovo(): void;
+  aoSelecionar(produto: Produto): void;
+  produtoSelecionadoId: string | null;
 }
 
-export function ListaDeProdutos({ produtos, estado, aoTentarDeNovo }: Props) {
+export function ListaDeProdutos({
+  produtos,
+  estado,
+  aoTentarDeNovo,
+  aoSelecionar,
+  produtoSelecionadoId,
+}: Props) {
   if (estado === 'carregando') {
     return (
       <p className="lista-de-produtos__estado" role="status">
@@ -41,11 +49,20 @@ export function ListaDeProdutos({ produtos, estado, aoTentarDeNovo }: Props) {
   return (
     <ul className="lista-de-produtos">
       {produtos.map((produto) => (
-        <li key={produto.id} className="lista-de-produtos__item">
-          <span className="lista-de-produtos__nome">{produto.nome}</span>
-          <span className="lista-de-produtos__data">
-            {new Date(produto.created_at).toLocaleDateString('pt-BR')}
-          </span>
+        <li key={produto.id}>
+          {/* O item é botão, não div com onClick: seleção precisa alcançar teclado e
+              leitor de tela, e `aria-pressed` é o que anuncia qual modelo está aberto. */}
+          <button
+            type="button"
+            className="lista-de-produtos__item"
+            aria-pressed={produto.id === produtoSelecionadoId}
+            onClick={() => aoSelecionar(produto)}
+          >
+            <span className="lista-de-produtos__nome">{produto.nome}</span>
+            <span className="lista-de-produtos__data">
+              {new Date(produto.created_at).toLocaleDateString('pt-BR')}
+            </span>
+          </button>
         </li>
       ))}
     </ul>

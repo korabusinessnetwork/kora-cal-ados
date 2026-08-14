@@ -12,11 +12,12 @@ import {
   normalizarSvg,
   type RelatorioDeNormalizacao,
 } from '../../../lib/render/normalizarSvg';
+import { BUCKET_DE_ASSETS } from './bucketDeAssets';
 
 /** Normalizar é síncrono e trava a aba; acima disso recusa em vez de congelar. */
 const TAMANHO_MAXIMO_EM_BYTES = 2 * 1024 * 1024;
 
-export const BUCKET_DE_ASSETS = 'assets-base';
+export { BUCKET_DE_ASSETS };
 
 export interface ArquivoAnalisado {
   svgCanonico: string;

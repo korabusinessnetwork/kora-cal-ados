@@ -26,6 +26,12 @@
   letter-spacing: 0.06em;
 }
 
+/* Segunda seção dentro da mesma coluna precisa de respiro acima; a primeira não, porque
+   já vem colada no cabeçalho do grid. */
+.app__subtitulo--secao {
+  margin-top: var(--espaco-6);
+}
+
 .app__sair {
   padding: var(--espaco-2) var(--espaco-4);
   border: 1px solid var(--cor-borda);

@@ -1,45 +1,33 @@
-.lista-de-produtos {
+/* O desenho base é o objeto de trabalho da tela: ganha a maior área e fundo neutro.
+ *
+ * Regra 6 do design system (docs/02_DESIGN_SYSTEM/README.md): nenhum filtro, overlay ou
+ * mix-blend-mode pode encostar aqui. O que aparece na tela precisa ser a cor real do
+ * arquivo — é o critério 19 da rodada 1 e a metade visível do princípio nº1.
+ */
+
+.visualizador-de-asset-base {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-2);
+  gap: var(--espaco-3);
   margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
-.lista-de-produtos__item {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--espaco-3);
+.visualizador-de-asset-base__desenho {
   width: 100%;
-  padding: var(--espaco-3) var(--espaco-4);
+  max-height: 60vh;
+  padding: var(--espaco-4);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-borda);
   background: var(--cor-superficie);
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  object-fit: contain;
 }
 
-/* O modelo aberto precisa ser óbvio sem depender de cor: a borda muda de espessura
-   junto com o tom, para quem não distingue as duas cores continuar enxergando a seleção. */
-.lista-de-produtos__item[aria-pressed='true'] {
-  border-color: var(--cor-primaria);
-  box-shadow: inset 0 0 0 1px var(--cor-primaria);
-}
-
-.lista-de-produtos__nome {
-  font-weight: 600;
-}
-
-.lista-de-produtos__data {
+.visualizador-de-asset-base__legenda {
   color: var(--cor-texto-suave);
   font-size: var(--fonte-tamanho-pequeno);
 }
 
-.lista-de-produtos__estado {
+.visualizador-de-asset-base__estado {
   margin: 0;
   padding: var(--espaco-5);
   border: 1px dashed var(--cor-borda);
@@ -48,7 +36,7 @@
   text-align: center;
 }
 
-.lista-de-produtos__erro {
+.visualizador-de-asset-base__erro {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -59,11 +47,11 @@
   color: var(--cor-erro);
 }
 
-.lista-de-produtos__erro p {
+.visualizador-de-asset-base__erro p {
   margin: 0;
 }
 
-.lista-de-produtos__erro button {
+.visualizador-de-asset-base__erro button {
   padding: var(--espaco-2) var(--espaco-4);
   border: 1px solid currentcolor;
   border-radius: var(--raio-borda);

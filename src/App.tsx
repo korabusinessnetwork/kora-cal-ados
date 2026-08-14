@@ -3,12 +3,15 @@
 // O nome que aparece no cabeçalho vem do tenant, nunca de constante — o produto é
 // white-label e não tem marca própria na tela do cliente (ADR-002).
 
+import { useState } from 'react';
 import { AutenticacaoProvider, useAutenticacao } from './features/autenticacao/AutenticacaoContext';
 import { RotaProtegida } from './features/autenticacao/components/RotaProtegida';
 import { TenantProvider, useTenant } from './features/tenant/TenantContext';
 import { ListaDeProdutos } from './features/produtos/components/ListaDeProdutos';
 import { FormularioDeProduto } from './features/produtos/components/FormularioDeProduto';
-import { useProdutos } from './features/produtos/hooks/useProdutos';
+import { VisualizadorDeAssetBase } from './features/produtos/components/VisualizadorDeAssetBase';
+import { useProdutos, type Produto } from './features/produtos/hooks/useProdutos';
+import { useAssetBase } from './features/produtos/hooks/useAssetBase';
 import './App.css';
 
 function Catalogo() {
@@ -16,6 +19,11 @@ function Catalogo() {
   const { produtos, estado: estadoDaLista, buscar, criarProduto, analisarArquivo } = useProdutos(
     tenant?.id ?? null,
   );
+
+  // Seleção mora aqui, e não em rota, porque o app ainda é de tela única — instalar
+  // roteador para um único endereço é peso sem uso (ver specs/f001-…, fora de escopo).
+  const [selecionado, setSelecionado] = useState<Produto | null>(null);
+  const asset = useAssetBase(selecionado?.base_asset_path ?? null, tenant?.id ?? null);
 
   if (estado === 'carregando') {
     return (
@@ -54,7 +62,22 @@ function Catalogo() {
       <div className="app__conteudo">
         <section className="app__coluna">
           <h2 className="app__subtitulo">Modelos</h2>
-          <ListaDeProdutos produtos={produtos} estado={estadoDaLista} aoTentarDeNovo={buscar} />
+          <ListaDeProdutos
+            produtos={produtos}
+            estado={estadoDaLista}
+            aoTentarDeNovo={buscar}
+            aoSelecionar={setSelecionado}
+            produtoSelecionadoId={selecionado?.id ?? null}
+          />
+
+          <h2 className="app__subtitulo app__subtitulo--secao">Desenho base</h2>
+          <VisualizadorDeAssetBase
+            estado={asset.estado}
+            urlAssinada={asset.urlAssinada}
+            nomeDoProduto={selecionado?.nome ?? null}
+            mensagemDeErro={asset.mensagemDeErro}
+            aoTentarDeNovo={asset.tentarDeNovo}
+          />
         </section>
 
         <aside className="app__coluna">
