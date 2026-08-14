@@ -101,6 +101,45 @@ src/features/
 ✅ Estado crítico + compartilhado = Supabase + Context
 ❌ Redux; ❌ useState em component pai para passpropping profundo
 
+### Módulo que roda nos dois ambientes (navegador e função serverless)
+
+Regra de negócio que o editor e a API precisam aplicar **igual** (princípio nº1) mora num
+módulo só. Para o mesmo arquivo carregar no navegador e em Node, três coisas juntas — as
+três, não uma:
+
+1. **Cliente Supabase por parâmetro**, com a interface mínima declarada no próprio arquivo.
+   Assim o anon-key do editor e o service_role da função satisfazem o contrato sem que o
+   módulo conheça nenhum dos dois.
+2. **Constante compartilhada em módulo folha** (sem imports). O que decide se o módulo
+   carrega nos dois ambientes é o **fecho transitivo** de imports, não a assinatura da
+   função: importar uma constante de um arquivo que importa o singleton anon-key arrasta
+   `import.meta.env` junto e quebra em Node.
+3. **Teste estático do grafo de imports**, lendo os arquivos no disco. Um `import` dentro do
+   teste não prova nada: `vitest.config.ts` injeta o `.env.local` inteiro, então o singleton
+   do navegador carrega sem `throw` e o acoplamento passa verde.
+
+✅ `leituraDeAssetBase.ts` (cliente por parâmetro) + `bucketDeAssets.ts` (folha) +
+   `describe('grafo de imports…')` em `leituraDeAssetBase.test.ts`
+❌ Importar `BUCKET_DE_ASSETS` de `uploadDeAssetBase.ts` "porque já está lá" — foi
+   exatamente isso, e o módulo ficou impossível de importar em Node com 62 testes verdes
+❌ A rodada 3 reescrever a própria leitura porque o módulo não carrega — duas
+   implementações da mesma regra é o que o princípio nº1 proíbe
+
+### Validação de caminho de Storage: whitelist de forma, nunca blacklist
+
+Caminho vindo do banco é validado **contra o tenant do chamador**, nunca remontado, e a
+validação descreve a forma permitida em vez de listar o que é perigoso.
+
+✅ `segmentos.some((s) => !/^[A-Za-z0-9._-]+$/.test(s))` — mata `%`, barra codificada,
+   espaço, `?`, `#` e `\` de uma vez, e absorve segmento vazio
+❌ `if (caminho.includes('..'))` sozinho — `%2e%2e%2f` passa inteiro (BUG-011)
+❌ Remontar o caminho a partir de `tenant_id` + `product_id` — cria uma segunda fonte de
+   verdade capaz de divergir de `products.base_asset_path` em silêncio
+
+Entra por exceção de segurança/isolamento (sem esperar validação em uso), e vale para
+qualquer leitura futura de Storage: na rodada 3 quem lê é `service_role`, que ignora a
+policy — a validação é a única barreira que sobra.
+
 ## Padrões de API / Backend
 
 ### Envelope de Resposta

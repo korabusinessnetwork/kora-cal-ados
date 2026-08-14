@@ -3,8 +3,37 @@
 > Prioridade, esforço e dono entram conforme o backlog for revisado. Por ora, cada
 > entrada tem o mínimo pra não perder a ideia: o que é, por que importa, o que falta
 > decidir.
+>
+> Dívida técnica (`TD0XX`): `debito-tecnico.md`. Bugs: `memory/bugs.md`.
+> O que cada rodada do loop entregou: `specs/_loop.md`.
 
-## Recolor preservando gradiente
+## Índice de features
+
+Origem: raio-x do repositório de **2026-08-14**, mesma varredura que gerou `TD001..TD019`.
+O esquema `F0XX` nasceu aí — a ordem é de urgência, não cronológica.
+
+| ID | Feature | Status |
+|---|---|---|
+| F001 | Leitura do asset-base por URL assinada (300s) + tela de produto | **entregue** na rodada 2 — `specs/f001-leitura-do-asset-base-e-tela-de-produto.md` |
+| F002 | Editor de zonas (Fabric.js): marcar zona e gravar `product_zones` | aberto — próximo natural; F001 criou a superfície |
+| F003 | Preview client-side de variante usando **o mesmo** motor da API | aberto — é o princípio nº1 virando tela |
+| F004 | Relatório de zonas na tela (prevenção de erro do ADR-004 §5) | aberto |
+| F005 | API de variante: `POST /products/:id/variants` (Vercel Function, pasta `api/`) | aberto — "rodada 3" citada no código |
+| F006 | Autenticação máquina-a-máquina da API | aberto — sem ela a persona 2 (ERP/e-commerce) não consome nada |
+| F007 | Contrato da API escrito em `docs/07_APIS` | aberto — as duas fontes existentes se contradizem |
+| F008 | PNG sob demanda (`?format=png`) e cache na tabela `variants` | aberto — `sharp`/`resvg` são gratuitos; custo latente é volume |
+| F009 | Administração de tenant: tema white-label, membros, seletor de tenant | aberto |
+| F010 | Editar e excluir produto pela interface | aberto |
+| F011 | Exportação sem lock-in (SVG + CSV/JSON) | aberto — restrição de prioridade máxima, zero código hoje |
+| F012 | Recolor preservando gradiente (Fase 1.5) | capturada, não especificada — detalhe abaixo · **trava: decisão do dono** |
+| F013 | "Material" é prometido como escopo de Fase 1 e não existe | **trava: decisão do dono** |
+| F014 | Identidade visual e nome real do produto | **trava: decisão do dono** — design system vazio de propósito |
+| F015 | Cadastro self-serve / signup público | aberto — hoje o provisionamento é por script |
+| F016 | Domínio próprio | **trava: decisão do dono** — ~R$ 40-60/ano; sem alternativa gratuita real |
+| F017 | Perfil de Marca — IA que aprende como a marca se comporta (Fase 4+) | capturada, não especificada — detalhe abaixo · depende de API de IA paga |
+| F018 | Itens pagos represados aguardando decisão do dono | aberto — agrega o custo de F016/F017 e afins (`memory/restrictions.md`) |
+
+## F012 — Recolor preservando gradiente
 
 **Fase**: 1.5 — depende de dado real (ver "gatilho" abaixo), não de decisão nova.
 
@@ -29,7 +58,7 @@ gradiente, isto deixa de ser evolução e vira barreira de adoção — repriori
 
 **Status**: capturada, não especificada.
 
-## Perfil de Marca — IA que aprende como a marca se comporta
+## F017 — Perfil de Marca: IA que aprende como a marca se comporta
 
 **Fase**: 4+ (pós-MVP, pós-validação do núcleo mecânico) — **não é escopo de Fase 1**
 (ver ADR-001: MVP é motor mecânico vetor-only, sem componente de IA).

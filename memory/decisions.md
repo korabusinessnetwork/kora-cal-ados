@@ -119,3 +119,12 @@ Proposed / Accepted / Rejected
   `20260812_correcao_rls_e_storage.sql`). Tenant provisionado por `service_role` na
   Fase 1; membro cria/edita, owner apaga e gerencia membros; URL assinada 300s.
   Não virou ADR porque implementa o ADR-002, não o altera
+- **Decidido em 2026-08-14 pelo dono — plataforma de deploy (TD003)**: fica na Vercel no
+  plano gratuito (Hobby) durante a construção, e o plano pago entra quando o produto
+  começar a ser vendido. O termo de uso não-comercial do Hobby não é violado hoje porque
+  não há venda: o sistema está em criação, sem cliente pagante. **Gatilho de revisão**: o
+  primeiro contrato fechado — nesse momento o upgrade (Vercel Pro ~US$ 20/usuário/mês)
+  deixa de ser opcional. Alternativas gratuitas que permitem uso comercial ficam
+  registradas caso o custo pese na hora: Cloudflare Pages + Workers, Netlify, ou Supabase
+  Edge Functions (já na stack) — nenhuma linha do motor muda, só o adaptador de handler
+  HTTP. Não virou ADR porque não altera o ADR-001; se a plataforma mudar, aí sim exige ADR
