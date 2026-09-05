@@ -205,3 +205,24 @@ lendo o laço de pintura, não suposto — e é o caso em que o defeito nasce de
 nova, não de uma regressão: enquanto as zonas eram escritas à mão em `produtoDemo.ts`,
 ninguém conseguia produzir o estado inválido. A recusa entra no mesmo commit que a
 detecção, antes de existir UI que crie o problema.
+
+BUG-014 saiu de **abrir o editor num Chrome de verdade** em 2026-09-05, de novo com a suíte
+inteira verde (233 testes), `tsc` limpo e o teste de banco 7/7 — o mesmo jeito como BUG-011 e
+BUG-012 apareceram, e a terceira vez que o navegador acha o que o vitest não acha.
+
+O defeito: acrescentar um elemento a uma zona que já existe **apagava o `label` gravado**.
+O formulário volta vazio depois de salvar; a tela mandava `label: null` para `marcarZona`, e
+`null` ali significa "apague esta coluna" — semântica correta e documentada. O UPDATE então
+limpava o nome legível que um colega tinha definido. Ninguém perceberia tão cedo: a zona
+continua funcionando e gerando cor certa, só perde o nome.
+
+Como apareceu: a passada dirigida gravou a zona `ilhos` com rótulo "Ilhós", acrescentou os
+outros sete ilhoses e, ao conferir a linha no banco com service_role, o `label` estava
+`null`. Nenhum teste pegava porque cada metade estava certa isolada — `marcarZona` distingue
+ausente de nulo, e a tela é que escolhia mal entre os dois.
+
+Correção: `preservarOuLimpar` em `src/features/produtos/TelaDeProdutos.tsx` — campo vazio em
+zona existente vira `undefined` (preserva), em zona nova vira `null` (não há o que
+preservar). Provado por `src/features/produtos/TelaDeProdutos.test.ts` e reconferido no
+banco: a linha final tem os 8 ilhoses **e** o rótulo "Ilhós".
+

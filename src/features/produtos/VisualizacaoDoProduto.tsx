@@ -1,40 +1,40 @@
-// Mostra o asset-base canônico que veio do Storage. Ainda SEM zonas: marcar zona é a
-// próxima etapa, e esta tela existe para provar que o arquivo certo chegou ao navegador.
+// A moldura do produto aberto: cabeçalho, estados e os dois espaços que o editor de zonas
+// preenche — o palco e a lateral.
 //
-// Apresentacional: recebe o SVG já baixado. Quem baixa é `useAssetBase`.
+// Até a Etapa 3 este componente injetava o SVG canônico ele mesmo. Não injeta mais: quem
+// desenha é `PalcoDeMarcacao`, que passa o arquivo por `gerarVarianteDeCor` — o mesmo motor
+// da API. Dois lugares desenhando o calçado é exatamente o que o princípio nº1 proíbe, e
+// era o que ia acontecer no minuto em que o palco entrasse ao lado deste `innerHTML`.
+//
+// Apresentacional: não busca nada, não guarda estado.
 
-import { useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 
 export interface PropsDaVisualizacaoDoProduto {
   nome: string;
   estado: 'carregando' | 'erro' | 'pronto';
-  svg: string | null;
   erro: string | null;
-  /** Quantos elementos aceitam cor — exatamente o que o editor vai poder marcar. */
+  /** Quantos elementos aceitam cor — exatamente o que o editor pode marcar. */
   elementosMarcaveis: number | null;
+  /** Quantas zonas já estão gravadas em `product_zones`. */
+  zonasMarcadas: number | null;
+  /** O palco desenhado (`PalcoDeMarcacao`). */
+  palco: ReactNode;
+  /** Painel lateral: formulário da zona em curso, lista de zonas. */
+  lateral: ReactNode;
   aoVoltar: () => void;
 }
 
 export function VisualizacaoDoProduto({
   nome,
   estado,
-  svg,
   erro,
   elementosMarcaveis,
+  zonasMarcadas,
+  palco,
+  lateral,
   aoVoltar,
 }: PropsDaVisualizacaoDoProduto) {
-  const palco = useRef<HTMLDivElement>(null);
-
-  // Markup no DOM, não `<img>`: o editor precisa clicar em elemento, e elemento dentro de
-  // `<img>` não existe para o DOM. É seguro porque o arquivo é o CANÔNICO — `normalizarSvg`
-  // já removeu <script>, handlers on* e referência externa antes de ele subir ao Storage.
-  useEffect(() => {
-    const area = palco.current;
-    if (!area) return;
-
-    area.innerHTML = svg ?? '';
-  }, [svg]);
-
   return (
     <main className="produto">
       <div className="produto__cabecalho">
@@ -44,7 +44,7 @@ export function VisualizacaoDoProduto({
         <h1 className="produto__titulo">{nome}</h1>
         {elementosMarcaveis !== null && (
           <span className="produto__selo">
-            {elementosMarcaveis} elementos marcáveis · nenhuma zona marcada
+            {elementosMarcaveis} elementos marcáveis · {descreverZonas(zonasMarcadas)}
           </span>
         )}
       </div>
@@ -63,7 +63,17 @@ export function VisualizacaoDoProduto({
 
       {/* O palco não recebe filtro, sombra nem overlay: o que aparece aqui é o pixel que a
           API devolve (design system, itens 6 e 7). */}
-      <div className="produto__palco" ref={palco} hidden={estado !== 'pronto'} />
+      <div className="produto__area" hidden={estado !== 'pronto'}>
+        <div className="produto__palco">{palco}</div>
+        <aside className="produto__lateral">{lateral}</aside>
+      </div>
     </main>
   );
+}
+
+/** Zero zonas é estado nomeado, não silêncio: palco desenhado e sem texto parece um editor
+ *  que não respondeu ao clique. */
+function descreverZonas(zonas: number | null): string {
+  if (zonas === null || zonas === 0) return 'nenhuma zona marcada';
+  return zonas === 1 ? '1 zona marcada' : `${zonas} zonas marcadas`;
 }

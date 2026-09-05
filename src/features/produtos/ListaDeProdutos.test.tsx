@@ -2,6 +2,7 @@
 // A diferença entre "vazia" e "erro" é a mais cara aqui: uma fala do catálogo do cliente,
 // a outra do sistema.
 
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ListaDeProdutos } from './ListaDeProdutos';
@@ -70,9 +71,11 @@ describe('visualização do produto', () => {
       <VisualizacaoDoProduto
         nome="Runner"
         estado="pronto"
-        svg="<svg xmlns='http://www.w3.org/2000/svg'></svg>"
         erro={null}
         elementosMarcaveis={21}
+        zonasMarcadas={0}
+        palco={<p>palco</p>}
+        lateral={<p>lateral</p>}
         aoVoltar={() => {}}
         {...props}
       />,
@@ -90,18 +93,39 @@ describe('visualização do produto', () => {
     expect(ver({})).toContain('nenhuma zona marcada');
   });
 
+  it('conta as zonas já gravadas, no singular e no plural', () => {
+    expect(ver({ zonasMarcadas: 1 })).toContain('1 zona marcada');
+    expect(ver({ zonasMarcadas: 8 })).toContain('8 zonas marcadas');
+  });
+
   it('erro no download aparece como alerta, não como palco vazio', () => {
-    const html = ver({ estado: 'erro', svg: null, erro: 'Não foi possível baixar (403).' });
+    const html = ver({ estado: 'erro', erro: 'Não foi possível baixar (403).' });
 
     expect(html).toContain('role="alert"');
     expect(html).toContain('403');
   });
 
-  it('o palco fica oculto até o SVG chegar', () => {
-    expect(ver({ estado: 'carregando', svg: null })).toMatch(/produto__palco[^>]*hidden/);
+  it('a área do editor fica oculta até o asset-base chegar', () => {
+    // Palco vazio visível seria lido como "modelo sem desenho"; oculto até o arquivo chegar,
+    // o único estado visível é o "Baixando…".
+    expect(ver({ estado: 'carregando' })).toMatch(/produto__area[^>]*hidden/);
+  });
+
+  it('não desenha o SVG por conta própria — quem desenha é o palco', () => {
+    // Regressão do princípio nº1: enquanto esta tela injetava o canônico com `innerHTML`,
+    // havia dois lugares desenhando o calçado, e só um deles passava por
+    // `gerarVarianteDeCor`. O componente agora recebe o palco pronto e não conhece SVG.
+    // Tira os comentários antes de olhar: o cabeçalho do arquivo cita `innerHTML` justamente
+    // para contar por que ele saiu daqui. Isentar o arquivo inteiro seria mais fácil e
+    // esvaziaria a guarda — o que interessa é o código, não a explicação.
+    const fonte = readFileSync(new URL('./VisualizacaoDoProduto.tsx', import.meta.url), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/\/\/.*$/gm, ' ');
+
+    expect(fonte).not.toContain('innerHTML');
   });
 
   it('sempre oferece a volta para a lista', () => {
-    expect(ver({ estado: 'erro', svg: null, erro: 'x' })).toContain('Modelos');
+    expect(ver({ estado: 'erro', erro: 'x' })).toContain('Modelos');
   });
 });

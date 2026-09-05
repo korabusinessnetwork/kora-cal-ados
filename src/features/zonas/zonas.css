@@ -1,0 +1,291 @@
+/* Estilo do editor de zonas, separado do JSX (white-label — CLAUDE.md). Só tokens:
+   nenhuma cor de marca mora aqui, porque o tema vem do tenant e dois concorrentes usam
+   a mesma tela.
+
+   Três regras deste arquivo NÃO são estética, são o princípio nº1 escrito em CSS:
+
+   1. O DESENHO NÃO RECEBE FILTRO, SOMBRA, `opacity` NEM OVERLAY (design system, itens 6
+      e 7). O que aparece no palco é o pixel que a API devolve. Se o CSS clarear o
+      calçado em 5%, o time aprova uma cor e o cliente recebe outra — e ninguém descobre
+      pelo código, só pela devolução do pedido. Por isso o realce de seleção é uma CAMADA
+      por cima (`.palco__contorno`), nunca uma mudança no elemento da zona.
+   2. O contorno não pode roubar o clique de quem está embaixo (`pointer-events: none`):
+      clicar no realce da zona sola precisa continuar sendo clicar na sola.
+   3. Estado desabilitado se anuncia pelo cursor e pela borda, NUNCA por filtro sobre o
+      calçado — ver regra 1: "não dá para clicar agora" não pode custar fidelidade de cor.
+
+   O fundo claro do palco (#f4f4f2) repete o de `produtos.css`/`esboco.css` de propósito
+   e NÃO é token de tema: é papel neutro para a arte do cliente. Um tenant de marca escura
+   pintaria o fundo atrás do calçado e mudaria a cor percebida da variante — o mesmo
+   defeito da regra 1, por outro caminho. Vira `--cor-palco-fundo` quando
+   `docs/02_DESIGN_SYSTEM/` existir; o nome muda, a decisão não. */
+
+/* ── Palco ──────────────────────────────────────────────────────────────────
+   Estas declarações repetem, com os MESMOS valores, o `.palco` de `esboco.css`.
+   A repetição é deliberada: `.palco` é global e já existe lá, então divergir aqui
+   mudaria a tela do esboço sem ninguém pedir. Declarar tudo mantém o editor correto
+   qualquer que seja a ordem de import em `main.tsx`. */
+.palco {
+  position: relative;
+  padding: 24px;
+  background: #f4f4f2;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display: grid;
+  place-items: center;
+}
+
+/* Quando o palco é montado dentro de `.produto__palco`, a moldura (fundo claro, borda,
+   raio, respiro) já é daquela caixa. Sem esta neutralização o editor apareceria com duas
+   bordas e o dobro do padding. Fica aqui, e não em `produtos.css`, porque quem sabe que
+   o palco pode ser embutido é o palco; a especificidade maior também torna o resultado
+   independente da ordem de import em `main.tsx`. */
+.produto__palco > .palco {
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Desenho e contorno na MESMA célula do grid (linha 2) = mesma caixa, sobrepostos. O
+   contorno é uma camada por cima, não uma borda aplicada no desenho (regra 1).
+   A linha 2, e não a 1, é o que reserva a linha 1 para o alerta que o palco renderiza
+   quando o motor recusa o pedido: alerta auto-posicionado cai na primeira célula livre,
+   e erro que aparece embaixo do desenho é erro que ninguém lê. Sem alerta a linha fica
+   com altura zero (não há `gap`), então não sobra buraco. */
+.palco > .palco__desenho {
+  grid-area: 2 / 1;
+  /* Largura definida pela célula, não pelo `width` do arquivo do cliente: o editor é
+     ferramenta de precisão e quanto maior o calçado, mais fácil acertar um ilhós. */
+  width: 100%;
+  min-width: 0;
+}
+
+/* O alerta do motor ocupa a linha 1 sozinho e atravessa o palco inteiro. */
+.palco > .zonas__erro {
+  justify-self: stretch;
+  margin-bottom: 14px;
+}
+
+.palco__desenho {
+  /* Todo o desenho é clicável: em SVG o alvo do evento é sempre a folha. */
+  cursor: pointer;
+  /* Explícito e não herdado: é a regra 1 escrita como código, para um tema de tenant que
+     aplique filtro/sombra em contêiner genérico não alcançar o calçado sem aviso. */
+  filter: none;
+  opacity: 1;
+  mix-blend-mode: normal;
+  box-shadow: none;
+  background: none;
+}
+
+/* A caixa do SVG vem do arquivo do cliente e não é controlada por nós: sem isto, um
+   `width="1400"` do Illustrator estoura o layout da tela inteira. */
+.palco__desenho svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Contorno da zona (camada de realce) ───────────────────────────────────
+   Seletor de filho direto de propósito: `.palco__contorno` também existe em
+   `esboco.css`, onde vive dentro de `.palco__area` e é posicionado por `absolute`.
+   Restringir a `>` deixa as duas telas conviverem sem uma reescrever a outra. */
+.palco > .palco__contorno {
+  /* Mesma célula do desenho e `inset: 0`: a caixa do contorno passa a ser EXATAMENTE a
+     caixa do desenho — é isso que faz o traço cair em cima do elemento certo, e não a
+     alguns pixels dele. (Filho absoluto de um grid usa a própria célula como bloco
+     contêiner; o `position: relative` do `.palco` é o que fecha essa conta.)
+     Absoluto também tira o contorno do dimensionamento da célula: no fluxo, um `<svg>`
+     sem largura intrínseca empurraria a célula para os 300×150 padrão e o desenho de um
+     modelo baixo passaria a ser medido pela camada de realce, não por ele mesmo. */
+  position: absolute;
+  grid-area: 2 / 1;
+  inset: 0;
+  /* Regra 2: a camada de realce nunca intercepta o clique do elemento de baixo. */
+  pointer-events: none;
+}
+
+/* O realce é STROKE, nunca fill: preencher a cópia esconderia a cor real da zona — que é
+   justamente o que o time está aprovando na tela. */
+.palco__contorno use {
+  fill: none;
+  stroke: var(--cor-acento);
+  stroke-width: 2;
+  /* O `<use>` herda a escala do viewBox do calçado. Sem isto, um SVG grande reduzido
+     para caber no palco afina o traço até ele sumir no zoom padrão. */
+  vector-effect: non-scaling-stroke;
+}
+
+/* ── Palco desabilitado ────────────────────────────────────────────────────
+   Sem `filter`, sem `opacity` e sem véu sobre o desenho (regra 3). O sinal é a borda
+   tracejada e o cursor — o calçado continua mostrando a cor exata da API. */
+.palco--desabilitado {
+  /* `outline` e não `border`: a borda do palco pode ter sido neutralizada acima (palco
+     embutido em `.produto__palco`), e o aviso de "não dá para clicar" não pode depender
+     de onde a tela montou o palco. O `outline-offset` negativo mantém o traço dentro da
+     caixa, para o estado não empurrar o layout ao entrar e sair. */
+  outline: 1px dashed var(--cor-texto-fraco);
+  outline-offset: -1px;
+  cursor: not-allowed;
+}
+.palco--desabilitado .palco__desenho {
+  /* Bloqueia o clique em vez de só trocar o cursor: prevenção de erro > mensagem de erro.
+     Com o desenho inerte, o `not-allowed` do palco é o que a pessoa vê ao passar o mouse. */
+  pointer-events: none;
+}
+
+/* ── Formulário da zona ────────────────────────────────────────────────────── */
+.zona-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.zona-form__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.zona-form__rotulo {
+  font-size: 12px;
+  color: var(--cor-texto-fraco);
+}
+
+.zona-form__campo input {
+  padding: 9px 11px;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 13.5px;
+}
+.zona-form__campo input:disabled { opacity: 0.55; }
+/* `aria-invalid` em vez de uma classe extra: o mesmo atributo que o leitor de tela usa é
+   o que pinta a borda — não dá para a tela ficar vermelha sem o campo estar inválido. */
+.zona-form__campo input[aria-invalid='true'] { border-color: var(--cor-erro); }
+
+/* `zone_key` e `cor_default` em monoespaçado: os dois são valores literais que viajam
+   para a API, e `#C0392B` ou `ilhos-2` em fonte de texto confundem 0/O e 1/l — um
+   caractere errado aqui vira cor errada, ou zona que a integração do cliente não acha. */
+.zona-form__campo input[name='cor_default'],
+.zona-form__campo input[name='zone_key'] {
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+}
+
+.zona-form__ajuda {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--cor-texto-fraco);
+}
+/* O `<code>` da ajuda mostra o JSON da API e a sugestão de `zone_key` — texto que a
+   pessoa vai COPIAR. Monoespaçado é o que deixa `-` e `_` distinguíveis na cópia. */
+.zona-form__ajuda code {
+  font-family: var(--fonte-mono);
+  font-size: 11px;
+  color: var(--cor-texto);
+}
+
+.zona-form__erro {
+  margin: 0;
+  padding: 11px 13px;
+  background: var(--cor-erro-fundo);
+  border: 1px solid var(--cor-erro);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Quantos elementos entram nesta zona agora. É o número que o time confere antes de
+   gravar — marcar os 8 ilhoses precisa aparecer como 8 —, então ele fica com a cor de
+   texto cheia, não a fraca de ajuda: é informação de conferência, não legenda. */
+.zona-form__contagem {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--cor-texto);
+}
+
+.zona-form__acoes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.zona-form__acoes button {
+  padding: 9px 16px;
+  background: transparent;
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.zona-form__acoes button:hover:enabled { background: var(--cor-superficie-alta); }
+/* O texto do botão principal sai de `--cor-fundo`, não de um hex fixo: acento e fundo são
+   os dois extremos do tema do tenant, então o contraste acompanha a marca em vez de
+   depender de um literal que só serve para o tema provisório de hoje. */
+.zona-form__acoes button[type='submit'] {
+  background: var(--cor-acento);
+  color: var(--cor-fundo);
+  border-color: transparent;
+  font-weight: 600;
+}
+.zona-form__acoes button:disabled {
+  background: var(--cor-superficie-alta);
+  color: var(--cor-texto-fraco);
+  border-color: var(--cor-borda);
+  cursor: not-allowed;
+}
+
+/* ── Estados compartilhados da feature ─────────────────────────────────────
+   Carregando e vazio usam o mesmo desenho (borda tracejada, texto fraco) porque os dois
+   dizem "não há zona na tela agora" — o que muda é a frase, e é a frase que a pessoa lê.
+   Nenhum dos dois é silencioso: sumir com a caixa deixaria a tela igual à de sucesso. */
+.zonas__aviso {
+  margin: 0;
+  padding: 22px;
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cor-texto-fraco);
+}
+
+/* Usado das duas formas: direto no `<p role="alert">` (palco e formulário) e como caixa
+   com botão de "tentar de novo". Por isso `margin: 0` mora na própria classe — no `<p>`
+   a margem padrão do navegador ainda vale e empurraria o alerta para cima do desenho. */
+.zonas__erro {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  background: var(--cor-erro-fundo);
+  border: 1px solid var(--cor-erro);
+  border-radius: var(--raio);
+}
+.zonas__erro p { margin: 0; font-size: 13px; line-height: 1.5; }
+.zonas__erro button {
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-erro);
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
