@@ -4,7 +4,7 @@
 // Este módulo é importado tanto pelo editor quanto pela função serverless — nunca
 // existem duas implementações. É o que sustenta "cor no editor = cor na API".
 
-import { JSDOM } from 'jsdom';
+import { analisarSvg, serializarSvg } from './dom';
 import { ErroDeVariante } from './erros';
 import { validarCor } from './validarCor';
 
@@ -29,8 +29,7 @@ export function gerarVarianteDeCor(
   zonas: Zona[],
   coresPorZona: CoresPorZona,
 ): string {
-  const dom = new JSDOM(svgCanonico, { contentType: 'image/svg+xml' });
-  const documento = dom.window.document;
+  const documento = analisarSvg(svgCanonico);
 
   // Valida tudo antes de pintar qualquer coisa: variante sai inteira ou não sai.
   const trabalho = Object.entries(coresPorZona).map(([zoneKey, cor]) => ({
@@ -52,7 +51,7 @@ export function gerarVarianteDeCor(
     for (const alvo of alvos) alvo.setAttribute('fill', cor);
   }
 
-  return dom.serialize();
+  return serializarSvg(documento);
 }
 
 /**
@@ -64,8 +63,7 @@ export function relatorioDeZonas(
   svgCanonico: string,
   zonas: Zona[],
 ): Array<{ zone_key: string; elementos: number }> {
-  const dom = new JSDOM(svgCanonico, { contentType: 'image/svg+xml' });
-  const documento = dom.window.document;
+  const documento = analisarSvg(svgCanonico);
 
   return zonas.map((zona) => ({
     zone_key: zona.zone_key,

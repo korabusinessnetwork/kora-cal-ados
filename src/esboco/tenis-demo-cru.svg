@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Asset-base CRU do produto de demonstração do esboço.
+
+  É propositalmente "sujo", igual ao que sai de um Illustrator/Figma real:
+    - cor do cabedal, dos cadarços e do logo mora num bloco <style> (BUG-001)
+    - a entressola tem style inline
+    - os 4 cadarços têm o MESMO id (BUG-002 + desambiguação)
+    - tem <script>, handler onclick e referência externa (BUG-004)
+
+  O esboço nunca renderiza este arquivo diretamente: renderiza o asset-base canônico que
+  `normalizarSvg` devolve. É esse o contrato do ADR-004.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 420 260" width="420" height="260">
+
+  <style>
+    .st-cabedal { fill: #E9E4DA; stroke: #C9C2B4; stroke-width: 1.2; }
+    .st-sola    { fill: #2E2E33; }
+    .st-cadarco { fill: #F5F2EC; }
+    .st-logo    { fill: #B23A2E; }
+  </style>
+
+  <script>/* fixture: simula export com script embutido — normalizarSvg remove */</script>
+
+  <defs>
+    <linearGradient id="brilho" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8A8F98"/>
+      <stop offset="1" stop-color="#D8DCE2"/>
+    </linearGradient>
+  </defs>
+
+  <image xlink:href="https://exemplo-externo.invalido/textura.png" x="0" y="0" width="1" height="1"/>
+
+  <ellipse cx="210" cy="242" rx="176" ry="7" fill="#000000" opacity="0.10"/>
+
+  <path id="zona-cabedal" class="st-cabedal"
+        d="M 44 170 C 46 128 78 102 138 94 L 252 76 C 272 72 288 62 296 50 L 310 50
+           C 316 70 322 82 334 88 C 346 94 356 88 366 76 L 374 76
+           C 386 96 392 132 392 168 Z"/>
+
+  <path id="zona-biqueira" fill="#DDD6C8"
+        d="M 44 170 C 46 130 76 104 132 95 C 116 118 106 142 104 170 Z"/>
+
+  <path id="zona-logo" class="st-logo"
+        d="M 120 150 C 166 148 220 130 274 98 L 288 118 C 232 154 170 166 122 164 Z"/>
+
+  <path id="zona-lingua" fill="#D5CEC0"
+        d="M 258 80 L 290 34 Q 296 26 306 30 L 316 34 L 276 92 Z"/>
+
+  <path id="zona-cadarco" class="st-cadarco" d="M 194 96 L 216 80 L 222 87 L 200 103 Z"/>
+  <path id="zona-cadarco" class="st-cadarco" d="M 208 104 L 230 88 L 236 95 L 214 111 Z"/>
+  <path id="zona-cadarco" class="st-cadarco" d="M 222 112 L 244 96 L 250 103 L 228 119 Z"/>
+  <path id="zona-cadarco" class="st-cadarco" d="M 236 120 L 258 104 L 264 111 L 242 127 Z"/>
+
+  <circle cx="192" cy="99" r="3" fill="#8A8F98"/>
+  <circle cx="206" cy="107" r="3" fill="#8A8F98"/>
+  <circle cx="220" cy="115" r="3" fill="#8A8F98"/>
+  <circle cx="234" cy="123" r="3" fill="#8A8F98"/>
+  <circle cx="219" cy="83" r="3" fill="#8A8F98"/>
+  <circle cx="233" cy="91" r="3" fill="#8A8F98"/>
+  <circle cx="247" cy="99" r="3" fill="#8A8F98"/>
+  <circle cx="261" cy="107" r="3" fill="#8A8F98"/>
+
+  <path id="zona-colarinho" fill="#C4BCAB"
+        d="M 310 50 C 316 70 322 82 334 88 C 346 94 356 88 366 76 L 374 76 L 377 91
+           L 368 91 C 356 103 342 107 328 100 C 314 93 304 74 298 52 Z"/>
+
+  <rect id="zona-detalhe" x="350" y="98" width="30" height="22" rx="6" fill="url(#brilho)"/>
+
+  <path id="zona-entressola" style="fill:#C9C4B8"
+        d="M 26 206 C 22 182 40 172 74 169 L 344 166 C 374 166 390 184 392 206 Z"/>
+
+  <path id="zona-sola" class="st-sola" onclick="alert('fixture: handler removido')"
+        d="M 44 204 L 372 204 Q 392 204 392 218 Q 392 232 372 232 L 44 232
+           Q 24 232 24 218 Q 24 204 44 204 Z"/>
+
+  <path fill="none" stroke="#B9B2A4" stroke-width="1.5" stroke-dasharray="5 4"
+        d="M 104 168 C 108 138 122 116 140 100"/>
+  <path fill="none" stroke="#A9A296" stroke-width="1.5" stroke-dasharray="5 4"
+        d="M 30 200 C 90 194 240 192 388 199"/>
+</svg>

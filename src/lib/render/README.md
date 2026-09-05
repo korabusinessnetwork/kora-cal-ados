@@ -13,7 +13,25 @@ implementação é o que sustenta "cor no editor = cor na API" (princípio nº1 
 | `lerRegrasCss.ts` | Lê o `<style>` do próprio SVG (o jsdom não monta CSSOM em `image/svg+xml`) | texto CSS → regras com especificidade |
 | `validarCor.ts` | Só aceita hex (ADR-004, q3) | `#f00` → `#FF0000`, ou erro |
 | `erros.ts` | `ErroDeVariante` + códigos de erro (contrato de API) | — |
+| `dom.ts` | Abstrai de onde vem o DOM. No navegador usa `DOMParser` nativo | — |
+| `domNode.ts` | Registra o jsdom. **Só o Node importa** — é o que mantém jsdom fora do bundle | — |
 | `fixtures/teste-zona.svg` | Modelo de teste com sola, cabedal e cadarço (2 paths) | — |
+
+## Como o mesmo motor roda nos dois lados
+
+`jsdom` não roda no navegador e `DOMParser` não existe no Node. Sem `dom.ts`, a única
+saída seria reescrever o motor para o front — que é o que o princípio nº1 proíbe.
+
+- **Navegador** (editor, `src/esboco/`): não importa nada; `dom.ts` detecta o `DOMParser`
+  global sozinho. O jsdom não entra no bundle porque ninguém no front importa `domNode`.
+- **Node** (testes, função serverless): importa `./domNode` uma vez. Nos testes isso é o
+  `setupFiles` do `vite.config.ts`.
+
+Sem DOM nenhum, o motor **lança** em vez de devolver o SVG intacto — SVG que voltou sem
+mudar de cor com resposta 200 é o BUG-001 outra vez, por outro caminho.
+
+`dom.test.ts` roda o motor pelo caminho do navegador (`DOMParser` global) e confere que
+a saída é a mesma do caminho do Node.
 
 ## Ordem obrigatória
 

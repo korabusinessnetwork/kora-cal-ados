@@ -1,0 +1,140 @@
+/* Estilo do esboço, separado do JSX (regra de white-label do CLAUDE.md).
+   Os tokens abaixo são PROVISÓRIOS: docs/02_DESIGN_SYSTEM/ está vazio de propósito até a
+   identidade visual existir. Quando existir, estes valores viram tokens de tema por
+   tenant — os nomes ficam, os valores mudam.
+
+   Regra que não muda com o tema: nada de filtro, sombra ou overlay sobre o preview da
+   variante. O que aparece ali é o pixel que a API devolve. */
+
+:root {
+  --cor-fundo: #101014;
+  --cor-superficie: #17171d;
+  --cor-superficie-alta: #1e1e26;
+  --cor-borda: #2b2b36;
+  --cor-texto: #e8e8ee;
+  --cor-texto-fraco: #9a9aab;
+  --cor-acento: #4c8dff;
+  --cor-erro: #ff6b5e;
+  --cor-erro-fundo: #2a1512;
+  --cor-ok: #4ecb8f;
+  --raio: 10px;
+  --fonte-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+.tela { padding: 24px 28px 40px; max-width: 1600px; margin: 0 auto; }
+
+.cabecalho {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; padding-bottom: 18px; margin-bottom: 20px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+.cabecalho__titulo { margin: 0 0 6px; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+.cabecalho__meta { margin: 0; color: var(--cor-texto-fraco); font-size: 13px; }
+.cabecalho__meta code { font-family: var(--fonte-mono); font-size: 12px; }
+
+.selo {
+  padding: 5px 11px; border: 1px solid var(--cor-borda); border-radius: 999px;
+  color: var(--cor-texto-fraco); font-size: 12px; white-space: nowrap;
+}
+
+.colunas { display: grid; grid-template-columns: 320px minmax(420px, 1fr) 400px; gap: 20px; align-items: start; }
+.coluna-central { display: flex; flex-direction: column; gap: 16px; }
+
+.painel {
+  background: var(--cor-superficie); border: 1px solid var(--cor-borda);
+  border-radius: var(--raio); padding: 18px;
+}
+.painel__titulo { margin: 0 0 4px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--cor-texto-fraco); }
+.painel__titulo--espacado { margin-top: 26px; }
+.painel__ajuda { margin: 0 0 14px; font-size: 12px; line-height: 1.5; color: var(--cor-texto-fraco); }
+
+/* ── Zonas ─────────────────────────────────────────────────────────── */
+.zonas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+
+.zona {
+  width: 100%; display: grid; grid-template-columns: 20px 1fr auto; gap: 10px;
+  align-items: center; padding: 9px 10px; background: transparent; color: inherit;
+  border: 1px solid transparent; border-radius: 8px; cursor: pointer; text-align: left; font: inherit;
+}
+.zona:hover { background: var(--cor-superficie-alta); }
+.zona--ativa { background: var(--cor-superficie-alta); border-color: var(--cor-acento); }
+
+.zona__amostra { grid-row: 1 / span 2; width: 20px; height: 20px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.18); }
+.zona__amostra--gradiente { background: linear-gradient(135deg, #8a8f98, #d8dce2); }
+.zona__nome { font-size: 13px; }
+.zona__meta { grid-column: 2; grid-row: 2; font-size: 11px; color: var(--cor-texto-fraco); }
+.zona__hex { grid-column: 3; grid-row: 1 / span 2; font-family: var(--fonte-mono); font-size: 11px; color: var(--cor-texto-fraco); }
+
+.editor { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 10px 12px 40px; }
+.editor__roda { width: 34px; height: 28px; padding: 0; border: 1px solid var(--cor-borda); border-radius: 6px; background: none; cursor: pointer; }
+.editor__hex {
+  width: 92px; padding: 6px 8px; background: var(--cor-fundo); color: var(--cor-texto);
+  border: 1px solid var(--cor-borda); border-radius: 6px; font-family: var(--fonte-mono); font-size: 12px;
+}
+.editor__hex--invalido { border-color: var(--cor-erro); color: var(--cor-erro); }
+.editor__paleta { display: flex; gap: 5px; flex-basis: 100%; }
+.editor__atalho { width: 22px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.18); cursor: pointer; padding: 0; }
+
+/* ── Palco: sem filtro, sem overlay, sem sombra sobre a variante ───── */
+.palco {
+  position: relative; background: #f4f4f2; border: 1px solid var(--cor-borda);
+  border-radius: var(--raio); padding: 24px; display: grid; place-items: center;
+}
+.palco--congelado { outline: 1px dashed var(--cor-erro); outline-offset: -1px; }
+.palco__area { position: relative; width: 100%; }
+.palco__svg svg { width: 100%; height: auto; display: block; }
+.palco__svg [id^="zona-"] { cursor: pointer; }
+.palco__contorno { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* ── Comparativo antes/depois ──────────────────────────────────────── */
+.comparativo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.comparativo__item { margin: 0; background: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio); padding: 10px; }
+.comparativo__img { width: 100%; display: block; background: #f4f4f2; border-radius: 6px; }
+.comparativo figcaption { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; font-size: 11px; color: var(--cor-texto-fraco); }
+.comparativo figcaption strong { color: var(--cor-texto); font-size: 12px; font-weight: 600; }
+
+/* ── Painel de API ─────────────────────────────────────────────────── */
+.codigo {
+  margin: 0 0 10px; padding: 12px; background: var(--cor-fundo); border: 1px solid var(--cor-borda);
+  border-radius: 8px; font-family: var(--fonte-mono); font-size: 11.5px; line-height: 1.55;
+  white-space: pre-wrap; word-break: break-word; max-height: 300px; overflow: auto;
+}
+.codigo--requisicao { color: var(--cor-acento); }
+.codigo--ok { border-left: 2px solid var(--cor-ok); }
+.codigo--erro { border-left: 2px solid var(--cor-erro); }
+.codigo__status { color: var(--cor-texto-fraco); }
+
+.relatorio { margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.relatorio__linha { display: flex; justify-content: space-between; gap: 12px; padding: 7px 9px; border-radius: 6px; font-size: 12px; color: var(--cor-texto-fraco); }
+.relatorio__linha--ativa { background: var(--cor-superficie-alta); color: var(--cor-texto); }
+.relatorio__linha dt, .relatorio__linha dd { margin: 0; }
+.relatorio__linha dd { font-family: var(--fonte-mono); }
+
+.renomeados { margin: 10px 0 0; padding-left: 18px; font-size: 11.5px; color: var(--cor-texto-fraco); }
+.renomeados code { font-family: var(--fonte-mono); color: var(--cor-texto); }
+
+/* ── Erro: banner que fica até ação (memory/patterns.md) ───────────── */
+.erro {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  margin-bottom: 18px; padding: 14px 16px; background: var(--cor-erro-fundo);
+  border: 1px solid var(--cor-erro); border-radius: var(--raio);
+}
+.erro__codigo { margin: 0 0 4px; font-family: var(--fonte-mono); font-size: 12px; color: var(--cor-erro); }
+.erro__mensagem { margin: 0 0 6px; font-size: 13px; }
+.erro__nota { margin: 0; font-size: 12px; color: var(--cor-texto-fraco); }
+.erro__acao {
+  padding: 8px 14px; background: var(--cor-erro); color: #1a0d0b; border: none;
+  border-radius: 7px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+
+.tela--recusada { max-width: 640px; padding-top: 80px; }
