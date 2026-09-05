@@ -4,7 +4,8 @@
 **Data**: 2026-08-12
 **Decisores**: Matheus Bonato
 **Supersede**: (nenhum — primeira decisão do projeto)
-**Supersedido por**: (nenhum ainda)
+**Supersedido por**: ADR-005, **parcialmente** — só a escolha de Fabric.js para o editor.
+O resto (React+Vite, Supabase, Vercel Functions, MVP vetor-only) continua vigente.
 
 ---
 
@@ -28,6 +29,10 @@ infraestrutura paga na Fase 1.
 ---
 
 ## Decisão
+
+> ⚠️ **A parte "Fabric.js" desta decisão foi supersedida pelo ADR-005** (2026-09-05):
+> o editor manipula SVG no DOM, sem canvas. O texto abaixo fica como foi escrito — ADR não
+> se reescreve, se supersede.
 
 Vamos usar **React + Vite + Fabric.js** no editor, **Supabase** (Postgres + RLS +
 Storage + Auth) como camada de dados, e **Vercel Serverless Functions** como motor de
@@ -67,7 +72,7 @@ render leve o bastante para rodar em função serverless comum.
 - MVP roda 100% em free tier (Vercel + Supabase) — sem custo de infra na fase de venda manual
 - Motor de render simples (manipulação de SVG) é rápido de construir e fácil de testar
 - Mesma espinha dorsal dos outros projetos Kora (React+Vite+Supabase+Vercel) — reaproveita padrão de RLS, auth e deploy já validado
-- Fabric.js permite reaproveitar o mesmo grafo de objetos no editor (client) e, se necessário, num render espelhado no servidor
+- ~~Fabric.js permite reaproveitar o mesmo grafo de objetos no editor (client) e, se necessário, num render espelhado no servidor~~ — **não se concretizou**: o ADR-004 decidiu que o servidor usa `gerarVarianteDeCor` sobre o SVG canônico, sem grafo nenhum. Foi o que motivou o ADR-005
 
 ### Negativas / Trade-offs
 

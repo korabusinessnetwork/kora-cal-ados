@@ -6,7 +6,8 @@
 - Acelerar onboarding com guias de implementação
 
 ## Contexto
-- Stack: React + Vite + Fabric.js + Supabase + Vercel Serverless Functions (ver ADR-001)
+- Stack: React + Vite + Supabase + Vercel Serverless Functions (ver ADR-001); editor de
+  zonas manipula SVG no DOM, sem canvas (ver ADR-005)
 - Padrões evoluem com a base de código; deprecados ganham tag [DEPRECADO]
 
 ## Regras Gerais

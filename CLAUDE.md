@@ -98,8 +98,10 @@ Detalhes em `memory/restrictions.md`.
 
 ## Padrões de código
 
-- Componentes React em arquivos separados; lógica de canvas (Fabric.js) isolada em
-  hooks próprios (`src/hooks/`), nunca misturada com componente de UI genérico.
+- Componentes React em arquivos separados; lógica de manipulação do SVG do editor isolada
+  em hooks próprios (`src/features/zonas/hooks/`), nunca misturada com componente de UI
+  genérico. **O editor nunca normaliza nem regrava o asset-base** — ele é somente-leitura
+  sobre o canônico (ADR-005).
 - Variáveis/funções em português para nomes de domínio (`gerarVariante`, `marcarZona`),
   inglês para padrões técnicos (`handleSubmit`).
 - Sempre tratar erros de chamadas ao backend com `try/catch` ou checagem de `.error`.
@@ -111,7 +113,7 @@ Detalhes em `memory/restrictions.md`.
 ## Stack
 
 - React + Vite
-- Fabric.js (editor de zonas / canvas)
+- SVG manipulado direto no DOM no editor de zonas — sem canvas, sem Fabric.js (ADR-005)
 - Supabase (auth, Postgres, RLS, storage dos SVGs base)
 - Vercel Serverless Functions (motor de geração de variante — recolore SVG por zona)
 - sharp / resvg (rasterização SVG → PNG sob demanda, só quando `?format=png`)

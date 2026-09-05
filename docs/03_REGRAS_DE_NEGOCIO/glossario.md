@@ -26,7 +26,12 @@
 | **Tenant** | `tenants`, `tenant_id` | Uma marca/fabricante calçadista cliente da plataforma — unidade de isolamento (ver `docs/11_SEGURANCA/multi-tenancy-rls.md`) | cliente (isolado, sem contexto), empresa, conta |
 | **Membro** | `tenant_members` | Usuário vinculado a um tenant, com um papel (`owner` ou `membro`) | usuário (isolado, sem contexto de tenant), colaborador |
 | **Motor de render** | `src/lib/render/` (sugerido) | O componente que aplica `zone_colors` sobre o asset-base e devolve SVG/PNG | engine, renderer, gerador |
-| **Editor de zonas** | app front-end (Fabric.js) | Onde o time do tenant marca as zonas de um produto e faz preview de variante | designer, canvas (isolado, sem contexto), studio |
+| **Editor de zonas** | app front-end (SVG no DOM, ADR-005) | Onde o time do tenant marca as zonas de um produto e faz preview de variante | designer, canvas (isolado, sem contexto), studio |
+| **Marcar zona** | `marcarZona` | A operação de dizer quais elementos do asset-base canônico formam uma zona, gravando uma linha em `product_zones` | desenhar, selecionar (isolado), recortar |
+| **Id de elemento** | atributo `id` do canônico | O identificador único de cada elemento pintável do asset-base canônico. Cunhado pela **normalização** (`elemento-N` quando o arquivo não trouxe id), nunca pelo editor — o canônico é imutável (ADR-005) | nome do path, chave do elemento |
+| **Palco** | `PalcoDeMarcacao` | A área do editor onde o asset-base canônico é renderizado e clicado. Mostra o SVG que a API devolve, sem filtro nem overlay | canvas, viewport, tela (isolado) |
+| **Sobreposição de zonas** | `ZONAS_SOBREPOSTAS` | Duas zonas do mesmo produto que compartilham pelo menos um elemento — estado inválido: sem isso, a ordem das chaves do JSON decidiria a cor | conflito, colisão, overlap |
+| **Sessão** | `ContextoDeSessao` | O par usuário autenticado + tenant ativo. Nenhuma tela protegida renderiza sem os dois | login (isolado), auth (isolado) |
 
 ## Termos que existem só em contexto histórico (não usar em código novo)
 
@@ -47,3 +52,5 @@
 
 - **2026-08-12** — versão inicial, termos definidos durante o intake de fundação
 - **2026-08-12** — entram "asset-base canônico", "normalização" e "seletor de zona" (ADR-004)
+- **2026-09-05** — entram "marcar zona", "id de elemento", "palco", "sobreposição de zonas"
+  e "sessão"; o editor de zonas deixa de ser descrito como Fabric.js (ADR-005)

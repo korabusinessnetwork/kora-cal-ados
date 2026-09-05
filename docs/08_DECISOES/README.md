@@ -22,10 +22,11 @@
 | Arquivo | Decisão | Status |
 |---|---|---|
 | `adr-000-template.md` | TEMPLATE — copie para criar um ADR novo | — |
-| `adr-001-stack-e-motor-de-render.md` | React+Vite+Fabric+Supabase+Vercel, MVP vetor-only | Aceito |
+| `adr-001-stack-e-motor-de-render.md` | React+Vite+Supabase+Vercel, MVP vetor-only | Aceito (parte do Fabric.js supersedida pelo ADR-005) |
 | `adr-002-multi-tenant-white-label.md` | Multi-tenant desde o schema, white-label por tenant | Aceito |
 | `adr-003-organizacao-para-ia.md` | Projeto organizado para leitura de agente, não de humano | Aceito |
-| `adr-004-contrato-de-zona-e-normalizacao-de-svg.md` | Zona = conjunto de elementos; SVG normalizado no upload | 🟡 **Proposto** |
+| `adr-004-contrato-de-zona-e-normalizacao-de-svg.md` | Zona = conjunto de elementos; SVG normalizado no upload | Aceito |
+| `adr-005-editor-de-zonas-em-svg-dom.md` | Editor em SVG DOM (sem Fabric.js); id cunhado na normalização; seletor = lista de ids exatos | Aceito |
 
 Numeração é sequencial e nunca reciclada. Espelho deste índice em `memory/decisions.md`
 — os dois precisam estar em sync.

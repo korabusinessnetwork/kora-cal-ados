@@ -67,6 +67,7 @@ Architecture Decision Record (ADR) é um documento que captura uma escolha arqui
 | [ADR-002](../docs/08_DECISOES/adr-002-multi-tenant-white-label.md) | Estratégia multi-tenant e white-label | Aceito | 2026-08-12 | — |
 | [ADR-003](../docs/08_DECISOES/adr-003-organizacao-para-ia.md) | Organização do projeto para agente de IA | Aceito | 2026-08-12 | — |
 | [ADR-004](../docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md) | Contrato de zona e normalização de SVG | Aceito | 2026-08-12 | — |
+| [ADR-005](../docs/08_DECISOES/adr-005-editor-de-zonas-em-svg-dom.md) | Editor de zonas em SVG DOM, e quem cunha o `id` | Aceito | 2026-09-05 | Supersede ADR-001 em parte (só Fabric.js) |
 
 ## Regra Principal
 
@@ -112,7 +113,7 @@ Proposed / Accepted / Rejected
 
 ## Decisões Supersedidas / Em Review
 
-- ADR-001 supersede: (nenhuma)
+- ADR-001 supersede: (nenhuma); **supersedido em parte pelo ADR-005** — só a escolha de Fabric.js
 - **Em revisão**: (nenhuma decisão aberta)
 - **Decidido em 2026-08-12, executado e provado em 2026-09-05**: correção de RLS, papéis e Storage
   (`docs/11_SEGURANCA/proposta-correcao-rls.md` → migration

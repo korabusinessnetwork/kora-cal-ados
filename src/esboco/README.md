@@ -42,8 +42,8 @@ de um `<img>` com data URL no comparativo, onde não executa script nem busca re
 ## O que o esboço NÃO tem
 
 - **Login, banco e upload**: nada de Supabase aqui. A tela não faz uma requisição sequer.
-- **Marcação de zona**: as zonas já vêm marcadas em `produtoDemo.ts`. Marcar zona no
-  canvas (Fabric.js, ADR-001) é a próxima peça e ainda não existe.
+- **Marcação de zona**: as zonas já vêm marcadas em `produtoDemo.ts`. Marcar zona
+  clicando no calçado (SVG no DOM, ADR-005) é a próxima peça e ainda não existe.
 - **Estado de carregando**: tudo é síncrono e local. Preferi não simular spinner —
   estado falso em esboço vira expectativa errada de performance.
 - **Identidade visual**: `docs/02_DESIGN_SYSTEM/` está vazio até o nome do produto

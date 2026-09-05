@@ -7,7 +7,7 @@
 
 | Camada | Escolha | Papel |
 |---|---|---|
-| Frontend / Editor | React + Vite + **Fabric.js** | Canvas de edição: carregar SVG base, marcar zonas, preview de variante |
+| Frontend / Editor | React + Vite, **SVG no DOM** (ADR-005) | Editor de zonas: carregar o asset-base canônico, marcar zonas, preview de variante com o mesmo motor da API |
 | Dados / Auth | Supabase (Postgres + RLS + Storage) | Tenants, produtos, zonas, autenticação, storage dos SVGs |
 | API de geração | Vercel Serverless Functions | Recebe `{zona: cor}`, recolore o SVG base, devolve SVG ou PNG |
 | Deploy | Vercel (app + funções) + Supabase (dados) | Mesma espinha dorsal dos outros projetos Kora |
@@ -37,7 +37,7 @@ quando faz sentido reaproveitar (ex: catálogo público, ou variante muito requi
 
 ## Fluxo — Editor (setup, feito uma vez por modelo)
 
-1. Time de produto sobe o SVG base do modelo no editor (Fabric.js)
+1. Time de produto sobe o SVG base do modelo no editor
 2. **`normalizarSvg` roda no upload** e produz o asset-base canônico — ou recusa o arquivo
    explicando o que corrigir no export (ADR-004)
 3. Seleciona cada parte (path/grupo) e marca como zona: `sola`, `cabedal`, `cadarço`, `logo`

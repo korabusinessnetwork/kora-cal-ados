@@ -9,7 +9,7 @@
 - **Infraestrutura**: ambientes (dev/staging/prod), CI/CD, monitoramento
 - **Padrões técnicos**: convenções de código, estrutura de pastas, integração
 - **Performance & escalabilidade**: bottlenecks conhecidos, roadmap de otimização
-- **Decisões arquiteturais grandes**: por quê React+Fabric.js+Supabase+Vercel, por quê vetor-only na Fase 1 (ver ADR-001)
+- **Decisões arquiteturais grandes**: por quê React+Vite+Supabase+Vercel, por quê vetor-only na Fase 1 (ver ADR-001), por quê SVG no DOM em vez de canvas (ver ADR-005)
 
 ## O que NÃO vive aqui
 

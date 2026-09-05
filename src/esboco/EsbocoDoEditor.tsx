@@ -2,7 +2,7 @@
 // são burros de propósito, para ninguém ser tentado a recalcular cor por fora do motor.
 //
 // Não é o editor de zonas de verdade: aqui as zonas já vêm marcadas. Marcar zona com
-// Fabric.js é a próxima peça (ver README desta pasta).
+// Marcar zona é a próxima peça, em SVG DOM (ADR-005) — ver README desta pasta.
 
 import { useMemo, useRef, useState } from 'react';
 import { normalizarSvg } from '../lib/render/normalizarSvg';
