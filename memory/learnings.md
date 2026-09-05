@@ -64,6 +64,7 @@
 |---|---|---|
 | 2026-08-12 | Doc afirmava "protótipo validado" mas `node_modules` nunca tinha sido instalado neste checkout — o script jamais rodou aqui. Documentação registrou intenção como se fosse fato | "Validado" só entra em doc quando houver comando executado ou teste no repositório provando. Ação: os 9 casos viraram `src/lib/render/gerarVarianteDeCor.test.ts` |
 | 2026-08-12 | Fundação gerada a partir de template trouxe vocabulário de outro projeto Kora (PDV de bar) para `memory/` — e `patterns.md` ensinava `abrirCaixa`/`fecharComanda` como exemplo de nomenclatura, contradizendo o glossário que ele manda seguir | Num projeto lido só por agentes (ADR-003), resíduo de template é desinformação ativa: agente novo aprende o vocabulário errado. Limpar `memory/` faz parte de fechar a fundação, não é cosmético |
+| 2026-09-05 | Suíte verde, `tsc` limpo e build OK **não** provam que a tela mostra o que ela afirma: o comparativo do esboço passava em tudo enquanto renderizava a mesma imagem dos dois lados (BUG-011). O defeito só apareceu abrindo no Chrome | Toda peça de UI cuja razão de existir é *demonstrar* algo ganha uma passada em navegador real antes de ser considerada pronta — e o que a passada descobrir vira teste. Nesta o teste é `renderToStaticMarkup` conferindo o `src` gerado, sem dependência nova |
 
 ## Aprendizados de Negócio
 
@@ -87,7 +88,7 @@
 
 ## Limpeza Periódica
 
-**Última revisão**: 2026-08-12
+**Última revisão**: 2026-09-05
 
 Aprendizados obsoletos (superados por realidade nova):
 - (nenhum ainda)

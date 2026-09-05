@@ -80,6 +80,7 @@
 | ID | Data | Módulo | Descrição | Status | Correção/ADR | ETA |
 |---|---|---|---|---|---|---|
 | BUG-005 | 2026-08-12 | Motor de render | Zona pintada com gradiente (`fill="url(#grad)"`) vira cor chapa sem aviso — perde a representação de material/textura silenciosamente | **corrigido** (vira erro `ZONA_NAO_RECOLORIVEL`) | ADR-004, decisão 1 | 2026-08-12 |
+| BUG-011 | 2026-09-05 | Esboço do editor | `ComparativoDeNormalizacao` renderizava o asset-base canônico **sem** o pedido de cor, enquanto o lado cru recebia o pedido. Os dois lados saíam visualmente iguais: o painel que existe para provar o BUG-001 lado a lado não provava nada, e o README afirmava o contrário do que o código fazia | **corrigido** | `ComparativoDeNormalizacao.test.tsx` | 2026-09-05 |
 | BUG-009 | 2026-08-12 | Banco / RLS | `tenant_members.papel` (`owner`/`membro`) está modelado mas nenhuma policy o usa — todo membro tem escrita total sobre produtos, zonas e variantes | **em_correcao** (escrito, não executado) | `20260812_correcao_rls_e_storage.sql` | falta ambiente |
 
 ---
@@ -89,6 +90,7 @@
 | ID | Data | Módulo | Descrição | Status | Correção/ADR | ETA |
 |---|---|---|---|---|---|---|
 | BUG-010 | 2026-08-12 | Docs | `supabase/schema.sql` é um stub apontando para a migration, mas `CLAUDE.md` e `docs/04_MODELAGEM/` o declaram fonte de verdade do banco. A verdade real está em `supabase/migrations/` | **corrigido** | snapshot real em `supabase/schema.sql`, com a tabela de policies por operação | 2026-08-12 |
+| BUG-012 | 2026-09-05 | Esboço do editor | Motor recusando o pedido (zona com gradiente) fazia o comparativo cair em `<img src="">`. `src` vazio faz o navegador pedir a própria página de novo — 404 e download do documento inteiro — e o quadro em branco mentia dizendo "variante vazia" em vez de "pedido recusado" | **corrigido** | placeholder explícito + teste | 2026-09-05 |
 
 ---
 
@@ -139,6 +141,8 @@ A variante sai com cor errada? Um tenant vê dado de outro? Quantos produtos/zon
 | BUG-003 | 2026-08-12 | Motor de render | `src/lib/render/erros.ts` + `validarCor.ts` |
 | BUG-004 | 2026-08-12 | Upload | `src/lib/render/normalizarSvg.ts` → `sanitizar` |
 | BUG-005 | 2026-08-12 | Motor de render | erro `ZONA_NAO_RECOLORIVEL`; preservar gradiente foi pro backlog |
+| BUG-011 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (mesmo pedido de cor nos dois lados) |
+| BUG-012 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (sem variante → placeholder, nunca `<img src="">`) |
 
 Todos provados por teste em `src/lib/render/*.test.ts` (30 casos) — não por inspeção.
 
@@ -176,3 +180,9 @@ execução. O que fecha os quatro é `supabase/tests/isolamento.test.ts` rodando
 um ambiente real.
 
 BUG-010 (docs) foi corrigido junto: `supabase/schema.sql` virou snapshot de verdade.
+
+BUG-011 e BUG-012 saíram de **abrir a página num Chrome de verdade** em 2026-09-05 —
+depois de `npm test`, `tsc` e `npm run build` já estarem verdes. Nenhum dos dois é
+detectável em jsdom: um é diferença de pixel entre duas imagens, o outro é o navegador
+reagindo a um atributo vazio. Viraram `src/esboco/ComparativoDeNormalizacao.test.tsx`,
+que reprova se o comparativo voltar a mandar pedidos diferentes para cada lado.

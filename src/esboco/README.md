@@ -54,5 +54,11 @@ de um `<img>` com data URL no comparativo, onde não executa script nem busca re
 `npm test` cobre a premissa do esboço (`produtoDemo.test.ts`) e o caminho do navegador do
 motor (`../lib/render/dom.test.ts`, com `DOMParser` global em vez de jsdom).
 
-Ressalva honesta: esse teste roda no jsdom, que implementa a mesma API — **não** é
-Chrome/Firefox de verdade. Renderização e CSS só se provam abrindo a página.
+`ComparativoDeNormalizacao.test.tsx` prende o comparativo: os dois lados recebem o mesmo
+pedido de cor e um pedido recusado nunca vira `<img src="">` (BUG-011 e BUG-012).
+
+**Aberto no Chrome em 2026-09-05** — não só em jsdom. Verificado na página: as 9 zonas com
+a contagem de elementos certa (cadarço = 4), o preview mudando de cor, o comparativo
+mostrando o cru bege ao lado do canônico azul, e `ZONA_NAO_RECOLORIVEL` congelando a
+variante com o botão Desfazer funcionando. Foi essa passada que achou BUG-011/012 — a
+suíte estava verde com os dois presentes.

@@ -100,6 +100,11 @@ body {
 .comparativo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .comparativo__item { margin: 0; background: var(--cor-superficie); border: 1px solid var(--cor-borda); border-radius: var(--raio); padding: 10px; }
 .comparativo__img { width: 100%; display: block; background: #f4f4f2; border-radius: 6px; }
+.comparativo__vazio {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  aspect-ratio: 3 / 2; padding: 12px; border-radius: 6px; border: 1px dashed var(--cor-borda);
+  font-size: 11px; color: var(--cor-texto-fraco);
+}
 .comparativo figcaption { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; font-size: 11px; color: var(--cor-texto-fraco); }
 .comparativo figcaption strong { color: var(--cor-texto); font-size: 12px; font-weight: 600; }
 
