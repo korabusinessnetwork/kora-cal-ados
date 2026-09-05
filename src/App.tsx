@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { EsbocoDoEditor } from './esboco/EsbocoDoEditor';
 import { BarraDaSessao } from './features/sessao/BarraDaSessao';
 import { ProvedorDeSessao } from './features/sessao/ContextoDeSessao';
+import { TelaDeProdutos } from './features/produtos/TelaDeProdutos';
 import { RotaProtegida } from './features/sessao/RotaProtegida';
 import { ConfiguracaoAusente, lerConfiguracaoDoSupabase } from './lib/supabase/configuracaoDoSupabase';
 
@@ -47,12 +48,10 @@ export function App() {
         {(tenant) => (
           <>
             <BarraDaSessao />
-            <main className="tela">
-              <h1 className="cabecalho__titulo">{tenant.nome}</h1>
-              <p className="cabecalho__meta">
-                Sessão pronta. A lista de produtos entra na próxima etapa.
-              </p>
-            </main>
+            {/* `key` no tenant: trocar de marca REMONTA a tela. Sem isso o estado da
+                anterior (produto aberto, SVG baixado) sobreviveria à troca e mostraria o
+                modelo de um concorrente sob o nome da marca nova. */}
+            <TelaDeProdutos key={tenant.id} tenantId={tenant.id} />
           </>
         )}
       </RotaProtegida>

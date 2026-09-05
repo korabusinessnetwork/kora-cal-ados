@@ -7,6 +7,8 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { montarCenario, limpar, anonimo, temAmbiente, type Cenario } from './ambiente';
+import { analisarSvg } from '../../src/lib/render/dom';
+import { normalizarSvg } from '../../src/lib/render/normalizarSvg';
 
 describe.skipIf(!temAmbiente)('isolamento entre tenants', () => {
   let cenario: Cenario;
@@ -52,11 +54,43 @@ describe.skipIf(!temAmbiente)('isolamento entre tenants', () => {
   });
 
   it('marca concorrente não alcança o asset-base no Storage', async () => {
+    // O caminho é o do arquivo que EXISTE de verdade no bucket. Pedir um caminho
+    // inventado provaria menos: a recusa poderia ser "não achei", não "não é seu".
     const { error } = await cenario.clienteB.storage
       .from('assets-base')
-      .createSignedUrl(`tenants/${cenario.tenantA}/products/x/base.svg`, 300);
+      .createSignedUrl(cenario.assetDoProdutoA, 300);
 
     expect(error).not.toBeNull();
+  });
+
+  it('o dono baixa o próprio asset-base e recebe o SVG canônico', async () => {
+    // O outro lado da mesma moeda: sem isto, uma policy que negasse a TODO mundo passaria
+    // no teste acima e ninguém perceberia até o editor abrir vazio.
+    const { data, error } = await cenario.clienteA.storage
+      .from('assets-base')
+      .createSignedUrl(cenario.assetDoProdutoA, 300);
+
+    expect(error).toBeNull();
+
+    const svg = await (await fetch(data?.signedUrl ?? '')).text();
+
+    expect(svg).toContain('<svg');
+    // Canônico, não cru: é o que o editor e a API leem (ADR-004).
+    expect(analisarSvg(svg).querySelector('style')).toBeNull();
+    // E com os ids cunhados na normalização, que é o que o editor vai endereçar (ADR-005).
+    expect(svg).toContain('elemento-1');
+  });
+
+  it('canário: o normalizador de hoje é compatível com o asset já gravado', async () => {
+    // Se a ordem de cunhagem de id mudar numa versão futura, todo `svg_selector` gravado
+    // repointa em silêncio. Este teste fica vermelho ANTES de qualquer variante sair
+    // errada — é a rede de segurança que a decisão 2 do ADR-005 exige.
+    const { data } = await cenario.clienteA.storage
+      .from('assets-base')
+      .createSignedUrl(cenario.assetDoProdutoA, 300);
+    const baixado = await (await fetch(data?.signedUrl ?? '')).text();
+
+    expect(normalizarSvg(baixado).svg).toBe(baixado);
   });
 
   it('BUG-009: membro não-owner não apaga produto do próprio tenant', async () => {

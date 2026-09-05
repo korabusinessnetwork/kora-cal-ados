@@ -6,6 +6,7 @@ só ela usa. O que é compartilhado por mais de uma feature sobe para `src/lib/`
 | Pasta | O que resolve |
 |---|---|
 | `sessao/` | Quem entrou e em qual marca (tenant ativo). Nada protegido renderiza sem as duas coisas |
+| `produtos/` | Listar os modelos do tenant e abrir um deles, baixando o asset-base canônico do Storage |
 
 Regra de dependência: feature pode importar de `src/lib/`, **nunca** de outra feature.
 Se duas precisarem da mesma coisa, ela vira módulo em `src/lib/` — importar de vizinho

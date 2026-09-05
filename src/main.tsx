@@ -6,6 +6,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import './esboco/esboco.css';
+import './features/produtos/produtos.css';
 import './features/sessao/sessao.css';
 
 const raiz = document.getElementById('raiz');

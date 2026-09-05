@@ -30,9 +30,18 @@ alheio pelo id direto — em vez de conferir se a policy "existe".
 
 ## Estado
 
-✅ **Rodou verde (8/8) em 2026-09-05** contra um projeto Supabase real, com as duas
-migrations aplicadas — é o que fechou BUG-006..009. O cenário é montado e destruído a cada
-rodada (conferido: nenhum tenant ou usuário residual).
+✅ **Rodou verde (10/10) em 2026-09-05** contra um projeto Supabase real, com as duas
+migrations aplicadas — os 8 primeiros são o que fechou BUG-006..009. O cenário é montado e
+destruído a cada rodada (conferido: nenhum tenant ou usuário residual).
+
+Desde a Etapa 3 o cenário sobe um **asset-base real** para o Storage, em vez de gravar um
+caminho inventado. A diferença é grande: com caminho falso, a recusa ao concorrente podia
+ser "não achei" em vez de "não é seu". Os dois casos novos vieram daí — o dono baixa o
+próprio arquivo e recebe o canônico, e o **canário do ADR-005**
+(`normalizarSvg(baixado) === baixado`) fica vermelho se a ordem de cunhagem de id mudar,
+antes de qualquer `svg_selector` gravado repointar em silêncio.
+
+Rodar: `npm run test:banco`.
 
 Continua valendo a regra que criou este teste: SQL que não rodou não é correção provada.
 Toda mudança futura em policy volta a passar por aqui antes de ser considerada feita.

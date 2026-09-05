@@ -4,7 +4,11 @@
 // Usa service_role — por isso vive em supabase/tests/, nunca em src/ (que vai pro
 // bundle do navegador).
 
+import { readFileSync } from 'node:fs';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import '../../src/lib/render/domNode';
+import { normalizarSvg } from '../../src/lib/render/normalizarSvg';
+import { BUCKET_DO_ASSET_BASE, caminhoDoAssetBase } from '../scripts/caminhoDoAssetBase';
 
 const URL = process.env.SUPABASE_URL ?? '';
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
@@ -20,6 +24,8 @@ export interface Cenario {
   tenantA: string;
   tenantB: string;
   produtoA: string;
+  /** Caminho do asset-base do produto A no Storage — existe de verdade no bucket. */
+  assetDoProdutoA: string;
   /** owner do tenant A */
   clienteA: SupabaseClient;
   /** owner do tenant B — a marca concorrente */
@@ -66,12 +72,30 @@ export async function montarCenario(): Promise<Cenario> {
   const [tenantA, tenantB] = tenants.data.map((linha) => linha.id as string);
   if (!tenantA || !tenantB) throw new Error('tenants não criados');
 
+  // O produto nasce com um asset-base REAL no Storage. Antes isto era um caminho
+  // inventado: o teste de isolamento provava a policy do banco, mas nunca provava que
+  // um concorrente não consegue baixar o arquivo — não havia arquivo para baixar.
+  const productId = crypto.randomUUID();
+  const caminhoDoAsset = caminhoDoAssetBase(tenantA, productId);
+  const canonico = normalizarSvg(
+    readFileSync('src/esboco/tenis-demo-cru.svg', 'utf8'),
+  ).svg;
+
+  const upload = await admin()
+    .storage.from(BUCKET_DO_ASSET_BASE)
+    .upload(caminhoDoAsset, new Blob([canonico], { type: 'image/svg+xml' }), {
+      contentType: 'image/svg+xml',
+      upsert: true,
+    });
+  if (upload.error) throw upload.error;
+
   const produto = await admin()
     .from('products')
     .insert({
+      id: productId,
       tenant_id: tenantA,
       nome: 'Tênis coleção não lançada',
-      base_asset_path: `tenants/${tenantA}/products/x/base.svg`,
+      base_asset_path: caminhoDoAsset,
     })
     .select('id')
     .single();
@@ -85,6 +109,7 @@ export async function montarCenario(): Promise<Cenario> {
     tenantA,
     tenantB,
     produtoA: produto.data.id as string,
+    assetDoProdutoA: caminhoDoAsset,
     clienteA: a.cliente,
     clienteB: b.cliente,
     clienteMembroA: membro.cliente,
@@ -93,6 +118,9 @@ export async function montarCenario(): Promise<Cenario> {
 }
 
 export async function limpar(cenario: Cenario): Promise<void> {
+  // O objeto do Storage NÃO some junto com o tenant: apagar a linha de `products` não
+  // apaga o arquivo. Sem esta remoção, cada rodada do teste deixaria lixo no bucket.
+  await admin().storage.from(BUCKET_DO_ASSET_BASE).remove([cenario.assetDoProdutoA]);
   for (const userId of cenario.userIds) await admin().auth.admin.deleteUser(userId);
   await admin().from('tenants').delete().in('id', [cenario.tenantA, cenario.tenantB]);
 }
