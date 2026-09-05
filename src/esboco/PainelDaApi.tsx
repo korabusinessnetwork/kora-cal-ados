@@ -71,6 +71,10 @@ export function PainelDaApi({ cores, relatorio, erro }: Props) {
         <Linha rotulo="Handlers on* removidos" valor={relatorio.handlersRemovidos} />
         <Linha rotulo="Referências externas removidas" valor={relatorio.referenciasExternasRemovidas} />
         <Linha rotulo="Ids duplicados renomeados" valor={relatorio.idsRenomeados.length} />
+        {/* A cunhagem é o que torna um elemento marcável no editor: sem id, não há seletor.
+            Omitir esta linha faria o painel afirmar "o que a normalização mudou" escondendo
+            justamente a mudança que habilita a próxima tela (ADR-005). */}
+        <Linha rotulo="Ids atribuídos a elemento sem id" valor={relatorio.idsAtribuidos.length} />
       </dl>
 
       {relatorio.idsRenomeados.length > 0 && (

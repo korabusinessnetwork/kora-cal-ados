@@ -83,10 +83,16 @@ describe('recusa explícita em vez de achatar errado', () => {
 });
 
 describe('idempotência', () => {
-  it('normalizar duas vezes dá o mesmo resultado', () => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg"><style>.st0{fill:#333333;}</style><rect id="zona-sola" class="st0" style="stroke:#000000"/></svg>`;
+  // Canário do ADR-005: o id cunhado é contrato. Se uma segunda passada renumerasse, todo
+  // `svg_selector` já gravado em `product_zones` repointaria em silêncio. Por isso o
+  // arquivo aqui tem elemento ANÔNIMO — normalizar arquivo já identificado não exercita
+  // a cunhagem, que é justamente a parte que pode escorregar.
+  it('normalizar duas vezes dá o mesmo resultado, mesmo com elemento anônimo', () => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg"><style>.st0{fill:#333333;}</style><rect id="zona-sola" class="st0" style="stroke:#000000"/><path fill="#111111"/><g><circle fill="#222222"/></g></svg>`;
     const primeira = normalizarSvg(svg).svg;
+    const segunda = normalizarSvg(primeira);
 
-    expect(normalizarSvg(primeira).svg).toBe(primeira);
+    expect(segunda.svg).toBe(primeira);
+    expect(segunda.relatorio.idsAtribuidos).toEqual([]);
   });
 });

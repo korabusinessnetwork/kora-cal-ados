@@ -8,6 +8,7 @@
 
 import { analisarSvg, serializarSvg } from './dom';
 import { ErroDeVariante } from './erros';
+import { aplicarPoliticaDeId } from './idDeElemento';
 import { lerDeclaracoes, lerRegrasCss, type RegraCss } from './lerRegrasCss';
 
 /** Propriedades CSS que existem como atributo de apresentação SVG e podem ser achatadas. */
@@ -26,6 +27,8 @@ const PESO_IMPORTANTE = 1e12;
 
 export interface RelatorioDeNormalizacao {
   idsRenomeados: Array<{ de: string; para: string }>;
+  /** Ids cunhados em elemento que veio sem id — é o que torna a zona endereçável (ADR-005). */
+  idsAtribuidos: string[];
   declaracoesAchatadas: number;
   scriptsRemovidos: number;
   handlersRemovidos: number;
@@ -51,6 +54,7 @@ export function normalizarSvg(svgTexto: string): ResultadoDeNormalizacao {
 
   const relatorio: RelatorioDeNormalizacao = {
     idsRenomeados: [],
+    idsAtribuidos: [],
     declaracoesAchatadas: 0,
     scriptsRemovidos: 0,
     handlersRemovidos: 0,
@@ -59,7 +63,8 @@ export function normalizarSvg(svgTexto: string): ResultadoDeNormalizacao {
 
   sanitizar(documento, relatorio);
   acharEstilo(documento, relatorio);
-  desambiguarIds(documento, relatorio);
+  // Depois de sanitizar: elemento removido não pode consumir um número de `elemento-N`.
+  aplicarPoliticaDeId(documento, relatorio);
 
   return { svg: serializarSvg(documento), relatorio };
 }
@@ -157,26 +162,4 @@ function acharEstilo(documento: Document, relatorio: RelatorioDeNormalizacao): v
   }
 
   for (const bloco of blocos) bloco.remove();
-}
-
-/** `getElementById`/seletor de id com duplicata é ambíguo — renomeia e reporta. */
-function desambiguarIds(documento: Document, relatorio: RelatorioDeNormalizacao): void {
-  const vistos = new Set<string>();
-
-  for (const elemento of documento.querySelectorAll('[id]')) {
-    const id = elemento.getAttribute('id') ?? '';
-
-    if (!vistos.has(id)) {
-      vistos.add(id);
-      continue;
-    }
-
-    let sufixo = 2;
-    while (vistos.has(`${id}-${sufixo}`)) sufixo += 1;
-
-    const novo = `${id}-${sufixo}`;
-    elemento.setAttribute('id', novo);
-    vistos.add(novo);
-    relatorio.idsRenomeados.push({ de: id, para: novo });
-  }
 }

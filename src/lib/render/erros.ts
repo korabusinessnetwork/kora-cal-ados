@@ -6,7 +6,9 @@ export type CodigoDeErro =
   | 'COR_INVALIDA'
   | 'ZONA_NAO_RECOLORIVEL'
   | 'SVG_INVALIDO'
-  | 'SVG_NAO_NORMALIZAVEL';
+  | 'SVG_NAO_NORMALIZAVEL'
+  | 'ZONAS_SOBREPOSTAS'
+  | 'ZONE_KEY_INVALIDA';
 
 /**
  * Erro de qualquer etapa do motor. Existe para que "a zona não foi aplicada" seja

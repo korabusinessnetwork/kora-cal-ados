@@ -4,6 +4,7 @@
 // Este módulo é importado tanto pelo editor quanto pela função serverless — nunca
 // existem duas implementações. É o que sustenta "cor no editor = cor na API".
 
+import { alvosPintaveis } from './alvosPintaveis';
 import { analisarSvg, serializarSvg } from './dom';
 import { ErroDeVariante } from './erros';
 import { validarCor } from './validarCor';
@@ -16,8 +17,6 @@ export interface Zona {
 
 /** `{ "sola": "#C0392B" }` — chave é `zone_key` do glossário, nunca id de elemento SVG. */
 export type CoresPorZona = Record<string, string>;
-
-const PINTAVEIS = 'path, rect, circle, ellipse, polygon, polyline, line, text, tspan';
 
 /**
  * Devolve o SVG com as zonas pedidas recoloridas.
@@ -46,6 +45,8 @@ export function gerarVarianteDeCor(
       );
     }
   }
+
+  recusarSobreposicao(trabalho);
 
   for (const { cor, alvos } of trabalho) {
     for (const alvo of alvos) alvo.setAttribute('fill', cor);
@@ -106,29 +107,23 @@ function buscar(documento: Document, seletor: string, zoneKey: string): Element[
 }
 
 /**
- * Expande cada elemento da zona para ele mesmo + descendentes pintáveis — é assim que
- * grupo `<g>` e zona feita de N paths passam a funcionar (BUG-002).
- * Elemento com gradiente/pattern aborta (ADR-004, q1); `fill="none"` é pulado, porque
- * é contorno sem preenchimento e pintá-lo mudaria o desenho.
+ * Duas zonas pedidas que dividem um elemento fazem a ÚLTIMA chave do JSON decidir a cor
+ * dele — ordem de chave mandando no calçado, sem erro (BUG-013). Recusa o pedido inteiro:
+ * variante sai inteira ou não sai.
  */
-function alvosPintaveis(elementos: Element[], zoneKey: string): Element[] {
-  const alvos = new Set<Element>();
+function recusarSobreposicao(trabalho: Array<{ zoneKey: string; alvos: Element[] }>): void {
+  for (let a = 0; a < trabalho.length; a += 1) {
+    for (let b = a + 1; b < trabalho.length; b += 1) {
+      const esquerda = trabalho[a] as (typeof trabalho)[number];
+      const direita = trabalho[b] as (typeof trabalho)[number];
+      const comuns = esquerda.alvos.filter((alvo) => direita.alvos.includes(alvo));
 
-  for (const elemento of elementos) {
-    for (const candidato of [elemento, ...elemento.querySelectorAll(PINTAVEIS)]) {
-      const fill = (candidato.getAttribute('fill') ?? '').trim();
-
-      if (fill.startsWith('url(')) {
+      if (comuns.length > 0) {
         throw new ErroDeVariante(
-          'ZONA_NAO_RECOLORIVEL',
-          `A zona "${zoneKey}" usa gradiente ou padrão (${fill}) e não pode virar cor chapa sem descaracterizar o modelo.`,
+          'ZONAS_SOBREPOSTAS',
+          `As zonas "${esquerda.zoneKey}" e "${direita.zoneKey}" dividem ${comuns.length} elemento(s). Qual cor vale seria decidido pela ordem do pedido — corrija o mapeamento das zonas.`,
         );
       }
-
-      if (fill.toLowerCase() === 'none') continue;
-      if (candidato.matches(PINTAVEIS) || elementos.includes(candidato)) alvos.add(candidato);
     }
   }
-
-  return [...alvos];
 }

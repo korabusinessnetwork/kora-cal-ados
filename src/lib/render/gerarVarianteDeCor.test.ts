@@ -182,3 +182,51 @@ describe('relatório de zonas (prevenção no cadastro)', () => {
     ]);
   });
 });
+
+describe('zonas sobrepostas são recusadas (BUG-013)', () => {
+  // Sem isso, a ORDEM DAS CHAVES do JSON decide a cor: o motor pinta zona por zona, em
+  // sequência, e a última chave sobrescreve o elemento compartilhado — sem erro e sem
+  // aviso. É o princípio nº 1 violado em silêncio.
+  const svgCru = `<svg xmlns="http://www.w3.org/2000/svg"><g id="zona-cabedal"><rect id="zona-lingueta" fill="#333333"/></g><rect id="zona-sola" fill="#555555"/></svg>`;
+  const sobrepostas: Zona[] = [
+    { zone_key: 'cabedal', svg_selector: '#zona-cabedal' },
+    { zone_key: 'lingueta', svg_selector: '#zona-lingueta' },
+  ];
+
+  it('lança ZONAS_SOBREPOSTAS em vez de deixar a última chave vencer', () => {
+    expect(() => subirEGerar(svgCru, sobrepostas, { cabedal: NOVA, lingueta: '#0000FF' })).toThrow(
+      expect.objectContaining({ codigo: 'ZONAS_SOBREPOSTAS' }),
+    );
+  });
+
+  it('a ordem das chaves não muda o resultado — recusa nos dois sentidos', () => {
+    // Se o motor pintasse, estes dois pedidos dariam calçados DIFERENTES com o mesmo dado.
+    expect(() => subirEGerar(svgCru, sobrepostas, { lingueta: '#0000FF', cabedal: NOVA })).toThrow(
+      ErroDeVariante,
+    );
+  });
+
+  it('a mensagem nomeia as duas zonas em conflito', () => {
+    expect(() => subirEGerar(svgCru, sobrepostas, { cabedal: NOVA, lingueta: '#0000FF' })).toThrow(
+      /cabedal.*lingueta|lingueta.*cabedal/,
+    );
+  });
+
+  it('zona sobreposta que NÃO foi pedida não bloqueia a variante', () => {
+    // A checagem é sobre o que vai ser pintado agora. Bloquear um pedido de uma zona só
+    // por causa de um mapeamento ruim em outra deixaria o produto inteiro travado.
+    const saida = subirEGerar(svgCru, sobrepostas, { cabedal: NOVA });
+
+    expect(saida).toMatch(new RegExp(NOVA, 'i'));
+    expect(saida).toMatch(/fill="#555555"/i);
+  });
+
+  it('zonas disjuntas continuam gerando normalmente', () => {
+    const zonas: Zona[] = [
+      { zone_key: 'lingueta', svg_selector: '#zona-lingueta' },
+      { zone_key: 'sola', svg_selector: '#zona-sola' },
+    ];
+
+    expect(() => subirEGerar(svgCru, zonas, { lingueta: NOVA, sola: '#0000FF' })).not.toThrow();
+  });
+});

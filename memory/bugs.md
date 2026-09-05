@@ -58,6 +58,8 @@
 | BUG-003 | 2026-08-12 | Motor de render | Zona inexistente só emite `console.warn` e devolve o SVG normalmente; cor inválida (`"banana"`) é aceita sem validação. Em função serverless, `console.warn` é falha silenciosa — o chamador da API não tem como saber que a variante saiu errada | **corrigido** | ADR-004 · `ErroDeVariante` + `validarCor.ts` | 2026-08-12 |
 | BUG-006 | 2026-08-12 | Banco / RLS | `auth_tenant_ids()` é `language sql stable` **sem `security definer`** e a policy de `tenant_members` a invoca — a função relê `tenant_members`, que reaplica a policy. Padrão clássico de `42P17: infinite recursion detected in policy`. **Ainda não reproduzido** (sem Docker local pra `supabase start`) | **corrigido** | `20260812_correcao_rls_e_storage.sql` | 2026-09-05 |
 
+| BUG-013 | 2026-09-05 | Motor de render | Duas zonas que compartilham um elemento fazem a **ordem das chaves do JSON** decidir a cor dele: `gerarVarianteDeCor` pinta zona por zona, em sequência, e a última sobrescreve — sem erro, sem aviso. `{cabedal, lingueta}` e `{lingueta, cabedal}` produziam calçados diferentes com o mesmo dado. Ninguém conseguia criar esse estado enquanto as zonas eram escritas à mão; o editor de zonas passa a conseguir | **corrigido** | ADR-005 · `zonasSobrepostas.ts` + recusa `ZONAS_SOBREPOSTAS` | 2026-09-05 |
+
 **Critério de fechamento**: correção + teste que prova a correção rodando em CI
 
 ---
@@ -147,6 +149,7 @@ A variante sai com cor errada? Um tenant vê dado de outro? Quantos produtos/zon
 | BUG-009 | 2026-09-05 | Banco / RLS | policies que usam `tenant_members.papel` — membro não apaga produto |
 | BUG-011 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (mesmo pedido de cor nos dois lados) |
 | BUG-012 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (sem variante → placeholder, nunca `<img src="">`) |
+| BUG-013 | 2026-09-05 | Motor de render | `zonasSobrepostas.ts` + `recusarSobreposicao` em `gerarVarianteDeCor.ts` |
 
 Todos provados por teste em `src/lib/render/*.test.ts` (30 casos) — não por inspeção.
 
@@ -195,3 +198,10 @@ depois de `npm test`, `tsc` e `npm run build` já estarem verdes. Nenhum dos doi
 detectável em jsdom: um é diferença de pixel entre duas imagens, o outro é o navegador
 reagindo a um atributo vazio. Viraram `src/esboco/ComparativoDeNormalizacao.test.tsx`,
 que reprova se o comparativo voltar a mandar pedidos diferentes para cada lado.
+
+BUG-013 saiu de **planejar o editor de zonas** em 2026-09-05: a pergunta "o que acontece se
+o time marcar o mesmo elemento em duas zonas?" não tinha resposta no código. Foi confirmado
+lendo o laço de pintura, não suposto — e é o caso em que o defeito nasce de uma capacidade
+nova, não de uma regressão: enquanto as zonas eram escritas à mão em `produtoDemo.ts`,
+ninguém conseguia produzir o estado inválido. A recusa entra no mesmo commit que a
+detecção, antes de existir UI que crie o problema.
