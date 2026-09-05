@@ -72,34 +72,17 @@
   font-size: 11.5px; color: var(--cor-texto-fraco); white-space: nowrap;
 }
 
-/* Palco e lateral dividem a largura; abaixo de 900px a lateral desce, porque espremer o
-   calcado para caber um formulario ao lado torna o clique impreciso. */
+/* A area e um bloco simples com um filho: o editor de zonas. A grade de duas colunas mora
+   em `zonas.css`, junto do componente que a usa — duas folhas dividindo a mesma grade e a
+   ordem de import passa a decidir o layout, o que e invisivel em revisao. */
 .produto__area {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
-  gap: 20px;
-  align-items: start;
+  display: block;
 }
 
-@media (max-width: 900px) {
-  .produto__area { grid-template-columns: minmax(0, 1fr); }
-}
-
-.produto__palco {
-  background: #f4f4f2;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  padding: 28px;
-  display: grid;
-  place-items: center;
-}
-
-/* O tamanho do SVG e a camada de contorno sao regra de `zonas.css`, dona do palco. Duas
-   folhas dimensionando o mesmo desenho e uma delas ganha por ordem de import, o que e
-   invisivel em revisao. */
-
-.produto__lateral {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+/* `display` de autor vence o `[hidden] { display: none }` da folha do navegador, então a
+   regra acima sozinha deixaria a área VISÍVEL durante o carregando e o erro — palco vazio
+   lido como "modelo sem desenho", que é o oposto do estado nomeado (BUG-015). Vale para
+   qualquer `display` que se coloque acima, não só o `block`. */
+.produto__area[hidden] {
+  display: none;
 }

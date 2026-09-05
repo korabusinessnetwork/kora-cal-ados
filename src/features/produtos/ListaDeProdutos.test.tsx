@@ -73,9 +73,7 @@ describe('visualização do produto', () => {
         estado="pronto"
         erro={null}
         elementosMarcaveis={21}
-        zonasMarcadas={0}
-        palco={<p>palco</p>}
-        lateral={<p>lateral</p>}
+        editor={<p>editor</p>}
         aoVoltar={() => {}}
         {...props}
       />,
@@ -88,14 +86,15 @@ describe('visualização do produto', () => {
     expect(ver({})).toContain('21 elementos marcáveis');
   });
 
-  it('diz explicitamente que ainda não há zona marcada', () => {
-    // Estado vazio nomeado: sem isso, o palco desenhado parece um editor que não responde.
-    expect(ver({})).toContain('nenhuma zona marcada');
+  it('não repete a contagem de zonas — quem conta zona é o painel', () => {
+    // O painel do editor lista as zonas com a contagem de elementos de cada uma. Um segundo
+    // número aqui seria outra fonte da mesma verdade, e as duas divergem no dia em que uma
+    // delas deixar de ser atualizada.
+    expect(ver({})).not.toContain('zona marcada');
   });
 
-  it('conta as zonas já gravadas, no singular e no plural', () => {
-    expect(ver({ zonasMarcadas: 1 })).toContain('1 zona marcada');
-    expect(ver({ zonasMarcadas: 8 })).toContain('8 zonas marcadas');
+  it('mostra o editor que recebeu, sem saber o que ele é', () => {
+    expect(ver({ editor: <p>o editor</p> })).toContain('o editor');
   });
 
   it('erro no download aparece como alerta, não como palco vazio', () => {
@@ -109,6 +108,20 @@ describe('visualização do produto', () => {
     // Palco vazio visível seria lido como "modelo sem desenho"; oculto até o arquivo chegar,
     // o único estado visível é o "Baixando…".
     expect(ver({ estado: 'carregando' })).toMatch(/produto__area[^>]*hidden/);
+  });
+
+  it('e o CSS não pode desfazer esse `hidden` (BUG-015)', () => {
+    // O teste acima olha a marcacao, e a marcação estáva certa o tempo todo: o defeito
+    // morava na folha. Qualquer `display` de autor em `.produto__area` vence o
+    // `[hidden] { display: none }` do navegador, e a área continuava na tela durante o
+    // carregando e o erro. Sem esta guarda, o estado nomeado volta a sumir no dia em que
+    // alguém mexer no layout — e nenhum teste de markup percebe.
+    const folha = readFileSync(new URL('./produtos.css', import.meta.url), 'utf8').replace(
+      /\/\*[\s\S]*?\*\//g,
+      ' ',
+    );
+
+    expect(folha).toMatch(/\.produto__area\[hidden\]\s*\{[^}]*display:\s*none/);
   });
 
   it('não desenha o SVG por conta própria — quem desenha é o palco', () => {

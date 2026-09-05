@@ -44,7 +44,10 @@ const zona = (zoneKey: string, seletor: string): ZonaDoProduto => ({
 
 const zonas = [zona('sola', '#elemento-1'), zona('cabedal', '#elemento-2')];
 
+// A aspa logo depois de `palco__contorno` é o que separa as duas camadas: a de foco tem
+// `class="palco__contorno palco__contorno--foco"`, então nunca cai nesta primeira regex.
 const CAMADA_DE_CONTORNO = /<svg class="palco__contorno"[\s\S]*?<\/svg>/;
+const CAMADA_DE_FOCO = /<svg class="palco__contorno palco__contorno--foco"[\s\S]*?<\/svg>/;
 
 const renderizar = (props: Partial<PropsDoPalcoDeMarcacao> = {}): string =>
   renderToStaticMarkup(
@@ -147,6 +150,84 @@ describe('palco de marcação — camada de contorno', () => {
 
     expect(html).not.toContain('palco__contorno');
     expect(html).not.toContain('<use');
+  });
+});
+
+describe('palco de marcação — camada de foco', () => {
+  // Quem abre um modelo já mapeado precisa ver NO DESENHO o que o painel lista. Sem esta
+  // camada o painel dizia "sola: 3 elementos" e o calçado ficava mudo — clicar em "sola"
+  // não mostrava onde a sola fica.
+
+  it('traz um <use> por id em foco, com as mesmas garantias da camada de marcação', () => {
+    const camada = CAMADA_DE_FOCO.exec(
+      renderizar({ idsEmFoco: ['elemento-1', 'elemento-2'] }),
+    )?.[0];
+
+    expect(camada).toBeDefined();
+    expect(camada).toContain('palco__contorno--foco');
+    expect(camada).toContain('viewBox="0 0 300 150"');
+    expect(camada).toContain('aria-hidden="true"');
+    expect(camada).toContain('focusable="false"');
+    expect(camada).toContain('href="#elemento-1"');
+    expect(camada).toContain('href="#elemento-2"');
+    expect(camada?.match(/<use/g)).toHaveLength(2);
+  });
+
+  it('sem idsEmFoco não existe camada de foco, e a de marcação continua sozinha', () => {
+    // Lista ausente não pode virar `<svg>` vazio: quem inspeciona o palco procurando o que
+    // está realçado tropeçaria numa camada que não realça nada.
+    const html = renderizar({ idsMarcados: ['elemento-1'] });
+
+    expect(html).not.toContain('palco__contorno--foco');
+    expect(html).toMatch(CAMADA_DE_CONTORNO);
+    expect(html.match(/<svg class="palco__contorno/g)).toHaveLength(1);
+  });
+
+  it('lista de foco vazia também não gera camada', () => {
+    expect(renderizar({ idsEmFoco: [] })).not.toContain('palco__contorno');
+  });
+
+  it('idsEmFoco sem idsMarcados desenha só a camada de foco', () => {
+    const html = renderizar({ idsEmFoco: ['elemento-1'] });
+
+    expect(html).toMatch(CAMADA_DE_FOCO);
+    expect(html).not.toMatch(CAMADA_DE_CONTORNO);
+    expect(html.match(/<use/g)).toHaveLength(1);
+  });
+
+  it('id presente nas duas listas aparece nas duas camadas', () => {
+    // Sobreposição INTENCIONAL: a pessoa está acrescentando um elemento à zona que está em
+    // foco, e as duas leituras são verdadeiras ao mesmo tempo. Esconder uma delas seria
+    // decidir aparência no JSX — quem decide isso é o `zonas.css`.
+    const html = renderizar({ idsMarcados: ['elemento-1'], idsEmFoco: ['elemento-1'] });
+
+    expect(CAMADA_DE_FOCO.exec(html)?.[0]).toContain('href="#elemento-1"');
+    expect(CAMADA_DE_CONTORNO.exec(html)?.[0]).toContain('href="#elemento-1"');
+    expect(html.match(/<use/g)).toHaveLength(2);
+  });
+
+  it('canônico sem viewBox não gera camada de foco', () => {
+    const html = renderizar({ svgCanonico: canonicoSemViewBox, idsEmFoco: ['elemento-1'] });
+
+    expect(html).not.toContain('palco__contorno');
+    expect(html).not.toContain('<use');
+  });
+
+  it('destacar uma zona não altera um byte do desenho', () => {
+    // A asserção que fecha o princípio nº1 para o foco: o realce é camada, nunca filtro ou
+    // overlay sobre o desenho. Removida a camada de foco, o markup tem de ser IDÊNTICO ao
+    // de um palco sem foco nenhum — o que a API devolveria é exatamente o mesmo.
+    const coresPorZona = { sola: '#C0392B' };
+    const semFoco = renderizar({ coresPorZona, idsMarcados: ['elemento-1'] });
+    const comFoco = renderizar({
+      coresPorZona,
+      idsMarcados: ['elemento-1'],
+      idsEmFoco: ['elemento-2'],
+    });
+
+    expect(comFoco).toMatch(CAMADA_DE_FOCO);
+    expect(comFoco.replace(CAMADA_DE_FOCO, '')).toBe(semFoco);
+    expect(comFoco).toContain(gerarVarianteDeCor(canonico, zonas, coresPorZona));
   });
 });
 

@@ -59,6 +59,7 @@
 | BUG-006 | 2026-08-12 | Banco / RLS | `auth_tenant_ids()` é `language sql stable` **sem `security definer`** e a policy de `tenant_members` a invoca — a função relê `tenant_members`, que reaplica a policy. Padrão clássico de `42P17: infinite recursion detected in policy`. **Ainda não reproduzido** (sem Docker local pra `supabase start`) | **corrigido** | `20260812_correcao_rls_e_storage.sql` | 2026-09-05 |
 
 | BUG-013 | 2026-09-05 | Motor de render | Duas zonas que compartilham um elemento fazem a **ordem das chaves do JSON** decidir a cor dele: `gerarVarianteDeCor` pinta zona por zona, em sequência, e a última sobrescreve — sem erro, sem aviso. `{cabedal, lingueta}` e `{lingueta, cabedal}` produziam calçados diferentes com o mesmo dado. Ninguém conseguia criar esse estado enquanto as zonas eram escritas à mão; o editor de zonas passa a conseguir | **corrigido** | ADR-005 · `zonasSobrepostas.ts` + recusa `ZONAS_SOBREPOSTAS` | 2026-09-05 |
+| BUG-014 | 2026-09-05 | Editor de zonas | Acrescentar um elemento a uma zona existente **apagava o `label` gravado**: o formulário volta vazio depois de salvar e a tela mandava `label: null` para `marcarZona`, onde `null` significa "apague esta coluna". O UPDATE limpava o nome legível definido por um colega, sem aviso e sem sintoma — a zona continua gerando a cor certa, só perde o nome | **corrigido** | `preservarOuLimpar` em `EditorDeZonas.tsx` | 2026-09-05 |
 
 **Critério de fechamento**: correção + teste que prova a correção rodando em CI
 
@@ -84,6 +85,7 @@
 | BUG-005 | 2026-08-12 | Motor de render | Zona pintada com gradiente (`fill="url(#grad)"`) vira cor chapa sem aviso — perde a representação de material/textura silenciosamente | **corrigido** (vira erro `ZONA_NAO_RECOLORIVEL`) | ADR-004, decisão 1 | 2026-08-12 |
 | BUG-011 | 2026-09-05 | Esboço do editor | `ComparativoDeNormalizacao` renderizava o asset-base canônico **sem** o pedido de cor, enquanto o lado cru recebia o pedido. Os dois lados saíam visualmente iguais: o painel que existe para provar o BUG-001 lado a lado não provava nada, e o README afirmava o contrário do que o código fazia | **corrigido** | `ComparativoDeNormalizacao.test.tsx` | 2026-09-05 |
 | BUG-009 | 2026-08-12 | Banco / RLS | `tenant_members.papel` (`owner`/`membro`) está modelado mas nenhuma policy o usa — todo membro tem escrita total sobre produtos, zonas e variantes | **corrigido** | `20260812_correcao_rls_e_storage.sql` | 2026-09-05 |
+| BUG-015 | 2026-09-05 | Tela de produtos | `.produto__area { display: … }` é declaração de autor e vence o `[hidden] { display: none }` da folha do navegador, então a área do editor continuava **visível** durante o `carregando` e o `erro` — palco vazio ao lado do "Baixando…", que se lê como "modelo sem desenho". O teste existente olhava o atributo `hidden` na marcação, que sempre esteve certo: o defeito morava só no CSS | **corrigido** | `.produto__area[hidden]` + guarda que lê a folha | 2026-09-05 |
 
 ---
 
@@ -150,6 +152,8 @@ A variante sai com cor errada? Um tenant vê dado de outro? Quantos produtos/zon
 | BUG-011 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (mesmo pedido de cor nos dois lados) |
 | BUG-012 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (sem variante → placeholder, nunca `<img src="">`) |
 | BUG-013 | 2026-09-05 | Motor de render | `zonasSobrepostas.ts` + `recusarSobreposicao` em `gerarVarianteDeCor.ts` |
+| BUG-014 | 2026-09-05 | Editor de zonas | `preservarOuLimpar` em `src/features/zonas/EditorDeZonas.tsx` (campo vazio preserva, não apaga) |
+| BUG-015 | 2026-09-05 | Tela de produtos | `.produto__area[hidden] { display: none }` em `src/features/produtos/produtos.css` |
 
 Todos provados por teste em `src/lib/render/*.test.ts` (30 casos) — não por inspeção.
 
@@ -221,8 +225,19 @@ outros sete ilhoses e, ao conferir a linha no banco com service_role, o `label` 
 `null`. Nenhum teste pegava porque cada metade estava certa isolada — `marcarZona` distingue
 ausente de nulo, e a tela é que escolhia mal entre os dois.
 
-Correção: `preservarOuLimpar` em `src/features/produtos/TelaDeProdutos.tsx` — campo vazio em
+Correção: `preservarOuLimpar` em `src/features/zonas/EditorDeZonas.tsx` — campo vazio em
 zona existente vira `undefined` (preserva), em zona nova vira `null` (não há o que
-preservar). Provado por `src/features/produtos/TelaDeProdutos.test.ts` e reconferido no
+preservar). Provado por `src/features/zonas/EditorDeZonas.test.ts` e reconferido no
 banco: a linha final tem os 8 ilhoses **e** o rótulo "Ilhós".
 
+BUG-015 saiu de uma **revisão de CSS por subagente** em 2026-09-05, e é o primeiro achado
+desta série que não veio do navegador nem do vitest: quem leu a folha percebeu que o
+`display` de autor em `.produto__area` vence o `[hidden] { display: none }` do navegador.
+Defeito **pré-existente** — a Etapa 4 já tinha `display: grid` ali, e a Etapa 5 só trocou o
+valor.
+
+O que ele ensina sobre a suíte: o teste `a área do editor fica oculta até o asset-base
+chegar` estava verde e continuava verde, porque `renderToStaticMarkup` devolve markup, e a
+markup nunca esteve errada. Todo teste de componente deste projeto tem esse teto — ele
+prova o que o React escreve, nunca o que o navegador desenha. A guarda nova lê
+`produtos.css` e exige a regra `[hidden]`, que é o lado da verdade que a markup não alcança.

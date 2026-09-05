@@ -1,7 +1,7 @@
-// O palco do editor: o calçado na tela, clicável. Apresentacional — recebe o canônico e a
-// marcação em curso já resolvidos, não busca nada e não guarda estado.
+// O palco do editor: o calçado na tela, clicável. Apresentacional — recebe o canônico, a
+// marcação em curso e a zona em foco já resolvidos, não busca nada e não guarda estado.
 //
-// Três decisões moram aqui, cada uma barrando um modo de falha específico:
+// Quatro decisões moram aqui, cada uma barrando um modo de falha específico:
 //
 // 1. O desenho sai SEMPRE de `gerarVarianteDeCor`, nunca de CSS — mesmo sem cor pedida.
 //    Se o palco pintasse por `fill` de classe, o editor mostraria uma cor que a API não
@@ -11,6 +11,10 @@
 // 3. O contorno dos ids marcados vive numa CAMADA separada: regra 6 do design system —
 //    o palco não recebe filtro, sombra nem overlay sobre o desenho, porque o que aparece
 //    ali é o pixel que a API devolve. Realçar não pode alterar um byte do desenho.
+// 4. Marcação em curso e zona em foco são DUAS camadas, não uma com duas classes: elas
+//    respondem a perguntas diferentes ("o que estou marcando agora" × "onde já está
+//    mapeado") e mudam em momentos diferentes. Quem abria um modelo já mapeado via o
+//    painel listar as zonas e o calçado ficar mudo; a camada de foco fecha esse buraco.
 
 import { useMemo } from 'react';
 import type { MouseEvent, ReactElement } from 'react';
@@ -28,6 +32,9 @@ export interface PropsDoPalcoDeMarcacao {
   coresPorZona?: CoresPorZona;
   /** Ids da marcação em curso, ainda não salva. */
   idsMarcados: string[];
+  /** Ids dos elementos da zona destacada no painel. Realce discreto, distinto da marcação
+   *  em curso: um é "o que estou marcando agora", o outro é "onde já está mapeado". */
+  idsEmFoco?: string[];
   /** `zoneKeyExistente` é null quando o elemento ainda não pertence a nenhuma zona. */
   aoClicarElemento(id: string, zoneKeyExistente: string | null): void;
   desabilitado?: boolean;
@@ -38,6 +45,7 @@ export function PalcoDeMarcacao({
   zonas,
   coresPorZona,
   idsMarcados,
+  idsEmFoco,
   aoClicarElemento,
   desabilitado = false,
 }: PropsDoPalcoDeMarcacao): ReactElement {
@@ -86,18 +94,43 @@ export function PalcoDeMarcacao({
         dangerouslySetInnerHTML={{ __html: desenho.markup }}
       />
 
-      {/* Sem `viewBox` no canônico a camada é OMITIDA: chutar um alinharia o contorno com
-          o desenho por acaso, e contorno no lugar errado é marcação no lugar errado. */}
-      {viewBox !== null && idsMarcados.length > 0 && (
-        <svg className="palco__contorno" viewBox={viewBox} aria-hidden="true" focusable="false">
-          {/* `<use>` referencia o elemento do SVG inline no mesmo documento: o contorno é
-              desenhado por `stroke` na camada, sem tocar o elemento original. */}
-          {idsMarcados.map((id) => (
-            <use key={id} href={`#${id}`} />
-          ))}
-        </svg>
-      )}
+      {/* O foco vem ANTES da marcação em curso porque em SVG/HTML quem é declarado depois
+          pinta por cima: "onde já está mapeado" é pano de fundo, "o que estou marcando
+          agora" é o que a pessoa está manipulando. Um id que esteja nas DUAS listas
+          aparece nas duas camadas — a sobreposição é intencional, não um bug a esconder:
+          o elemento está sendo acrescentado à zona que está em foco, e as duas leituras
+          são verdadeiras ao mesmo tempo. Quem decide como isso fica (qual traço vence, se
+          um é tracejado, se há transparência) é o `zonas.css`, nunca este arquivo. */}
+      {camadaDeContorno(viewBox, idsEmFoco ?? [], 'palco__contorno palco__contorno--foco')}
+      {camadaDeContorno(viewBox, idsMarcados, 'palco__contorno')}
     </div>
+  );
+}
+
+/**
+ * Uma camada de realce. As duas camadas compartilham as mesmas garantias porque a regra
+ * que as sustenta é a mesma: nada aqui pode tocar o desenho que veio do motor.
+ *
+ * Sem `viewBox` no canônico a camada é OMITIDA: chutar um alinharia o contorno com o
+ * desenho por acaso, e contorno no lugar errado é marcação no lugar errado. Lista vazia
+ * também não vira `<svg>` nenhum — um elemento vazio na árvore só serve para atrapalhar
+ * quem inspeciona o palco procurando o que está realçado.
+ */
+function camadaDeContorno(
+  viewBox: string | null,
+  ids: string[],
+  className: string,
+): ReactElement | null {
+  if (viewBox === null || ids.length === 0) return null;
+
+  return (
+    <svg className={className} viewBox={viewBox} aria-hidden="true" focusable="false">
+      {/* `<use>` referencia o elemento do SVG inline no mesmo documento: o contorno é
+          desenhado por `stroke` na camada, sem tocar o elemento original. */}
+      {ids.map((id) => (
+        <use key={id} href={`#${id}`} />
+      ))}
+    </svg>
   );
 }
 

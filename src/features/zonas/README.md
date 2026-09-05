@@ -5,9 +5,12 @@ O que vive aqui: **clicar numa parte do calçado, dar um nome a ela e gravar a l
 aqui: listar produtos e baixar o asset-base (isso é `src/features/produtos/`), e as regras
 de SVG/cor em si (isso é `src/lib/render/`, importado, nunca reimplementado).
 
-Esta feature não tem tela própria: `PalcoDeMarcacao` e `FormularioDeNovaZona` são
-apresentacionais e são montados por `produtos/VisualizacaoDoProduto.tsx`, dentro de
-`.produto__palco` e `.produto__lateral`. Quem tem estado é `produtos/TelaDeProdutos.tsx`.
+Desde a Etapa 5 o editor é um componente só: `EditorDeZonas.tsx` monta palco, painel e
+formulário, e é o **único arquivo desta feature com estado** — `PalcoDeMarcacao`,
+`PainelDeZonas` e `FormularioDeNovaZona` continuam apresentacionais e testáveis como função
+de props. `produtos/VisualizacaoDoProduto.tsx` só entrega a área onde ele é montado; a grade
+de duas colunas (palco à esquerda, lateral à direita) mora em `zonas.css`, não em
+`produtos.css` — duas folhas medindo a mesma tela é empate decidido pela ordem de import.
 
 | Arquivo | Papel |
 |---|---|
@@ -19,9 +22,13 @@ apresentacionais e são montados por `produtos/VisualizacaoDoProduto.tsx`, dentr
 | `marcacaoEmCurso.ts` | **Puro.** `alternarId` / `desfazerUltimo` sobre a lista de ids clicados. A regra mora fora do hook para ser testável sem testing-library |
 | `hooks/useMarcacaoDeZona.ts` | Casca de `useState` da marcação em curso; zera ao trocar de produto, no próprio render |
 | `hooks/useZonasDoProduto.ts` | Carrega e grava `product_zones`. `salvando`/`erroAoGravar` separados de `estado`/`erro`; relê a lista depois de gravar |
-| `PalcoDeMarcacao.tsx` | O calçado na tela, clicável: markup de `gerarVarianteDeCor` + camada `<svg>` de contorno + `closest('[id]')` |
+| `PalcoDeMarcacao.tsx` | O calçado na tela, clicável: markup de `gerarVarianteDeCor` + duas camadas `<svg>` de contorno (marcação em curso e zona em foco) + `closest('[id]')` |
 | `FormularioDeNovaZona.tsx` | `zone_key`, `label` e `cor_default` validados por `validarZoneKey`/`validarCor` **antes** do banco |
-| `zonas.css` | Estilo do palco e do formulário, separado do JSX (white-label). Importado uma vez em `src/main.tsx` |
+| `coresDoPreview.ts` | **Puro.** Separa **cor em edição** (o texto do campo) de **cor válida** (o que o motor recebe): `coresValidas`, `errosDeCor`, `definirCor`. Quem decide o que é hex é `validarCor`; aqui só se decide quando ainda é cedo para reclamar |
+| `hooks/usePreviewDeCor.ts` | Casca de `useState` do preview; descarta as cores ao trocar de modelo |
+| `PainelDeZonas.tsx` | O relatório do mapeamento: zonas gravadas, **quantos elementos** cada uma captura hoje, campo de cor de teste por zona e o alerta de sobreposição. Burro: recebe contagem e sobreposições já calculadas |
+| `EditorDeZonas.tsx` | O editor inteiro e o **único lugar com estado**: calcula `relatorioDeZonas` e `zonasSobrepostas` e passa tudo pronto por props |
+| `zonas.css` | Estilo do editor (grade), do palco, do painel e do formulário, separado do JSX (white-label). Importado uma vez em `src/main.tsx` |
 
 Os `*.test.ts` / `*.test.tsx` ficam co-locados, ao lado do arquivo que provam.
 
@@ -83,6 +90,52 @@ borda, nunca clareando o calçado.
 
 Quando o motor recusa o pedido (zona sobreposta, gradiente, cor inválida), o palco mostra
 o canônico **cru** e o alerta com o código do erro. Nunca "quase certo".
+
+## O que a Etapa 5 tirou do banco e pôs na tela
+
+Três coisas existiam só em `product_zones` e agora são visíveis antes de existir variante —
+conferência, não relatório: quem descobre o erro aqui ainda pode remarcar; quem descobre
+depois descobre pelo calçado fabricado.
+
+- **Contagem por zona.** `relatorioDeZonas(canônico, zonas)` (de `src/lib/render/`) diz
+  quantos elementos cada `svg_selector` captura **hoje**, e o painel mostra o número. Marcar
+  os 8 ilhoses e ler "7 elementos" é a única chance de perceber o clique que faltou. Zero
+  elementos é mapeamento quebrado, não zona vazia: a geração falharia nessa zona, então o
+  painel diz isso na linha, alto.
+- **Sobreposição.** `zonasSobrepostas(canônico, zonas)` acha zonas que dividem elemento. O
+  editor recusa criar uma, mas mapeamento antigo do banco pode ter; enquanto existir, gerar
+  variante pedindo cor para as duas **falha inteiro** (BUG-013) — quem decidiria a cor do
+  elemento dividido seria a ordem das chaves no pedido. Por isso o aviso vem antes da lista,
+  não depois de a pessoa escolher as cores.
+- **Preview de cor.** Trocar a cor no painel repassa o canônico por `gerarVarianteDeCor` —
+  o mesmo motor da API, nunca `fill` de classe. Uma zona que não aceita cor chapa (gradiente)
+  faz o palco mostrar o erro e o canônico cru, em vez de pintar "quase certo".
+
+O painel também **destaca no palco** a zona em foco: é uma segunda camada de contorno
+(`palco__contorno--foco`), que se distingue da marcação em curso pelo traço (tracejado ×
+contínuo), não pela cor — separar por matiz morreria no primeiro tenant que trocasse a
+paleta. Como toda camada de realce, ela não encosta no desenho: sem filtro, sem sombra, sem
+`opacity`.
+
+### Por que existe "cor em edição" separada de "cor válida"
+
+Está em `coresDoPreview.ts`, e é a pergunta que volta em toda refatoração.
+
+A pessoa digita `#`, `#C`, `#C0`… e **cada tecla dispara um render**. Se o texto cru fosse
+direto para `gerarVarianteDeCor`, o motor lançaria `COR_INVALIDA` a cada tecla: o calçado
+sumiria durante a digitação e o painel acusaria um erro que ninguém cometeu ainda — a pessoa
+só não terminou de digitar. Então:
+
+- **Cor em edição** é o texto do campo, guardado como foi digitado. O painel nunca conserta
+  o que a pessoa escreveu.
+- **Cor válida** é só o que `validarCor` aceita, já em `#RRGGBB` maiúsculo — é isso, e só
+  isso, que vai para o motor. Zona sendo digitada não participa do pedido, e por isso não
+  impede as outras de continuarem pintadas.
+- **Rascunho** (`#` seguido de até 5 dígitos hex) não vira erro; qualquer outra coisa vira na
+  hora, porque nenhuma tecla a mais transforma `vermelho` ou `#GGG` em cor.
+
+O que **não** muda: quem decide o que é um hex continua sendo `validarCor`, o mesmo validador
+da API. Aqui só se decide *quando ainda é cedo para reclamar* — nunca o que é uma cor.
 
 ## Fora de escopo desta entrega (registrado, não esquecido)
 

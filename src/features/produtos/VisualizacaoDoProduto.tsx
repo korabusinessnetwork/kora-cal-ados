@@ -1,10 +1,10 @@
-// A moldura do produto aberto: cabeçalho, estados e os dois espaços que o editor de zonas
-// preenche — o palco e a lateral.
+// A moldura do produto aberto: cabeçalho, estados do download e o espaço onde o editor de
+// zonas entra.
 //
-// Até a Etapa 3 este componente injetava o SVG canônico ele mesmo. Não injeta mais: quem
-// desenha é `PalcoDeMarcacao`, que passa o arquivo por `gerarVarianteDeCor` — o mesmo motor
-// da API. Dois lugares desenhando o calçado é exatamente o que o princípio nº1 proíbe, e
-// era o que ia acontecer no minuto em que o palco entrasse ao lado deste `innerHTML`.
+// Ela não desenha o calçado e não conhece zona. Quem desenha é `PalcoDeMarcacao`, dentro de
+// `EditorDeZonas`, passando o arquivo por `gerarVarianteDeCor` — o mesmo motor da API. Até a
+// Etapa 3 esta tela injetava o canônico ela mesma; com o editor ao lado seriam dois lugares
+// desenhando o mesmo calçado e só um passando pelo motor, que é o princípio nº1 quebrado.
 //
 // Apresentacional: não busca nada, não guarda estado.
 
@@ -16,12 +16,8 @@ export interface PropsDaVisualizacaoDoProduto {
   erro: string | null;
   /** Quantos elementos aceitam cor — exatamente o que o editor pode marcar. */
   elementosMarcaveis: number | null;
-  /** Quantas zonas já estão gravadas em `product_zones`. */
-  zonasMarcadas: number | null;
-  /** O palco desenhado (`PalcoDeMarcacao`). */
-  palco: ReactNode;
-  /** Painel lateral: formulário da zona em curso, lista de zonas. */
-  lateral: ReactNode;
+  /** O editor de zonas montado. Quantas zonas existem é assunto do painel, dentro dele. */
+  editor: ReactNode;
   aoVoltar: () => void;
 }
 
@@ -30,9 +26,7 @@ export function VisualizacaoDoProduto({
   estado,
   erro,
   elementosMarcaveis,
-  zonasMarcadas,
-  palco,
-  lateral,
+  editor,
   aoVoltar,
 }: PropsDaVisualizacaoDoProduto) {
   return (
@@ -43,9 +37,7 @@ export function VisualizacaoDoProduto({
         </button>
         <h1 className="produto__titulo">{nome}</h1>
         {elementosMarcaveis !== null && (
-          <span className="produto__selo">
-            {elementosMarcaveis} elementos marcáveis · {descreverZonas(zonasMarcadas)}
-          </span>
+          <span className="produto__selo">{elementosMarcaveis} elementos marcáveis</span>
         )}
       </div>
 
@@ -61,19 +53,9 @@ export function VisualizacaoDoProduto({
         </div>
       )}
 
-      {/* O palco não recebe filtro, sombra nem overlay: o que aparece aqui é o pixel que a
-          API devolve (design system, itens 6 e 7). */}
       <div className="produto__area" hidden={estado !== 'pronto'}>
-        <div className="produto__palco">{palco}</div>
-        <aside className="produto__lateral">{lateral}</aside>
+        {editor}
       </div>
     </main>
   );
-}
-
-/** Zero zonas é estado nomeado, não silêncio: palco desenhado e sem texto parece um editor
- *  que não respondeu ao clique. */
-function descreverZonas(zonas: number | null): string {
-  if (zonas === null || zonas === 0) return 'nenhuma zona marcada';
-  return zonas === 1 ? '1 zona marcada' : `${zonas} zonas marcadas`;
 }

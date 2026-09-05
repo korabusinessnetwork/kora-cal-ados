@@ -9,6 +9,7 @@ tela de cadastro: a policy de INSERT em `tenants` é `service_role` de propósit
 |---|---|
 | `provisionarTenant.ts` | Cria tenant + owner + produto e sobe o asset-base **canônico** |
 | `caminhoDoAssetBase.ts` | A única definição de `tenants/{tenant_id}/products/{product_id}/base.svg` |
+| `semearZonasDeTeste.ts` | Semeia, num produto, os dois estados que o **editor se recusa a criar** e que o banco pode ter mesmo assim: zona de gradiente e zonas sobrepostas |
 | `executar.mjs` | Carregador: roda um script `.ts` que importa o motor de render |
 
 ## Provisionar uma marca
@@ -24,6 +25,22 @@ node --env-file=.env.local supabase/scripts/executar.mjs \
 `--svg` é opcional (usa o tênis de demo). A **senha é obrigatória e escolhida por quem
 provisiona**: o script não inventa nem imprime credencial (CLAUDE.md — nunca logar dado
 sensível). Combine-a com o cliente por fora.
+
+## Semear os estados que o editor recusa
+
+```bash
+npm run semear-zonas -- --produto <uuid>            # semeia
+npm run semear-zonas -- --produto <uuid> --limpar   # remove
+```
+
+Desde a Etapa 4 o editor recusa, no clique, tanto o elemento que não aceita cor chapa quanto
+o que já pertence a outra zona. Ótimo para quem marca — e péssimo para verificar: os
+caminhos de falha viram inalcançáveis **pela tela**, e continuam alcançáveis na vida real
+(mapeamento gravado antes da regra, importação futura, correção manual no banco). Se a tela
+reagir mal a isso, ninguém descobre, porque ninguém consegue produzir o estado clicando.
+
+O SVG é lido do Storage, nunca remontado aqui: os ids que vão para o `svg_selector` precisam
+ser os do arquivo que o navegador recebe, senão a semeadura testa outra coisa.
 
 ## Por que existe o `executar.mjs`
 

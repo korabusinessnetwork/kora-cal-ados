@@ -10,7 +10,7 @@
 // apagar", e ela só existe quando a zona já existe.
 
 import { describe, expect, it } from 'vitest';
-import { preservarOuLimpar } from './TelaDeProdutos';
+import { preservarOuLimpar } from './EditorDeZonas';
 
 describe('campo vazio numa zona que já existe', () => {
   it('preserva o que está gravado em vez de apagar', () => {

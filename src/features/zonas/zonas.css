@@ -20,11 +20,49 @@
    defeito da regra 1, por outro caminho. Vira `--cor-palco-fundo` quando
    `docs/02_DESIGN_SYSTEM/` existir; o nome muda, a decisão não. */
 
+/* ── Layout do editor ───────────────────────────────────────────────────────
+   A grade de duas colunas é DAQUI, não de `produtos.css`. Até a Etapa 4 a moldura do
+   produto entregava palco e lateral em dois espaços separados e era ela quem media as
+   colunas; na Etapa 5 o editor virou um componente só (`EditorDeZonas.tsx`) e
+   `.produto__area` passou a ser um bloco simples com um único filho. Uma grade só, num
+   arquivo só: duas folhas dimensionando a mesma tela é o defeito que não aparece em
+   revisão, porque quem decide o empate é a ordem de import de `main.tsx`.
+
+   Abaixo de 900px a lateral desce em vez de espremer o calçado: calçado estreito é
+   clique impreciso, e clique impreciso é zona marcada no lugar errado. */
+.editor-zonas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .editor-zonas { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* `min-width: 0` nas duas colunas porque item de grid nasce com `min-width: auto`: sem
+   isto um `zone_key` longo (monoespaçado e sem espaço para quebrar) ou um SVG largo
+   empurra a própria coluna em vez de quebrar, e a tela inteira ganha rolagem lateral. */
+.editor-zonas__palco { min-width: 0; }
+
+.editor-zonas__lateral {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 /* ── Palco ──────────────────────────────────────────────────────────────────
    Estas declarações repetem, com os MESMOS valores, o `.palco` de `esboco.css`.
    A repetição é deliberada: `.palco` é global e já existe lá, então divergir aqui
    mudaria a tela do esboço sem ninguém pedir. Declarar tudo mantém o editor correto
-   qualquer que seja a ordem de import em `main.tsx`. */
+   qualquer que seja a ordem de import em `main.tsx`.
+
+   Desde a Etapa 5 a moldura do palco no editor (papel claro, borda, raio, respiro) mora
+   SÓ aqui: `.produto__palco` deixou de existir, e com ela a regra que neutralizava esta
+   caixa para não somar duas bordas e dois paddings. Se a moldura voltar a ser declarada
+   em outro arquivo, a neutralização volta a ser necessária — foi assim que ela nasceu. */
 .palco {
   position: relative;
   padding: 24px;
@@ -35,18 +73,9 @@
   place-items: center;
 }
 
-/* Quando o palco é montado dentro de `.produto__palco`, a moldura (fundo claro, borda,
-   raio, respiro) já é daquela caixa. Sem esta neutralização o editor apareceria com duas
-   bordas e o dobro do padding. Fica aqui, e não em `produtos.css`, porque quem sabe que
-   o palco pode ser embutido é o palco; a especificidade maior também torna o resultado
-   independente da ordem de import em `main.tsx`. */
-.produto__palco > .palco {
-  width: 100%;
-  padding: 0;
-  background: none;
-  border: 0;
-  border-radius: 0;
-}
+/* O palco ocupa a coluna inteira: a largura vem da grade do editor, não do `width` do
+   arquivo do cliente. */
+.editor-zonas__palco > .palco { width: 100%; }
 
 /* Desenho e contorno na MESMA célula do grid (linha 2) = mesma caixa, sobrepostos. O
    contorno é uma camada por cima, não uma borda aplicada no desenho (regra 1).
@@ -93,7 +122,12 @@
    Seletor de filho direto de propósito: `.palco__contorno` também existe em
    `esboco.css`, onde vive dentro de `.palco__area` e é posicionado por `absolute`.
    Restringir a `>` deixa as duas telas conviverem sem uma reescrever a outra. */
-.palco > .palco__contorno {
+.palco > .palco__contorno,
+/* O modificador entra no grupo, e não só como classe extra do bloco, para a camada de
+   foco continuar sobre o desenho mesmo se o componente algum dia render só
+   `palco__contorno--foco`. Camada de realce fora de posição é traço apontando para o
+   elemento errado — o modo de falha que o princípio nº1 existe para impedir. */
+.palco > .palco__contorno--foco {
   /* Mesma célula do desenho e `inset: 0`: a caixa do contorno passa a ser EXATAMENTE a
      caixa do desenho — é isso que faz o traço cair em cima do elemento certo, e não a
      alguns pixels dele. (Filho absoluto de um grid usa a própria célula como bloco
@@ -110,7 +144,8 @@
 
 /* O realce é STROKE, nunca fill: preencher a cópia esconderia a cor real da zona — que é
    justamente o que o time está aprovando na tela. */
-.palco__contorno use {
+.palco__contorno use,
+.palco__contorno--foco use {
   fill: none;
   stroke: var(--cor-acento);
   stroke-width: 2;
@@ -119,14 +154,31 @@
   vector-effect: non-scaling-stroke;
 }
 
+/* Segunda camada: a zona em FOCO no painel (a pessoa passou o mouse ou selecionou a
+   linha), que pode aparecer ao mesmo tempo que a marcação em curso.
+   As duas se distinguem por TRAÇO, não por cor: tracejado largo × contínuo fino. Separar
+   por matiz — verde de foco, azul de marcação — morreria no primeiro tenant que trocasse
+   a paleta, e num tema de baixo contraste as duas camadas viram a mesma linha colorida.
+   O padrão do traço não depende de token nenhum, então sobrevive a qualquer marca.
+   Mesmas garantias da primeira camada: `pointer-events: none` e `inset: 0` (herdados do
+   grupo acima), `fill: none` aqui, e ZERO filtro, sombra ou opacidade sobre o desenho —
+   realçar não pode alterar um byte do que a API devolve (regra 1 do topo do arquivo). */
+.palco__contorno--foco use {
+  stroke-width: 3;
+  /* `stroke-dasharray` em unidade do usuário casa com `non-scaling-stroke`, que já
+     mantém a espessura constante: o tracejado fica legível em qualquer zoom. */
+  stroke-dasharray: 6 5;
+  stroke-linecap: butt;
+}
+
 /* ── Palco desabilitado ────────────────────────────────────────────────────
    Sem `filter`, sem `opacity` e sem véu sobre o desenho (regra 3). O sinal é a borda
    tracejada e o cursor — o calçado continua mostrando a cor exata da API. */
 .palco--desabilitado {
-  /* `outline` e não `border`: a borda do palco pode ter sido neutralizada acima (palco
-     embutido em `.produto__palco`), e o aviso de "não dá para clicar" não pode depender
-     de onde a tela montou o palco. O `outline-offset` negativo mantém o traço dentro da
-     caixa, para o estado não empurrar o layout ao entrar e sair. */
+  /* `outline` e não `border`: a borda do palco pode ser neutralizada por quem o embute
+     (era o caso de `.produto__palco` até a Etapa 5), e o aviso de "não dá para clicar" não
+     pode depender de onde a tela montou o palco. O `outline-offset` negativo mantém o
+     traço dentro da caixa, para o estado não empurrar o layout ao entrar e sair. */
   outline: 1px dashed var(--cor-texto-fraco);
   outline-offset: -1px;
   cursor: not-allowed;
@@ -288,4 +340,236 @@
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
+}
+
+/* ── Painel de zonas (relatório do mapeamento) ──────────────────────────────
+   Cartão irmão de `.zona-form`: mesma superfície, mesma borda, mesmo raio. Os dois
+   dividem a lateral do editor e parecer coisas diferentes sugeriria que uma delas não é
+   parte do editor. */
+.painel-zonas {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.painel-zonas__titulo {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--cor-texto-fraco);
+}
+
+/* Vazio tem o mesmo desenho de `.zonas__aviso` (tracejado, texto fraco) porque diz a mesma
+   coisa — "não há zona aqui" —, mas é caixa própria: `.zonas__aviso` é do palco e da lista
+   de fora do cartão, e reaproveitá-la aqui prenderia o respiro dos dois no mesmo valor. */
+.painel-zonas__vazio {
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed var(--cor-borda);
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--cor-texto-fraco);
+}
+
+/* Sem `max-height` e sem rolagem interna, de propósito: com 15 zonas a lista fica longa e
+   a tentação é encaixotá-la, mas zona fora da vista é zona não conferida — e conferir a
+   contagem antes de existir variante é a razão de este painel existir. A página rola; o
+   painel não esconde linha. */
+.painel-zonas__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.painel-zonas__item {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  /* A marca lateral existe em TODOS os itens, transparente quando fora de foco: assim
+     entrar e sair de foco não empurra o texto 3px para o lado, o que a lista inteira
+     acusaria como tremor a cada passagem de mouse. */
+  border-left-width: 3px;
+  border-radius: 8px;
+}
+
+/* O item em foco se anuncia por DOIS canais independentes: a marca lateral (forma — a
+   barra aparece onde antes não havia nada) e o peso do texto, abaixo. Só cor não serve:
+   o tema é do tenant e nada garante que o acento dele contraste com a superfície dele.
+   Se a paleta engolir a barra, o negrito ainda diz qual linha está destacada no palco. */
+.painel-zonas__item--foco {
+  background: var(--cor-superficie-alta);
+  border-color: var(--cor-borda);
+  border-left-color: var(--cor-acento);
+}
+
+/* Hover apenas sugere que a linha é clicável, e de propósito NÃO imita o item em foco:
+   se passar o mouse pela lista pintasse a linha igual ao foco, a pessoa leria destaque no
+   palco onde não há nenhum. */
+.painel-zonas__item:not(.painel-zonas__item--foco):hover {
+  border-left-color: var(--cor-borda);
+}
+
+/* O botão é a linha clicável (chave, rótulo, contagem) e não tem classe própria: o estilo
+   desce por descendência a partir do item. */
+.painel-zonas__item > button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 10px;
+  align-items: baseline;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Segundo canal do foco, preso ao MESMO atributo que o leitor de tela usa (o precedente é
+   o `aria-invalid` do formulário, mais acima): não dá para a linha ficar em negrito sem
+   ela estar marcada como a atual para quem navega por teclado. */
+.painel-zonas__item > button[aria-current='true'] .painel-zonas__rotulo,
+.painel-zonas__item > button[aria-current='true'] .painel-zonas__chave {
+  font-weight: 600;
+}
+
+/* A chave da API tem tratamento de CÓDIGO — monoespaçada, em cápsula, sobre o fundo do
+   app. Ela é literal: vai ser copiada para o JSON do pedido, e em fonte de texto `ilhos-1`
+   e `ilhos-l` são o mesmo desenho. Rótulo legível e chave técnica não podem parecer a
+   mesma coisa; quem confundir os dois manda o rótulo para a API e recebe zona inexistente. */
+.painel-zonas__chave {
+  grid-column: 1;
+  justify-self: start;
+  max-width: 100%;
+  padding: 1px 6px;
+  background: var(--cor-fundo);
+  border: 1px solid var(--cor-borda);
+  border-radius: 5px;
+  font-family: var(--fonte-mono);
+  font-size: 11.5px;
+  color: var(--cor-texto);
+  /* A coluna da lateral tem largura fixa e `zone_key` não tem espaço onde quebrar: sem
+     isto uma chave longa atravessa o cartão inteiro. */
+  overflow-wrap: anywhere;
+}
+
+.painel-zonas__rotulo {
+  grid-column: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--cor-texto);
+  /* `label` é texto livre do cliente — pode vir com uma palavra sem fim. */
+  overflow-wrap: anywhere;
+}
+
+/* Cor de texto cheia, não a fraca de legenda: é o número que o time confere para saber se
+   marcou os 8 ilhoses ou 7 — mesma decisão de `.zona-form__contagem`. */
+.painel-zonas__contagem {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  font-size: 11.5px;
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.painel-zonas__item > label {
+  font-size: 11.5px;
+  color: var(--cor-texto-fraco);
+}
+
+/* Campo de cor monoespaçado pelo mesmo motivo da chave: `#C0392B` é literal que viaja para
+   a API, e um `0`/`O` trocado vira cor errada no calçado. Largura curta porque o conteúdo
+   tem 7 caracteres — campo largo demais sugere que cabe outra coisa ali. */
+.painel-zonas__cor {
+  width: 100%;
+  max-width: 130px;
+  padding: 6px 9px;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  font: inherit;
+  font-family: var(--fonte-mono);
+  font-size: 12.5px;
+}
+.painel-zonas__cor[aria-invalid='true'] { border-color: var(--cor-erro); }
+
+/* Erro da linha: texto, não caixa. Some 15 zonas e a caixa vermelha por zona viraria uma
+   parede que ninguém lê — o alerta que grita é o de sobreposição, abaixo, que trava a
+   geração inteira. Este aqui é local e a pessoa corrige na linha em que está. */
+.painel-zonas__erro {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--cor-erro);
+  overflow-wrap: anywhere;
+}
+
+/* Sobreposição é estado INVÁLIDO do mapeamento, não aviso: enquanto existir, gerar
+   variante pedindo cor para as duas zonas falha inteiro (BUG-013). Usa os mesmos tokens de
+   erro de `.zonas__erro` e `.zona-form__erro` — vermelho novo aqui faria a tela ter dois
+   vermelhos de gravidades diferentes, e aí nenhum dos dois significa nada. */
+.painel-zonas__sobreposicao {
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--cor-erro-fundo);
+  border: 1px solid var(--cor-erro);
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+/* As `zone_key` citadas na frase são as que a pessoa vai procurar na lista: mesmo desenho
+   de código da `.painel-zonas__chave`, para o olho casar as duas sem reler. */
+.painel-zonas__sobreposicao code {
+  font-family: var(--fonte-mono);
+  font-size: 11.5px;
+  color: var(--cor-texto);
+}
+
+/* Coluna, e não linha: a frase que separa "limpar preview" de "apagar zona" precisa ficar
+   colada no botão. Ao lado, ela quebraria em três linhas na largura da lateral e pareceria
+   legenda do painel inteiro. */
+.painel-zonas__acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--cor-borda);
+}
+.painel-zonas__acoes button {
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.painel-zonas__acoes button:hover { background: var(--cor-superficie-alta); }
+.painel-zonas__acoes p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--cor-texto-fraco);
 }
