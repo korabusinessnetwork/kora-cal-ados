@@ -6,7 +6,8 @@
 --   20260812_schema_inicial.sql        — tabelas + RLS inicial
 --   20260812_correcao_rls_e_storage.sql — corrige recursão, papéis e Storage (BUG-006..009)
 --
--- ⚠️ Nenhuma das duas foi executada em banco real ainda — ver supabase/tests/README.md.
+-- As duas estão APLICADAS num projeto Supabase real desde 2026-09-05, provado por
+-- supabase/tests/isolamento.test.ts rodando 8/8 verde contra ele (BUG-006..009 fechados).
 -- Ao rodar uma migration nova, atualize este snapshot no mesmo commit.
 
 -- ── Tabelas ─────────────────────────────────────────────────────────────

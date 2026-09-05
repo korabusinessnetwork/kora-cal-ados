@@ -5,7 +5,9 @@ feita para o dono do projeto **ver** o motor de render funcionando antes de exis
 produto. O nome do diretório é literal de propósito (ADR-003): ninguém deve confundir
 isto com a Fase 1 de verdade.
 
-Rodar: `npm run dev` → <http://localhost:5173>
+Rodar: `npm run dev` → <http://localhost:5173> → link **"ver o esboço do motor (sem banco)"**
+no rodapé. Desde a Etapa 2 a raiz do app é a área protegida (sessão + tenant); o esboço
+continua fora dela de propósito — não lê nada do banco, então não há o que proteger.
 
 | Arquivo | Papel |
 |---|---|

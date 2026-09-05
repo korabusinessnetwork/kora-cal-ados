@@ -1,0 +1,137 @@
+/* Estilo das telas de sessão, separado do JSX (regra de white-label do CLAUDE.md).
+   Reusa os tokens declarados em `src/esboco/esboco.css` — quando o design system existir,
+   os valores viram tema por tenant e estes seletores continuam valendo. */
+
+.login,
+.sessao-escolha,
+.sessao-aviso {
+  /* Desconta o rodapé de navegação: com 100vh cheios a página ganhava barra de rolagem
+     só para mostrar um link de uma linha. */
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login__cartao,
+.sessao-escolha__cartao {
+  width: 100%;
+  max-width: 380px;
+  padding: 28px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login__titulo,
+.sessao-escolha__titulo {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.login__ajuda,
+.sessao-escolha__ajuda {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--cor-texto-fraco);
+}
+
+.login__erro {
+  margin: 0;
+  padding: 11px 13px;
+  background: var(--cor-erro-fundo);
+  border: 1px solid var(--cor-erro);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.login__campo { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--cor-texto-fraco); }
+.login__campo input {
+  padding: 9px 11px;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 13.5px;
+}
+.login__campo input:disabled { opacity: 0.55; }
+
+.login__enviar {
+  margin-top: 4px;
+  padding: 10px 16px;
+  background: var(--cor-acento);
+  color: #08111f;
+  border: none;
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.login__enviar:disabled { background: var(--cor-superficie-alta); color: var(--cor-texto-fraco); cursor: not-allowed; }
+
+/* ── Escolha de marca ───────────────────────────────────────────────── */
+.sessao-escolha__lista { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.sessao-escolha__opcao {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--cor-superficie-alta);
+  color: inherit;
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sessao-escolha__opcao:hover { border-color: var(--cor-acento); }
+.sessao-escolha__nome { font-size: 14px; font-weight: 500; }
+.sessao-escolha__papel { font-size: 11px; color: var(--cor-texto-fraco); }
+.sessao-escolha__sair {
+  align-self: flex-start; margin-top: 6px; padding: 0;
+  background: none; border: none; color: var(--cor-texto-fraco);
+  font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer;
+}
+
+/* ── Aviso (carregando / sem tenant / sem configuração) ─────────────── */
+.sessao-aviso { text-align: center; }
+.sessao-aviso h1 { margin: 0 0 10px; font-size: 18px; font-weight: 600; }
+.sessao-aviso p { margin: 0 auto 16px; max-width: 520px; font-size: 13px; line-height: 1.6; color: var(--cor-texto-fraco); }
+.sessao-aviso button {
+  padding: 8px 16px; background: var(--cor-superficie-alta); color: var(--cor-texto);
+  border: 1px solid var(--cor-borda); border-radius: 7px; font: inherit; cursor: pointer;
+}
+
+/* ── Barra da sessão ────────────────────────────────────────────────── */
+.barra-sessao {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 28px; border-bottom: 1px solid var(--cor-borda); background: var(--cor-superficie);
+}
+.barra-sessao__marca { display: flex; align-items: baseline; gap: 9px; }
+.barra-sessao__tenant { font-size: 14px; font-weight: 600; }
+.barra-sessao__papel {
+  padding: 2px 8px; border: 1px solid var(--cor-borda); border-radius: 999px;
+  font-size: 10.5px; color: var(--cor-texto-fraco);
+}
+.barra-sessao__acoes { display: flex; align-items: center; gap: 10px; }
+.barra-sessao__email { font-size: 12px; color: var(--cor-texto-fraco); }
+.barra-sessao__botao {
+  padding: 6px 12px; background: transparent; color: var(--cor-texto);
+  border: 1px solid var(--cor-borda); border-radius: 7px; font: inherit; font-size: 12px; cursor: pointer;
+}
+.barra-sessao__botao:hover { background: var(--cor-superficie-alta); }
+
+.rodape-telas { margin: 0; padding: 16px 28px 28px; text-align: center; }
+.rodape-telas button {
+  background: none; border: none; color: var(--cor-texto-fraco);
+  font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer;
+}
