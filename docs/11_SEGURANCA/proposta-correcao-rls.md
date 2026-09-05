@@ -1,6 +1,6 @@
 # Proposta — correção de RLS, onboarding e Storage
 
-**Status**: Decidido e escrito — **falta executar**
+**Status**: Aplicado e provado (2026-09-05)
 **Data**: 2026-08-12
 **Referente a**: `supabase/migrations/20260812_schema_inicial.sql`
 **Bugs**: BUG-006, BUG-007, BUG-008, BUG-009 (`memory/bugs.md`)
@@ -12,9 +12,13 @@
 > O SQL virou `supabase/migrations/20260812_correcao_rls_e_storage.sql`, e as asserções
 > viraram `supabase/tests/isolamento.test.ts`.
 >
-> ⚠️ **Nada disso foi executado ainda** — não há Postgres local (sem Docker) nem projeto
-> Supabase criado. BUG-006..009 seguem abertos até o teste de isolamento rodar de
-> verdade. SQL revisado não é SQL provado.
+> ✅ **Aplicado em 2026-09-05** num projeto Supabase real (free tier, sem custo — ver
+> `memory/restrictions.md`): as duas migrations estão no banco e
+> `supabase/tests/isolamento.test.ts` roda **8/8 verde** contra ele, incluindo a asserção
+> específica do `42P17` do BUG-006. BUG-006..009 fechados.
+>
+> A regra que gerou o aviso anterior continua: SQL revisado não é SQL provado — o que
+> prova é o teste rodando contra banco de verdade.
 
 ---
 

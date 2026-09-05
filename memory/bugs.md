@@ -56,7 +56,7 @@
 |---|---|---|---|---|---|---|
 | BUG-001 | 2026-08-12 | Motor de render | `style` inline e regra CSS de classe (`.st0{fill:...}`) vencem o atributo `fill` que o motor escreve — a zona **não muda de cor** e a API devolve 200 como se tivesse mudado. Export padrão de Illustrator/Figma cai exatamente nesse caso. Viola o princípio nº1 (cor no editor = cor na API) | **corrigido** | ADR-004 · `normalizarSvg.ts` | 2026-08-12 |
 | BUG-003 | 2026-08-12 | Motor de render | Zona inexistente só emite `console.warn` e devolve o SVG normalmente; cor inválida (`"banana"`) é aceita sem validação. Em função serverless, `console.warn` é falha silenciosa — o chamador da API não tem como saber que a variante saiu errada | **corrigido** | ADR-004 · `ErroDeVariante` + `validarCor.ts` | 2026-08-12 |
-| BUG-006 | 2026-08-12 | Banco / RLS | `auth_tenant_ids()` é `language sql stable` **sem `security definer`** e a policy de `tenant_members` a invoca — a função relê `tenant_members`, que reaplica a policy. Padrão clássico de `42P17: infinite recursion detected in policy`. **Ainda não reproduzido** (sem Docker local pra `supabase start`) | **em_correcao** (escrito, não executado) | `20260812_correcao_rls_e_storage.sql` | falta ambiente |
+| BUG-006 | 2026-08-12 | Banco / RLS | `auth_tenant_ids()` é `language sql stable` **sem `security definer`** e a policy de `tenant_members` a invoca — a função relê `tenant_members`, que reaplica a policy. Padrão clássico de `42P17: infinite recursion detected in policy`. **Ainda não reproduzido** (sem Docker local pra `supabase start`) | **corrigido** | `20260812_correcao_rls_e_storage.sql` | 2026-09-05 |
 
 **Critério de fechamento**: correção + teste que prova a correção rodando em CI
 
@@ -68,8 +68,8 @@
 |---|---|---|---|---|---|---|
 | BUG-002 | 2026-08-12 | Motor de render | Zona só é endereçável como **um** elemento por `id`: grupo `<g>` não repinta filhos com `fill` próprio, zona com N paths (`zona-cadarco` + `zona-cadarco-2`, presente no próprio `fixtures/teste-zona.svg`) só repinta o primeiro, e `id` duplicado idem | **corrigido** | ADR-004 · seletor CSS + descendentes pintáveis | 2026-08-12 |
 | BUG-004 | 2026-08-12 | Motor de render / Upload | `<script>` embutido no SVG base sobrevive ao motor e é servido ao navegador do cliente. Não há sanitização no upload, apesar de exigida em `docs/11_SEGURANCA/multi-tenancy-rls.md` | **corrigido** | ADR-004 · `normalizarSvg.ts` → `sanitizar` | 2026-08-12 |
-| BUG-007 | 2026-08-12 | Banco / RLS | Não existe policy de INSERT em `tenants` nem `tenant_members`, nem de UPDATE em `tenants` — criar tenant, convidar membro e editar tema white-label são impossíveis pelo cliente. Onboarding travado antes de existir | **em_correcao** (escrito, não executado) | `20260812_correcao_rls_e_storage.sql` | falta ambiente |
-| BUG-008 | 2026-08-12 | Storage | Nenhuma policy de Storage definida na migration, apesar de o plano de segurança exigir bucket privado + path particionado por tenant + URL assinada. Hoje o isolamento do asset-base depende só de convenção de path | **em_correcao** (escrito, não executado) | `20260812_correcao_rls_e_storage.sql` | falta ambiente |
+| BUG-007 | 2026-08-12 | Banco / RLS | Não existe policy de INSERT em `tenants` nem `tenant_members`, nem de UPDATE em `tenants` — criar tenant, convidar membro e editar tema white-label são impossíveis pelo cliente. Onboarding travado antes de existir | **corrigido** | `20260812_correcao_rls_e_storage.sql` | 2026-09-05 |
+| BUG-008 | 2026-08-12 | Storage | Nenhuma policy de Storage definida na migration, apesar de o plano de segurança exigir bucket privado + path particionado por tenant + URL assinada. Hoje o isolamento do asset-base depende só de convenção de path | **corrigido** | `20260812_correcao_rls_e_storage.sql` | 2026-09-05 |
 
 **Critério de fechamento**: correção + teste de isolamento (dois tenants) verde
 
@@ -81,7 +81,7 @@
 |---|---|---|---|---|---|---|
 | BUG-005 | 2026-08-12 | Motor de render | Zona pintada com gradiente (`fill="url(#grad)"`) vira cor chapa sem aviso — perde a representação de material/textura silenciosamente | **corrigido** (vira erro `ZONA_NAO_RECOLORIVEL`) | ADR-004, decisão 1 | 2026-08-12 |
 | BUG-011 | 2026-09-05 | Esboço do editor | `ComparativoDeNormalizacao` renderizava o asset-base canônico **sem** o pedido de cor, enquanto o lado cru recebia o pedido. Os dois lados saíam visualmente iguais: o painel que existe para provar o BUG-001 lado a lado não provava nada, e o README afirmava o contrário do que o código fazia | **corrigido** | `ComparativoDeNormalizacao.test.tsx` | 2026-09-05 |
-| BUG-009 | 2026-08-12 | Banco / RLS | `tenant_members.papel` (`owner`/`membro`) está modelado mas nenhuma policy o usa — todo membro tem escrita total sobre produtos, zonas e variantes | **em_correcao** (escrito, não executado) | `20260812_correcao_rls_e_storage.sql` | falta ambiente |
+| BUG-009 | 2026-08-12 | Banco / RLS | `tenant_members.papel` (`owner`/`membro`) está modelado mas nenhuma policy o usa — todo membro tem escrita total sobre produtos, zonas e variantes | **corrigido** | `20260812_correcao_rls_e_storage.sql` | 2026-09-05 |
 
 ---
 
@@ -141,6 +141,10 @@ A variante sai com cor errada? Um tenant vê dado de outro? Quantos produtos/zon
 | BUG-003 | 2026-08-12 | Motor de render | `src/lib/render/erros.ts` + `validarCor.ts` |
 | BUG-004 | 2026-08-12 | Upload | `src/lib/render/normalizarSvg.ts` → `sanitizar` |
 | BUG-005 | 2026-08-12 | Motor de render | erro `ZONA_NAO_RECOLORIVEL`; preservar gradiente foi pro backlog |
+| BUG-006 | 2026-09-05 | Banco / RLS | `auth_tenant_ids()` com `security definer` — sem recursão de policy |
+| BUG-007 | 2026-09-05 | Banco / RLS | policies de INSERT/UPDATE em `tenants` e `tenant_members` — onboarding destravado |
+| BUG-008 | 2026-09-05 | Storage | bucket privado `assets-base` + policies por path de tenant |
+| BUG-009 | 2026-09-05 | Banco / RLS | policies que usam `tenant_members.papel` — membro não apaga produto |
 | BUG-011 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (mesmo pedido de cor nos dois lados) |
 | BUG-012 | 2026-09-05 | Esboço do editor | `src/esboco/ComparativoDeNormalizacao.tsx` (sem variante → placeholder, nunca `<img src="">`) |
 
@@ -171,13 +175,18 @@ Fase 1 ser escrito — e foram corrigidos no mesmo dia pelo ADR-004. Os casos vi
 `src/lib/render/gerarVarianteDeCor.test.ts`: os mesmos 9 cenários que reprovavam agora
 exigem o comportamento correto, então uma regressão futura reprova o build.
 
-BUG-006..009 saíram de revisão estática do schema/migration na mesma data. As decisões
-foram tomadas e a correção está escrita
-(`supabase/migrations/20260812_correcao_rls_e_storage.sql`), mas **nenhuma linha rodou em
-banco**: não há Docker local nem projeto Supabase. Continuam em correção, não corrigidos —
-a diferença importa, porque BUG-006 é justamente o tipo de defeito que só aparece na
-execução. O que fecha os quatro é `supabase/tests/isolamento.test.ts` rodando verde contra
-um ambiente real.
+BUG-006..009 saíram de revisão estática do schema/migration na mesma data, e ficaram em
+correção enquanto a migration existia só como SQL escrito. **Fechados em 2026-09-05**: as
+duas migrations estão aplicadas num projeto Supabase real (free tier) e
+`supabase/tests/isolamento.test.ts` roda **8/8 verde** contra ele — dois tenants
+concorrentes, três usuários, ataque real (pedir o produto alheio pelo id, escrever zona no
+tenant alheio, pedir URL assinada do asset-base do concorrente, apagar produto sendo
+membro não-owner, editar tema de outro tenant, ler sem sessão). O cenário é criado e
+destruído a cada rodada; conferido depois: 0 tenants e 0 usuários residuais.
+
+A diferença importava mesmo: BUG-006 (recursão `42P17`) é o tipo de defeito que só aparece
+na execução, e agora tem asserção própria — o teste falha explicitamente nesse código de
+erro, não numa consequência dele.
 
 BUG-010 (docs) foi corrigido junto: `supabase/schema.sql` virou snapshot de verdade.
 

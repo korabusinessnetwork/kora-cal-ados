@@ -114,8 +114,9 @@ Proposed / Accepted / Rejected
 
 - ADR-001 supersede: (nenhuma)
 - **Em revisão**: (nenhuma decisão aberta)
-- **Decidido em 2026-08-12, aguardando execução**: correção de RLS, papéis e Storage
+- **Decidido em 2026-08-12, executado e provado em 2026-09-05**: correção de RLS, papéis e Storage
   (`docs/11_SEGURANCA/proposta-correcao-rls.md` → migration
   `20260812_correcao_rls_e_storage.sql`). Tenant provisionado por `service_role` na
   Fase 1; membro cria/edita, owner apaga e gerencia membros; URL assinada 300s.
-  Não virou ADR porque implementa o ADR-002, não o altera
+  Não virou ADR porque implementa o ADR-002, não o altera. Aplicado num projeto Supabase
+  real e provado por `supabase/tests/isolamento.test.ts` (8/8) — BUG-006..009 fechados

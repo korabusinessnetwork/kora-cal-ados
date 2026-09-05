@@ -28,6 +28,11 @@ item técnico: o dano de um vazamento aqui é competitivo (coleção não lança
 concorrente que também é cliente). Por isso o teste tenta o ataque real — pedir o recurso
 alheio pelo id direto — em vez de conferir se a policy "existe".
 
-⚠️ **Enquanto este teste não rodar em um ambiente de verdade, BUG-006..009 continuam
-abertos.** A migration `20260812_correcao_rls_e_storage.sql` foi escrita, revisada e nunca
-executada — SQL que não rodou não é correção provada.
+## Estado
+
+✅ **Rodou verde (8/8) em 2026-09-05** contra um projeto Supabase real, com as duas
+migrations aplicadas — é o que fechou BUG-006..009. O cenário é montado e destruído a cada
+rodada (conferido: nenhum tenant ou usuário residual).
+
+Continua valendo a regra que criou este teste: SQL que não rodou não é correção provada.
+Toda mudança futura em policy volta a passar por aqui antes de ser considerada feita.

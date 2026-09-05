@@ -27,7 +27,7 @@
 | Arquivo | Conteúdo |
 |---|---|
 | `multi-tenancy-rls.md` | Modelo de ameaças, controles obrigatórios, checklist de release, plano de incidente — **documento principal** |
-| `proposta-correcao-rls.md` | Histórico da decisão que corrigiu a recursão da policy, o onboarding travado e a ausência de policy de Storage (BUG-006..009). Implementada em `supabase/migrations/20260812_correcao_rls_e_storage.sql`, **ainda não executada** |
+| `proposta-correcao-rls.md` | Histórico da decisão que corrigiu a recursão da policy, o onboarding travado e a ausência de policy de Storage (BUG-006..009). Implementada em `supabase/migrations/20260812_correcao_rls_e_storage.sql`, **aplicada e provada em 2026-09-05** pelo teste de isolamento (8/8) |
 
 O teste que prova o isolamento vive em `supabase/tests/` — pula quando não há ambiente
 Supabase configurado, para nunca passar em falso.
