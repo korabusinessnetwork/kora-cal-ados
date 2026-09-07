@@ -16,7 +16,7 @@ de duas colunas (palco à esquerda, lateral à direita) mora em `zonas.css`, nã
 |---|---|
 | `tiposDeZona.ts` | `ZonaDoProduto` (a linha de `product_zones`) e `ZonaParaGravar` (a linha + **como** gravar). Definição única: uma zona atravessa banco, motor e tela |
 | `marcarZona.ts` | **Puro.** (canônico, zonas atuais, `zone_key`, ids marcados) → `ZonaParaGravar`, ou `ErroDeVariante`. Recusa elemento inexistente, `fill="none"` e sobreposição com outra zona. Exporta também `idsDoSeletor` (`"#a, #b"` → `['a','b']`) |
-| `resolverZonaDoElemento.ts` | **Puro.** Elemento → `zone_key` a que ele já pertence, pelo mesmo caminho que o motor usa para pintar. `mapaDeZonasPorElemento` faz a varredura de uma vez, para o palco não pagar uma por clique |
+| `resolverZonaDoElemento.ts` | **Puro.** Elemento → `zone_key` a que ele já pertence, pelo mesmo caminho que o motor usa para pintar. Exporta também `mapaDeZonasPorElemento` (documento inteiro → mapa), que **nenhuma tela usa hoje** — ela existe como contraprova nos testes: o mapa e a resolução elemento a elemento têm de responder a mesma coisa |
 | `listarZonasDoProduto.ts` | As zonas gravadas do produto: campos explícitos, `.order('created_at')`. Erro sobe, nunca vira lista vazia |
 | `gravarZonaNoBanco.ts` | INSERT **ou** UPDATE por `idExistente`, nunca `upsert`. Traduz `23505` e `PGRST116` para frase acionável; o objeto cru do Supabase não sai daqui |
 | `marcacaoEmCurso.ts` | **Puro.** `alternarId` / `desfazerUltimo` sobre a lista de ids clicados. A regra mora fora do hook para ser testável sem testing-library |

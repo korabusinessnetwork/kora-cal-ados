@@ -44,6 +44,19 @@ describe('normalização do asset-base de demonstração', () => {
   });
 });
 
+describe('nenhuma zona do esboço usa seletor de prefixo (ADR-005)', () => {
+  // O esboço é a tela que o time abre para aprender o produto — seletor de prefixo aqui
+  // seria copiado para uma zona de verdade, e `[id^="zona-cadarco"]` capturaria uma zona
+  // futura `zona-cadarco-lateral` pintando o lugar errado em silêncio.
+  const LISTA_DE_IDS_EXATOS = /^#[A-Za-z_][A-Za-z0-9_-]*(, #[A-Za-z_][A-Za-z0-9_-]*)*$/;
+
+  it('todo svg_selector é lista de ids exatos, no formato que montarSeletorDeZona produz', () => {
+    for (const zona of zonasDoProduto) {
+      expect(zona.svg_selector, `zona ${zona.zone_key}`).toMatch(LISTA_DE_IDS_EXATOS);
+    }
+  });
+});
+
 describe('mapeamento de zonas', () => {
   const contagem = Object.fromEntries(
     relatorioDeZonas(canonico.svg, zonasDoProduto).map((linha) => [linha.zone_key, linha.elementos]),
@@ -61,6 +74,22 @@ describe('mapeamento de zonas', () => {
 });
 
 describe('o comparativo do esboço mostra um fato', () => {
+  it('a lista de ids exatos captura os mesmos 4 cadarços no cru e no canônico', () => {
+    // O comparativo passa o MESMO pedido de cor pelos dois arquivos, então a zona precisa
+    // capturar o mesmo conjunto nos dois — senão a diferença entre os lados seria "menos
+    // cadarço de um lado", e não o BUG-001 que o esboço existe para mostrar.
+    //
+    // No cru os 4 paths ainda dividem `id="zona-cadarco"`. A lista continua pegando os 4
+    // porque `#zona-cadarco` em CSS é igualdade de atributo, não `getElementById`: casa
+    // todos os elementos com aquele id. Os termos `-2`, `-3` e `-4` só passam a casar
+    // depois que a normalização desambigua. É esta linha que prova que trocar o antigo
+    // seletor de prefixo por lista exata não mudou o que a tela demonstra.
+    const soCadarco = zonasDoProduto.filter((zona) => zona.zone_key === 'cadarco');
+
+    expect(relatorioDeZonas(assetBaseCru, soCadarco)).toEqual([{ zone_key: 'cadarco', elementos: 4 }]);
+    expect(relatorioDeZonas(canonico.svg, soCadarco)).toEqual([{ zone_key: 'cadarco', elementos: 4 }]);
+  });
+
   it('no canônico, a cor pedida é a cor que fica', () => {
     const variante = gerarVarianteDeCor(canonico.svg, zonasDoProduto, { cabedal: VERMELHO });
 
@@ -77,6 +106,16 @@ describe('o comparativo do esboço mostra um fato', () => {
     // prioridade sobre atributo de apresentação. É por isso que a normalização existe.
     expect(variante).toMatch(/\.st-cabedal\s*\{[^}]*fill:\s*#E9E4DA/i);
     expect(variante).toMatch(/id="zona-cabedal"[^>]*class="st-cabedal"/i);
+  });
+
+  it('no arquivo cru, os 4 cadarços recebem o atributo e ainda assim ficam bege (BUG-001)', () => {
+    // O cadarço é a zona de N elementos E uma das que o `<style>` sequestra. Se o pedido
+    // só alcançasse o primeiro path, três continuariam com a cor original e o teste acima
+    // não perceberia — ele olha o cabedal, que é um path só.
+    const variante = gerarVarianteDeCor(assetBaseCru, zonasDoProduto, { cadarco: VERMELHO });
+
+    expect((variante.match(new RegExp(`fill="${VERMELHO}"`, 'gi')) ?? []).length).toBe(4);
+    expect(variante).toMatch(/\.st-cadarco\s*\{[^}]*fill:\s*#F5F2EC/i);
   });
 
   it('a zona de gradiente recusa cor chapa em vez de achatar sem avisar', () => {

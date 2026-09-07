@@ -63,6 +63,7 @@ function ProdutoAberto({
       erro={asset.erro}
       elementosMarcaveis={elementosMarcaveis}
       aoVoltar={aoVoltar}
+      aoTentarDeNovo={asset.recarregar}
       editor={
         asset.svg && (
           <EditorDeZonas productId={produto.id} tenantId={tenantId} svgCanonico={asset.svg} />

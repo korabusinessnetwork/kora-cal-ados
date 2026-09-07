@@ -32,7 +32,12 @@ export function resolverZonaDoElemento(
 
 /**
  * Todos os elementos do documento que já pertencem a alguma zona → `zone_key`.
- * O palco usa isto para não pagar uma varredura por clique.
+ *
+ * **Nenhuma tela chama isto hoje** — o palco resolve elemento a elemento, no clique, que é
+ * barato porque acontece uma vez por clique. O que a mantém no arquivo é o papel de
+ * contraprova: ela compartilha a expansão com `resolverZonaDoElemento`, e o teste exige que
+ * as duas respondam a mesma coisa para todo elemento do asset real. Se alguém trocar a
+ * resolução do palco por uma varredura única, é esta função que já vem com a garantia.
  */
 export function mapaDeZonasPorElemento(
   documento: Document,

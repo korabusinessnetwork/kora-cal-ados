@@ -18,6 +18,16 @@
 - APIs que executam passos → `07_APIS/`
 - Decisões arquiteturais → `08_DECISOES/`
 
+## Fluxos escritos
+
+| Arquivo | O que ele cobre | Estado |
+|---|---|---|
+| [`fluxo-marcacao-de-zona.md`](fluxo-marcacao-de-zona.md) | Login → tenant → modelo → asset-base canônico → **marcar zona** → linha em `product_zones` que sobrevive ao F5. Inclui as recusas no clique e ao salvar, os erros de banco/rede/RLS e os pontos de perda de dado | Vigente (Etapas 0–5) |
+
+O caminho contrário — a API de variante lendo `product_zones` e devolvendo o SVG colorido —
+ainda não tem fluxo aqui porque **ainda não tem código**. Ele entra quando a função
+serverless existir.
+
 ## Arquivos sugeridos
 
 - `fluxo-autenticacao.md` — sign-up, login, 2FA, logout (sequence diagram)

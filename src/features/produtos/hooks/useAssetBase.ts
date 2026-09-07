@@ -3,7 +3,7 @@
 // Separado de `useProdutos` porque a lista não deve pagar o download de N SVGs para
 // mostrar N nomes — o arquivo só desce quando alguém abre o produto.
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { clienteSupabase } from '../../../lib/supabase/cliente';
 import { baixarAssetBase } from '../baixarAssetBase';
 
@@ -11,12 +11,18 @@ export interface AssetBaseCarregado {
   estado: 'carregando' | 'erro' | 'pronto';
   svg: string | null;
   erro: string | null;
+  /** Baixa de novo. A falha mais provável aqui é de rede, e rede volta (BUG-016). */
+  recarregar(): void;
 }
 
 export function useAssetBase(baseAssetPath: string): AssetBaseCarregado {
   const [estado, setEstado] = useState<AssetBaseCarregado['estado']>('carregando');
   const [svg, setSvg] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  // Contador em vez de um `recarregar` que chama a função direto: assim a tentativa nova
+  // passa pelo MESMO efeito, com a mesma limpeza do `vivo` — dois caminhos de download
+  // acabariam divergindo justamente no cancelamento.
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
     let vivo = true;
@@ -41,7 +47,9 @@ export function useAssetBase(baseAssetPath: string): AssetBaseCarregado {
     return () => {
       vivo = false;
     };
-  }, [baseAssetPath]);
+  }, [baseAssetPath, tentativa]);
 
-  return { estado, svg, erro };
+  const recarregar = useCallback(() => setTentativa((numero) => numero + 1), []);
+
+  return { estado, svg, erro, recarregar };
 }

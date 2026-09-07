@@ -29,19 +29,23 @@
 - Padrão de segurança/isolamento: entra imediatamente, sem esperar validação em uso
 
 ## Auditoria
-- Code review checa conformidade com padrões
-- Linter configurable para policing automático
-
-## Eventos
-- `pattern.validated`, `pattern.deprecated`, `pattern.superseded`
+- Revisão de código (feita por agente) checa conformidade com os padrões daqui
+- **Não há linter configurado** neste projeto (não há ESLint em `package.json`). Onde um
+  padrão precisa de garantia automática, ele vira **teste que lê o próprio fonte** — é o que
+  `gravarZonaNoBanco.test.ts` faz com a proibição de `upsert`, e o que a guarda de
+  `produtos.css` faz com a regra `[hidden]` (BUG-015). Comentário sozinho não segura regra
+- Auditar este arquivo contra o código a cada entrega que muda arquitetura de front. Padrão
+  documentado que o código não segue é pior que padrão ausente: o agente seguinte o
+  implementa e cria a segunda convenção
 
 ## Casos de Uso
 - Revisar código de feature nova
 - Decidir como estruturar novo módulo
-- Treinar dev novo
+- Reconstruir o contexto do projeto numa sessão nova (não há dev humano com memória de
+  time — ver ADR-003)
 
 ## Critérios de Aceite
-- [ ] Padrão tem mínimo 1 exemplo de uso real
+- [ ] Padrão tem mínimo 1 exemplo de uso real, com caminho de arquivo que existe
 - [ ] Contraexemplos claros (anti-padrão)
 - [ ] Exceções documentadas
 
@@ -69,40 +73,98 @@ abaixo é otimizado pra busca/leitura de agente primeiro, ergonomia humana depoi
 Termos de domínio vêm do glossário (`docs/03_REGRAS_DE_NEGOCIO/glossario.md`), sem
 sinônimo — zona é zona em todo lugar.
 
-- **Domínio (português)**: `marcarZona`, `gerarVarianteDeCor`, `aplicarCorNaZona`
-- **Técnico (inglês)**: `useEffect`, `handleSubmit`, `fetchData`
-- **Constantes**: `ZONAS_PADRAO_CALCADO`, `MAX_ZONAS_POR_PRODUTO`
-- **Booleans**: `isDone`, `canEdit`, `hasError`
+Os exemplos abaixo são **nomes que existem no repositório**, não ilustrações inventadas —
+exemplo fictício em doc de nomenclatura é a primeira coisa que um agente copia achando que
+está seguindo o padrão.
+
+- **Domínio (português)**: `marcarZona`, `gerarVarianteDeCor`, `resolverZonaDoElemento`,
+  `zonasSobrepostas`, `montarSeletorDeZona`
+- **Técnico (inglês)**: `useEffect`, `handleSubmit`, `closest`
+- **Constantes**: `PINTAVEIS` (`src/lib/render/alvosPintaveis.ts`), `BUCKET_DO_ASSET_BASE`
+  (`supabase/scripts/caminhoDoAssetBase.ts`)
+- **Booleans**: `desabilitado`, `emFoco`, `salvando` — em português quando descrevem estado
+  de domínio na tela, que é o caso de todos os que existem hoje
 
 ✅ `const gerarVarianteDeCor = (svg, zoneColors) => { ... }` (ação em português, termo do glossário)
 ❌ `const processColorMapping = () => { ... }` (jargão técnico + termo fora do glossário)
 
-### Estrutura de Arquivos (por-feature)
+### Estrutura de Arquivos (por-feature) — como o código realmente é
+
 ```
 src/features/
+├── README.md                    <- índice e a regra de dependência entre features
 ├── zonas/
-│   ├── components/
-│   │   ├── EditorDeZonas.jsx
-│   │   └── EditorDeZonas.test.jsx
-│   ├── hooks/
-│   │   └── useZonas.js
-│   ├── types.js (ou .ts)
-│   ├── constants.js
-│   └── index.js (barrel export)
+│   ├── README.md
+│   ├── EditorDeZonas.tsx        <- componentes na raiz da feature, sem `components/`
+│   ├── EditorDeZonas.test.ts    <- teste CO-LOCADO, ao lado do que ele prova
+│   ├── PalcoDeMarcacao.tsx
+│   ├── marcarZona.ts            <- regra pura, fora de componente e fora de hook
+│   ├── tiposDeZona.ts           <- os tipos da feature (não `types.ts`)
+│   ├── zonas.css                <- estilo separado do JSX, importado em src/main.tsx
+│   └── hooks/
+│       └── useZonasDoProduto.ts
 ```
 
-✅ `src/features/zonas/components/EditorDeZonas.jsx`
-❌ `src/components/zonas/EditorDeZonas.jsx` + `src/hooks/zonas.js` espalhados
+Três coisas mudaram em relação ao que este arquivo prescrevia na fundação, e a razão de cada
+uma é a mesma — **nome de arquivo tem de bater com nome de conceito** (ADR-003):
+
+- **Sem pasta `components/`.** Ela separa por *tipo de coisa*, não por conceito: `zonas/`
+  já tem 15 arquivos e a pasta só acrescentaria um nível para atravessar. O que separa é o
+  sufixo do nome, que já diz o que o arquivo é.
+- **Sem `index.js` de barrel.** Import por barrel esconde de onde a coisa vem; `grep` no nome
+  do arquivo é como um agente encontra código aqui, e o barrel quebra exatamente isso.
+- **`tiposDeZona.ts`, não `types.ts`.** Buscar por "zona" tem de achar o arquivo dos tipos de
+  zona. `types.ts` existiria idêntico em toda feature e não diria nada.
+
+✅ `src/features/zonas/EditorDeZonas.tsx` + `src/features/zonas/hooks/useZonasDoProduto.ts`
+❌ `src/components/zonas/EditorDeZonas.tsx` + `src/hooks/zonas.ts` espalhados
+❌ `src/features/zonas/index.ts` reexportando tudo
 
 ### Gerenciamento de Estado
-- **Local**: useState (componente é dono dos dados)
-- **Contexto**: autenticação e tenant/tema (white-label — nunca constante no componente)
-- **Supabase Realtime**: subscriptions em useEffect (cleanup ao desmontar)
 
-✅ Estado crítico + compartilhado = Supabase + Context
-❌ Redux; ❌ useState em component pai para passpropping profundo
+- **Context API para a sessão** (`ContextoDeSessao`): usuário autenticado + tenant ativo. É
+  contexto e não prop porque o tenant carrega o tema (white-label), e tema em constante de
+  componente é o que o produto proíbe. **Não há Redux** (ADR-001).
+- **Um único componente com estado por feature.** `EditorDeZonas` é o único lugar de
+  `zonas/` com `useState`; `TelaDeProdutos` é o de `produtos/`. Tudo abaixo — `PalcoDeMarcacao`,
+  `PainelDeZonas`, `FormularioDeNovaZona`, `ListaDeProdutos` — é **apresentacional**: recebe
+  props, não busca nada, e por isso é testável como função pura de props.
+- **Hook é casca de `useState`, a regra vive fora dele.** `useMarcacaoDeZona` guarda a lista
+  de ids; quem sabe *alternar* e *desfazer* é `marcacaoEmCurso.ts`, puro. O motivo é teste:
+  regra dentro do hook só se prova montando componente; fora dele se prova com uma chamada.
+- **Cálculo derivado sobe para quem tem o estado.** `relatorioDeZonas` e `zonasSobrepostas`
+  são calculados em `EditorDeZonas` e descem prontos por props — dois componentes calculando
+  a mesma contagem divergiriam, e a divergência apareceria como número errado na conferência.
+
+✅ Estado crítico + compartilhado = Supabase + Context; estado de tela = um dono só, no topo
+❌ Redux; ❌ `useState` espalhado em componente burro para prop-drilling profundo
+
+> **Supabase Realtime não é padrão deste projeto.** A versão anterior deste arquivo prescrevia
+> "subscriptions em useEffect", e nada no código usa Realtime — a única `subscribe` que existe
+> é o `onAuthStateChange` da sessão. Prescrever integração que ninguém validou contradiz a
+> primeira regra deste documento (padrão entra depois de validado, não por opinião), e o
+> concorrente entre membros hoje é tratado por releitura depois de gravar, não por push.
+
+### CSS separado do JSX (white-label — CLAUDE.md)
+
+Cada feature tem `<feature>.css`, importado **uma vez** em `src/main.tsx`; nenhum componente
+importa estilo. É o que permite um tenant trocar a folha sem tocar em marcação.
+
+Duas regras que custaram defeito:
+
+- **Quem mede a tela é uma folha só.** A grade do editor mora em `zonas.css`, não em
+  `produtos.css` — duas folhas medindo a mesma área é empate decidido pela ordem de import.
+- **`display` de autor vence o `[hidden]` do navegador** (BUG-015). Todo elemento que a tela
+  esconde por `hidden` e que tem `display` declarado precisa da regra `[hidden]` explícita na
+  folha. Teste de componente **não pega isso**: `renderToStaticMarkup` prova o que o React
+  escreve, nunca o que o navegador desenha — por isso a guarda lê o arquivo CSS.
 
 ## Padrões de API / Backend
+
+> **Estado:** a API de variante **ainda não existe** (não há diretório `api/`). O que já é
+> real e vinculante é o **contrato de erro**: `CodigoDeErro` e `ErroDeVariante` em
+> `src/lib/render/erros.ts`, usados hoje pelo editor. O envelope abaixo é o alvo a cumprir
+> quando o endpoint for escrito — está aqui como contrato, não como descrição do que roda.
 
 ### Envelope de Resposta
 ```json
@@ -128,45 +190,78 @@ src/features/
    fidelidade de cor é o princípio nº1; zona não aplicada é erro, não aviso
 
 ### Validação
-- Input validation antes de tocar no banco **e antes de tocar no SVG** (Zod ou equivalente):
-  `zone_key` existe no produto, cor é hex válido
-- Mensagens de erro em português, código de erro em enum estável
+- Input validation antes de tocar no banco **e antes de tocar no SVG**: `validarCor` e
+  `validarZoneKey`, em `src/lib/render/`. São validadores escritos à mão, **não Zod** — duas
+  regras pequenas e estáveis não pagam uma dependência nova, e elas precisam rodar igual no
+  editor e na função serverless (princípio nº1). Quem decide o que é um hex é `validarCor`, e
+  é o mesmo em todo lugar
+- **O mesmo validador vale para os dois lados.** A tela chama `validarZoneKey`/`validarCor`
+  antes de gravar, e o motor chama de novo na geração: a primeira chamada é conveniência
+  (prevenção de erro > mensagem de erro), a segunda é a garantia
+- Mensagens de erro em português, código de erro em enum estável (`CodigoDeErro`)
 
 ### Tratamento de Erros
-- Código de erro estável (não muda entre versões)
-- Retry automático em 5xx (com backoff exponencial)
+- Código de erro estável (não muda entre versões) — `CodigoDeErro` é contrato de API
+- Erro do Supabase **nunca** sai cru da camada de acesso: `gravarZonaNoBanco` traduz `23505`
+  e `PGRST116` para frase acionável antes de o objeto chegar à tela
+- Erro **sobe**, nunca vira lista vazia. Lista vazia por engano se lê como "essa marca não
+  tem produto", que é um fato falso apresentado com a mesma cara de um fato verdadeiro
 - Log estruturado sem dados sensíveis (senhas, tokens)
+- **Retry automático ainda não existe** em nenhum caminho do código. Fica registrado como
+  alvo para quando houver função serverless com 5xx a que reagir; hoje não há a quem aplicar,
+  e descrevê-lo como padrão vigente faria um agente procurar o utilitário que o implementa
 
 ## Padrões de UI/UX
 
 ### Feedback Temporal
-- **Sucesso**: toast confirmação, <2s
-- **Erro**: banner vermelho + botão retry, permanece até ação
-- **Carregando**: skeleton ou spinner, ≤ 100ms de latência antes de aparecer
-
-✅ Gerar variante: spinner no preview, sucesso com toast "Variante gerada"
-❌ Pop-up de erro que some em 3s
+- **Erro**: banner com a ação a tomar, que **permanece até alguém agir**. Nunca toast — a
+  mensagem que some sozinha é a que ninguém leu. É o que `ListaDeProdutos` faz hoje
+- **Sucesso**: o resultado aparece na tela, não um aviso sobre ele. Gravar zona relê
+  `product_zones` e a zona nova entra no painel com a contagem de elementos — confirmação que
+  se pode conferir, em vez de uma frase dizendo que deu certo
+- **Carregando**: estado próprio e nomeado, nunca ausência de estado
+- **Não existe componente de toast, skeleton nem spinner** no projeto. Antes de escrever
+  "spinner", olhe o que a tela vizinha faz: uma segunda convenção de carregamento é o começo
+  de duas experiências diferentes na mesma aplicação
 
 ### Estados Obrigatórios
-Toda tela tem renderização para:
-- `loading`: buscando dados
-- `empty`: nenhum resultado
-- `error`: algo quebrou
-- `success`: renderização normal
+Toda tela tem renderização para carregando, vazio, erro e sucesso (CLAUDE.md). O padrão é
+uma **união de strings exaustiva**, não um par de booleanos:
+
+```ts
+export type EstadoDaLista = 'carregando' | 'erro' | 'vazia' | 'pronta';
+```
+
+✅ `EstadoDaLista` (`hooks/useProdutos.ts`), `EstadoDaSessao` (`ContextoDeSessao.tsx`) —
+   um estado por vez, e a lista de nomes é a própria checagem de que nenhum foi esquecido
+❌ `carregando: boolean` + `erro: string | null`, que admite "carregando e com erro ao mesmo
+   tempo" e deixa o quarto estado (vazio) sem nome nenhum
 
 ## Padrões de Processo
 
-### Fluxo de PR
-1. Branch `feature/xxx` ou `fix/xxx` de `main`
-2. Commit `message em inglês, corpo em pt-BR opcionalmente`
-3. PR com checklist (testes passam, design review, casos edge)
-4. ≥ 1 aprovação + CI green = merge
-5. Delete branch remota
+### Fluxo de entrega
 
-### Code Review
-- Verificar se novo padrão? Documentar em `memory/patterns.md`
-- Quebra padrão existente? Tag `[DEPRECADO]` o padrão velho
-- Segurança? Escalar ao tech lead imediatamente
+Este projeto **não tem PR, não tem CI e não tem revisor humano** — todos os commits até hoje
+foram direto em `main`, e não existe `.github/`. O texto anterior descrevia branch, PR com
+`≥ 1 aprovação` e "CI green = merge"; nada disso jamais existiu aqui, e um agente que o siga
+fica esperando uma aprovação que nunca vem. O que existe, do CLAUDE.md e do ADR-003:
+
+1. **Planejar tudo antes de executar** — escopo fechado, sem retrabalho
+2. Build multi-parte → fan-out paralelo com **dono exclusivo por arquivo** (dois agentes
+   nunca escrevem no mesmo arquivo). Tarefa de peça única não ganha fan-out
+3. `npm test` e `npm run typecheck` verdes **antes** de commitar; função pura nasce com teste
+4. **Abrir no navegador** toda peça de UI cuja razão de existir é mostrar algo — a suíte não
+   substitui isso (ver `memory/learnings.md`)
+5. **Sintetizar e validar no fim**: revisar cada entrega, rodar a suíte e o build
+6. Commit com mensagem em inglês, corpo em pt-BR quando ajudar
+
+### Revisão de código (feita por agente)
+- Nome bate com `docs/03_REGRAS_DE_NEGOCIO/glossario.md`? Termo novo entrou lá **no mesmo
+  commit**?
+- Padrão novo? Documentar aqui, com o arquivo real que o valida
+- Quebra padrão existente? Tag `[DEPRECADO]` no padrão velho, com data e sucessor
+- Doc que descreve o trecho mudado continua verdadeiro? Se não, corrigir no mesmo commit
+- Segurança/isolamento entre tenants? Escalar ao dono imediatamente, antes de commitar
 
 ### Documentação
 - Comentário explica o **porquê**, não o quê (ver ADR-003) — o quê já está no código
@@ -180,10 +275,26 @@ Toda tela tem renderização para:
 | Padrão | Razão | Data | Sucessor |
 |---|---|---|---|
 | Recolor por `getElementById` + `setAttribute('fill')` | Falha em silêncio em SVG real (style inline/CSS vencem o atributo) — ver BUG-001/002 | 2026-08-12 | `normalizarSvg` + seletor de zona (ADR-004, aceito) |
+| `svg_selector` como "seletor CSS" qualquer, inclusive prefixo | `[id^="zona-cadarco"]` capturaria uma zona futura `zona-cadarco-lateral` e pintaria o lugar errado **sem avisar** | 2026-09-05 | Lista de ids exatos, montada só por `montarSeletorDeZona` (ADR-005) |
+| Subscriptions de Supabase Realtime como padrão de estado | Nunca foi usado no código; entrou na fundação como opinião, não como padrão validado | 2026-09-07 | Releitura depois de gravar (`useZonasDoProduto`) |
 
 ## Checklist de Novo Padrão
 
-- [ ] Testado em 2+ contextos reais
+- [ ] Validado por execução ou teste real (não por opinião), com o caminho de arquivo citado
 - [ ] Documentado aqui com exemplo ✅ e contraexemplo ❌
-- [ ] Code review aprovada
-- [ ] Linter/automação em lugar? (opcional)
+- [ ] O ✅ aponta para código que existe no repositório, não para exemplo inventado
+- [ ] Aprovado pelo dono quando muda algo já em uso
+- [ ] Onde a regra é fácil de desfazer sem perceber, existe teste que a segura (não só
+      comentário)
+
+## Atualizações deste documento
+
+- **2026-09-07** — auditoria contra o código das Etapas 0–5 (Etapa 6). Alinhados à realidade:
+  a estrutura por feature (sem `components/`, sem barrel, `tiposDeZona.ts`), o gerenciamento
+  de estado (Context só na sessão; um componente com estado por feature, apresentacionais
+  abaixo; regra pura fora do hook), a validação (validadores próprios, não Zod), o feedback
+  de UI (banner que fica; não há toast/skeleton/spinner) e os exemplos de nomenclatura, que
+  agora usam nomes que existem. Marcado como não-vigente o que nunca foi implementado
+  (Realtime, retry com backoff, linter) e removido o processo herdado de template (branch,
+  PR com aprovação, CI). Padrão documentado que o código não segue é armadilha: o próximo
+  agente o implementa e cria a segunda convenção.

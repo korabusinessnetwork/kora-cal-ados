@@ -89,7 +89,7 @@ nunca um seletor de prefixo.
 - **Contras**: ilegível, e quebra em silêncio se qualquer coisa mudar de posição no arquivo
 - **Descartado porque**: o modo de falha é justamente "pinta o elemento errado sem avisar"
 
-### 4. Seletor de prefixo (`[id^="zona-cadarco"]`, como o esboço usa hoje)
+### 4. Seletor de prefixo (`[id^="zona-cadarco"]`)
 
 - **Prós**: uma string curta cobre N elementos, e já funciona
 - **Contras**: uma zona futura `zona-cadarco-lateral` seria capturada pelo prefixo de
@@ -144,7 +144,11 @@ nunca um seletor de prefixo.
   `elemento-N`. `normalizarSvg` delega
 - `montarSeletorDeZona` é a **única** fonte do formato de `svg_selector` — nada de montar a
   string à mão em outro lugar
-- Antes de gravar em `product_zones`, o editor confere com `relatorioDeZonas` que o seletor
-  resolve exatamente os elementos marcados, e recusa a gravação se divergir
+- Antes de gravar em `product_zones`, `marcarZona` confere que o seletor montado resolve
+  exatamente os elementos da marcação, e recusa a gravação se divergir
+  (`conferirQueOSeletorResolveAMarcacao`, em `src/features/zonas/marcarZona.ts`). A conferência
+  vale sobretudo para os ids **já gravados**: eles vêm da linha do banco e ninguém os
+  confrontava com o desenho de hoje, então asset trocado depois do mapeamento deixava id
+  morto no seletor e a zona passava a pintar menos do que o painel promete
 - `respostas-intake.md` cita Fabric.js e **não deve ser corrigido**: é registro histórico
   do intake, não documentação vigente

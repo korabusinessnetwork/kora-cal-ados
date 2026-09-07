@@ -70,8 +70,17 @@ describe('zona é conjunto de elementos, não um id (BUG-002)', () => {
 
     expect(relatorio.idsRenomeados).toEqual([{ de: 'zona-sola', para: 'zona-sola-2' }]);
 
-    const zonas: Zona[] = [{ zone_key: 'sola', svg_selector: '[id^="zona-sola"]' }];
-    esperaRecolorCompleto(gerarVarianteDeCor(canonico, zonas, { sola: NOVA }), '#222222');
+    // O seletor é a lista de ids exatos que o editor gravaria depois da desambiguação, e
+    // não `[id^="zona-sola"]`: o ADR-005 proíbe prefixo porque ele pegaria de brinde uma
+    // zona futura `zona-sola-lateral`. Escrever o padrão proibido aqui, no teste do motor,
+    // é como ele volta — é deste arquivo que se copia exemplo de `svg_selector`.
+    const zonas: Zona[] = [{ zone_key: 'sola', svg_selector: '#zona-sola, #zona-sola-2' }];
+    const saida = gerarVarianteDeCor(canonico, zonas, { sola: NOVA });
+
+    // As duas cores originais têm de sumir: se a lista alcançasse só um dos rects, a outra
+    // sobreviveria. É esta dupla que faz o teste falar sobre "os dois", e não sobre um.
+    esperaRecolorCompleto(saida, '#222222');
+    expect(saida).not.toMatch(/#111111/i);
   });
 
   it('contorno sem preenchimento (fill="none") não é pintado', () => {
@@ -96,6 +105,21 @@ describe('falha alto, nunca em silêncio (BUG-003 e BUG-005)', () => {
     expect(() => subirEGerar(svgSimples, zonas, { sola: NOVA })).toThrow(
       expect.objectContaining({ codigo: 'ZONA_NAO_ENCONTRADA' }),
     );
+  });
+
+  it('seletor que não é CSS válido vira erro com código, não exceção crua do DOM', () => {
+    // O motor resolve `svg_selector` como CSS, seja ele qual for — não conhece "formato de
+    // zona". Quem garante que o gravado é lista de ids exatos é `montarSeletorDeZona`
+    // (ADR-005), e por isso nenhum teste daqui usa prefixo como exemplo: seria ensinar o
+    // padrão proibido para provar uma indiferença que este caso já prova.
+    //
+    // Linha quebrada no banco não pode subir `SyntaxError` do DOM para o cliente da API:
+    // vira `ZONA_NAO_ENCONTRADA` nomeando o seletor, que é o que permite remarcar a zona.
+    const zonas: Zona[] = [{ zone_key: 'sola', svg_selector: '#' }];
+    expect(() => subirEGerar(svgSimples, zonas, { sola: NOVA })).toThrow(
+      expect.objectContaining({ codigo: 'ZONA_NAO_ENCONTRADA' }),
+    );
+    expect(() => subirEGerar(svgSimples, zonas, { sola: NOVA })).toThrow(/seletor CSS válido/);
   });
 
   it('cor fora do formato hex', () => {
@@ -139,7 +163,8 @@ describe('modelo completo (fixtures/teste-zona.svg)', () => {
   const zonas: Zona[] = [
     { zone_key: 'sola', svg_selector: '#zona-sola' },
     { zone_key: 'cabedal', svg_selector: '#zona-cabedal' },
-    { zone_key: 'cadarco', svg_selector: '[id^="zona-cadarco"]' },
+    // Lista de ids exatos, o único formato que `montarSeletorDeZona` produz (ADR-005).
+    { zone_key: 'cadarco', svg_selector: '#zona-cadarco, #zona-cadarco-2' },
   ];
 
   it('troca as três zonas de uma vez, sem sobrar cor original', () => {
@@ -171,7 +196,7 @@ describe('relatório de zonas (prevenção no cadastro)', () => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg"><rect id="zona-sola" fill="#111111"/><rect id="zona-cadarco" fill="#555555"/><rect id="zona-cadarco-2" fill="#555555"/></svg>`;
     const zonas: Zona[] = [
       { zone_key: 'sola', svg_selector: '#zona-sola' },
-      { zone_key: 'cadarco', svg_selector: '[id^="zona-cadarco"]' },
+      { zone_key: 'cadarco', svg_selector: '#zona-cadarco, #zona-cadarco-2' },
       { zone_key: 'logo', svg_selector: '#zona-logo' },
     ];
 

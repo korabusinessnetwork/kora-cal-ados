@@ -69,9 +69,12 @@ export function marcarZona(pedido: PedidoDeMarcacao): ZonaParaGravar {
   const existente = pedido.zonasAtuais.find((zona) => zona.zone_key === chave);
   const idsGravados = existente ? idsDoSeletor(existente.svg_selector) : [];
 
+  const seletor = montarSeletorDeZona([...idsGravados, ...idsNovos]);
+  conferirQueOSeletorResolveAMarcacao(documento, seletor, [...idsGravados, ...idsNovos], chave);
+
   return {
     zone_key: chave,
-    svg_selector: montarSeletorDeZona([...idsGravados, ...idsNovos]),
+    svg_selector: seletor,
     label: pedido.label !== undefined ? pedido.label : (existente?.label ?? null),
     cor_default: resolverCor(pedido, existente, chave),
     // `unique (product_id, zone_key)`: acrescentar elemento a uma zona é UPDATE da linha,
@@ -129,6 +132,60 @@ function recusarSobreposicao(
         `A zona "${chave}" dividiria ${compartilhados.length} elemento(s) com a zona "${outra.zone_key}". Cada elemento pertence a uma zona só — tire esses elementos de "${outra.zone_key}" antes.`,
       );
     }
+  }
+}
+
+/**
+ * A promessa do ADR-005: o seletor que vai para o banco resolve EXATAMENTE os elementos que
+ * a marcação diz, e a gravação é recusada se divergir.
+ *
+ * Os ids NOVOS já foram conferidos um a um lá em cima. Os GRAVADOS não: eles vêm da linha
+ * do banco e ninguém nunca os confrontou com o desenho de hoje. Se o asset-base de um
+ * produto foi trocado depois do mapeamento, ou se a linha veio de outro produto, o id
+ * gravado não resolve mais nada — e acrescentar um elemento à zona regravaria o seletor
+ * carregando o id morto junto, em silêncio. A zona passaria a pintar menos do que o painel
+ * promete, que é o princípio nº1 quebrado exatamente onde ninguém olha.
+ *
+ * Recusar é caro para quem está marcando (obriga a remarcar a zona) e é o preço certo: a
+ * alternativa é uma variante saindo com uma parte do calçado sem cor, já fabricada.
+ */
+function conferirQueOSeletorResolveAMarcacao(
+  documento: Document,
+  seletor: string,
+  ids: string[],
+  chave: string,
+): void {
+  const esperados = new Set<Element>();
+  const ausentes: string[] = [];
+
+  for (const id of ids) {
+    const elemento = documento.getElementById(id);
+
+    if (!elemento) {
+      ausentes.push(id);
+      continue;
+    }
+
+    for (const alvo of expandirPintaveis([elemento])) esperados.add(alvo);
+  }
+
+  if (ausentes.length > 0) {
+    throw new ErroDeVariante(
+      'ZONA_NAO_ENCONTRADA',
+      `A zona "${chave}" aponta para ${ausentes.length} elemento(s) que não existem mais neste desenho (${ausentes.join(', ')}). O mapeamento dela está velho: remarque a zona do zero antes de acrescentar elementos.`,
+    );
+  }
+
+  const resolvidos = expandirPintaveis(resolver(documento, seletor));
+
+  if (resolvidos.length !== esperados.size || resolvidos.some((alvo) => !esperados.has(alvo))) {
+    // Cinto e suspensório do passo acima: id que existe mas não é seletor CSS seguro (SVG
+    // aceita `.` e `:` em id) monta um `#id` que casa outra coisa, ou nada. A normalização
+    // renomeia esses ids, então isto só alcança linha gravada antes dessa regra existir.
+    throw new ErroDeVariante(
+      'ZONA_NAO_ENCONTRADA',
+      `O seletor da zona "${chave}" resolveria ${resolvidos.length} elemento(s), e a marcação tem ${esperados.size}. Remarque a zona do zero.`,
+    );
   }
 }
 

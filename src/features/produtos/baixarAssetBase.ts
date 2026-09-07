@@ -34,14 +34,39 @@ export async function baixarAssetBase(
     .from(BUCKET)
     .createSignedUrl(baseAssetPath, VALIDADE_EM_SEGUNDOS);
 
-  if (error) throw error;
+  if (error) {
+    // As duas falhas possíveis aqui se distinguem pela ESTRUTURA, não pelo texto: a do
+    // servidor traz `status` (403, 404…); a de rede não traz nada além da mensagem que o
+    // navegador escreveu, em inglês. Classificar por texto quebraria com a locale, e é
+    // como `Failed to fetch` continuava chegando à tela mesmo depois da primeira correção
+    // do BUG-016 — a rede caía ANTES do `fetch` deste arquivo, aqui dentro do supabase-js.
+    const status = (error as { status?: number }).status;
+
+    throw new Error(
+      status === undefined
+        ? 'Não foi possível pedir acesso ao asset-base: a rede não respondeu. Confira a conexão e tente de novo.'
+        : `Não foi possível pedir acesso ao asset-base (${status}: ${error.message}). Se o modelo continuar sem abrir, avise quem administra a marca.`,
+    );
+  }
   if (!data?.signedUrl) throw new Error('O Supabase não devolveu URL para o asset-base.');
 
-  const resposta = await fetch(data.signedUrl);
+  let resposta: Response;
+
+  try {
+    resposta = await fetch(data.signedUrl);
+  } catch {
+    // `fetch` REJEITA — não devolve `!ok` — quando a rede cai, o DNS falha ou o pedido é
+    // bloqueado. O tratamento abaixo nunca cobriu esse caminho, e o `TypeError: Failed to
+    // fetch` do navegador ia inteiro para a tela, em inglês, sem dizer o que fazer
+    // (BUG-016). É justamente o caso mais provável dos dois.
+    throw new Error(
+      'Não foi possível baixar o asset-base: a rede não respondeu. Confira a conexão e tente de novo.',
+    );
+  }
 
   if (!resposta.ok) {
-    // Falha de rede aqui vira tela sem desenho. Melhor um erro que nomeia o arquivo do
-    // que um palco vazio que parece produto sem imagem.
+    // Tela sem desenho precisa de um erro que nomeie o arquivo; palco vazio pareceria
+    // produto sem imagem.
     throw new Error(`Não foi possível baixar o asset-base (${resposta.status}).`);
   }
 

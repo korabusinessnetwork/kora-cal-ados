@@ -118,9 +118,15 @@ describe('mapaDeZonasPorElemento', () => {
 // A invariante, sobre o asset de demonstração REAL do projeto.
 // ---------------------------------------------------------------------------------------
 //
-// `produtoDemo.ts` ainda carrega um seletor de prefixo (`[id^="zona-cadarco"]`) que o
-// ADR-005 proíbe e que sai na Etapa 6 — por isso as zonas daqui são remontadas com
-// `montarSeletorDeZona` a partir dos ids reais do canônico, e não copiadas de lá.
+// As zonas daqui são montadas com `montarSeletorDeZona`, nunca com string escrita à mão:
+// `svg_selector` é lista de ids exatos e tem uma fonte de formato só (ADR-005, decisão 2).
+// Elas também não são copiadas de `produtoDemo.ts` — a lista abaixo tem uma zona a mais
+// (`costura`), que existe só para provar a regra do `fill="none"` e nunca seria uma linha
+// de `product_zones` de verdade.
+//
+// `idsReais` continua existindo porque a costura chega ao canônico com id cunhado
+// (`elemento-N`): descobrir esses ids no documento é honesto, e o que vai para a zona
+// continua sendo a lista exata que `montarSeletorDeZona` devolve.
 
 const canonico = normalizarSvg(assetBaseCru).svg;
 const documentoReal = analisarSvg(canonico);
@@ -135,8 +141,11 @@ const zonasReais: ZonaDoProduto[] = [
   zona('cabedal', ['zona-cabedal']),
   zona('biqueira', ['zona-biqueira']),
   zona('logo', ['zona-logo']),
-  // Os 4 cadarços nascem com o mesmo id e a normalização os desambigua.
-  zona('cadarco', idsReais('[id^="zona-cadarco"]')),
+  // Os 4 cadarços nascem com o mesmo id e a normalização os desambigua em `-2`, `-3`, `-4`
+  // (`produtoDemo.test.ts` prende esse renomeio). Os ids vão escritos, e não descobertos
+  // por `idsReais('[id^="zona-cadarco"]')`: prefixo é o padrão que o ADR-005 proíbe, e um
+  // exemplo dele aqui seria copiado para uma zona de verdade.
+  zona('cadarco', ['zona-cadarco', 'zona-cadarco-2', 'zona-cadarco-3', 'zona-cadarco-4']),
   zona('lingua', ['zona-lingua']),
   zona('colarinho', ['zona-colarinho']),
   zona('detalhe', ['zona-detalhe']),
@@ -175,8 +184,9 @@ describe('invariante sobre o asset canônico real', () => {
   });
 
   it('o mapa responde o mesmo que a resolução elemento a elemento', () => {
-    // As duas funções compartilham a expansão; este teste prende o compartilhamento, para
-    // que hover (mapa) e clique (resolução) nunca discordem no palco.
+    // As duas funções compartilham a expansão, e este teste prende o compartilhamento.
+    // Não é sobre o palco de hoje (ele só usa a resolução elemento a elemento): é a
+    // garantia de que trocar uma pela outra amanhã não muda resposta nenhuma.
     const mapa = mapaDeZonasPorElemento(documentoReal, zonasReais);
 
     for (const alvo of pintaveis) {

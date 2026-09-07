@@ -75,6 +75,7 @@ describe('visualização do produto', () => {
         elementosMarcaveis={21}
         editor={<p>editor</p>}
         aoVoltar={() => {}}
+        aoTentarDeNovo={() => {}}
         {...props}
       />,
     );
@@ -102,6 +103,13 @@ describe('visualização do produto', () => {
 
     expect(html).toContain('role="alert"');
     expect(html).toContain('403');
+  });
+
+  it('erro no download oferece nova tentativa sem sair do modelo (BUG-016)', () => {
+    // A falha mais provável aqui é de rede, e rede volta. Sem botão, a única saída era
+    // voltar para a lista e reabrir o modelo — e quem já tinha elementos marcados no
+    // editor perdia a marcação no caminho.
+    expect(ver({ estado: 'erro', erro: 'x' })).toContain('Tentar de novo');
   });
 
   it('a área do editor fica oculta até o asset-base chegar', () => {

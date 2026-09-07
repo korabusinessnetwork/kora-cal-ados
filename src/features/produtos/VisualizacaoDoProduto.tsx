@@ -19,6 +19,8 @@ export interface PropsDaVisualizacaoDoProduto {
   /** O editor de zonas montado. Quantas zonas existem é assunto do painel, dentro dele. */
   editor: ReactNode;
   aoVoltar: () => void;
+  /** Baixar de novo, sem sair do modelo. Erro sem ação obriga a voltar e reabrir. */
+  aoTentarDeNovo: () => void;
 }
 
 export function VisualizacaoDoProduto({
@@ -28,6 +30,7 @@ export function VisualizacaoDoProduto({
   elementosMarcaveis,
   editor,
   aoVoltar,
+  aoTentarDeNovo,
 }: PropsDaVisualizacaoDoProduto) {
   return (
     <main className="produto">
@@ -50,6 +53,11 @@ export function VisualizacaoDoProduto({
       {estado === 'erro' && (
         <div className="produtos__erro" role="alert">
           <p>{erro ?? 'Não foi possível baixar o asset-base.'}</p>
+          {/* A falha mais provável aqui é de rede, e rede volta. Sem este botão a única
+              saída era voltar para a lista e reabrir o modelo (BUG-016). */}
+          <button type="button" onClick={aoTentarDeNovo}>
+            Tentar de novo
+          </button>
         </div>
       )}
 

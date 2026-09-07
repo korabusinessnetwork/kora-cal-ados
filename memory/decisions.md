@@ -6,46 +6,49 @@
 - Documentar trade-offs e contexto de cada decisão
 
 ## Contexto
-- Sistema vive em `/docs/08_DECISOES/` (ADRs em markdown)
+- Sistema vive em `docs/08_DECISOES/` (ADRs em markdown)
 - Cada ADR tem ID sequencial (ADR-001, ADR-002, etc.)
-- ADRs são imutáveis após mergeados (novos ADRs superseden os antigos)
+- **A decisão** de um ADR aceito é imutável; **o arquivo não é**. Quando um ADR novo supersede
+  um antigo, o antigo ganha o aviso de supersessão no cabeçalho e no trecho afetado — foi o
+  que aconteceu com o ADR-001 quando o ADR-005 tirou o Fabric.js. A versão anterior deste
+  documento dizia "ADRs são imutáveis após mergeados", e o próprio repositório já a
+  contradiz. Deixar assim faria um agente encontrar o ADR-001 falando de Fabric.js sem o
+  aviso e implementá-lo
 
 ## Regras Gerais
 - Toda decisão de arquitetura, tech stack ou produto vai para um ADR
 - Decisão = mudança que afeta 2+ componentes ou ciclo de vida longo
-- Pequenos bugs/refators não viram ADR
+- Pequenos bugs/refators não viram ADR — vão para `memory/bugs.md`
 - ADR sobrescreve docs divergentes; ADR é fonte de verdade
 
 ## Validações
 - ADR tem contexto claro (problema, alternativas, consequências)?
-- Decisão foi discutida com stakeholders chave?
+- ADR tem o **porquê** da escolha, não só o quê? Sem isso, o próximo agente desfaz de boa-fé
+- Decisão foi aprovada pelo dono (Matheus)? Não há "stakeholders" além dele nesta fase
 
 ## Permissões
-- Qualquer dev pode propor ADR (em `docs/08_DECISOES/adr-NNN-titulo.md` (minúsculo, como os existentes))
-- Dono/tech lead: aprova merge
+- Agente propõe ADR (em `docs/08_DECISOES/adr-NNN-titulo.md`, minúsculo, como os existentes)
+- Dono (Matheus): aceita ou recusa. É a única aprovação que existe — não há time de dev, não
+  há PR e não há CI neste projeto (ver ADR-003)
 
 ## Exceções
 - ADR de máxima urgência (segurança, compliance): pode ser escrito pós-deploy com tag [URGENT]
 
 ## Auditoria
-- Revisar ADRs semestralmente vs. realidade da codebase
-
-## Eventos
-- `decision.proposed`, `decision.superseded`, `decision.reviewed`
-
-## Configurações Futuras
-- Bot para validar formato de ADR
-- Acoplamento automático ADR ↔ issues/PRs
+- Revisar os ADRs contra a codebase **a cada entrega que muda arquitetura**, não por
+  calendário: entre uma revisão semestral e a próxima, um agente lê o doc vencido como fato.
+  A Etapa 6 (2026-09-07) foi a primeira dessas revisões
 
 ## Casos de Uso
 - "Por que escolhemos Supabase e não Firebase?"
 - "O que mudou de banco de dados e quando?"
 - "Quem decidiu usar Context API e não Redux?"
+- "Por que o editor não regrava o SVG depois de marcar zona?"
 
 ## Critérios de Aceite
-- [x] Índice abaixo está em sync com arquivos em docs/08_DECISOES/ (conferido 2026-08-12)
+- [x] Índice abaixo está em sync com arquivos em `docs/08_DECISOES/` (conferido 2026-09-07)
 - [x] Cada ADR tem Status e Data
-- [ ] ADRs obsoletos têm link para sucessor (nenhum obsoleto ainda)
+- [x] ADRs supersedidos têm link para o sucessor (ADR-001 → ADR-005, supersessão parcial)
 
 ---
 
@@ -68,6 +71,42 @@ Architecture Decision Record (ADR) é um documento que captura uma escolha arqui
 | [ADR-003](../docs/08_DECISOES/adr-003-organizacao-para-ia.md) | Organização do projeto para agente de IA | Aceito | 2026-08-12 | — |
 | [ADR-004](../docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md) | Contrato de zona e normalização de SVG | Aceito | 2026-08-12 | — |
 | [ADR-005](../docs/08_DECISOES/adr-005-editor-de-zonas-em-svg-dom.md) | Editor de zonas em SVG DOM, e quem cunha o `id` | Aceito | 2026-09-05 | Supersede ADR-001 em parte (só Fabric.js) |
+
+## O que cada ADR decidiu, e o que isso obriga no código
+
+Resumo operacional, não substituto: o ADR continua sendo a fonte. Isto existe porque um
+agente que só lê o índice acima sai sem saber **o que pode e o que não pode escrever** — e
+descobre a regra depois de já ter violado.
+
+| ADR | A decisão | O que ela proíbe no código |
+|---|---|---|
+| ADR-001 | React + Vite + Supabase + Vercel Functions; MVP **vetor-only** (nada de foto real na Fase 1) | Dependência de canvas/rasterização no editor; segmentação de foto |
+| ADR-002 | Multi-tenant com RLS por `tenant_id` em toda tabela; white-label vindo do tenant | Marca, cor, logo ou regra de cliente hardcodada; tabela nova sem RLS |
+| ADR-003 | O projeto é escrito e lido por agentes: um termo um nome, arquivo pequeno, README de índice em todo diretório, comentário explica o porquê | Nome criativo (`magicColorEngine`); sinônimo "só neste arquivo"; convenção implícita não escrita |
+| ADR-004 | Normalizar o SVG **antes** do Storage; zona endereça **conjunto** de elementos; zona não aplicada é **erro**, nunca aviso | `getElementById` + `setAttribute('fill')`; responder 200 com variante "quase certa"; `console.warn` como tratamento de falha |
+| ADR-005 | Editor manipula SVG no DOM (Fabric.js **não entra no projeto**); o `id` nasce na normalização; `svg_selector` é lista de ids exatos; o canônico é **imutável** e o editor é somente-leitura sobre ele | Cunhar id no editor; regravar o asset ao marcar zona; seletor de prefixo (`[id^="..."]`); pintar o preview por CSS |
+
+### ADR-005 em detalhe, porque é o que rege todo o código do editor
+
+Está implementado e verificável hoje — `src/features/zonas/` e `src/lib/render/idDeElemento.ts`:
+
+- **O id é cunhado na normalização, nunca no editor.** `normalizarSvg` dá `elemento-N` a todo
+  pintável anônimo, em ordem de documento, sem colidir com id que o designer escreveu. Sem
+  isso o export padrão de Illustrator seria immarcável: no tênis de demo, os 8 ilhoses não
+  têm id nenhum.
+- **O asset-base canônico é imutável e o editor é somente-leitura sobre ele.** Marcar zona
+  escreve uma linha em `product_zones` e **nada** no SVG. O motivo é concorrência, não
+  elegância: o Storage não tem escrita condicional (sem If-Match/ETag no `supabase-js`), então
+  dois membros marcando ao mesmo tempo se sobrescreveriam — o id de um sumiria do arquivo
+  enquanto o `svg_selector` dele continuaria no banco, resolvendo 0 elementos ou, pior, o
+  elemento errado. Nenhum arquivo de `src/features/zonas/` importa `normalizarSvg`.
+- **`svg_selector` é lista de ids exatos** (`#zona-cadarco, #zona-cadarco-2`), montada só por
+  `montarSeletorDeZona`. Prefixo é **proibido**: `[id^="zona-cadarco"]` capturaria uma zona
+  futura `zona-cadarco-lateral` e pintaria o lugar errado sem avisar — o modo de falha exato
+  que o princípio nº1 existe para impedir.
+- **Fabric.js não entra no projeto.** Importar o SVG para objetos Fabric criaria uma segunda
+  representação do mesmo desenho ao lado do canônico, e o preview viraria canvas rasterizado
+  enquanto a API devolve SVG: o pixel do editor deixaria de ser o pixel da API por construção.
 
 ## Regra Principal
 
@@ -106,10 +145,14 @@ Proposed / Accepted / Rejected
 ## Como Contribuir
 
 1. Propor ADR em `docs/08_DECISOES/adr-NNN-titulo.md` (minúsculo, como os existentes)
-2. Solicitar revisão ao tech lead / dono
-3. Discutir alternativas (no PR)
-4. Merge quando consenso atingido
-5. Atualizar índice acima
+2. Escrever as alternativas descartadas **e por que foram descartadas** — é a parte que
+   impede a decisão de ser refeita do zero daqui a três meses
+3. Levar ao dono (Matheus). Não há PR nem revisor além dele nesta fase
+4. Ao ser aceito: atualizar o índice acima, a tabela de "o que ela proíbe no código", e
+   marcar a supersessão no ADR antigo, se houver
+5. Se o ADR muda algo que já está no ar, atualizar `docs/01_ARQUITETURA/overview.md` e
+   `memory/patterns.md` no **mesmo commit** — doc vencido é o defeito que esta seção existe
+   para evitar
 
 ## Decisões Supersedidas / Em Review
 
@@ -121,3 +164,31 @@ Proposed / Accepted / Rejected
   Fase 1; membro cria/edita, owner apaga e gerencia membros; URL assinada 300s.
   Não virou ADR porque implementa o ADR-002, não o altera. Aplicado num projeto Supabase
   real e provado por `supabase/tests/isolamento.test.ts` (8/8) — BUG-006..009 fechados
+
+## Decisões tomadas na execução, sem ADR próprio (registradas para não serem refeitas)
+
+Nenhuma delas altera um ADR — todas o implementam. Ficam aqui porque são escolhas com
+alternativa razoável descartada, e um agente que não as encontre vai refazer a discussão:
+
+- **Sem roteador no front** (`src/App.tsx` alterna telas por `useState`). Uma dependência de
+  rota só se paga quando existir URL que precise ser compartilhável; hoje não existe.
+- **`key={tenant.id}` na árvore protegida.** Trocar de marca **remonta** a tela em vez de
+  atualizar o estado. Sem isso, o produto aberto e o SVG baixado da marca anterior
+  sobreviveriam à troca e apareceriam sob o nome da marca nova — vazamento visual entre
+  tenants concorrentes.
+- **Validação escrita à mão (`validarCor`, `validarZoneKey`), sem Zod.** Duas validações
+  pequenas e estáveis não pagam uma dependência nova; `memory/patterns.md` dizia "Zod ou
+  equivalente" e o "equivalente" é isto.
+- **`upsert` proibido em `product_zones`.** INSERT e UPDATE significam coisas diferentes, e a
+  diferença é *quem some* — `upsert` cego apagaria o mapeamento de um colega em silêncio. A
+  regra é guardada por teste que lê o próprio fonte, não por comentário.
+- **A API de variante ainda não existe.** Não é omissão: é a peça seguinte. Enquanto isso,
+  `src/lib/render/` já é o contrato que ela vai cumprir, e o editor prova que ele funciona.
+
+## Atualizações deste documento
+
+- **2026-09-07** — auditoria contra o código das Etapas 0–5 (Etapa 6). Entram o resumo do
+  que cada ADR obriga/proíbe e o detalhamento do ADR-005, que só existia como uma linha de
+  índice; sai o processo herdado de template que este projeto nunca teve (PR com revisor,
+  CI, bot de validação de ADR, acoplamento a issue tracker, eventos `decision.*`); corrigida
+  a afirmação "ADRs são imutáveis após mergeados", que o próprio ADR-001 contradiz.

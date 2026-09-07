@@ -16,7 +16,7 @@ continua fora dela de propósito — não lê nada do banco, então não há o q
 | `PreviewDaVariante.tsx` | Palco: a variante + contorno da zona selecionada + clique no calçado |
 | `PainelDaApi.tsx` | A chamada HTTP equivalente e o relatório da normalização |
 | `ComparativoDeNormalizacao.tsx` | Antes/depois: o mesmo pedido de cor no arquivo cru e no canônico |
-| `produtoDemo.ts` | O que viria de `products` + `product_zones` — dado falso, não é tenant real |
+| `produtoDemo.ts` | O que viria de `products` + `product_zones` — dado falso, não é tenant real. Os `svg_selector` saem de `montarSeletorDeZona`, nunca de string à mão |
 | `tenis-demo-cru.svg` | Asset-base **cru**, sujo de propósito (ver abaixo) |
 | `produtoDemo.test.ts` | Prende a premissa do esboço: o que a tela afirma é verdade |
 | `esboco.css` | Estilo separado do JSX (regra de white-label do CLAUDE.md) |
@@ -27,7 +27,10 @@ continua fora dela de propósito — não lê nada do banco, então não há o q
    `gerarVarianteDeCor`. Não há caminho no código para elas divergirem — é o princípio
    nº1 virando estrutura, não promessa.
 2. **Zona é conjunto de elementos.** O cadarço são 4 paths que nascem com o mesmo `id`;
-   a normalização desambigua e o seletor `[id^="zona-cadarco"]` pega os 4 (BUG-002).
+   a normalização desambigua (`zona-cadarco`, `-2`, `-3`, `-4`) e a zona os endereça pela
+   **lista de ids exatos** que `montarSeletorDeZona` monta — `#zona-cadarco, #zona-cadarco-2,
+   #zona-cadarco-3, #zona-cadarco-4` (BUG-002). Prefixo (`[id^="zona-cadarco"]`) é proibido
+   pelo ADR-005: pegaria de brinde uma zona futura `zona-cadarco-lateral`.
 3. **Normalização não é firula.** O comparativo roda o mesmo pedido de cor nos dois
    arquivos. No cru, sola, cabedal, cadarço e logo **não mudam** — a regra `.st-*` do
    bloco `<style>` vence o atributo `fill` que o motor escreve. É o BUG-001 ao vivo.
@@ -40,6 +43,22 @@ continua fora dela de propósito — não lê nada do banco, então não há o q
 inline, `id` repetido, `<script>`, handler `onclick` e referência externa. O esboço nunca
 o renderiza inline — só o asset-base canônico entra no DOM. O cru aparece apenas dentro
 de um `<img>` com data URL no comparativo, onde não executa script nem busca rede.
+
+### A mesma lista de ids exatos captura os 4 cadarços nos dois lados
+
+Pergunta que volta ao ler `produtoDemo.ts`: se no arquivo cru os 4 cadarços ainda dividem
+`id="zona-cadarco"`, como a lista `#zona-cadarco, #zona-cadarco-2, #zona-cadarco-3,
+#zona-cadarco-4` não fica capturando só um path do lado "Sem normalizar"?
+
+Porque `#id` em CSS é **igualdade de atributo**, não `getElementById`: `querySelectorAll`
+devolve *todos* os elementos com aquele id, e é isso que o motor usa. No cru, o termo
+`#zona-cadarco` casa os 4 sozinho e os termos `-2`, `-3` e `-4` não casam nada; no
+canônico, cada termo casa o seu. Resultado idêntico dos dois lados: **4 elementos**.
+
+Isso importa para o comparativo continuar provando o que promete. Os dois lados recebem o
+mesmo pedido de cor; se a zona alcançasse conjuntos diferentes, a diferença na tela seria
+"faltou cadarço de um lado", e não o BUG-001 — o `<style>` do arquivo vencendo o atributo
+que o motor escreveu. `produtoDemo.test.ts` prende as duas contagens exatamente por isso.
 
 ## O que o esboço NÃO tem
 
@@ -58,6 +77,11 @@ motor (`../lib/render/dom.test.ts`, com `DOMParser` global em vez de jsdom).
 
 `ComparativoDeNormalizacao.test.tsx` prende o comparativo: os dois lados recebem o mesmo
 pedido de cor e um pedido recusado nunca vira `<img src="">` (BUG-011 e BUG-012).
+
+A Etapa 6 trocou o seletor do cadarço, de prefixo para lista de ids exatos. A equivalência
+está provada na suíte (contagem 4 no cru e 4 no canônico, e os 4 paths recebendo o atributo
+no cru), mas a passada de Chrome abaixo é anterior à troca — vale reconferir "cadarço = 4"
+na próxima vez que a tela for aberta.
 
 **Aberto no Chrome em 2026-09-05** — não só em jsdom. Verificado na página: as 9 zonas com
 a contagem de elementos certa (cadarço = 4), o preview mudando de cor, o comparativo

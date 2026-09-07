@@ -120,16 +120,14 @@ export function EditorDeZonas({
 
       if (elemento) {
         try {
-          if (alvosPintaveis([elemento], chave === '' ? 'esta zona' : chave).length === 0) {
+          if (alvosPintaveis([elemento], chave === '' ? NOME_PROVISORIO : chave).length === 0) {
             setRecusa(
               'Esse traço é um contorno sem preenchimento (`fill="none"`): pintá-lo mudaria o desenho, então ele não pode virar zona.',
             );
             return;
           }
         } catch (falha: unknown) {
-          setRecusa(
-            falha instanceof ErroDeVariante ? falha.message : 'Esse elemento não aceita cor.',
-          );
+          setRecusa(motivoDaRecusaDeClique(falha));
           return;
         }
       }
@@ -250,4 +248,33 @@ export function preservarOuLimpar(
   const limpo = valor.trim();
   if (limpo !== '') return limpo;
   return zonaExistente ? undefined : null;
+}
+
+/**
+ * O motor exige uma `zone_key` para compor a mensagem dele, e no clique ainda não há zona.
+ * Este nome nunca chega à tela — `motivoDaRecusaDeClique` reescreve a frase (BUG-017);
+ * ele existe só para satisfazer a assinatura de `alvosPintaveis`.
+ */
+const NOME_PROVISORIO = 'esta zona';
+
+/**
+ * A recusa do motor, dita em cima do ELEMENTO em vez da zona.
+ *
+ * A frase do motor ("A zona X usa gradiente…") é a certa na geração, onde a zona existe e
+ * tem nome. No clique não há zona nenhuma, e ela saía como `A zona "esta zona" usa
+ * gradiente…` — que se lê como se houvesse uma zona chamada "esta zona" (BUG-017).
+ *
+ * A DECISÃO continua sendo só do motor: só se chega aqui porque `alvosPintaveis` recusou.
+ * O que muda é o sujeito da frase, e nada mais.
+ */
+export function motivoDaRecusaDeClique(falha: unknown): string {
+  if (!(falha instanceof ErroDeVariante)) return 'Esse elemento não aceita cor.';
+
+  if (falha.codigo === 'ZONA_NAO_RECOLORIVEL') {
+    return 'Esse elemento é pintado com gradiente ou padrão. Virar cor chapa apagaria o volume do modelo, então ele não pode entrar numa zona.';
+  }
+
+  // Código novo no motor não pode virar frase muda: até existir texto próprio, a mensagem
+  // dele é melhor que "não deu certo".
+  return falha.message;
 }

@@ -36,5 +36,6 @@
 ## Ligações
 
 - `08_DECISOES/` — ADRs que justificam escolhas maiores (ex: "Por que Supabase?")
-- `memory/tech-choices.md` — restrições técnicas do projeto
+- `memory/restrictions.md` — restrições do projeto (custo, ferramentas, o que é adiado por padrão)
+- `memory/decisions.md` — índice das decisões e o que cada ADR proíbe no código
 - `04_MODELAGEM/` — schema de dados que você vai descrever em diagrama ER

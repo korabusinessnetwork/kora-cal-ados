@@ -315,3 +315,72 @@ describe('idsDoSeletor', () => {
     expect(erro.codigo).toBe('ZONA_NAO_ENCONTRADA');
   });
 });
+
+// ---------------------------------------------------------------------------------------
+// A conferência que o ADR-005 promete, e que só existiu depois da Etapa 6.
+// ---------------------------------------------------------------------------------------
+//
+// Os ids NOVOS sempre foram conferidos um a um. Os GRAVADOS nunca: vêm da linha do banco e
+// ninguém os confrontava com o desenho de hoje. Asset-base trocado depois do mapeamento, ou
+// linha copiada de outro produto, deixavam id morto no seletor — e acrescentar um elemento
+// regravava o seletor carregando o morto junto, em silêncio. A zona passa a pintar menos do
+// que o painel promete, que é o princípio nº1 quebrado onde ninguém olha.
+
+describe('o seletor gravado é conferido contra o desenho de hoje (ADR-005)', () => {
+  it('id gravado que sumiu do desenho recusa em vez de ser regravado morto', () => {
+    const erro = erroDe(() =>
+      marcarZona(
+        pedido({
+          zonasAtuais: [
+            zonaGravada({
+              zone_key: 'cabedal',
+              // `painel` existe; `painel-antigo` é o que sobrou de um asset anterior.
+              svg_selector: montarSeletorDeZona(['painel', 'painel-antigo']),
+            }),
+          ],
+          zoneKey: 'cabedal',
+          idsMarcados: ['lingueta'],
+        }),
+      ),
+    );
+
+    expect(erro.codigo).toBe('ZONA_NAO_ENCONTRADA');
+    expect(erro.message).toContain('painel-antigo');
+    // A mensagem tem de dizer o que fazer: "não encontrado" sozinho deixa a pessoa
+    // clicando de novo no mesmo lugar.
+    expect(erro.message).toContain('remarque a zona');
+  });
+
+  it('zona inteira apontando para desenho velho recusa, mesmo sem elemento novo válido', () => {
+    const erro = erroDe(() =>
+      marcarZona(
+        pedido({
+          zonasAtuais: [
+            zonaGravada({ zone_key: 'sola', svg_selector: montarSeletorDeZona(['sola-v1']) }),
+          ],
+          zoneKey: 'sola',
+          idsMarcados: ['sola'],
+        }),
+      ),
+    );
+
+    expect(erro.codigo).toBe('ZONA_NAO_ENCONTRADA');
+    expect(erro.message).toContain('sola-v1');
+  });
+
+  it('mapeamento íntegro passa — a conferência não pode virar pedágio', () => {
+    // O caminho normal precisa continuar barato e verde: acrescentar `lingueta` a uma zona
+    // que já tem `painel` é a operação mais comum do editor.
+    const linha = marcarZona(
+      pedido({
+        zonasAtuais: [
+          zonaGravada({ zone_key: 'cabedal', svg_selector: montarSeletorDeZona(['painel']) }),
+        ],
+        zoneKey: 'cabedal',
+        idsMarcados: ['lingueta'],
+      }),
+    );
+
+    expect(linha.svg_selector).toBe(montarSeletorDeZona(['painel', 'lingueta']));
+  });
+});
