@@ -24,7 +24,7 @@ código que não existe.
 |---|---|---|
 | `tiposDaApi.ts` | `CodigoDeRespostaDaApi` (a união que **estende** `CodigoDeErro` sem editá-lo) e a classe `FalhaDaApi` | **Existe** |
 | `traduzirParaFalhaDaApi.ts` | A tabela código → status → mensagem, num lugar só | a escrever |
-| `formatoDaChaveDeApi.ts` | Gerar e interpretar `kora_<ambiente>_<prefixo>_<segredo>`; o SHA-256 do segredo | a escrever |
+| `formatoDaChaveDeApi.ts` | Gerar e interpretar `kora_<ambiente>_<prefixo>_<segredo>`; o SHA-256 do segredo | **Existe** |
 | `lerCoresPedidas.ts` | Corpo cru → `Record<zone_key, cor>`, delegando a `validarCor`/`validarZoneKey` do motor | a escrever |
 | `respostaDaApi.ts` | Monta a `Response`: SVG cru no sucesso, envelope JSON no erro | a escrever |
 | `logDaRequisicao.ts` | A linha de log que conhece o **prefixo** e nunca a chave | a escrever |
@@ -34,6 +34,32 @@ código que não existe.
 | `listarZonasDoProdutoDoTenant.ts` | Zonas com filtro de tenant **explícito** | a escrever |
 | `baixarAssetBaseComServiceRole.ts` | `.download(base_asset_path)` direto do bucket privado | a escrever |
 | `registrarUsoDaChave.ts` | `last_used_at` em fire-and-forget, nunca aguardado | a escrever |
+
+## O separador do formato da chave está dentro do alfabeto do segredo
+
+Fica escrito aqui porque é o tipo de detalhe que alguém "simplifica" seis meses depois, e a
+simplificação parece correta.
+
+A chave é `kora_<ambiente>_<prefixo>_<segredo>` e o segredo são 32 bytes em **base64url** —
+alfabeto que inclui `-` e `_`. O separador do formato é o `_`. Ou seja: cerca de metade das
+chaves geradas contém pelo menos um `_` **dentro do segredo**.
+
+A leitura óbvia — `chave.split('_')` e exigir quatro pedaços — recusaria essas chaves. O
+modo de falha é o pior que existe: não é determinístico, é sorteado no momento da geração.
+Passa em qualquer teste escrito com uma chave de exemplo, e depois um cliente em cada dois
+não consegue autenticar, sem padrão visível e sem nada ter mudado.
+
+Por isso `interpretarChaveDeApi` lê **posicionalmente**: os três primeiros separadores
+delimitam produto, ambiente e prefixo, e todo o resto é o segredo. A ambiguidade some porque
+o segredo tem alfabeto e comprimento exatos (43 caracteres), então a estrutura fica
+determinada mesmo com `_` no meio. `formatoDaChaveDeApi.test.ts` prende isso de duas formas:
+uma chave montada à mão com `_` no segredo, e um lote de 200 chaves geradas — com um canário
+que falha se nenhuma delas tiver `_`, para o teste avisar quando parar de exercitar o caso
+difícil em vez de seguir verde sem testar nada.
+
+Corolário: **não existe segunda leitura do formato**. O script que cria a chave e a função
+que a valida importam este mesmo módulo. Se divergissem num caractere, toda chave já emitida
+deixaria de autenticar de uma vez.
 
 ## Por que existe `listarZonasDoProdutoDoTenant.ts` se o front já lista zonas
 

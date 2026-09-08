@@ -2,38 +2,53 @@
 -- (convenção Kora: YYYYMMDD_descricao.sql); este arquivo existe para ler o estado atual
 -- inteiro sem reconstruir migration por migration.
 --
--- Estado em 2026-08-12, resultante de:
---   20260812_schema_inicial.sql        — tabelas + RLS inicial
---   20260812_correcao_rls_e_storage.sql — corrige recursão, papéis e Storage (BUG-006..009)
+-- Resultante de:
+--   20260812_schema_inicial.sql         — tabelas + RLS inicial            (APLICADA)
+--   20260812_correcao_rls_e_storage.sql — recursão, papéis e Storage       (APLICADA)
+--   20260908_chave_de_api_por_tenant.sql — tenant_api_keys (ADR-006)   (NÃO APLICADA)
 --
--- As duas estão APLICADAS num projeto Supabase real desde 2026-09-05, provado por
--- supabase/tests/isolamento.test.ts rodando 8/8 verde contra ele (BUG-006..009 fechados).
+-- As duas de agosto estão APLICADAS num projeto Supabase real desde 2026-09-05, provado
+-- por supabase/tests/isolamento.test.ts rodando 8/8 verde contra ele (BUG-006..009
+-- fechados). A de 2026-09-08 é a única deste snapshot que ainda NÃO foi executada em
+-- banco nenhum — está escrita e revisada, não aplicada; as consultas de conferência que
+-- provam as regras dela estão no fim do próprio arquivo da migration.
 -- Ao rodar uma migration nova, atualize este snapshot no mesmo commit.
 
 -- ── Tabelas ─────────────────────────────────────────────────────────────
--- tenants        (id, nome, slug, tema jsonb, plano, status, created_at)
--- tenant_members (id, tenant_id, user_id, papel owner|membro, created_at)
--- products       (id, tenant_id, nome, base_asset_path, created_at)
--- product_zones  (id, product_id, tenant_id, zone_key, svg_selector, label, cor_default)
--- variants       (id, product_id, tenant_id, zone_colors jsonb, rendered_path, created_at)
+-- tenants          (id, nome, slug, tema jsonb, plano, status, created_at)
+-- tenant_members   (id, tenant_id, user_id, papel owner|membro, created_at)
+-- products         (id, tenant_id, nome, base_asset_path, created_at)
+-- product_zones    (id, product_id, tenant_id, zone_key, svg_selector, label, cor_default)
+-- variants         (id, product_id, tenant_id, zone_colors jsonb, rendered_path, created_at)
+-- tenant_api_keys  (id, tenant_id, prefixo único, hash, label, created_by, created_at,
+--                   last_used_at, revoked_at)   — chave de API do tenant, ADR-006
 --
--- DDL completo: 20260812_schema_inicial.sql (não duplicado aqui para não divergir).
+-- DDL completo: 20260812_schema_inicial.sql e 20260908_chave_de_api_por_tenant.sql
+-- (não duplicado aqui para não divergir).
 
 -- ── Isolamento (estado final das policies) ──────────────────────────────
--- RLS ativa nas 5 tabelas. Helpers security definer:
+-- RLS ativa nas 6 tabelas. Helpers security definer:
 --   auth_tenant_ids()        → tenants do usuário autenticado
 --   auth_owner_tenant_ids()  → tenants onde ele é owner
 --
--- | Tabela         | select | insert        | update        | delete |
--- |----------------|--------|---------------|---------------|--------|
--- | tenants        | membro | (service_role)| owner         | —      |
--- | tenant_members | membro | owner         | —             | owner  |
--- | products       | membro | membro        | membro        | owner  |
--- | product_zones  | membro | membro        | membro        | owner  |
--- | variants       | membro | membro        | —             | owner  |
+-- | Tabela          | select            | insert        | update          | delete |
+-- |-----------------|-------------------|---------------|-----------------|--------|
+-- | tenants         | membro            | (service_role)| owner           | —      |
+-- | tenant_members  | membro            | owner         | —               | owner  |
+-- | products        | membro            | membro        | membro          | owner  |
+-- | product_zones   | membro            | membro        | membro          | owner  |
+-- | variants        | membro            | membro        | —               | owner  |
+-- | tenant_api_keys | owner, sem `hash` | (service_role)| owner, só `revoked_at` | — |
+--
+-- tenant_api_keys é a única tabela onde policy não basta: RLS filtra linha, não coluna.
+-- A coluna `hash` fica fora do `grant select`, então `select *` nela dá permission denied
+-- para `authenticated` — desejado, e coerente com a proibição de `select *` em tabela
+-- sensível (CLAUDE.md). `update` é privilégio de coluna em `revoked_at` só: revogar é
+-- preencher a data, nunca apagar a linha (ADR-006 D4), e por isso não há delete nenhum.
 --
 -- Storage: bucket privado `assets-base`, path tenants/{tenant_id}/products/{id}/base.svg,
 -- leitura/escrita por membro do tenant dono do path, delete só owner.
 --
--- Criação de tenant é provisionada por script com service_role na Fase 1 (venda manual).
+-- Criação de tenant e criação de chave de API são provisionadas por script com
+-- service_role na Fase 1 (venda manual).
 -- service_role nunca no front — só em servidor/função.

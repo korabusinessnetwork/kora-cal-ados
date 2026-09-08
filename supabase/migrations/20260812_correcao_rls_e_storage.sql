@@ -7,9 +7,16 @@
 -- Fase 1 (venda manual) · membro cria e edita, só owner apaga e gerencia membros ·
 -- URL assinada de asset com 300s.
 --
--- ⚠️ ESTE SQL AINDA NÃO FOI EXECUTADO em nenhum banco — não há Postgres local (sem
---    Docker) nem projeto Supabase criado. Rodar `supabase/tests/isolamento.test.ts`
---    contra um ambiente real é o que fecha os bugs acima.
+-- APLICADA em 2026-09-05, no projeto Supabase real. Provado por
+-- `supabase/tests/isolamento.test.ts` rodando 8/8 verde contra ele — que é exatamente o
+-- que fecha BUG-006..009.
+--
+-- Este bloco dizia "AINDA NÃO FOI EXECUTADO em nenhum banco" até 2026-09-08, quatro dias
+-- depois de deixar de ser verdade: o aviso foi escrito com a migration e ninguém o
+-- reabriu ao aplicá-la. Ficou aqui como aviso de estado obsoleto, contradizendo o
+-- `supabase/schema.sql`, que já registrava a aplicação. Migration é o histórico do banco;
+-- quem a lê para saber o que está de pé no servidor era mandado embora com a resposta
+-- errada. Ao aplicar uma migration, atualize o cabeçalho dela no mesmo commit.
 
 -- ── 1. Helpers sem recursão ─────────────────────────────────────────────
 -- security definer: a função roda com os privilégios do dono, então o select interno

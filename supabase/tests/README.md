@@ -8,10 +8,12 @@ vê coleção de outra. O que não vive aqui: teste de lógica pura (vai junto d
 |---|---|
 | `ambiente.ts` | Monta o cenário (2 tenants concorrentes, 3 usuários) e limpa no fim. Usa `service_role` |
 | `isolamento.test.ts` | As asserções: leitura cruzada, escrita cruzada, Storage, papel de membro, anônimo |
+| `editorDeZonas.test.ts` | O caminho do editor contra o banco real: gravar zona, reler, e o que a RLS recusa |
+| `chaveDeApi.test.ts` | `tenant_api_keys`: o `hash` que nem o dono lê, o delete que não existe, e a chave da concorrente |
 
 ## Como rodar
 
-Precisa de um projeto Supabase real com as duas migrations aplicadas. Sem as variáveis
+Precisa de um projeto Supabase real com as migrations aplicadas. Sem as variáveis
 abaixo o teste **pula** (não passa em falso):
 
 ```bash
@@ -42,6 +44,17 @@ próprio arquivo e recebe o canônico, e o **canário do ADR-005**
 antes de qualquer `svg_selector` gravado repointar em silêncio.
 
 Rodar: `npm run test:banco`.
+
+⏳ **`chaveDeApi.test.ts` ainda NÃO rodou** — depende de
+`20260908_chave_de_api_por_tenant.sql`, que está escrita e não aplicada. Enquanto a tabela
+`tenant_api_keys` não existir, ele falha com tabela inexistente, e não pula: pular exigiria
+o ambiente ausente, e o ambiente está presente. Não confunda o verde do `npm test` com
+prova — lá ele é pulado por falta das variáveis, como todos os daqui.
+
+O que ele existe para provar é exatamente o que cliente falso não alcança: **privilégio de
+coluna não existe em mock**. Um teste unitário de `criarChaveDeApi` passaria idêntico num
+banco onde o `revoke` nunca rodou, e a diferença entre os dois bancos é o hash da
+credencial comercial de todas as marcas ficar legível ou não.
 
 Continua valendo a regra que criou este teste: SQL que não rodou não é correção provada.
 Toda mudança futura em policy volta a passar por aqui antes de ser considerada feita.
