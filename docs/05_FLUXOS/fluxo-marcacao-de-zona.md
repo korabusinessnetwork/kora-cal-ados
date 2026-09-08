@@ -338,7 +338,9 @@ Nada abaixo existe hoje:
 - `../../src/features/zonas/README.md` — índice da feature que executa os passos 11–19
 - `../../src/features/produtos/README.md` — lista de modelos e download do asset-base
 - `../../src/lib/render/README.md` — o motor importado pelo editor e, depois, pela API
-- `../07_APIS/README.md` — onde o contrato da API de variante vai morar quando ela existir
+- `../07_APIS/autenticacao.md` — como o sistema do cliente autentica na API que consome o
+  mapeamento gravado por este fluxo (chave de API por tenant, ADR-006). O resto do contrato
+  da API entra em `../07_APIS/` quando a função existir
 - `../../supabase/migrations/20260812_schema_inicial.sql` — DDL de `product_zones`,
   incluindo `unique (product_id, zone_key)`
 

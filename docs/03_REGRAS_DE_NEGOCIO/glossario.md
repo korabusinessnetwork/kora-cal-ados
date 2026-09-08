@@ -24,7 +24,7 @@
 | **Provisionamento** | `supabase/scripts/provisionarTenant.ts` | Criar tenant + owner + produto e subir o asset-base canônico, com `service_role`, fora do navegador. Na Fase 1 a venda é manual e não existe tela de cadastro | onboarding, cadastro, setup, upload |
 | **Seletor de zona** | `svg_selector` | A **lista de ids exatos** (`#a, #b`) que diz quais elementos do canônico formam uma zona. Montada só por `montarSeletorDeZona`; seletor de prefixo é proibido, capturaria zona futura e pintaria o lugar errado em silêncio (ADR-005) | id da zona, path da zona |
 | **Elemento pintável** | `PINTAVEIS`, `expandirPintaveis` (`alvosPintaveis.ts`) | Elemento do SVG que recebe cor (`path`, `rect`, `circle`, `ellipse`, `polygon`, `polyline`, `line`, `text`, `tspan`). A zona pinta o elemento marcado **e seus descendentes pintáveis**; `fill="none"` fica de fora — é contorno, e pintá-lo mudaria o desenho | shape, forma, nó, elemento (isolado) |
-| **Variante** | `variants`, `zone_colors` | Uma combinação específica de cor aplicada às zonas de um produto, produzida por `gerarVarianteDeCor` — hoje no preview do editor, e pela API quando ela existir. Mesmo motor nos dois, nunca duas implementações | versão, opção, combinação |
+| **Variante** | `variants`, `zone_colors` | Uma combinação específica de cor aplicada às zonas de um produto, produzida por `gerarVarianteDeCor` — hoje no preview do editor, e pela API quando ela existir. Mesmo motor nos dois, nunca duas implementações. A tabela `variants` existe no schema mas **fica sem uso**: a variante é gerada sob demanda, sem cache (decisão de 2026-09-08) | versão, opção, combinação |
 | **Tenant** | `tenants`, `tenant_id` | Uma marca/fabricante calçadista cliente da plataforma — unidade de isolamento (ver `docs/11_SEGURANCA/multi-tenancy-rls.md`) | cliente (isolado, sem contexto), empresa, conta |
 | **Membro** | `tenant_members` | Usuário vinculado a um tenant, com um papel (`owner` ou `membro`) | usuário (isolado, sem contexto de tenant), colaborador |
 | **Motor de render** | `src/lib/render/` | O módulo que aplica `zone_colors` sobre o asset-base canônico e devolve o SVG da variante. Um só, importado pelo editor e pela API | engine, renderer, gerador |
@@ -40,6 +40,7 @@
 | **Cor válida** | `coresValidas` (`coresDoPreview.ts`) | Só o que `validarCor` aceita, já em `#RRGGBB` — é isso, e só isso, que chega ao motor | cor final, cor confirmada |
 | **Rótulo** | coluna `label`, estado `rotulo` | O nome legível da zona, escrito pela pessoa ("Ilhós"). Diferente de `zone_key`, que é chave pública da API e nunca é renomeada | nome, título, descrição |
 | **Sessão** | `ContextoDeSessao` | O par usuário autenticado + tenant ativo. Nenhuma tela protegida renderiza sem os dois | login (isolado), auth (isolado) |
+| **Chave de API** | `tenant_api_keys` (ADR-006) | A credencial com que o **sistema** do tenant chama a API de variante. Pertence à marca, não à pessoa; guardada em hash, exibida uma vez, revogável. É de onde o `tenant_id` sai — nunca do corpo da requisição. Não abre o editor, e a **sessão** não chama a API | token, api key, credencial, service account |
 
 ## Termos que existem só em contexto histórico (não usar em código novo)
 
@@ -75,3 +76,8 @@
   provisionamento); **"palco"** deixa de dizer "sem overlay" (o palco **tem** duas camadas
   `<svg>` de contorno — o que não pode receber filtro nem overlay é o **desenho**);
   **"motor de render"** perde o "(sugerido)" — `src/lib/render/` existe desde 2026-08-12
+- **2026-09-08** — entra **"chave de API"** (ADR-006), desta vez **antes** de existir código
+  que a use, que é como a regra deste arquivo deveria ter funcionado sempre. Os sinônimos
+  proibidos importam mais que o normal aqui: "token" já significa o JWT de sessão neste
+  projeto, e chamar as duas coisas pelo mesmo nome é como se confunde a credencial de pessoa
+  com a de sistema — que é exatamente a alternativa que o ADR-006 descartou

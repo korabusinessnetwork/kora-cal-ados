@@ -46,7 +46,7 @@
 - "Por que o editor não regrava o SVG depois de marcar zona?"
 
 ## Critérios de Aceite
-- [x] Índice abaixo está em sync com arquivos em `docs/08_DECISOES/` (conferido 2026-09-07)
+- [x] Índice abaixo está em sync com arquivos em `docs/08_DECISOES/` (conferido 2026-09-08)
 - [x] Cada ADR tem Status e Data
 - [x] ADRs supersedidos têm link para o sucessor (ADR-001 → ADR-005, supersessão parcial)
 
@@ -71,6 +71,7 @@ Architecture Decision Record (ADR) é um documento que captura uma escolha arqui
 | [ADR-003](../docs/08_DECISOES/adr-003-organizacao-para-ia.md) | Organização do projeto para agente de IA | Aceito | 2026-08-12 | — |
 | [ADR-004](../docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md) | Contrato de zona e normalização de SVG | Aceito | 2026-08-12 | — |
 | [ADR-005](../docs/08_DECISOES/adr-005-editor-de-zonas-em-svg-dom.md) | Editor de zonas em SVG DOM, e quem cunha o `id` | Aceito | 2026-09-05 | Supersede ADR-001 em parte (só Fabric.js) |
+| [ADR-006](../docs/08_DECISOES/adr-006-autenticacao-da-api-de-variante.md) | Autenticação da API de variante: chave por tenant | Aceito — **não implementado** | 2026-09-08 | — |
 
 ## O que cada ADR decidiu, e o que isso obriga no código
 
@@ -85,6 +86,7 @@ descobre a regra depois de já ter violado.
 | ADR-003 | O projeto é escrito e lido por agentes: um termo um nome, arquivo pequeno, README de índice em todo diretório, comentário explica o porquê | Nome criativo (`magicColorEngine`); sinônimo "só neste arquivo"; convenção implícita não escrita |
 | ADR-004 | Normalizar o SVG **antes** do Storage; zona endereça **conjunto** de elementos; zona não aplicada é **erro**, nunca aviso | `getElementById` + `setAttribute('fill')`; responder 200 com variante "quase certa"; `console.warn` como tratamento de falha |
 | ADR-005 | Editor manipula SVG no DOM (Fabric.js **não entra no projeto**); o `id` nasce na normalização; `svg_selector` é lista de ids exatos; o canônico é **imutável** e o editor é somente-leitura sobre ele | Cunhar id no editor; regravar o asset ao marcar zona; seletor de prefixo (`[id^="..."]`); pintar o preview por CSS |
+| ADR-006 | A API de variante autentica por **chave de API do tenant** (hash no banco, header `Authorization: Bearer`, revogável); o `tenant_id` sai da chave e a função valida o `product_id` contra ele antes de tudo | Aceitar `tenant_id` vindo do corpo/URL/header do chamador; chave em query string; chave guardada em claro ou reexibida; logar a chave (só o prefixo); responder 403 para recurso de outro tenant (é 404) |
 
 ### ADR-005 em detalhe, porque é o que rege todo o código do editor
 
@@ -157,7 +159,9 @@ Proposed / Accepted / Rejected
 ## Decisões Supersedidas / Em Review
 
 - ADR-001 supersede: (nenhuma); **supersedido em parte pelo ADR-005** — só a escolha de Fabric.js
-- **Em revisão**: (nenhuma decisão aberta)
+- **Em revisão**: (nenhuma decisão aberta). As duas perguntas que o
+  `docs/01_ARQUITETURA/overview.md` deixava em branco — autenticação da API e cache em
+  `variants` — foram respondidas em 2026-09-08: ADR-006 e "nada por enquanto"
 - **Decidido em 2026-08-12, executado e provado em 2026-09-05**: correção de RLS, papéis e Storage
   (`docs/11_SEGURANCA/proposta-correcao-rls.md` → migration
   `20260812_correcao_rls_e_storage.sql`). Tenant provisionado por `service_role` na
@@ -184,9 +188,33 @@ alternativa razoável descartada, e um agente que não as encontre vai refazer a
   regra é guardada por teste que lê o próprio fonte, não por comentário.
 - **A API de variante ainda não existe.** Não é omissão: é a peça seguinte. Enquanto isso,
   `src/lib/render/` já é o contrato que ela vai cumprir, e o editor prova que ele funciona.
+  A **autenticação** dela já está decidida e documentada (ADR-006) — decidir antes de
+  implementar, porque autenticação é o que não se troca depois do primeiro cliente integrado.
+- **Cache em `variants`: nada por enquanto** (2026-09-08). A tabela existe e fica sem uso
+  até haver medição de custo ou latência. Cache mal invalidado devolve a variante antiga
+  depois de a zona ser remapeada ou a cor trocada — cor errada num calçado fabricado, e em
+  silêncio, que é o princípio nº1 quebrado do pior jeito. Gerar é um `parse` + troca de
+  `fill` sobre um SVG pequeno. Reabrir exige número medido **e** a regra de invalidação,
+  que é a parte difícil (mudar zona, `cor_default` ou asset-base invalida o quê?).
+- **`label` no banco, `rotulo` no código e na prosa** (2026-09-08). O glossário registra os
+  dois como o mesmo conceito. A coluna `label` já está no schema aplicado num projeto real e
+  renomeá-la custa migration + reescrita de todo `select` para ganhar consistência
+  cosmética; o inverso — falar "label" em português — colidiria com a regra "um termo, um
+  nome" no lado que um humano lê. A fronteira é exatamente a borda do banco: `zona.label`
+  vindo do `select`, `rotulo` de lá para dentro.
+- **`mapaDeZonasPorElemento` fica, como contraprova** (2026-09-08). Ele **não** é usado pelo
+  palco — `resolverZonaDoElemento` é quem responde ao clique. Continua existindo porque é a
+  única implementação que enxerga o desenho inteiro de uma vez, e é assim que se confere que
+  a resposta elemento a elemento bate com o mapa completo. Apagá-lo por "código morto" tira
+  a contraprova; o docstring diz isso no arquivo, para ninguém redescobrir pelo `git log`.
 
 ## Atualizações deste documento
 
+- **2026-09-08** — entra o **ADR-006** (autenticação da API de variante) e as três decisões
+  menores que o acompanham: cache em `variants` ("nada por enquanto"), `label`×`rotulo` e
+  `mapaDeZonasPorElemento` como contraprova. É o primeiro ADR escrito **antes** da
+  implementação em vez de junto dela — cabível porque autenticação é o que não se troca
+  depois do primeiro cliente integrado, e hoje existem zero integrações.
 - **2026-09-07** — auditoria contra o código das Etapas 0–5 (Etapa 6). Entram o resumo do
   que cada ADR obriga/proíbe e o detalhamento do ADR-005, que só existia como uma linha de
   índice; sai o processo herdado de template que este projeto nunca teve (PR com revisor,

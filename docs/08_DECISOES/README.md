@@ -27,6 +27,7 @@
 | `adr-003-organizacao-para-ia.md` | Projeto organizado para leitura de agente, não de humano | Aceito |
 | `adr-004-contrato-de-zona-e-normalizacao-de-svg.md` | Zona = conjunto de elementos; SVG normalizado no upload | Aceito |
 | `adr-005-editor-de-zonas-em-svg-dom.md` | Editor em SVG DOM (sem Fabric.js); id cunhado na normalização; seletor = lista de ids exatos | Aceito |
+| `adr-006-autenticacao-da-api-de-variante.md` | API de variante autentica por chave de API **por tenant**; `tenant_id` vem da chave, nunca do chamador | Aceito — **não implementado** |
 
 Numeração é sequencial e nunca reciclada. Espelho deste índice em `memory/decisions.md`
 — os dois precisam estar em sync.

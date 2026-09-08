@@ -32,6 +32,14 @@
 O teste que prova o isolamento vive em `supabase/tests/` — pula quando não há ambiente
 Supabase configurado, para nunca passar em falso.
 
+**A RLS não cobre tudo — e o buraco é conhecido, não acidental.** Hoje todo acesso a dado
+passa pelo Postgres com o JWT do usuário, então a RLS é o isolamento. A **API de variante**
+(ADR-006, ainda não implementada) muda isso: ela autentica por **chave de API do tenant** e
+consulta com `service_role`, que bypassa a RLS. A partir dela, o isolamento entre marcas
+concorrentes é responsabilidade da função — `tenant_id` vem sempre da chave, nunca do
+chamador. Quem for construir essa função lê `docs/07_APIS/autenticacao.md` **antes** do
+primeiro `select`.
+
 Ainda não escritos (só criar quando houver conteúdo real — arquivo vazio confunde agente):
 `gestao-secrets.md`, `checklist-release.md` (hoje embutido em `multi-tenancy-rls.md`),
 `auditoria-logs.md`.

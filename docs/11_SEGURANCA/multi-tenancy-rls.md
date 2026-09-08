@@ -16,7 +16,9 @@ comercial, não só item de checklist técnico.
 | Camada | Ameaça principal | Controle obrigatório |
 |--------|------------------|----------------------|
 | Cliente/UI | `service_role` vazada no front, XSS | Só chave `anon` no front; nunca `service_role` no client |
-| Rede/API | Endpoint de variante aceita `product_id` de outro tenant | Toda função valida `tenant_id` do token contra o `tenant_id` do produto antes de qualquer leitura/escrita |
+| Rede/API | Endpoint de variante aceita `product_id` de outro tenant | Toda função valida o `tenant_id` **da credencial** contra o `tenant_id` do produto antes de qualquer leitura/escrita. Produto de outro tenant responde **404**, não 403 — 403 confirma que o id existe |
+| Rede/API | Chave de API vaza (log, URL, repositório do cliente) | Chave só em header `Authorization`, **nunca** em query string; guardada em hash (o banco não tem como devolvê-la); log registra só o prefixo; revogável sem derrubar as outras chaves da marca (ADR-006) |
+| Rede/API | A função de variante roda com `service_role` e **bypassa a RLS** | O `tenant_id` sai **sempre** da chave, nunca do corpo/URL/header do chamador, e a validação mora num módulo único por onde toda rota passa. Este é o **único** ponto do sistema em que o isolamento não é do Postgres (ADR-006, D3) |
 | Autorização | Um tenant lê zona/produto de outro | **RLS em toda tabela**, política por `tenant_id`; testar isolamento antes de cada release |
 | Storage | SVG base de um tenant acessível via URL previsível | Path particionado por tenant (`tenants/{tenant_id}/products/{id}/...`), bucket privado, URL assinada com expiração curta |
 | Observabilidade | Log cruza nome de modelo/cliente entre tenants | Logs de erro nunca incluem payload completo de outro tenant; scrub antes de gravar |
@@ -34,8 +36,10 @@ comercial, não só item de checklist técnico.
       `variants`) antes de qualquer deploy além de local
 - [ ] Teste de isolamento: usuário do tenant A tenta acessar `product_id` do tenant B
       via API — deve falhar sempre, incluindo por manipulação direta de ID na URL
-- [ ] Toda função de geração de variante recebe o token do usuário, resolve o
-      `tenant_id` a partir dele — nunca confia em `tenant_id` vindo do corpo da requisição
+- [ ] Toda função de geração de variante resolve o `tenant_id` a partir da **credencial**
+      — nunca confia em `tenant_id` vindo do corpo da requisição. Desde o ADR-006 a
+      credencial da API é a **chave de API do tenant**, não o token de usuário: o editor e
+      a API autenticam por caminhos diferentes e nenhuma credencial serve para os dois
 
 ### Entrada e dados
 - [ ] Input de zona/cor validado por schema antes de tocar no SVG (evita injeção via

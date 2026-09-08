@@ -77,8 +77,9 @@ A `unique (product_id, zone_key)` é o que desenha o editor inteiro: acrescentar
 uma zona é **UPDATE** da linha existente, nunca um segundo INSERT, e `upsert` cego é proibido
 porque apagaria em silêncio o mapeamento de um colega.
 
-`*variants` é cache opcional — a API pode gerar on-the-fly sem persistir. **Nenhuma linha é
-escrita nessa tabela hoje**, porque a API ainda não existe.
+`*variants` **fica sem uso**: a decisão de 2026-09-08 é gerar sob demanda e não cachear até
+haver medição de custo ou latência (motivo na seção da API, mais abaixo). Nenhuma linha é
+escrita nessa tabela — hoje porque a API não existe, e depois por escolha.
 
 ## Fluxo — Editor (setup, feito uma vez por modelo)
 
@@ -111,7 +112,8 @@ Descrição passo a passo, com os estados de tela e as recusas, em
 
 Fica descrito aqui porque é o contrato que o motor já cumpre; o endpoint é a peça seguinte.
 
-1. `POST /products/:id/variants` com `{"sola": "#C0392B", "cabedal": "#111111"}`
+1. `POST /products/:id/variants` com `{"sola": "#C0392B", "cabedal": "#111111"}` e
+   `Authorization: Bearer <chave de API do tenant>` (ADR-006)
 2. A função busca o asset-base canônico no Storage
    (`tenants/{tenant_id}/products/{product_id}/base.svg` — a definição única do path é
    `supabase/scripts/caminhoDoAssetBase.ts`)
@@ -119,16 +121,27 @@ Fica descrito aqui porque é o contrato que o motor já cumpre; o endpoint é a 
    ausente, cor inválida, zona com gradiente ou zonas sobrepostas devolvem **erro**, nunca
    200 "quase certo". Os códigos são os de `src/lib/render/erros.ts`, que já é contrato
 4. Devolve SVG direto, ou rasteriza pra PNG (`sharp` ou `resvg`) se `?format=png`
-5. Opcionalmente grava em `variants` pra reuso rápido da mesma combinação
+5. **Não grava em `variants`** — gera sob demanda, toda vez (ver abaixo)
 
-**Pergunta em aberto (só o dono decide):** como o chamador da API se autentica. O app usa o
-JWT de sessão do Supabase, mas a API de variante é consumida por sistema do cliente, não por
-navegador logado — chave por tenant, service account ou outra coisa não foi decidido em ADR
-nenhum, e `docs/07_APIS/` ainda está vazio. Fica em branco de propósito: palpite bem escrito
-vira fato na próxima leitura, e aqui ele decidiria sozinho o modelo de integração do produto.
+**Autenticação — decidida em 2026-09-08, [ADR-006](../08_DECISOES/adr-006-autenticacao-da-api-de-variante.md):**
+chave de API **por tenant**, guardada em hash, enviada em `Authorization: Bearer`, revogável
+sem derrubar as outras chaves da marca. O JWT de sessão do Supabase não serve aqui: é
+credencial de pessoa (login, expiração, refresh) para um chamador que é máquina. Contrato em
+`docs/07_APIS/autenticacao.md`. **Ainda não implementado** — a função serverless não existe.
 
-**Segunda pergunta em aberto:** qual o critério para gravar em `variants`. "Cache opcional"
-foi escrito na fundação sem regra; quem decide persistir e quem invalida não está definido.
+Consequência que o ADR-006 obriga e que vale repetir aqui: a função valida a chave e depois
+consulta com `service_role`, que **bypassa a RLS**. O `tenant_id` sai **sempre** da chave,
+nunca do corpo ou da URL, e o `product_id` é conferido contra ele antes de qualquer outra
+coisa. É o único lugar do sistema onde o isolamento entre marcas não é do Postgres.
+
+**Cache em `variants` — decidido em 2026-09-08: nada por enquanto.** A tabela existe e fica
+sem uso até haver medição de custo ou latência que justifique o contrário. O motivo é o
+princípio nº1: cache mal invalidado devolve a variante **antiga** depois de a zona ser
+remapeada ou a cor trocada, e o resultado é cor errada num calçado fabricado — falha
+silenciosa, o modo que este projeto trata como o pior de todos. Gerar é um `parse` + troca de
+`fill` sobre um SVG pequeno; enquanto for barato, correto vence rápido. Reabrir a decisão
+exige número medido, não intuição — e junto dela a regra de invalidação, que é a parte
+difícil (mudar zona, cor padrão ou asset-base invalida o quê?).
 
 ## Isolamento multi-tenant (não-negociável — ver `11_SEGURANCA/`)
 
@@ -186,3 +199,8 @@ scripts de provisionamento e os testes. `dom.ts` é o que torna isso possível: 
   entra o mapa por feature; sai a contagem fixa de testes. Duas lacunas ficam registradas
   como pergunta em aberto (autenticação da API, critério de cache em `variants`) em vez de
   preenchidas por palpite.
+- **2026-09-08** — as duas perguntas em aberto são respondidas pelo dono, e o texto delas dá
+  lugar às decisões: **chave de API por tenant** (ADR-006, com o alerta de que a função
+  serverless usa `service_role` e por isso o isolamento entre marcas passa a ser dela) e
+  **nenhum cache em `variants`** até haver medição. Ter deixado as duas em branco funcionou:
+  voltaram como decisão explícita, não como convenção que alguém achou no código.
