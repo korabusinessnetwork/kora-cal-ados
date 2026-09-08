@@ -9,8 +9,8 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["vitest/globals", "vite/client"],
+    "types": ["vitest/globals", "vite/client", "node"],
     "verbatimModuleSyntax": true
   },
-  "include": ["src", "supabase/tests", "vite.config.ts"]
+  "include": ["api", "src", "supabase/tests", "vite.config.ts"]
 }

@@ -40,7 +40,9 @@
 | **Cor válida** | `coresValidas` (`coresDoPreview.ts`) | Só o que `validarCor` aceita, já em `#RRGGBB` — é isso, e só isso, que chega ao motor | cor final, cor confirmada |
 | **Rótulo** | coluna `label`, estado `rotulo` | O nome legível da zona, escrito pela pessoa ("Ilhós"). Diferente de `zone_key`, que é chave pública da API e nunca é renomeada | nome, título, descrição |
 | **Sessão** | `ContextoDeSessao` | O par usuário autenticado + tenant ativo. Nenhuma tela protegida renderiza sem os dois | login (isolado), auth (isolado) |
-| **Chave de API** | `tenant_api_keys` (ADR-006) | A credencial com que o **sistema** do tenant chama a API de variante. Pertence à marca, não à pessoa; guardada em hash, exibida uma vez, revogável. É de onde o `tenant_id` sai — nunca do corpo da requisição. Não abre o editor, e a **sessão** não chama a API | token, api key, credencial, service account |
+| **Chave de API** | `tenant_api_keys` (`id`, `tenant_id`, `prefixo`, `hash`, `label`, `created_by`, `created_at`, `last_used_at`, `revoked_at`) — ADR-006 | A credencial com que o **sistema** do tenant chama a API de variante, no formato `kora_<ambiente>_<prefixo>_<segredo>`. Pertence à marca, não à pessoa; o banco guarda o **prefixo** em claro e o **hash** do **segredo**, nunca a chave inteira. Exibida uma vez, revogável (`revoked_at` preenchido, linha nunca apagada). É de onde o `tenant_id` sai — nunca do corpo da requisição. Não abre o editor, e a **sessão** não chama a API | token, api key, credencial, service account |
+| **Prefixo** | coluna `prefixo` | A parte da chave de API guardada **em claro** e indexada: é por ela que a API acha a linha antes de conferir o hash, e é ela (nunca a chave) que aparece em log e na tela de gerenciamento. **Identifica sem autenticar** — quem tem só o prefixo não chama nada | id da chave, chave (isolado), token público |
+| **Segredo** | os 32 bytes aleatórios de `crypto.randomBytes` da chave; `hash` é o SHA-256 dele | A parte da chave de API que **nunca é guardada** — o banco tem só o SHA-256, então perder o segredo significa gerar outra chave, não "ver de novo". Hash rápido é decisão do ADR-006 (D2): 32 bytes aleatórios não têm dicionário, e hash lento cobraria seu custo em toda chamada | senha, hash (o hash é do segredo, não é o segredo), chave (isolado) |
 
 ## Termos que existem só em contexto histórico (não usar em código novo)
 
@@ -81,3 +83,14 @@
   proibidos importam mais que o normal aqui: "token" já significa o JWT de sessão neste
   projeto, e chamar as duas coisas pelo mesmo nome é como se confunde a credencial de pessoa
   com a de sistema — que é exatamente a alternativa que o ADR-006 descartou
+- **2026-09-08** — entram **"prefixo"** e **"segredo"**, as duas metades da chave de API, e
+  a linha da **chave de API** ganha os nomes reais das colunas de `tenant_api_keys`. As duas
+  metades viram termo próprio porque a diferença entre elas é a **regra de segurança
+  inteira** em uma palavra: o prefixo pode aparecer em log, em tela e em ticket de suporte;
+  o segredo não existe em lugar nenhum depois de exibido. Sem os dois nomes, escreve-se
+  "a chave" nos dois casos e um agente futuro loga a chave inteira achando que segue o
+  padrão. Nomes de coluna: valem `label`, `created_by`, `created_at`, `last_used_at`,
+  `revoked_at` — as Notas de Implementação do ADR-006 anotaram `rotulo`/`criada_em`/
+  `criada_por`/`ultima_utilizacao_em`/`revogada_em`, o que conflita com as 5 tabelas já
+  existentes (todas com `created_at`) e, no caso de `rotulo`, inventaria uma segunda coluna
+  para o conceito que este glossário já mapeia como **rótulo → coluna `label`**

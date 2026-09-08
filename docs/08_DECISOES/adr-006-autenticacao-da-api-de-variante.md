@@ -14,10 +14,19 @@ depois de o primeiro cliente integrar.
 ## Contexto
 
 A API de variante é o produto vendido: o sistema da marca calçadista pede
-`POST /products/:id/variants` com `{"sola": "#C0392B"}` e recebe o SVG (ou PNG) daquele
-modelo naquelas cores. O contrato está descrito em `docs/01_ARQUITETURA/overview.md`,
-seção "Fluxo — API (geração)", e o motor que o cumpre (`src/lib/render/`) já existe e é
-testado.
+`POST /api/v1/products/:productId/variants` com `{"sola": "#C0392B"}` e recebe **o SVG cru**
+daquele modelo naquelas cores — sucesso é o artefato, erro é o envelope JSON. O motor que o
+cumpre (`src/lib/render/`) já existe e é testado.
+
+> **Nota de 2026-09-08.** Este parágrafo dizia "`POST /products/:id/variants` [...] recebe o
+> SVG (ou PNG)". Ficou alinhado ao contrato fechado na mesma data, que é hoje a fonte da
+> forma da requisição e da resposta: `docs/07_APIS/endpoints.md` (com o raciocínio em
+> `memory/patterns.md`, seção "Padrões de API / Backend"). Mudaram três coisas de redação,
+> nenhuma delas parte da decisão deste ADR: a rota ganhou o prefixo `/api/v1`; o sucesso é
+> **o SVG cru, sem envelope**, e só o erro é envelopado; e o PNG saiu — `?format=` diferente
+> de `svg` responde 400 explícito, porque rasterizar exigiria um segundo renderizador que
+> teria de ser provado pixel a pixel contra o hex do SVG antes de ser vendido. O que este
+> ADR decide — a autenticação — continua intacto.
 
 Faltava a pergunta que o `overview.md` deixava **em branco de propósito**: como o chamador
 se autentica. Ela ficou aberta porque um palpite bem escrito vira fato na leitura seguinte,
@@ -85,7 +94,9 @@ virar ADR em vez de convenção:
   API entrega. Essa é a falha inteira, numa linha.
 - **`product_id` é validado contra o `tenant_id` da chave** antes de qualquer outra coisa
   — a regra que o `overview.md` já registra ("nenhuma função serverless aceita
-  `product_id` sem validar que pertence ao `tenant_id` do token autenticado").
+  `product_id` sem validar que pertence ao `tenant_id` da **chave de API** que autenticou a
+  chamada"). Não "token": neste projeto token é o JWT de sessão da pessoa, e usá-lo aqui
+  confundiria as duas credenciais justamente na frase que separa uma da outra (glossário).
 - Produto de outro tenant responde **404, não 403**. 403 confirma que aquele id existe;
   entre marcas concorrentes no mesmo sistema, isso já é informação vendável.
 - A validação mora em **um** módulo (`autenticarChaveDeApi`), e toda rota da API passa por
@@ -94,7 +105,7 @@ virar ADR em vez de convenção:
 
 ### D4 — Revogação e rotação
 
-- Revogar é preencher `revogada_em`, nunca apagar a linha: chave apagada some do histórico
+- Revogar é preencher `revoked_at`, nunca apagar a linha: chave apagada some do histórico
   junto com a resposta para "quem estava usando isso quando aconteceu".
 - Um tenant pode ter **várias chaves ativas** ao mesmo tempo. Sem isso, rotacionar exige
   derrubar a integração do cliente entre gerar a nova e trocar no sistema dele — e uma
@@ -153,7 +164,7 @@ marcas, e o `tenant_id` dito pelo chamador é isolamento nenhum.
 - **Rate limiting fica de fora por enquanto** e vira dívida registrada: chave por tenant é
   o que torna limite por tenant *possível*, mas o limite em si não está decidido. Sem ele,
   um cliente com laço mal escrito consome a cota da Vercel de todo mundo.
-- **Não há métrica de uso ainda.** `ultima_utilizacao_em` é o mínimo para responder "esta
+- **Não há métrica de uso ainda.** `last_used_at` é o mínimo para responder "esta
   chave ainda serve para alguma coisa?" antes de revogar; contagem e cobrança por uso são
   decisão futura.
 
@@ -161,8 +172,11 @@ marcas, e o `tenant_id` dito pelo chamador é isolamento nenhum.
 
 ## Referências
 
-- `docs/01_ARQUITETURA/overview.md` — o contrato da API e o fluxo que esta decisão fecha
+- `docs/01_ARQUITETURA/overview.md` — o **fluxo** de geração que esta decisão fecha (o
+  contrato da API saiu de lá em 2026-09-08 e mora em `docs/07_APIS/`)
 - `docs/07_APIS/autenticacao.md` — o contrato desta decisão em formato de API
+- `docs/07_APIS/endpoints.md` — o **contrato da API**: rota, corpo e forma da resposta
+  ("sucesso é o artefato, erro é o envelope"); é a fonte para tudo que não é autenticação
 - `docs/11_SEGURANCA/multi-tenancy-rls.md` — o isolamento que o D3 é obrigado a preservar
 - ADR-002 — multi-tenant com RLS por `tenant_id`; este ADR é o primeiro caso em que a RLS
   **não** é o mecanismo de isolamento, e por isso precisa substituí-la explicitamente
@@ -175,14 +189,30 @@ marcas, e o `tenant_id` dito pelo chamador é isolamento nenhum.
 
 Escritas antes da implementação, para que ela não redecida nada:
 
-- Tabela `tenant_api_keys` (`id`, `tenant_id`, `prefixo` único indexado, `hash`, `rotulo`,
-  `criada_por`, `criada_em`, `ultima_utilizacao_em`, `revogada_em`).
+> **Correção de 2026-09-08 — nomes de coluna.** A primeira versão destas notas anotou
+> `criada_em`, `criada_por`, `ultima_utilizacao_em`, `revogada_em` e `rotulo`. Confrontados
+> com `supabase/schema.sql` e com a migration `20260812_schema_inicial.sql`, estavam errados
+> em dois pontos, e ficam corrigidos abaixo. O rastro fica escrito em vez de apagado porque
+> um agente que encontre os nomes antigos noutro lugar precisa achar aqui por que eles não
+> valem. **(1)** As **5 tabelas existentes** (`tenants`, `tenant_members`, `products`,
+> `product_zones`, `variants`) usam `created_at`: timestamp é coluna técnica, e o schema já
+> põe técnica em inglês (`zone_key`, `svg_selector`, `base_asset_path`, `rendered_path`) —
+> inaugurar uma sexta convenção numa tabela nova é criar a segunda forma de escrever a mesma
+> coisa. **(2)** `rotulo` vira `label` porque o glossário
+> (`docs/03_REGRAS_DE_NEGOCIO/glossario.md`) já declara "**Rótulo** | coluna `label`, estado
+> `rotulo`"; uma segunda coluna para o conceito que já tem nome é exatamente o que "um termo,
+> um nome" (ADR-003) proíbe. A **decisão** deste ADR não muda — muda a nota de implementação
+> (`memory/decisions.md`: "a decisão de um ADR aceito é imutável; o arquivo não é"). Os nomes
+> corrigidos aparecem também em D4 e em Consequências, pelo mesmo motivo.
+
+- Tabela `tenant_api_keys` (`id`, `tenant_id`, `prefixo` único indexado, `hash`, `label`,
+  `created_by`, `created_at`, `last_used_at`, `revoked_at`).
 - Validação = uma consulta por `prefixo` (indexada) + comparação do hash **em tempo
   constante** (`crypto.timingSafeEqual`). Comparar hash com `===` vaza, por tempo, quantos
   bytes iniciais estavam certos.
 - Chave revogada e chave inexistente respondem **igual** (401, mesma mensagem, mesmo
   tempo): distinguir as duas conta ao atacante que ele acertou um prefixo real.
-- `ultima_utilizacao_em` é gravado **fire-and-forget** — nunca bloqueia a geração da
+- `last_used_at` é gravado **fire-and-forget** — nunca bloqueia a geração da
   variante (padrão já vigente para log de atividade, em CLAUDE.md).
 - O termo é **chave de API** em todo o projeto (código, banco, docs, commits) — não
   "token", não "api key", não "credencial", não "service account". Já está no glossário

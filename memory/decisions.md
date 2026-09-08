@@ -202,6 +202,52 @@ alternativa razoável descartada, e um agente que não as encontre vai refazer a
   cosmética; o inverso — falar "label" em português — colidiria com a regra "um termo, um
   nome" no lado que um humano lê. A fronteira é exatamente a borda do banco: `zona.label`
   vindo do `select`, `rotulo` de lá para dentro.
+- **Rota `POST /api/v1/products/:productId/variants`** (2026-09-08). Inglês e com `/v1`
+  desde já. Inglês porque o corpo já é `{"sola": ...}` sob a coluna `zone_key`, que o
+  glossário declara "chave pública da API e nunca é renomeada" — path em português
+  (`/produtos/:id/variantes`) com corpo em inglês mistura dois idiomas dentro de uma
+  requisição só, e o integrador acerta um e erra o outro. O `/v1` custa um segmento hoje;
+  descartado "adicionar versão quando precisar", porque depois do primeiro cliente
+  integrado o custo vira ou ele reescrever o código dele, ou nós carregarmos um alias sem
+  versão para sempre. O arquivo é `api/v1/products/[productId]/variants.ts` — roteamento
+  por sistema de arquivos da Vercel.
+- **Sucesso é o artefato, erro é o envelope** (2026-09-08). 200 devolve o SVG cru
+  (`Content-Type: image/svg+xml; charset=utf-8`, `Cache-Control: no-store`); erro devolve o
+  envelope JSON `{ data, error: { code, message }, meta }`. Descartado envelopar também o
+  sucesso (que era o que `memory/patterns.md` prescrevia): pôr o SVG dentro de JSON obriga
+  escape/unescape do desenho inteiro, e o modo de falha desse round-trip é **mudança
+  silenciosa do desenho** — a classe que o princípio nº1 proíbe. O raciocínio completo, as
+  três razões e a tabela de códigos → status estão em `memory/patterns.md`, seção "Padrões
+  de API / Backend".
+- **A família "dado do tenant" responde 409** (2026-09-08), não 500 nem 422. São os erros em
+  que a requisição está autenticada e bem formada e o que está errado é o mapeamento de
+  zonas gravado pela marca (`svg_selector` que resolve zero elementos, zona em gradiente,
+  zonas sobrepostas, asset-base corrompido). Descartado 500 porque faz cliente com retry
+  reprocessar em laço uma falha determinística e enterra erro de dado no alarme de
+  indisponibilidade; descartado 422 porque manda o integrador caçar defeito num payload
+  correto. 409 é literalmente "a requisição conflita com o estado atual do recurso" — e a
+  mensagem, que muda com a família, aponta a correção para o **editor**, não para o pedido.
+- **Sem `vercel.json`** (2026-09-08). O roteamento por sistema de arquivos (zero-config) já
+  cobre `api/v1/products/[productId]/variants.ts`. Descartado criar o arquivo por
+  antecipação "porque um dia vai precisar": ele viraria a **segunda fonte de verdade da
+  rota**, e a hora em que as duas divergirem é a hora em que ninguém sabe qual manda.
+- **Assinatura Web (`Request`/`Response`) no handler, sem `@vercel/node`** (2026-09-08).
+  Descartada a assinatura `(req: VercelRequest, res: VercelResponse)`: ela amarra o handler
+  ao runtime da Vercel. Com `Request`/`Response`, (a) o mesmo handler roda num servidor
+  local por Vite sem dependência nova — que é como ele será exercitado enquanto não houver
+  deploy — e (b) ele fica testável construindo um `Request` à mão, sem subir servidor nem
+  simular objetos de `node:http`.
+- **Colunas de `tenant_api_keys` seguem o schema, não o rascunho do ADR-006** (2026-09-08).
+  Valem `id, tenant_id, prefixo, hash, label, created_by, created_at, last_used_at,
+  revoked_at`. As Notas de Implementação do ADR-006 tinham anotado `criada_em` /
+  `criada_por` / `ultima_utilizacao_em` / `revogada_em` / `rotulo`; confrontadas com o
+  schema real, estão erradas em dois pontos. Timestamp é coluna técnica e o schema já põe
+  técnica em inglês (`zone_key`, `svg_selector`, `base_asset_path`, `rendered_path`), e as
+  **5 tabelas existentes usam `created_at`** — descartado inaugurar uma sexta convenção numa
+  tabela nova. E `rotulo` vira `label` porque o glossário já declara "**Rótulo** | coluna
+  `label`, estado `rotulo`": inventar uma segunda coluna para o mesmo conceito é exatamente
+  o que "um termo, um nome" proíbe. A **decisão** do ADR-006 não muda; mudou a nota de
+  implementação, com o rastro da correção escrito no próprio ADR.
 - **`mapaDeZonasPorElemento` fica, como contraprova** (2026-09-08). Ele **não** é usado pelo
   palco — `resolverZonaDoElemento` é quem responde ao clique. Continua existindo porque é a
   única implementação que enxerga o desenho inteiro de uma vez, e é assim que se confere que
@@ -210,6 +256,14 @@ alternativa razoável descartada, e um agente que não as encontre vai refazer a
 
 ## Atualizações deste documento
 
+- **2026-09-08** — entram as decisões de execução do **contrato da API de variante** (Etapa 1,
+  contrato e README; a função ainda não existe): a rota `POST /api/v1/products/:productId/variants`,
+  "sucesso é o artefato, erro é o envelope", a família "dado do tenant" em 409, a ausência
+  deliberada de `vercel.json`, a assinatura Web (`Request`/`Response`) no handler e a
+  correção dos nomes de coluna de `tenant_api_keys` contra o schema real. Nenhuma delas
+  altera um ADR — a última **corrige a nota de implementação** do ADR-006 sem tocar na
+  decisão dele, que é o caso que a seção "Contexto" deste documento já previa ("a decisão de
+  um ADR aceito é imutável; o arquivo não é").
 - **2026-09-08** — entra o **ADR-006** (autenticação da API de variante) e as três decisões
   menores que o acompanham: cache em `variants` ("nada por enquanto"), `label`×`rotulo` e
   `mapaDeZonasPorElemento` como contraprova. É o primeiro ADR escrito **antes** da

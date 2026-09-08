@@ -8,12 +8,19 @@
 
 | Arquivo | O que responde | Estado |
 |---|---|---|
+| [`endpoints.md`](endpoints.md) | O contrato do endpoint: rota, método, corpo, resposta 200 (SVG cru), envelope de erro, tabela de códigos e status, exemplos `curl` | **Contrato escrito**, endpoint não implementado |
 | [`autenticacao.md`](autenticacao.md) | Como o sistema do cliente se autentica: chave de API por tenant, header, revogação, respostas 401/404 | **Decidido** (ADR-006), não implementado |
 
-O contrato do endpoint em si (rota, corpo, resposta, `?format=png`) está em
-`docs/01_ARQUITETURA/overview.md`, seção "Fluxo — API (geração)". Ele muda de lugar para cá
-— como `endpoints.md` e `schemas.md` — quando a função existir e o texto puder ser conferido
-contra código em vez de contra intenção.
+O contrato do endpoint (rota, corpo, resposta, códigos) **mudou de lugar**: até 2026-09-08 ele
+morava em `docs/01_ARQUITETURA/overview.md`, seção "Fluxo — API (geração)", e agora está em
+[`endpoints.md`](endpoints.md). O `overview.md` responde *como o sistema se encaixa*; o
+contrato que o cliente da API lê é outra pergunta, e mantê-lo em dois lugares é o começo de
+duas versões dele. A função serverless continua **não existindo** — o contrato entra antes do
+código de propósito, porque rota e códigos de erro são a parte que não se troca depois do
+primeiro cliente integrado.
+
+`schemas.md` ainda não existe: enquanto o corpo do pedido for um objeto de `zone_key` para
+hex, `endpoints.md` descreve tudo, e um arquivo só de schema seria repetição.
 
 ## As duas autenticações do produto
 
@@ -38,12 +45,20 @@ Não são a mesma, e confundi-las é a falha que este diretório existe para evi
 
 ## O que NÃO vive aqui
 
-- Implementação → `supabase/functions/` e a função serverless da Vercel
+- Implementação → `api/` na raiz do projeto (função serverless da Vercel, roteada por sistema
+  de arquivos: `api/v1/products/[productId]/variants.ts`)
 - Motor de render e códigos de erro → `src/lib/render/`
 - Banco de dados → `04_MODELAGEM/`
 - Regras de negócio → `03_REGRAS_DE_NEGOCIO/`
 - Fluxos de tela → `05_FLUXOS/`
 - Por que a autenticação é assim → `08_DECISOES/adr-006-*`
+
+> Correção: a primeira linha desta lista já apontou a implementação para
+> `supabase/functions/`. **Não é lá.** O diretório existe vazio, resquício do scaffold da fundação, e a API de variante não
+> vai para dentro dele: o motor de geração roda em função serverless da **Vercel** (ADR-001),
+> não em Edge Function do Supabase. Doc apontando para um diretório vazio manda o próximo
+> agente escrever no lugar errado — que é o defeito que o CLAUDE.md chama de convenção
+> implícita, só que pior, porque estava escrito.
 
 ## Ligações
 

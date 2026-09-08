@@ -9,11 +9,11 @@
 
 ## Stack
 
-| Camada | Escolha | Papel | Estado (2026-09-07) |
+| Camada | Escolha | Papel | Estado (2026-09-08) |
 |---|---|---|---|
 | Frontend / Editor | React + Vite, **SVG no DOM** (ADR-005) | Login, lista de modelos, marcação de zona e preview de variante com o mesmo motor da API | **No ar** — `src/` |
 | Dados / Auth | Supabase (Postgres + RLS + Storage) | Tenants, membros, produtos, zonas, autenticação, bucket privado dos SVGs | **No ar** — `supabase/migrations/` |
-| API de geração | Vercel Serverless Functions | Recebe `{zona: cor}`, recolore o asset-base canônico, devolve SVG ou PNG | **Não existe ainda** — não há diretório `api/` no repositório; é a próxima peça |
+| API de geração | Vercel Serverless Functions | Recebe `{zona: cor}`, recolore o asset-base canônico, devolve o SVG da variante | **Contrato escrito, código em curso** — o contrato está em `docs/07_APIS/endpoints.md`; o handler ainda não existe (não há diretório `api/` versionado). Contrato escrito não é função funcionando |
 | Deploy | Vercel (app + funções) + Supabase (dados) | Mesma espinha dorsal dos outros projetos Kora | **Alvo** — o app roda em `npm run dev`; não há `vercel.json` nem `.github/` versionados |
 
 Escala escolhida deliberadamente **enxuta para o MVP**: como o MVP é vetor/ilustração
@@ -108,31 +108,62 @@ escrita nessa tabela — hoje porque a API não existe, e depois por escolha.
 Descrição passo a passo, com os estados de tela e as recusas, em
 `docs/05_FLUXOS/fluxo-marcacao-de-zona.md`.
 
-## Fluxo — API (geração) — **contrato alvo, ainda não implementado**
+## Fluxo — API (geração) — **contrato escrito, função ainda não existe**
 
-Fica descrito aqui porque é o contrato que o motor já cumpre; o endpoint é a peça seguinte.
+> **O contrato vive em [`docs/07_APIS/endpoints.md`](../07_APIS/endpoints.md)** — corpo do
+> pedido, headers, envelope de erro e a tabela de código → status. Esta seção ficou só com o
+> que é arquitetura: o que a função faz, em que ordem e com qual identidade consulta o banco.
+> A tabela de status **não é repetida aqui de propósito**: duas cópias do mesmo contrato
+> divergem no primeiro ajuste, e quando divergem ninguém sabe qual das duas o cliente leu.
 
-1. `POST /products/:id/variants` com `{"sola": "#C0392B", "cabedal": "#111111"}` e
-   `Authorization: Bearer <chave de API do tenant>` (ADR-006)
-2. A função busca o asset-base canônico no Storage
+Rota final: **`POST /api/v1/products/:productId/variants`**, servida pelo arquivo
+`api/v1/products/[productId]/variants.ts` (roteamento por sistema de arquivos da Vercel — não
+há `vercel.json` e não vai haver: um arquivo de rota criado por antecipação seria a segunda
+fonte de verdade do endereço). Ordem das etapas, e a ordem importa:
+
+1. **Autentica antes de ler qualquer coisa** — chave de API do tenant em
+   `Authorization: Bearer` (ADR-006). É desta etapa que sai o `tenant_id`.
+2. Lê o produto e as zonas (`products`, `product_zones`) **já filtrando pelo `tenant_id` da
+   chave**. Produto inexistente e produto de outro tenant respondem igual: 404, nunca 403 —
+   403 confirmaria ao concorrente que aquele id existe.
+3. Busca o asset-base canônico no Storage
    (`tenants/{tenant_id}/products/{product_id}/base.svg` — a definição única do path é
-   `supabase/scripts/caminhoDoAssetBase.ts`)
-3. Aplica os seletores de `product_zones` e troca `fill` de cada zona pedida — zona
-   ausente, cor inválida, zona com gradiente ou zonas sobrepostas devolvem **erro**, nunca
-   200 "quase certo". Os códigos são os de `src/lib/render/erros.ts`, que já é contrato
-4. Devolve SVG direto, ou rasteriza pra PNG (`sharp` ou `resvg`) se `?format=png`
-5. **Não grava em `variants`** — gera sob demanda, toda vez (ver abaixo)
+   `supabase/scripts/caminhoDoAssetBase.ts`).
+4. Passa o canônico e o `{zone_key: cor}` pedido pelo **mesmo** `gerarVarianteDeCor` que o
+   editor usa no preview. Zona ausente, cor inválida, zona com gradiente ou zonas
+   sobrepostas devolvem **erro**, nunca 200 "quase certo".
+5. **Não grava em `variants`** — gera sob demanda, toda vez (motivo mais abaixo).
+
+**Sucesso é o artefato; erro é o envelope.** A assimetria é deliberada:
+
+- **200 devolve o SVG cru** — byte a byte a saída do motor, `Content-Type: image/svg+xml`,
+  **sem envelope JSON**. Envelopar obrigaria escapar e desescapar um documento inteiro, e o
+  modo de falha desse round-trip (mojibake, BOM, `\u` dentro de `<text>`) é **mudança
+  silenciosa do desenho** — a classe exata de falha que o princípio nº1 proíbe. Com o corpo
+  nu, há zero transformações entre a saída do motor e o byte que o cliente grava.
+- **Erro devolve JSON**, sempre no envelope `{ data, error: { code, message }, meta }` de
+  `memory/patterns.md`. Os códigos do motor (`src/lib/render/erros.ts`) são contrato e não
+  mudam; os códigos de transporte (chave, método, corpo, formato, falha interna) os
+  **estendem** sem editá-los. Qual código dá qual status: `docs/07_APIS/endpoints.md`.
+
+`?format=png` **não existe nesta versão**: `?format=` diferente de `svg` é recusa explícita
+com 400, nunca parâmetro ignorado em silêncio — parâmetro ignorado devolveria 200 com um
+artefato que não é o pedido. O porquê de PNG ser entrega própria está em
+`docs/09_BACKLOG/features.md`.
 
 **Autenticação — decidida em 2026-09-08, [ADR-006](../08_DECISOES/adr-006-autenticacao-da-api-de-variante.md):**
 chave de API **por tenant**, guardada em hash, enviada em `Authorization: Bearer`, revogável
 sem derrubar as outras chaves da marca. O JWT de sessão do Supabase não serve aqui: é
 credencial de pessoa (login, expiração, refresh) para um chamador que é máquina. Contrato em
-`docs/07_APIS/autenticacao.md`. **Ainda não implementado** — a função serverless não existe.
+`docs/07_APIS/autenticacao.md`. **Ainda não implementado** — a função serverless não existe,
+e ter o contrato escrito não é tê-la funcionando.
 
 Consequência que o ADR-006 obriga e que vale repetir aqui: a função valida a chave e depois
 consulta com `service_role`, que **bypassa a RLS**. O `tenant_id` sai **sempre** da chave,
-nunca do corpo ou da URL, e o `product_id` é conferido contra ele antes de qualquer outra
-coisa. É o único lugar do sistema onde o isolamento entre marcas não é do Postgres.
+nunca do corpo, da URL ou de header do chamador, e o `product_id` é conferido contra ele
+antes de qualquer outra coisa. É o único lugar do sistema onde o isolamento entre marcas não
+é do Postgres — em toda a outra superfície, esquecer o filtro é inofensivo porque a RLS
+recusa; aqui, esquecer o filtro é o vazamento.
 
 **Cache em `variants` — decidido em 2026-09-08: nada por enquanto.** A tabela existe e fica
 sem uso até haver medição de custo ou latência que justifique o contrário. O motivo é o
@@ -141,7 +172,10 @@ remapeada ou a cor trocada, e o resultado é cor errada num calçado fabricado �
 silenciosa, o modo que este projeto trata como o pior de todos. Gerar é um `parse` + troca de
 `fill` sobre um SVG pequeno; enquanto for barato, correto vence rápido. Reabrir a decisão
 exige número medido, não intuição — e junto dela a regra de invalidação, que é a parte
-difícil (mudar zona, cor padrão ou asset-base invalida o quê?).
+difícil (mudar zona, cor padrão ou asset-base invalida o quê?). Vale notar que não cachear
+**do nosso lado** é metade da decisão: se um CDN cachear a resposta, a variante velha volta
+do mesmo jeito depois de a zona ser remarcada. Por isso a resposta declara `no-store` — o
+header exato e o resto dos cabeçalhos estão em `docs/07_APIS/endpoints.md`.
 
 ## Isolamento multi-tenant (não-negociável — ver `11_SEGURANCA/`)
 
@@ -150,8 +184,11 @@ difícil (mudar zona, cor padrão ou asset-base invalida o quê?).
 - Storage particionado por tenant no path (`tenants/{tenant_id}/...`), em **bucket privado**:
   as policies leem `storage.foldername(name)`, então o path é controle de acesso e não
   convenção de nome de arquivo
-- Nenhuma função serverless aceita `product_id` sem validar que pertence ao
-  `tenant_id` do token autenticado
+- Nenhuma função serverless aceita `product_id` sem validar que pertence ao `tenant_id` da
+  **chave de API** que autenticou a chamada — nunca "token", que neste projeto é o JWT de
+  sessão da pessoa (glossário). A função consulta com `service_role` e por isso não tem a
+  RLS como rede: o isolamento ali é código, e mora num ponto só (ver a seção da API acima e
+  o ADR-006)
 
 ## Motor de render — estado
 
@@ -204,3 +241,15 @@ scripts de provisionamento e os testes. `dom.ts` é o que torna isso possível: 
   serverless usa `service_role` e por isso o isolamento entre marcas passa a ser dela) e
   **nenhum cache em `variants`** até haver medição. Ter deixado as duas em branco funcionou:
   voltaram como decisão explícita, não como convenção que alguém achou no código.
+- **2026-09-08** — o contrato do endpoint **muda de casa** para `docs/07_APIS/endpoints.md`;
+  a seção "Fluxo — API (geração)" encolhe para o resumo de arquitetura (o que a função faz,
+  em que ordem, com qual identidade) e aponta para lá. Ele estava aqui provisoriamente
+  porque não havia `endpoints.md`; mantê-lo nos dois lugares seria escolher, agora, qual
+  dos dois vai envelhecer errado. No mesmo passe: a rota fica fixada como
+  `POST /api/v1/products/:productId/variants`, fica escrito que **200 é o SVG cru e só o
+  erro é envelope** (o texto anterior dizia "devolve SVG direto" e não dizia nada do erro),
+  `?format=png` deixa de ser descrito como se já respondesse e passa a ser 400 explícito com
+  o porquê no backlog, e a linha da API na tabela de stack passa de "não existe ainda" para
+  "contrato escrito, código em curso" — sem afirmar que funciona, porque não funciona. O
+  bullet de isolamento troca "token autenticado" por "chave de API": "token" é sinônimo
+  proibido no glossário justamente porque já significa o JWT de sessão da pessoa.
