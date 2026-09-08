@@ -18,7 +18,8 @@
 -- tenants          (id, nome, slug, tema jsonb, plano, status, created_at)
 -- tenant_members   (id, tenant_id, user_id, papel owner|membro, created_at)
 -- products         (id, tenant_id, nome, base_asset_path, created_at)
--- product_zones    (id, product_id, tenant_id, zone_key, svg_selector, label, cor_default)
+-- product_zones    (id, product_id, tenant_id, zone_key, svg_selector, label, cor_default,
+--                   created_at)   — `created_at` é a única ordenação estável desta tabela
 -- variants         (id, product_id, tenant_id, zone_colors jsonb, rendered_path, created_at)
 -- tenant_api_keys  (id, tenant_id, prefixo único, hash, label, created_by, created_at,
 --                   last_used_at, revoked_at)   — chave de API do tenant, ADR-006

@@ -16,9 +16,9 @@ já faz do lado do front.
 
 ## Índice
 
-Só existe o que está marcado como tal. O resto é a entrega em curso — a lista está aqui
-para que a divisão de responsabilidade seja lida antes de ser escrita, não para descrever
-código que não existe.
+Todo módulo desta tabela existe e tem teste co-locado. O que ainda falta para a API
+responder é o handler — `api/v1/products/[productId]/variants.ts`, que orquestra estes
+módulos na ordem e não decide nada (ver `../README.md`).
 
 | Arquivo | Responsabilidade | Estado |
 |---|---|---|
@@ -29,12 +29,31 @@ código que não existe.
 | `respostaDaApi.ts` | Monta a `Response`: SVG cru no sucesso, envelope JSON no erro | **Existe** |
 | `logDaRequisicao.ts` | A linha de log que conhece o **prefixo** e nunca a chave | **Existe** |
 | `clienteDeServico.ts` | O `SupabaseClient` de `service_role`; recusa ambiente incompleto | **Existe** |
-| `autenticarChaveDeApi.ts` | `Request` → `tenant_id`, ou 401. O ponto único do ADR-006 D3 | a escrever |
-| `carregarProdutoDoTenant.ts` | Produto por `(id, tenant_id da chave)`; ausente ou alheio = 404 | a escrever |
-| `listarZonasDoProdutoDoTenant.ts` | Zonas com filtro de tenant **explícito** | a escrever |
-| `baixarAssetBaseComServiceRole.ts` | `.download(base_asset_path)` direto do bucket privado | a escrever |
-| `registrarUsoDaChave.ts` | `last_used_at` em fire-and-forget, nunca aguardado | a escrever |
+| `autenticarChaveDeApi.ts` | `Request` → `tenant_id`, ou 401. O ponto único do ADR-006 D3 | **Existe** |
+| `carregarProdutoDoTenant.ts` | Produto por `(id, tenant_id da chave)`; ausente ou alheio = 404 | **Existe** |
+| `listarZonasDoProdutoDoTenant.ts` | Zonas com filtro de tenant **explícito** | **Existe** |
+| `baixarAssetBaseComServiceRole.ts` | `.download(base_asset_path)` direto do bucket privado | **Existe** |
+| `registrarUsoDaChave.ts` | `last_used_at` em fire-and-forget, nunca aguardado | **Existe** |
 | `apiNaoImportaOFront.test.ts` | Varredura: proíbe `api/` de importar `src/features/` e `src/lib/supabase/`, e exige que o motor continue sendo importado | **Existe** |
+
+## Guarda que lê o próprio fonte: as duas regras
+
+Quatro módulos daqui têm um teste que abre o próprio `.ts` e exige (ou proíbe) um trecho.
+Não é preciosismo: sob `service_role` não há RLS, então a linha `.eq('tenant_id', …)` é a
+única coisa entre uma marca e o dado da concorrente. Um teste de comportamento com cliente
+falso **não** pega a remoção dela, porque quem refatora ajusta o cliente falso junto.
+
+Duas regras, e as duas saíram de defeito real encontrado nesta pasta:
+
+1. **A guarda lê o código, não a prosa.** Tire os comentários antes de comparar. Uma guarda
+   escrita como `expect(fonte).toContain(".eq('tenant_id'")` fica verde quando alguém apaga a
+   linha e deixa a menção num comentário explicando o que ela fazia — que é exatamente o que
+   se escreve ao remover código. E para identificador **importado**, presença não basta:
+   exija ao menos duas ocorrências no código, porque o `import` sobrevive intacto à remoção
+   da chamada que ele servia.
+2. **Guarda não mutada é guarda não verificada.** Antes de considerá-la pronta, apague a linha
+   que ela protege, rode e veja vermelho; depois restaure. Uma guarda que passa em falso é
+   pior que guarda nenhuma: ela ocupa o lugar da proteção e ainda dá a sensação de que existe.
 
 ## O separador do formato da chave está dentro do alfabeto do segredo
 
