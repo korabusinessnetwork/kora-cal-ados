@@ -3,6 +3,12 @@
 //
 // Tudo o que toca o banco vive dentro de `RotaProtegida` — a autenticação é verificada
 // antes de a tela existir, não dentro dela.
+//
+// A ordem das checagens aqui é deliberada, e já foi o contrário: a configuração do
+// Supabase é conferida DEPOIS de saber qual tela vai abrir, não antes. Conferir antes
+// derrubava o app inteiro por falta de `.env.local` — inclusive o esboço, que não faz
+// uma requisição sequer. Cobrar credencial de quem não vai usar credencial nenhuma é
+// justamente a "prevenção de erro" do princípio nº1 aplicada ao contrário.
 
 import { useState } from 'react';
 import { EsbocoDoEditor } from './esboco/EsbocoDoEditor';
@@ -11,34 +17,50 @@ import { ProvedorDeSessao } from './features/sessao/ContextoDeSessao';
 import { TelaDeProdutos } from './features/produtos/TelaDeProdutos';
 import { RotaProtegida } from './features/sessao/RotaProtegida';
 import { ConfiguracaoAusente, lerConfiguracaoDoSupabase } from './lib/supabase/configuracaoDoSupabase';
-
-type Tela = 'app' | 'esboco';
+import type { Tela } from './telaInicial';
+import { lerTelaDaUrl, urlDaTela } from './telaInicial';
 
 export function App() {
-  const [tela, setTela] = useState<Tela>('app');
+  const [tela, setTela] = useState<Tela>(() => lerTelaDaUrl(window.location.search));
 
-  // Sem `.env.local` o app não sobe. Falhar aqui, com o que fazer escrito na tela, é
-  // melhor que uma tela de login que recusa toda senha sem explicar por quê.
+  // Trocar de tela troca o endereço junto. Sem isso um F5 no esboço devolveria a tela
+  // de login, e o link não serviria para mandar a alguém "abre isto aqui".
+  function irPara(destino: Tela) {
+    setTela(destino);
+    window.history.replaceState(null, '', urlDaTela(destino, window.location.pathname));
+  }
+
+  // O esboço do motor roda sem Supabase: SVG commitado, zero rede, zero sessão. Sai
+  // antes da checagem de configuração de propósito — é o que faz `?tela=esboco`
+  // funcionar num clone recém-baixado, sem conta e sem `.env.local`.
+  if (tela === 'esboco') {
+    return (
+      <>
+        <EsbocoDoEditor />
+        <p className="rodape-telas">
+          <button type="button" onClick={() => irPara('app')}>
+            ← ir para o editor (pede login)
+          </button>
+        </p>
+      </>
+    );
+  }
+
+  // Sem `.env.local` a área protegida não sobe. Falhar aqui, com o que fazer escrito na
+  // tela, é melhor que uma tela de login que recusa toda senha sem explicar por quê.
   const problema = conferirConfiguracao();
   if (problema) {
     return (
       <main className="sessao-aviso">
         <h1>Configuração do Supabase ausente</h1>
         <p>{problema}</p>
-      </main>
-    );
-  }
-
-  if (tela === 'esboco') {
-    return (
-      <>
-        <EsbocoDoEditor />
         <p className="rodape-telas">
-          <button type="button" onClick={() => setTela('app')}>
-            ← voltar para o editor
+          {/* Saída, não beco sem saída: o esboço não precisa de nada disso. */}
+          <button type="button" onClick={() => irPara('esboco')}>
+            ver o esboço do motor (funciona sem conta e sem `.env.local`)
           </button>
         </p>
-      </>
+      </main>
     );
   }
 
@@ -56,8 +78,8 @@ export function App() {
         )}
       </RotaProtegida>
       <p className="rodape-telas">
-        <button type="button" onClick={() => setTela('esboco')}>
-          ver o esboço do motor (sem banco)
+        <button type="button" onClick={() => irPara('esboco')}>
+          ver o esboço do motor (sem banco, sem conta)
         </button>
       </p>
     </ProvedorDeSessao>

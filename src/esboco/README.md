@@ -5,9 +5,29 @@ feita para o dono do projeto **ver** o motor de render funcionando antes de exis
 produto. O nome do diretório é literal de propósito (ADR-003): ninguém deve confundir
 isto com a Fase 1 de verdade.
 
-Rodar: `npm run dev` → <http://localhost:5173> → link **"ver o esboço do motor (sem banco)"**
-no rodapé. Desde a Etapa 2 a raiz do app é a área protegida (sessão + tenant); o esboço
-continua fora dela de propósito — não lê nada do banco, então não há o que proteger.
+## Rodar sem conta
+
+```bash
+npm run dev:esboco     # abre o navegador já no esboço
+```
+
+Ou, à mão: `npm run dev` e acrescente `?tela=esboco` ao endereço —
+<http://localhost:5173/?tela=esboco>. O botão no rodapé de qualquer tela leva ao mesmo
+lugar; a query string existe para o endereço ser digitável e sobreviver a um F5.
+
+**Não pede login e não precisa de `.env.local`.** Até 2026-09-08 precisava das duas
+coisas, e nenhuma delas por um motivo real: a raiz do app é a área protegida, e a
+checagem de configuração do Supabase rodava antes de o `App` sequer decidir que tela
+abrir. Resultado — um clone recém-baixado não conseguia ver o motor funcionando, que é
+exatamente para o que esta tela existe. Hoje o `App` decide a tela primeiro e só cobra
+configuração de quem vai usar o banco (`src/telaInicial.ts`).
+
+Isso **não** é um bypass de autenticação, e a diferença importa: `?tela=esboco` não abre
+nada protegido, abre a única tela que não tem o que proteger — o SVG é commitado
+(`tenis-demo-cru.svg`), o dado é falso (`produtoDemo.ts`) e a tela não faz uma requisição
+sequer. Qualquer outro valor na query cai na área protegida, com o portão inteiro pela
+frente; `src/telaInicial.test.ts` prende essa regra, inclusive o caso do valor
+desconhecido.
 
 | Arquivo | Papel |
 |---|---|

@@ -6,6 +6,7 @@
   "description": "Motor de customizacao de calcados - editor de zonas + API de geracao de variante",
   "scripts": {
     "dev": "vite",
+    "dev:esboco": "vite --open \"/?tela=esboco\"",
     "build": "vite build",
     "test": "vitest run",
     "test:watch": "vitest",
