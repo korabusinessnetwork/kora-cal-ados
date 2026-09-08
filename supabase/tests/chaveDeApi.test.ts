@@ -11,17 +11,19 @@
 // A migration que ele confere é `20260908_chave_de_api_por_tenant.sql`.
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { gerarChaveDeApi } from '../../api/_lib/formatoDaChaveDeApi';
-import { admin, anonimo, limpar, montarCenario, temAmbiente, type Cenario } from './ambiente';
+import {
+  admin,
+  anonimo,
+  limpar,
+  montarCenario,
+  semearChavesDaApi,
+  temAmbiente,
+  type Cenario,
+  type ChavesDoCenario,
+} from './ambiente';
 
 /** As colunas que um owner PODE ler. `hash` está fora, e é o ponto do arquivo. */
 const CAMPOS_PERMITIDOS = 'id, tenant_id, prefixo, label, created_by, created_at, revoked_at';
-
-interface ChavesDoCenario {
-  ativaDeA: { id: string; prefixo: string };
-  revogadaDeA: { id: string; prefixo: string };
-  ativaDeB: { id: string; prefixo: string };
-}
 
 describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de coluna', () => {
   let cenario: Cenario;
@@ -29,7 +31,7 @@ describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de c
 
   beforeAll(async () => {
     cenario = await montarCenario();
-    chaves = await semearChaves(cenario);
+    chaves = await semearChavesDaApi(cenario);
   }, 60_000);
 
   afterAll(async () => {
@@ -159,37 +161,3 @@ describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de c
     });
   });
 });
-
-/**
- * Três chaves: uma ativa e uma revogada no tenant A, uma ativa no tenant B.
- *
- * As chaves saem de `gerarChaveDeApi`, não de string à mão — assim o teste também exerce
- * o formato de verdade contra o banco (comprimento do prefixo, do hash e a unicidade do
- * prefixo). O segredo em claro é descartado aqui mesmo: nada além de `prefixo` e `hash`
- * chega à tabela, que é exatamente o que a Etapa 2 promete.
- */
-async function semearChaves(cenario: Cenario): Promise<ChavesDoCenario> {
-  const inserir = async (tenantId: string, label: string, revogada: boolean) => {
-    const gerada = gerarChaveDeApi('test');
-    const { data, error } = await admin()
-      .from('tenant_api_keys')
-      .insert({
-        tenant_id: tenantId,
-        prefixo: gerada.prefixo,
-        hash: gerada.hash,
-        label,
-        revoked_at: revogada ? new Date().toISOString() : null,
-      })
-      .select('id, prefixo')
-      .single();
-
-    if (error) throw error;
-    return { id: data['id'] as string, prefixo: data['prefixo'] as string };
-  };
-
-  return {
-    ativaDeA: await inserir(cenario.tenantA, 'ativa de A', false),
-    revogadaDeA: await inserir(cenario.tenantA, 'revogada de A', true),
-    ativaDeB: await inserir(cenario.tenantB, 'ativa de B', false),
-  };
-}

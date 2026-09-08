@@ -91,10 +91,20 @@ nem truncado. Chave em terminal vira chave em histórico de shell.
 
 ## Roteiro de `curl`
 
-Substitua `<productId>` pelo id de um produto do tenant. Sem `-i` o corpo sai limpo para
-gravar em arquivo.
+O roteiro completo — 18 passos, com o que cada um prova — está em
+[`roteiroDePassada.md`](roteiroDePassada.md). Aqui ficam só os três que rodam **hoje**, sem
+chave válida. Substitua `<productId>` pelo id de um produto do tenant.
 
-### 1. Sem chave — 401
+### 1. Método errado — 405
+
+```bash
+curl -i "http://localhost:3210/api/v1/products/<productId>/variants"
+```
+
+Esperado: `405`, header `Allow: POST`, `"code": "METODO_NAO_PERMITIDO"`. Se em vez disso vier
+o 404 com `ROTA_NAO_ENCONTRADA_NO_SERVIDOR_LOCAL`, o problema é a URL, não o handler.
+
+### 2. Sem chave — 401
 
 ```bash
 curl -i -X POST "http://localhost:3210/api/v1/products/<productId>/variants" \
@@ -102,9 +112,9 @@ curl -i -X POST "http://localhost:3210/api/v1/products/<productId>/variants" \
   -d '{"sola": "#C0392B"}'
 ```
 
-Esperado: `401` e o envelope de erro com `"code": "CHAVE_AUSENTE"`.
+Esperado: `401`, `"code": "CHAVE_AUSENTE"` e `Cache-Control: no-store`.
 
-### 2. Com chave — o SVG
+### 3. Com chave — o SVG
 
 ```bash
 curl -X POST "http://localhost:3210/api/v1/products/<productId>/variants" \
@@ -116,18 +126,10 @@ curl -X POST "http://localhost:3210/api/v1/products/<productId>/variants" \
 
 Esperado: `200`, `Content-Type: image/svg+xml; charset=utf-8`, e um arquivo que abre no
 navegador. O corpo é byte a byte a saída do motor — é o uso que motivou o corpo nu
-(`docs/07_APIS/endpoints.md`).
+(`docs/07_APIS/endpoints.md`). **Abrir o arquivo e olhar** é o passo 17 do roteiro completo,
+e é o único que nenhum teste substitui.
 
-### 3. Método errado — 405
-
-```bash
-curl -i "http://localhost:3210/api/v1/products/<productId>/variants"
-```
-
-Esperado: `405`, header `Allow: POST`, `"code": "METODO_NAO_PERMITIDO"`. Se em vez disso
-vier o 404 com `ROTA_NAO_ENCONTRADA_NO_SERVIDOR_LOCAL`, o problema é a URL, não o handler.
-
-## De onde vem a chave — e por que o passo 2 ainda não roda
+## De onde vem a chave — e por que o passo 3 ainda não roda
 
 **Não invente a chave.** Ela é gerada por script, e o segredo em claro só aparece uma vez:
 
@@ -143,10 +145,12 @@ gravar, nem o handler tem onde procurar. Observado em 2026-09-08 neste servidor:
 com formato válido mas inexistente responde **500 `FALHA_INTERNA`** (o erro de tabela
 ausente sobe como falha interna, por `api/_lib/autenticarChaveDeApi.ts`), e não o `401
 CHAVE_INVALIDA` que responderia com a tabela no lugar. Enquanto a migration não for
-aplicada, os passos 1 e 3 do roteiro funcionam e o passo 2 não tem como funcionar.
+aplicada, os passos 1 e 2 acima funcionam e o passo 3 não tem como funcionar.
 
 ## Ligações
 
+- [`roteiroDePassada.md`](roteiroDePassada.md) — a passada dirigida inteira, e o que dela
+  já foi observado de fato
 - [`../README.md`](../README.md) — a assinatura Web do handler, a sonda de empacotamento e
   o que já foi verificado de fato
 - [`../_lib/README.md`](../_lib/README.md) — os módulos que o handler orquestra

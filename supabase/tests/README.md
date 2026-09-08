@@ -10,6 +10,7 @@ vê coleção de outra. O que não vive aqui: teste de lógica pura (vai junto d
 | `isolamento.test.ts` | As asserções: leitura cruzada, escrita cruzada, Storage, papel de membro, anônimo |
 | `editorDeZonas.test.ts` | O caminho do editor contra o banco real: gravar zona, reler, e o que a RLS recusa |
 | `chaveDeApi.test.ts` | `tenant_api_keys`: o `hash` que nem o dono lê, o delete que não existe, e a chave da concorrente |
+| `apiDeVariante.test.ts` | A API de variante inteira sobre o banco real: o 200 que recolore só a zona pedida, o 404 do concorrente e os 409 de dado do tenant |
 
 ## Como rodar
 
@@ -58,3 +59,31 @@ credencial comercial de todas as marcas ficar legível ou não.
 
 Continua valendo a regra que criou este teste: SQL que não rodou não é correção provada.
 Toda mudança futura em policy volta a passar por aqui antes de ser considerada feita.
+
+## `apiDeVariante.test.ts` — por que ele não é redundante com o teste do handler
+
+`api/v1/products/[productId]/_variants.test.ts` roda com cliente falso, e cliente falso
+responde o que o teste mandou responder. Ele prova que o handler **pede** a coisa certa:
+tabela, filtros, ordem dos passos. Não prova, e não tem como provar, que o que volta é a
+coisa certa.
+
+Só um banco de verdade prova que o `.eq('tenant_id', …)` de fato recorta a linha, que o
+asset-base baixa do bucket privado com `service_role`, e que o `svg_selector` gravado pelo
+editor resolve no arquivo canônico que está lá dentro. **Sob `service_role` não há RLS** — o
+isolamento passa a ser código nosso, e código nosso é o que erra.
+
+Dois testes daqui não olham status nenhum, e são os que mais importam:
+
+- a variante devolvida é comparada **contra o canônico baixado do Storage**, exigindo que a
+  cor da sola tenha sumido e a do cabedal tenha ficado idêntica. Sem a segunda metade, um
+  seletor que capturasse o calçado inteiro passaria verde e só apareceria quando um cliente
+  abrisse o arquivo;
+- a chave de API é usada como credencial do Supabase e **precisa falhar**. Se fosse aceita, o
+  cliente teria leitura do banco pela porta do front, e o que a nossa função filtra deixaria
+  de importar.
+
+⏳ **Ele também ainda não rodou**, pela mesma migration ausente do `chaveDeApi.test.ts`: sem
+`tenant_api_keys` não existe chave válida, e sem chave válida nenhum dos casos sai do 500.
+
+O que ele **não** cobre: o olho. Nenhuma asserção aqui vê o desenho. Isso é
+`api/_local/roteiroDePassada.md`, passo 17.
