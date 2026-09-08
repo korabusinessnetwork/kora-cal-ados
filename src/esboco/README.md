@@ -34,11 +34,13 @@ desconhecido.
 | `EsbocoDoEditor.tsx` | Tela única. **O único lugar com estado** — os painéis são burros |
 | `PainelDeZonas.tsx` | Lista de zonas, contagem de elementos por seletor, seleção de cor |
 | `PreviewDaVariante.tsx` | Palco: a variante + contorno da zona selecionada + clique no calçado |
-| `PainelDaApi.tsx` | A chamada HTTP equivalente e o relatório da normalização |
+| `PainelDaApi.tsx` | A chamada HTTP equivalente — espelho de `docs/07_APIS/endpoints.md`, não proposta — e o relatório da normalização |
 | `ComparativoDeNormalizacao.tsx` | Antes/depois: o mesmo pedido de cor no arquivo cru e no canônico |
 | `produtoDemo.ts` | O que viria de `products` + `product_zones` — dado falso, não é tenant real. Os `svg_selector` saem de `montarSeletorDeZona`, nunca de string à mão |
 | `tenis-demo-cru.svg` | Asset-base **cru**, sujo de propósito (ver abaixo) |
 | `produtoDemo.test.ts` | Prende a premissa do esboço: o que a tela afirma é verdade |
+| `PainelDaApi.test.tsx` | Prende cada string do contrato mostrado no painel (rota, corpo, envelope, status) |
+| `ComparativoDeNormalizacao.test.tsx` | Prende o comparativo (BUG-011 e BUG-012) |
 | `esboco.css` | Estilo separado do JSX (regra de white-label do CLAUDE.md) |
 
 ## O que o esboço demonstra (e por que cada peça está ali)
@@ -97,6 +99,12 @@ motor (`../lib/render/dom.test.ts`, com `DOMParser` global em vez de jsdom).
 
 `ComparativoDeNormalizacao.test.tsx` prende o comparativo: os dois lados recebem o mesmo
 pedido de cor e um pedido recusado nunca vira `<img src="">` (BUG-011 e BUG-012).
+
+`PainelDaApi.test.tsx` prende o contrato que o painel exibe. Ele existe porque o painel
+mostrou por semanas uma rota, um corpo e uma resposta que **deixaram de valer** na Etapa 1 da
+API, com a suíte inteira verde: nada, em teste nenhum, comparava a tela com
+`docs/07_APIS/endpoints.md`. O esboço é a peça que este projeto usa para conferir o princípio
+nº1 a olho — mostrando contrato morto, ele ensinava errado exatamente onde deveria ensinar.
 
 A Etapa 6 trocou o seletor do cadarço, de prefixo para lista de ids exatos. A equivalência
 está provada na suíte (contagem 4 no cru e 4 no canônico, e os 4 paths recebendo o atributo

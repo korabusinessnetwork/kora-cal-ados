@@ -46,6 +46,23 @@ contrato da rota vive em `docs/07_APIS/endpoints.md`.
 Diretório começado por `_` é **ignorado** pelo roteamento da Vercel — é assim que `_lib/` e
 `_local/` convivem com as rotas sem virar endpoint.
 
+### Todo arquivo de teste dentro de `api/v1/**` começa com `_`
+
+O `_` vale para **arquivo**, não só para diretório, e é o único jeito de um arquivo em `api/`
+não virar endpoint. Consequência que custa caro se passar batido: um `variants.test.ts`
+co-locado ao lado do handler seria **publicado** como `/api/v1/products/:productId/variants.test`
+— um endpoint que ninguém pretendeu criar, que expõe o nome dos casos de teste e que responde
+alguma coisa (ou falha no build) sem nunca ter sido pensado como rota.
+
+Por isso o teste do handler é `_variants.test.ts`. Ele fica co-locado, o vitest o encontra
+igual (o padrão dele é por sufixo `.test.ts`, não por prefixo) e o roteamento não o vê.
+
+Isto foi descoberto pelo servidor local, que deriva a rota do caminho do arquivo exatamente
+como a Vercel: o teste apareceu na lista de rotas dele. `api/_local/servidorLocal.mjs` segue
+listando e avisando sobre arquivo de teste que vire rota, como rede para o dia em que alguém
+criar um sem o `_` — e nunca o esconde, porque esconder aqui esconderia o que apareceria no
+deploy.
+
 ## Não existe `vercel.json`, e não vai existir
 
 O roteamento zero-config já cobre `api/` mais a saída do Vite em `dist/`. Um `vercel.json`

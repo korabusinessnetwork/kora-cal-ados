@@ -17,6 +17,7 @@ import {
   STATUS_POR_CODIGO_DO_MOTOR,
   TRANSPORTE_POR_CODIGO,
   criarFalhaDeTransporte,
+  criarFalhaDeZonaDesconhecida,
   traduzirParaFalhaDaApi,
 } from './traduzirParaFalhaDaApi';
 
@@ -218,5 +219,46 @@ describe('criarFalhaDeTransporte', () => {
 
     expect(falha.status).toBe(400);
     expect(falha.message).toBe('Formato "png" não é suportado. Use format=svg.');
+  });
+});
+
+
+describe('criarFalhaDeZonaDesconhecida — o mesmo código com dois status, e os dois certos', () => {
+  it('a pré-checagem do handler dá 422, e não o 409 da tabela do motor', () => {
+    // Este é o par mais fácil de contradizer do projeto: `ZONA_NAO_ENCONTRADA` vale 422 quando
+    // é o integrador pedindo uma zona que o produto não tem, e 409 quando é o `svg_selector`
+    // gravado que não resolve. As duas linhas moram neste módulo justamente para que ninguém
+    // mude uma sem ver a outra.
+    const falha = criarFalhaDeZonaDesconhecida('A zona "bico" não existe neste produto.');
+
+    expect(falha.codigo).toBe('ZONA_NAO_ENCONTRADA');
+    expect(falha.status).toBe(422);
+    expect(STATUS_POR_CODIGO_DO_MOTOR.ZONA_NAO_ENCONTRADA.status).toBe(409);
+  });
+
+  it('e a mensagem é a de quem chamou — só o handler sabe quais zonas o produto tem', () => {
+    const falha = criarFalhaDeZonaDesconhecida('Zonas deste produto: "sola", "cabedal".');
+
+    expect(falha.message).toBe('Zonas deste produto: "sola", "cabedal".');
+  });
+
+  it('e o tradutor devolve a falha INTACTA, sem rebaixá-la para o 409 do motor', () => {
+    // Sem este comportamento a pré-checagem seria inútil: a falha passaria pelo `catch` do
+    // handler, seria retraduzida pela tabela do motor e o integrador receberia 409 mandando
+    // corrigir o mapeamento de zonas — quando o que ele precisa é corrigir a `zone_key` que
+    // digitou. O 422 existe exatamente para não mandá-lo ao lugar errado.
+    const falha = criarFalhaDeZonaDesconhecida('A zona "bico" não existe neste produto.');
+
+    expect(traduzirParaFalhaDaApi(falha)).toBe(falha);
+    expect(traduzirParaFalhaDaApi(falha).status).toBe(422);
+  });
+
+  it('não é `ErroDeVariante`: é falha de resposta, já com status', () => {
+    // Se fosse `ErroDeVariante`, o `catch` do handler a traduziria pela tabela do motor — 409
+    // de novo. O tipo é o que garante o caminho.
+    const falha = criarFalhaDeZonaDesconhecida('qualquer');
+
+    expect(falha).toBeInstanceOf(FalhaDaApi);
+    expect(falha).not.toBeInstanceOf(ErroDeVariante);
   });
 });

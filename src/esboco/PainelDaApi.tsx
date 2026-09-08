@@ -4,11 +4,20 @@
 // O painel existe para tornar visível o princípio nº1: as duas colunas saem da mesma
 // chamada de `gerarVarianteDeCor`, então o hex daqui é o hex de lá, por construção.
 //
-// ⚠️ O contrato HTTP ainda NÃO está decidido (docs/07_APIS/ está vazio). O envelope segue
-// `memory/patterns.md`; a rota é proposta, não decisão.
+// DE ONDE VEM O CONTRATO MOSTRADO AQUI: `docs/07_APIS/endpoints.md` — rota, corpo,
+// cabeçalhos, envelope de erro e a tabela de status. Ele está fechado desde a Etapa 1, e
+// nada nesta tela decide contrato; quem editar este arquivo confere cada string contra
+// aquele doc. A forma do envelope de erro espelha `api/_lib/respostaDaApi.ts`, que é quem
+// monta a `Response` de verdade — espelha e não importa, porque `src/` vai inteiro para o
+// bundle do navegador e `api/` carrega a `service_role`.
+//
+// Este painel já exibiu, por semanas, um contrato que nunca existiu (rota em português,
+// `zone_colors`/`format` no corpo, sucesso envelopado com `variante_id` e `svg_url`).
+// `PainelDaApi.test.tsx` existe para que isso volte como teste vermelho, e não como
+// descoberta de leitor.
 
 import type { RelatorioDeNormalizacao } from '../lib/render/normalizarSvg';
-import type { ErroDeVariante } from '../lib/render/erros';
+import type { CodigoDeErro, ErroDeVariante } from '../lib/render/erros';
 import { produtoDemo } from './produtoDemo';
 
 interface Props {
@@ -17,44 +26,102 @@ interface Props {
   erro: ErroDeVariante | null;
 }
 
+/** Chave de exemplo, nunca uma chave real. O prefixo é o do exemplo do contrato. */
+const CHAVE_DE_EXEMPLO = 'kora_live_7f3ab902_SEGREDO_DE_EXEMPLO';
+
+/** `meta.version` do envelope — o `VERSAO_DO_ENVELOPE` de `api/_lib/respostaDaApi.ts`. */
+const VERSAO_DO_ENVELOPE = '1';
+
+/**
+ * Timestamp de exemplo, fixo. Na resposta real ele sai de `relogio().toISOString()` em
+ * `respostaDaApi.ts`; aqui um relógio de verdade só faria o painel piscar um número que
+ * ninguém lê, e tiraria a tela da comparação direta com o exemplo do doc.
+ */
+const TIMESTAMP_DE_EXEMPLO = '2026-09-08T10:30:00.000Z';
+
+interface RespostaDeErroMostrada {
+  status: number;
+  texto: string;
+  familia: string;
+}
+
+/**
+ * Status e família por código do motor — cópia da tabela de `docs/07_APIS/endpoints.md`, e
+ * não um import de `api/_lib/traduzirParaFalhaDaApi.ts`: `src/` não pode importar de `api/`.
+ * `Record<CodigoDeErro, ...>` de propósito — código novo no motor vira erro de compilação
+ * aqui, e não status inventado na tela.
+ *
+ * `ZONA_NAO_ENCONTRADA` é 409 e não 422 porque, vindo do MOTOR, ele só acontece com seletor
+ * gravado quebrado — dado do tenant. O 422 de mesmo código é o da pré-checagem do handler,
+ * que o esboço não tem (não há banco aqui).
+ */
+const RESPOSTA_DE_ERRO_POR_CODIGO: Readonly<Record<CodigoDeErro, RespostaDeErroMostrada>> = {
+  COR_INVALIDA: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
+  ZONE_KEY_INVALIDA: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
+  ZONA_NAO_ENCONTRADA: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+  ZONA_NAO_RECOLORIVEL: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+  ZONAS_SOBREPOSTAS: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+  SVG_INVALIDO: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+  SVG_NAO_NORMALIZAVEL: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+};
+
 export function PainelDaApi({ cores, relatorio, erro }: Props) {
+  // As cores vão no TOPO do corpo, uma chave por `zone_key`. Nada que não seja cor entra
+  // aqui: o topo é espaço de nomes do tenant, e um campo nosso colidiria com uma zona de
+  // mesmo nome como cor não aplicada — não como erro (endpoints.md, "O corpo do pedido").
   const requisicao = [
-    `POST /api/produtos/${produtoDemo.id}/variantes`,
+    `POST /api/v1/products/${produtoDemo.id}/variants`,
+    `Authorization: Bearer ${CHAVE_DE_EXEMPLO}`,
+    'Content-Type: application/json',
     '',
-    JSON.stringify({ zone_colors: cores, format: 'svg' }, null, 2),
+    JSON.stringify(cores, null, 2),
   ].join('\n');
 
+  const respostaDeErro = erro ? RESPOSTA_DE_ERRO_POR_CODIGO[erro.codigo] : null;
+
   const resposta = erro
-    ? JSON.stringify(
-        {
-          data: null,
-          error: { code: erro.codigo, message: erro.message },
-          meta: { timestamp: '…', version: '1' },
-        },
-        null,
-        2,
-      )
-    : JSON.stringify(
-        {
-          data: { variante_id: '…', svg_url: '…', zone_colors: cores },
-          error: null,
-          meta: { timestamp: '…', version: '1' },
-        },
-        null,
-        2,
-      );
+    ? [
+        'Content-Type: application/json; charset=utf-8',
+        '',
+        JSON.stringify(
+          {
+            data: null,
+            error: { code: erro.codigo, message: erro.message },
+            meta: { timestamp: TIMESTAMP_DE_EXEMPLO, version: VERSAO_DO_ENVELOPE },
+          },
+          null,
+          2,
+        ),
+      ].join('\n')
+    : [
+        'Content-Type: image/svg+xml; charset=utf-8',
+        'Cache-Control: no-store',
+        '',
+        '<svg xmlns="http://www.w3.org/2000/svg" …>…</svg>',
+      ].join('\n');
 
   return (
     <section className="painel">
       <h2 className="painel__titulo">Chamada equivalente</h2>
       <p className="painel__ajuda">
-        Mesmo motor dos dois lados: o preview ao lado é a saída desta chamada, não uma
-        aproximação dela.
+        Mesmo motor dos dois lados: o corpo do <code>200</code> é, byte a byte, o SVG que o
+        preview ao lado mostra — não uma aproximação dele. Campo que não é cor vai na query
+        string (<code>?format=svg</code>), nunca no topo do corpo, que é o espaço de nomes das{' '}
+        <code>zone_key</code> do tenant.
       </p>
 
       <pre className="codigo codigo--requisicao">{requisicao}</pre>
+
+      {/* A assimetria é o ponto pedagógico: sucesso é o artefato, erro é o envelope. Mostrar
+          o 200 envelopado — como este painel mostrou por semanas — ensina um round-trip de
+          escape/unescape que o contrato proíbe justamente porque ele muda o desenho em
+          silêncio (endpoints.md, "A resposta"). */}
       <pre className={`codigo ${erro ? 'codigo--erro' : 'codigo--ok'}`}>
-        <span className="codigo__status">{erro ? '422 Unprocessable Entity' : '200 OK'}</span>
+        <span className="codigo__status">
+          {respostaDeErro
+            ? `${respostaDeErro.status} ${respostaDeErro.texto} · família "${respostaDeErro.familia}"`
+            : '200 OK · sem envelope, o corpo é o artefato'}
+        </span>
         {'\n'}
         {resposta}
       </pre>

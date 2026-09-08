@@ -122,6 +122,32 @@ export function criarFalhaDeTransporte(codigo: CodigoDeTransporte, mensagem?: st
   });
 }
 
+/**
+ * A ÚNICA linha da tabela de `docs/07_APIS/endpoints.md` que nenhuma das duas tabelas acima
+ * consegue produzir: `ZONA_NAO_ENCONTRADA` com **422**.
+ *
+ * O código é do motor, então não cabe em `TRANSPORTE_POR_CODIGO`; e `STATUS_POR_CODIGO_DO_MOTOR`
+ * mapeia esse mesmo código para 409 de propósito, porque vindo do motor ele significa outra
+ * coisa (seletor gravado quebrado). Os dois status são certos, para origens diferentes — é o
+ * caso ambíguo que o doc descreve, e que o handler resolve pré-checando as `zone_key` pedidas
+ * contra as zonas do produto ANTES de chamar o motor.
+ *
+ * Por que a fábrica mora aqui e não no handler, que é quem faz a pré-checagem: escrever
+ * `new FalhaDaApi('ZONA_NAO_ENCONTRADA', 422, ...)` lá seria a terceira tabela de status do
+ * projeto, na única parte que não tem tabela nenhuma. Aqui, as três linhas do par ficam no
+ * mesmo arquivo, e quem for mudar 409 ou 422 vê as duas de uma vez em vez de mudar uma e
+ * deixar a outra contradizendo o doc.
+ *
+ * A MENSAGEM é do handler, e tem de ser: só ele sabe quais zonas o produto tem, que é a parte
+ * acionável da resposta.
+ */
+export function criarFalhaDeZonaDesconhecida(mensagem: string): FalhaDaApi {
+  return new FalhaDaApi('ZONA_NAO_ENCONTRADA', STATUS_DA_PRE_CHECAGEM_DE_ZONA, mensagem);
+}
+
+/** 422 e não 409: quem corrige é quem fez o pedido, mudando a `zone_key` que enviou. */
+const STATUS_DA_PRE_CHECAGEM_DE_ZONA = 422;
+
 export function traduzirParaFalhaDaApi(erro: unknown): FalhaDaApi {
   // Já traduzida: sai igual. Retraduzir perderia o status já decidido — é o caso do 422 de
   // `ZONA_NAO_ENCONTRADA` da pré-checagem, que aqui viraria 409 e mandaria o integrador

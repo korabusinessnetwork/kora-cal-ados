@@ -5,7 +5,7 @@
 // Marcar zona é a próxima peça, em SVG DOM (ADR-005) — ver README desta pasta.
 
 import { useMemo, useRef, useState } from 'react';
-import { normalizarSvg } from '../lib/render/normalizarSvg';
+import { normalizarSvg, type RelatorioDeNormalizacao } from '../lib/render/normalizarSvg';
 import { gerarVarianteDeCor, relatorioDeZonas } from '../lib/render/gerarVarianteDeCor';
 import { ErroDeVariante } from '../lib/render/erros';
 import { PainelDeZonas } from './PainelDeZonas';
@@ -126,8 +126,15 @@ export function EsbocoDoEditor() {
   );
 }
 
-const vazio = {
+// ANOTADO COM O TIPO DE PROPÓSITO, e não deduzido. Sem a anotação este objeto ficava sem
+// `idsAtribuidos` e o `tsc` passava: o `if (upload.erro) return` acima já estreita
+// `upload.resultado` para não-nulo, então o `?? vazio` é ramo morto que o compilador nunca
+// confere. O defeito só apareceria se alguém mexesse naquele early-return — e apareceria como
+// `relatorio.idsAtribuidos.length` estourando em runtime, longe da causa. Com o tipo escrito,
+// campo novo em `RelatorioDeNormalizacao` vira erro de compilação aqui, hoje.
+const vazio: RelatorioDeNormalizacao = {
   idsRenomeados: [],
+  idsAtribuidos: [],
   declaracoesAchatadas: 0,
   scriptsRemovidos: 0,
   handlersRemovidos: 0,

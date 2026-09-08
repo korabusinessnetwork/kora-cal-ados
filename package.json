@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "dev:esboco": "vite --open \"/?tela=esboco\"",
+    "api:local": "node api/_local/servidorLocal.mjs",
     "build": "vite build",
     "test": "vitest run",
     "test:watch": "vitest",
