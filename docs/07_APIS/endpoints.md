@@ -291,7 +291,7 @@ curl -i -X POST "https://<host>/api/v1/products/a3f1c2d4-5e6b-4a7c-8d9e-0f1a2b3c
   "data": null,
   "error": {
     "code": "ZONAS_SOBREPOSTAS",
-    "message": "As zonas \"cabedal\" e \"lingueta\" dividem 2 elemento(s). Qual cor vale seria decidido pela ordem do pedido — corrija o mapeamento das zonas."
+    "message": "As zonas \"cabedal\" e \"lingueta\" dividem 2 elemento(s). Qual cor vale seria decidido pela ordem do pedido — corrija o mapeamento das zonas. O pedido está correto: o que precisa de correção é o mapeamento de zonas ou o arquivo base deste produto, no editor de zonas da marca. Repetir a chamada não resolve."
   },
   "meta": { "timestamp": "2026-09-08T10:30:00.000Z", "version": "1" }
 }
@@ -299,6 +299,12 @@ curl -i -X POST "https://<host>/api/v1/products/a3f1c2d4-5e6b-4a7c-8d9e-0f1a2b3c
 
 O pedido está correto; o mapeamento das duas zonas é que se sobrepõe. Repetir a chamada não
 resolve — quem resolve é o time da marca, no editor de zonas (BUG-013).
+
+A mensagem tem duas partes coladas, e isso é regra e não acaso: a primeira frase vem do motor
+(nomeia as zonas e quantos elementos elas dividem) e a segunda é acrescentada por
+`api/_lib/traduzirParaFalhaDaApi.ts` a **todo** erro da família "dado do tenant" — sozinha, a
+mensagem do motor fala de elemento e seletor, vocabulário sobre o qual quem integra não tem
+como agir. Os 422 não recebem esse acréscimo: eles já dizem o que mudar no pedido.
 
 ### 400 — `?format=png`
 

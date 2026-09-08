@@ -72,8 +72,25 @@ describe('a service_role nunca chega ao navegador', () => {
     expect(culpados).toEqual([]);
   });
 
+  it('nenhum arquivo de src/ lê `process.env`', () => {
+    // Este caso passou a ser necessário quando o `tsconfig.json` ganhou `"node"` em
+    // `types` (para `api/` compilar): `process.env` COMPILA dentro de `src/` desde então.
+    // Antes o compilador recusava; agora aceita, e quem segura isto é esta varredura.
+    //
+    // O front lê ambiente por `import.meta.env.VITE_*`. Um `process.env` em `src/` vira
+    // `undefined` no navegador — falha silenciosa, sem erro nenhum — ou, se algum bundler
+    // o substituir, embute no bundle uma variável sem prefixo `VITE_`, ou seja, uma que
+    // nunca foi pensada como pública. É por aí que a service_role entraria sem a palavra
+    // `service_role` aparecer em lugar nenhum.
+    const culpados = fontes
+      .filter(({ conteudo }) => /process\.env/.test(conteudo))
+      .map(({ caminho }) => caminho);
+
+    expect(culpados).toEqual([]);
+  });
+
   it('a varredura está mesmo olhando os arquivos (canário)', () => {
-    // Sem isto, um erro no caminho da pasta faria os três testes acima passarem sempre.
+    // Sem isto, um erro no caminho da pasta faria os quatro testes acima passarem sempre.
     expect(fontes.length).toBeGreaterThan(20);
     expect(fontes.some(({ caminho }) => caminho.includes('cliente.ts'))).toBe(true);
   });

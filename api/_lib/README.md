@@ -23,17 +23,18 @@ código que não existe.
 | Arquivo | Responsabilidade | Estado |
 |---|---|---|
 | `tiposDaApi.ts` | `CodigoDeRespostaDaApi` (a união que **estende** `CodigoDeErro` sem editá-lo) e a classe `FalhaDaApi` | **Existe** |
-| `traduzirParaFalhaDaApi.ts` | A tabela código → status → mensagem, num lugar só | a escrever |
+| `traduzirParaFalhaDaApi.ts` | A tabela código → status → mensagem, num lugar só | **Existe** |
 | `formatoDaChaveDeApi.ts` | Gerar e interpretar `kora_<ambiente>_<prefixo>_<segredo>`; o SHA-256 do segredo | **Existe** |
-| `lerCoresPedidas.ts` | Corpo cru → `Record<zone_key, cor>`, delegando a `validarCor`/`validarZoneKey` do motor | a escrever |
-| `respostaDaApi.ts` | Monta a `Response`: SVG cru no sucesso, envelope JSON no erro | a escrever |
-| `logDaRequisicao.ts` | A linha de log que conhece o **prefixo** e nunca a chave | a escrever |
-| `clienteDeServico.ts` | O `SupabaseClient` de `service_role`; recusa ambiente incompleto | a escrever |
+| `lerCoresPedidas.ts` | Corpo cru → `Record<zone_key, cor>`, delegando a `validarCor`/`validarZoneKey` do motor | **Existe** |
+| `respostaDaApi.ts` | Monta a `Response`: SVG cru no sucesso, envelope JSON no erro | **Existe** |
+| `logDaRequisicao.ts` | A linha de log que conhece o **prefixo** e nunca a chave | **Existe** |
+| `clienteDeServico.ts` | O `SupabaseClient` de `service_role`; recusa ambiente incompleto | **Existe** |
 | `autenticarChaveDeApi.ts` | `Request` → `tenant_id`, ou 401. O ponto único do ADR-006 D3 | a escrever |
 | `carregarProdutoDoTenant.ts` | Produto por `(id, tenant_id da chave)`; ausente ou alheio = 404 | a escrever |
 | `listarZonasDoProdutoDoTenant.ts` | Zonas com filtro de tenant **explícito** | a escrever |
 | `baixarAssetBaseComServiceRole.ts` | `.download(base_asset_path)` direto do bucket privado | a escrever |
 | `registrarUsoDaChave.ts` | `last_used_at` em fire-and-forget, nunca aguardado | a escrever |
+| `apiNaoImportaOFront.test.ts` | Varredura: proíbe `api/` de importar `src/features/` e `src/lib/supabase/`, e exige que o motor continue sendo importado | **Existe** |
 
 ## O separador do formato da chave está dentro do alfabeto do segredo
 
