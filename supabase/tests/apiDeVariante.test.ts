@@ -63,8 +63,18 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
       expect(resposta.headers.get('cache-control')).toBe('no-store');
 
       // Sucesso é o ARTEFATO, não um envelope com o artefato dentro.
-      expect(corpo.startsWith('<svg')).toBe(true);
+      //
+      // NÃO se afirma aqui que o corpo COMEÇA com `<svg`, e a primeira versão deste teste
+      // afirmava — vermelho na primeira vez que rodou contra o banco. Um documento SVG
+      // legítimo começa com declaração XML, com comentário ou com espaço em branco (o
+      // asset-base do demo começa com um comentário do próprio arquivo, preservado pela
+      // normalização). Prender a asserção aos primeiros bytes é prender o contrato ao
+      // formato de um fixture. O que o contrato promete é: o documento inteiro, do `<svg`
+      // ao `</svg>`, sem JSON em volta. O `endsWith` é a metade que pega truncamento.
+      expect(corpo).toContain('<svg');
+      expect(corpo.trimEnd().endsWith('</svg>')).toBe(true);
       expect(corpo).not.toContain('"data"');
+      expect(corpo).not.toContain('"error"');
       expect(corpo).toContain('#C0392B');
     });
 

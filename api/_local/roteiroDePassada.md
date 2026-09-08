@@ -91,18 +91,26 @@ da zona.
 
 ## Bloco 5 — o dado do tenant errado (o pedido está certo)
 
-Precisa de um produto com as zonas de defeito marcadas. `npm run semear-zonas` grava as zonas
-do demo; a de gradiente é `detalhe`.
+Precisa de um produto com as zonas de defeito marcadas — dois estados que **o editor se
+recusa a criar** e que o banco pode ter mesmo assim. `npm run semear-zonas` grava as duas no
+produto de demonstração: `detalhe-gradiente` (o retângulo pintado com `url(#brilho)`) e
+`sobreposta`, que aponta para o **primeiro elemento da zona `ilhos`** de propósito.
 
 | # | Corpo | Esperado |
 |---|---|---|
-| 14 | `-d '{"detalhe":"#C0392B"}'` | `409` `ZONA_NAO_RECOLORIVEL` |
-| 15 | duas `zone_key` apontando o mesmo elemento | `409` `ZONAS_SOBREPOSTAS` |
+| 14 | `-d '{"detalhe-gradiente":"#C0392B"}'` | `409` `ZONA_NAO_RECOLORIVEL` |
+| 15 | `-d '{"sobreposta":"#C0392B","ilhos":"#1F6F5C"}'` | `409` `ZONAS_SOBREPOSTAS` |
 | 16 | `zone_key` cujo `svg_selector` não resolve nada | `409` `ZONA_NAO_ENCONTRADA` — o **mesmo código** do passo 13, com status diferente |
 
 A mensagem destes três termina com a orientação de que o conserto é **no editor de zonas** e
 que repetir a chamada não resolve. É metade do valor do 409: sem ela, um cliente com retry
 reprocessa em laço um `svg_selector` que nunca conserta sozinho.
+
+O passo 15 só falha se as duas zonas do par forem pedidas **juntas**. Pedir `sobreposta`
+sozinha devolve `200`: a recusa é sobre o conjunto do pedido, não sobre a zona. Na passada de
+2026-09-08 eu perdi duas tentativas mandando `sobreposta` com `sola` e com `cadarco` — as duas
+deram `200`, corretamente, porque `sobreposta` divide elemento com `ilhos` e com mais ninguém.
+Confira em `product_zones` **qual** é o par antes de montar o corpo.
 
 O par 13 × 16 é o ponto mais fácil de contradizer do projeto. Rode os dois **na mesma
 passada**, um atrás do outro, e compare as duas mensagens lado a lado.
@@ -147,18 +155,87 @@ Com o servidor local ainda no terminal, olhe **todas** as linhas que ele imprimi
       uma chave mal colada pela query apareceria
 - [ ] nenhum hash, nenhum `base_asset_path` (ele contém o `tenant_id`)
 
+## Medição de tempo — o que a passada de 2026-09-08 mediu, e por que o resultado assusta à toa
+
+O passo 4 tem um irmão que não é um `curl` só: **medir**. O ADR-006 D1 promete que o tempo de
+resposta não diz se um prefixo existe. Isso é afirmação sobre relógio, e relógio se mede.
+
+```bash
+K_EXISTE="kora_test_<prefixo REAL de uma chave>_$(printf 'k%.0s' {1..43})"   # segredo errado
+K_NAO="kora_test_deadbeef_$(printf 'k%.0s' {1..43})"                          # prefixo que não existe
+medir() {
+  for i in $(seq 1 12); do
+    curl -s -o /dev/null -w '%{time_total}\n' -X POST "$API/$PRODUTO/variants" \
+      -H "Authorization: Bearer $1" -H 'Content-Type: application/json' -d '{"sola":"#C0392B"}'
+  done | sort -n | awk '{v[NR]=$1} END {printf "mediana=%s\n", v[int(NR/2)+1]}'
+}
+medir "$K_EXISTE"; medir "$K_NAO"; medir 'nada'
+```
+
+Medido em 2026-09-08, 12 amostras cada:
+
+| Chave enviada | mediana |
+|---|---|
+| prefixo que **existe**, segredo errado | 74,8 ms |
+| prefixo que **não existe**, formato válido | 72,8 ms |
+| lixo sem formato de chave | 12,8 ms |
+
+**As duas primeiras são indistinguíveis, e é isso que o ADR-006 D1 exige.** A terceira é ~6×
+mais rápida, e à primeira vista parece um vazamento — não é: ela separa "chave bem formada"
+de "chave malformada", e o formato da chave está **publicado** em
+`docs/07_APIS/autenticacao.md`. O atacante não aprende nada que já não estivesse no doc.
+
+O que seria vazamento é a primeira linha destoar da segunda — aí o tempo diria quais prefixos
+existem, e o prefixo é só 8 caracteres hex. Se um dia essas duas divergirem, o suspeito é uma
+saída antecipada nova em `autenticarChaveDeApi.ts`: hoje a função consulta o banco, calcula o
+hash e compara **mesmo quando já sabe que vai recusar**, de propósito.
+
+## Observação da passada: recusa não registra prefixo no log
+
+Toda linha de 401 sai com `prefixo=ausente`, inclusive quando a chave enviada tinha um prefixo
+real. É consequência do desenho: o prefixo só existe depois que `autenticarChaveDeApi`
+devolve, e ela não devolve nada quando recusa. Custo: com um cliente reclamando de 401, o log
+não diz **qual** chave ele mandou. Não é defeito — é um trade-off que ninguém tinha escrito.
+
 ## O que já foi feito, e o que falta
 
-| Passo | Estado |
-|---|---|
-| 1, 2, 3, 4, 6 | ✅ observados em 2026-09-08 contra `npm run api:local` |
-| Bloco 7 | ✅ observado na mesma passada: zero ocorrências de `kora_live` no log, `rota=` sem query |
-| 5, 7, 8, 9, 10–18 | ⏳ **bloqueados**: dependem de uma chave válida, e a migration `supabase/migrations/20260908_chave_de_api_por_tenant.sql` ainda não foi aplicada ao projeto real |
+Passada completa em **2026-09-08**, com a migration já aplicada, contra o Supabase real e o
+produto de demonstração (`aurora-demo` / "Runner 2026"):
 
-Enquanto a tabela `tenant_api_keys` não existir, uma chave de formato válido responde `500
-FALHA_INTERNA` em vez de `401 CHAVE_INVALIDA`: o erro de tabela ausente sobe como falha
-interna. Aplicada a migration, refaça o roteiro **do passo 1**, não a partir do 5 — o
-comportamento dos primeiros muda quando a tabela passa a existir.
+| Passo | Resultado observado |
+|---|---|
+| 1 GET | ✅ `405` + `allow: POST` |
+| 2 sem chave | ✅ `401 CHAVE_AUSENTE` + `cache-control: no-store` |
+| 3 × 4 lixo × formato válido inexistente | ✅ `diff` **vazio** — respostas idênticas |
+| 5 revogada × inventada | ✅ `diff` **vazio** |
+| 6 chave na query com header válido | ✅ `401 CHAVE_AUSENTE` — o header não é lido |
+| 8 produto inexistente | ✅ `404 PRODUTO_NAO_ENCONTRADO` |
+| 10 corpo vazio | ✅ `400 CORPO_INVALIDO` |
+| 11 `?format=png` | ✅ `400 FORMATO_NAO_SUPORTADO` |
+| 12 cor inválida | ✅ `422 COR_INVALIDA`, sem falar em editor |
+| 13 zona inexistente | ✅ `422 ZONA_NAO_ENCONTRADA` + a lista das 6 zonas do produto |
+| 14 gradiente | ✅ `409 ZONA_NAO_RECOLORIVEL` + a orientação de editor |
+| 15 sobreposição (`sobreposta` + `ilhos`) | ✅ `409 ZONAS_SOBREPOSTAS` |
+| 17 o 200 e o arquivo | ✅ SVG de 3.464 bytes, abre no navegador |
+| 18 cabeçalhos | ✅ `image/svg+xml; charset=utf-8` + `no-store` |
+| Bloco 7 log | ✅ 0 ocorrências do segredo, 0 `rota=` com query, 0 `base_asset_path`; só `prefixo=` de 8 caracteres |
+| Medição de tempo | ✅ ver a seção acima |
+
+**A prova mais forte do passo 17 não é o status: é o `diff`.** Comparando o canônico baixado
+do Storage com a variante devolvida pela API, **duas linhas diferem — a mesma linha, antes e
+depois** — e a única mudança dentro dela é `fill="#2E2E33"` → `fill="#C0392B"` no elemento
+`zona-sola`. Todo o resto do documento é byte a byte igual. É a forma verificável de "mudou a
+sola e **nada mais**".
+
+```bash
+diff canonico-original.svg variante-sola-vermelha.svg | grep -c '^[<>]'   # 2
+```
+
+Faltam: **7** (a chave de API contra o Supabase) e **9** (o 404 do concorrente comparado com
+o de um id inventado) — os dois estão cobertos por `supabase/tests/apiDeVariante.test.ts`, que
+roda verde contra o mesmo banco, e não foram repetidos à mão. **16** (seletor gravado que não
+resolve) precisa de uma zona quebrada de propósito, que o produto de demonstração não tem —
+também coberto pelo teste automatizado.
 
 ## Ligações
 

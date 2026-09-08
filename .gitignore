@@ -4,3 +4,6 @@ dist/
 .env.local
 *.log
 scripts/variante-teste.svg
+
+# Cache do CLI do Supabase (criado por `npx supabase`), nunca versionado
+supabase/.temp/

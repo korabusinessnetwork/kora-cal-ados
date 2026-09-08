@@ -46,11 +46,12 @@ antes de qualquer `svg_selector` gravado repointar em silêncio.
 
 Rodar: `npm run test:banco`.
 
-⏳ **`chaveDeApi.test.ts` ainda NÃO rodou** — depende de
-`20260908_chave_de_api_por_tenant.sql`, que está escrita e não aplicada. Enquanto a tabela
-`tenant_api_keys` não existir, ele falha com tabela inexistente, e não pula: pular exigiria
-o ambiente ausente, e o ambiente está presente. Não confunda o verde do `npm test` com
-prova — lá ele é pulado por falta das variáveis, como todos os daqui.
+✅ **`chaveDeApi.test.ts` rodou verde em 2026-09-08**, junto com `apiDeVariante.test.ts`,
+depois de a migration `20260908_chave_de_api_por_tenant.sql` ser aplicada ao projeto real:
+`npm run test:banco` = **4 arquivos, 45 testes, todos passando**. Antes disso ele não pulava,
+falhava — pular exigiria o ambiente ausente, e o ambiente estava presente. Continua valendo:
+não confunda o verde do `npm test` com prova, porque lá ele é pulado por falta das variáveis,
+como todos os daqui.
 
 O que ele existe para provar é exatamente o que cliente falso não alcança: **privilégio de
 coluna não existe em mock**. Um teste unitário de `criarChaveDeApi` passaria idêntico num
@@ -82,8 +83,12 @@ Dois testes daqui não olham status nenhum, e são os que mais importam:
   cliente teria leitura do banco pela porta do front, e o que a nossa função filtra deixaria
   de importar.
 
-⏳ **Ele também ainda não rodou**, pela mesma migration ausente do `chaveDeApi.test.ts`: sem
-`tenant_api_keys` não existe chave válida, e sem chave válida nenhum dos casos sai do 500.
+✅ **Rodou verde em 2026-09-08**, na primeira vez que a migration existiu no banco. Um único
+caso nasceu vermelho, e o defeito era do teste: ele afirmava que o corpo do 200 **começa** com
+`<svg`, e um documento SVG legítimo pode começar com declaração XML ou comentário — o
+asset-base do demo começa com um comentário do próprio arquivo. A asserção agora é `<svg`
+presente e `</svg>` no fim, que é o contrato ("o documento inteiro, sem JSON em volta") e
+ainda pega truncamento. Nenhum defeito de produto: o handler estava certo desde a Etapa 5.
 
 O que ele **não** cobre: o olho. Nenhuma asserção aqui vê o desenho. Isso é
 `api/_local/roteiroDePassada.md`, passo 17.

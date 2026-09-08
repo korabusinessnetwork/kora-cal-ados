@@ -1,9 +1,18 @@
 # `api/` — a função serverless que gera a variante
 
-> **Estado: em construção.** Nesta etapa existem só o contrato escrito e os índices. O
-> handler ainda não foi escrito, e nada aqui está publicado. Contrato escrito não é função
-> funcionando — ver `docs/07_APIS/endpoints.md` para o contrato e
-> `docs/08_DECISOES/adr-006-autenticacao-da-api-de-variante.md` para a autenticação.
+> **Estado: funciona localmente, não está publicado.** Em 2026-09-08 o endpoint devolveu
+> `200` com o SVG recolorido por HTTP real, contra o Supabase de produção, rodando em
+> `npm run api:local` — a passada inteira está em `_local/roteiroDePassada.md` e a
+> integração automatizada em `../supabase/tests/apiDeVariante.test.ts` (45/45 verdes por
+> `npm run test:banco`).
+>
+> **Nada aqui foi publicado na Vercel, e isso não é detalhe:** o servidor local carrega o
+> handler pelo Vite, e a Vercel o empacotaria com esbuild + node-file-trace. Rodar local não
+> prova empacotamento — a lista do que ele **não** prova está em `_local/README.md`, e o
+> risco do `jsdom` continua aberto até um deploy existir.
+>
+> Contrato em `docs/07_APIS/endpoints.md`; autenticação em
+> `docs/08_DECISOES/adr-006-autenticacao-da-api-de-variante.md`.
 
 Este diretório é a **API que o produto vende**: o sistema da marca calçadista manda as cores
 e recebe o modelo pintado. O editor (`src/`) existe para produzir o dado que ela consome.

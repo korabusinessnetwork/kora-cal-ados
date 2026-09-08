@@ -129,23 +129,33 @@ navegador. O corpo é byte a byte a saída do motor — é o uso que motivou o c
 (`docs/07_APIS/endpoints.md`). **Abrir o arquivo e olhar** é o passo 17 do roteiro completo,
 e é o único que nenhum teste substitui.
 
-## De onde vem a chave — e por que o passo 3 ainda não roda
+## De onde vem a chave
 
 **Não invente a chave.** Ela é gerada por script, e o segredo em claro só aparece uma vez:
 
 ```bash
-npm run criar-chave
+npm run criar-chave -- --tenant <slug> --ambiente test --label "para que serve"
+npm run revogar-chave -- --prefixo <8 caracteres>
 ```
 
-(`supabase/scripts/criarChaveDeApi.ts`; para revogar, `npm run revogar-chave`.)
+(`supabase/scripts/criarChaveDeApi.ts` e `revogarChaveDeApi.ts`.) O `--tenant` é o **slug**,
+não o nome comercial.
 
-**Aviso: a migration `supabase/migrations/20260908_chave_de_api_por_tenant.sql` ainda não
-foi aplicada**, então hoje não existe tabela de chaves no banco — nem o script tem onde
-gravar, nem o handler tem onde procurar. Observado em 2026-09-08 neste servidor: uma chave
-com formato válido mas inexistente responde **500 `FALHA_INTERNA`** (o erro de tabela
-ausente sobe como falha interna, por `api/_lib/autenticarChaveDeApi.ts`), e não o `401
-CHAVE_INVALIDA` que responderia com a tabela no lugar. Enquanto a migration não for
-aplicada, os passos 1 e 2 acima funcionam e o passo 3 não tem como funcionar.
+Guarde a chave numa variável de shell, nunca num arquivo do repositório. O jeito de manter o
+segredo fora do terminal — e fora de qualquer transcript — é redirecionar a saída do script
+para um arquivo temporário e ler dele:
+
+```bash
+npm run criar-chave -- --tenant aurora-demo --ambiente test --label local > /tmp/k.txt
+CHAVE=$(grep -o 'kora_test_[A-Za-z0-9_-]*' /tmp/k.txt | tail -1)
+```
+
+**A migration `20260908_chave_de_api_por_tenant.sql` foi aplicada ao projeto real em
+2026-09-08**, e desde então os três passos acima rodam de verdade — o passo 3 devolveu
+`200` com o SVG. Antes disso, uma chave de formato válido respondia `500 FALHA_INTERNA` (o
+erro de tabela ausente subindo como falha interna) em vez de `401 CHAVE_INVALIDA`; fica
+registrado porque é o sintoma de "a migration não rodou neste banco", e vai aparecer de novo
+em qualquer projeto Supabase novo.
 
 ## Ligações
 
