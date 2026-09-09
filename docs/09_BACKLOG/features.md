@@ -182,8 +182,11 @@ passa a ser possível a qualquer momento.
 
 ## Calçado manipulável — girar o modelo com o mouse, em qualquer ângulo
 
-**Fase**: não atribuída. A rota escolhida (B ou A, abaixo) decide se isto é evolução da
-Fase 2 ou uma reabertura do ADR-001 — e essa escolha ainda não foi feita.
+**Fase**: não atribuída. **Rota escolhida pelo dono em 2026-09-09: (A) 3D de verdade** — a
+decisão e a arquitetura estão em `docs/08_DECISOES/adr-007-modelo-3d-manipulavel.md`, que
+supera em parte o “MVP vetor-only” do ADR-001 e resolve a objeção do princípio nº1
+que esta entrada levantou contra A. **A implementação está bloqueada num insumo que não
+existe:** não há um único glTF neste projeto.
 
 **O que é**: hoje o editor mostra **uma vista fixa** do calçado. A pessoa clica nos
 elementos e marca zonas (isso funciona, ADR-005 e `05_FLUXOS/fluxo-marcacao-de-zona.md`),
@@ -228,7 +231,13 @@ produto real, ou o primeiro cliente cujo catálogo já tem spin de e-commerce pr
 caso a rota B fica barata, porque o insumo já existe).
 
 **Perguntas em aberto**:
-- Rota B ou A? Enquanto isso não for decidido, nada mais aqui pode ser decidido.
+- ~~Rota B ou A?~~ **Respondida em 2026-09-09: A** (ADR-007). As perguntas de B abaixo ficam
+  registradas porque B continua sendo a rota mais barata, e é para onde voltar se o modelo
+  3D de demonstração nunca aparecer.
+- **De onde vem o modelo 3D?** É a única pergunta que trava a entrega inteira, e é do dono:
+  CAD da marca exportado para glTF (grátis, se a marca tiver), modelar um só para demo
+  (tempo ou algumas centenas de reais), ou comprar pronto com licença comercial. Tabela de
+  custo e recomendação no ADR-007.
 - Em B, a zona é **por vista** (cada vista tem seus ids e seu mapeamento) ou **por produto**
   (uma `zone_key` que atravessa as vistas, e o editor marca em cada uma)? A segunda é o que
   a pessoa espera; a primeira é o que o schema de hoje comporta.
@@ -242,5 +251,7 @@ caso a rota B fica barata, porque o insumo já existe).
 - A API entra nisso ou fica de fora? Se o cliente pede a variante e recebe uma vista só, o
   editor manipulável passa a mostrar algo que a API não entrega.
 
-**Status**: capturada, não especificada. Registrada em 2026-09-09 a pedido do dono, depois
-de uma verificação que confirmou ausência total na documentação.
+**Status**: rota decidida (A, ADR-007), **não especificada**. Registrada em 2026-09-09 a
+pedido do dono, depois de uma verificação que confirmou ausência total na documentação; a
+rota foi escolhida no mesmo dia. A spec só pode ser escrita depois de existir o modelo 3D de
+demonstração — antes disso seria construir um motor sem nunca ter visto o combustível.

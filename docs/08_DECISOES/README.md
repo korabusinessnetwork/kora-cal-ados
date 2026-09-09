@@ -22,12 +22,14 @@
 | Arquivo | Decisão | Status |
 |---|---|---|
 | `adr-000-template.md` | TEMPLATE — copie para criar um ADR novo | — |
-| `adr-001-stack-e-motor-de-render.md` | React+Vite+Supabase+Vercel, MVP vetor-only | Aceito (parte do Fabric.js supersedida pelo ADR-005) |
+| `adr-001-stack-e-motor-de-render.md` | React+Vite+Supabase+Vercel, MVP vetor-only | Aceito (Fabric.js supersedido pelo ADR-005; “vetor-only” pelo ADR-007) |
 | `adr-002-multi-tenant-white-label.md` | Multi-tenant desde o schema, white-label por tenant | Aceito |
 | `adr-003-organizacao-para-ia.md` | Projeto organizado para leitura de agente, não de humano | Aceito |
 | `adr-004-contrato-de-zona-e-normalizacao-de-svg.md` | Zona = conjunto de elementos; SVG normalizado no upload | Aceito |
 | `adr-005-editor-de-zonas-em-svg-dom.md` | Editor em SVG DOM (sem Fabric.js); id cunhado na normalização; seletor = lista de ids exatos | Aceito |
-| `adr-006-autenticacao-da-api-de-variante.md` | API de variante autentica por chave de API **por tenant**; `tenant_id` vem da chave, nunca do chamador | Aceito — **não implementado** |
+| `adr-006-autenticacao-da-api-de-variante.md` | API de variante autentica por chave de API **por tenant**; `tenant_id` vem da chave, nunca do chamador | Aceito — implementado (Etapas 1–6, 2026-09-08) |
+
+| `adr-007-modelo-3d-manipulavel.md` | Calçado 3D manipulável: glTF como artefato, recolor por `baseColorFactor`, **modo cor chapa** como o modo que verifica o princípio nº1, zona = lista de nomes de malha | Aceito — **bloqueado no insumo** (não existe glTF no projeto) |
 
 Numeração é sequencial e nunca reciclada. Espelho deste índice em `memory/decisions.md`
 — os dois precisam estar em sync.

@@ -66,12 +66,13 @@ Architecture Decision Record (ADR) é um documento que captura uma escolha arqui
 
 | ID | Título | Status | Data | Supersede/Supersedido por |
 |---|---|---|---|---|
-| [ADR-001](../docs/08_DECISOES/adr-001-stack-e-motor-de-render.md) | Stack e motor de renderização (vetor-first) | Aceito | 2026-08-12 | — |
+| [ADR-001](../docs/08_DECISOES/adr-001-stack-e-motor-de-render.md) | Stack e motor de renderização (vetor-first) | Aceito | 2026-08-12 | Supersedido em parte por ADR-005 (Fabric.js) e por ADR-007 (“vetor-only”) |
 | [ADR-002](../docs/08_DECISOES/adr-002-multi-tenant-white-label.md) | Estratégia multi-tenant e white-label | Aceito | 2026-08-12 | — |
 | [ADR-003](../docs/08_DECISOES/adr-003-organizacao-para-ia.md) | Organização do projeto para agente de IA | Aceito | 2026-08-12 | — |
 | [ADR-004](../docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md) | Contrato de zona e normalização de SVG | Aceito | 2026-08-12 | — |
 | [ADR-005](../docs/08_DECISOES/adr-005-editor-de-zonas-em-svg-dom.md) | Editor de zonas em SVG DOM, e quem cunha o `id` | Aceito | 2026-09-05 | Supersede ADR-001 em parte (só Fabric.js) |
-| [ADR-006](../docs/08_DECISOES/adr-006-autenticacao-da-api-de-variante.md) | Autenticação da API de variante: chave por tenant | Aceito — **não implementado** | 2026-09-08 | — |
+| [ADR-006](../docs/08_DECISOES/adr-006-autenticacao-da-api-de-variante.md) | Autenticação da API de variante: chave por tenant | Aceito — implementado | 2026-09-08 | — |
+| [ADR-007](../docs/08_DECISOES/adr-007-modelo-3d-manipulavel.md) | Calçado 3D manipulável, e onde o princípio nº1 passa a ser verificado | Aceito — **bloqueado no insumo** | 2026-09-09 | Supersede ADR-001 em parte (só “vetor-only”) |
 
 ## O que cada ADR decidiu, e o que isso obriga no código
 
@@ -81,12 +82,13 @@ descobre a regra depois de já ter violado.
 
 | ADR | A decisão | O que ela proíbe no código |
 |---|---|---|
-| ADR-001 | React + Vite + Supabase + Vercel Functions; MVP **vetor-only** (nada de foto real na Fase 1) | Dependência de canvas/rasterização no editor; segmentação de foto |
+| ADR-001 | React + Vite + Supabase + Vercel Functions; MVP **vetor-only** (nada de foto real na Fase 1) | Dependência de canvas/rasterização **para produto SVG**; segmentação de foto. O ADR-007 abre WebGL **só para produto 3D** — no palco de um produto SVG a proibição continua inteira, e é o que impede o preview vetorial de virar canvas rasterizado |
 | ADR-002 | Multi-tenant com RLS por `tenant_id` em toda tabela; white-label vindo do tenant | Marca, cor, logo ou regra de cliente hardcodada; tabela nova sem RLS |
 | ADR-003 | O projeto é escrito e lido por agentes: um termo um nome, arquivo pequeno, README de índice em todo diretório, comentário explica o porquê | Nome criativo (`magicColorEngine`); sinônimo "só neste arquivo"; convenção implícita não escrita |
 | ADR-004 | Normalizar o SVG **antes** do Storage; zona endereça **conjunto** de elementos; zona não aplicada é **erro**, nunca aviso | `getElementById` + `setAttribute('fill')`; responder 200 com variante "quase certa"; `console.warn` como tratamento de falha |
 | ADR-005 | Editor manipula SVG no DOM (Fabric.js **não entra no projeto**); o `id` nasce na normalização; `svg_selector` é lista de ids exatos; o canônico é **imutável** e o editor é somente-leitura sobre ele | Cunhar id no editor; regravar o asset ao marcar zona; seletor de prefixo (`[id^="..."]`); pintar o preview por CSS |
 | ADR-006 | A API de variante autentica por **chave de API do tenant** (hash no banco, header `Authorization: Bearer`, revogável); o `tenant_id` sai da chave e a função valida o `product_id` contra ele antes de tudo | Aceitar `tenant_id` vindo do corpo/URL/header do chamador; chave em query string; chave guardada em claro ou reexibida; logar a chave (só o prefixo); responder 403 para recurso de outro tenant (é 404) |
+| ADR-007 | Produto 3D é **glTF**; recolorir é escrever `baseColorFactor`, nunca renderizar no servidor; o **modo cor chapa** (unlit) é onde “cor no editor = cor na API” é verificável por pixel; zona 3D é **lista de nomes de malha exatos**, nascidos na normalização; material compartilhado é separado no provisionamento | Render 3D no servidor; aprovar cor no modo sombreado; escrever sRGB direto em `baseColorFactor` (é linear — a conversão mora em uma função só); seletor de malha por prefixo; nomear malha no editor; migrar produto SVG para 3D |
 
 ### ADR-005 em detalhe, porque é o que rege todo o código do editor
 
@@ -256,6 +258,16 @@ alternativa razoável descartada, e um agente que não as encontre vai refazer a
 
 ## Atualizações deste documento
 
+- **2026-09-09** — entra o **ADR-007** (calçado 3D manipulável). O dono escolheu a rota A —
+  3D de verdade, não carrossel de vistas 2D — e o ADR existe sobretudo para resolver a
+  objeção que a escolha levantava: em cena sombreada o pixel não é o hex, e o princípio nº1
+  deixaria de ser verificável. A saída tem três partes: o **artefato** continua sendo editado,
+  não renderizado, no servidor (glTF é JSON); o **modo cor chapa** devolve a igualdade de
+  pixel onde ela precisa existir; e a conversão sRGB→linear vira função única com teste de
+  ida e volta, porque errá-la produz cor plausível e errada — o modo de falha silencioso que
+  o projeto existe para não ter. No mesmo passe, duas correções de índice: o ADR-006 estava
+  marcado “não implementado” desde 2026-09-08, quando foi implementado inteiro, e a
+  linha do ADR-001 não registrava a supersessão parcial do “vetor-only”.
 - **2026-09-08** — entram as decisões de execução do **contrato da API de variante** (Etapa 1,
   contrato e README; a função ainda não existe): a rota `POST /api/v1/products/:productId/variants`,
   "sucesso é o artefato, erro é o envelope", a família "dado do tenant" em 409, a ausência

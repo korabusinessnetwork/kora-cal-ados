@@ -5,7 +5,9 @@
 **Decisores**: Matheus Bonato
 **Supersede**: (nenhum — primeira decisão do projeto)
 **Supersedido por**: ADR-005, **parcialmente** — só a escolha de Fabric.js para o editor.
-O resto (React+Vite, Supabase, Vercel Functions, MVP vetor-only) continua vigente.
+E ADR-007, **parcialmente** — só o “MVP vetor-only”, que passa a admitir produto 3D ao
+lado do vetorial (nenhum produto SVG é migrado). O resto (React+Vite, Supabase, Vercel
+Functions) continua vigente.
 
 ---
 
