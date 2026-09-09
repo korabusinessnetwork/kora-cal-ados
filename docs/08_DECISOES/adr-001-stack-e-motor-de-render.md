@@ -6,8 +6,9 @@
 **Supersede**: (nenhum — primeira decisão do projeto)
 **Supersedido por**: ADR-005, **parcialmente** — só a escolha de Fabric.js para o editor.
 E ADR-007, **parcialmente** — só o “MVP vetor-only”, que passa a admitir produto 3D ao
-lado do vetorial (nenhum produto SVG é migrado). O resto (React+Vite, Supabase, Vercel
-Functions) continua vigente.
+lado do vetorial (nenhum produto SVG é migrado). E ADR-008, **parcialmente** — o “MVP sem
+componente de IA” deixa de valer no modo generativo, em que o prompt escolhe peças de um
+acervo. O resto (React+Vite, Supabase, Vercel Functions) continua vigente.
 
 ---
 

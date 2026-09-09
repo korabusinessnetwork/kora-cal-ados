@@ -73,6 +73,7 @@ Architecture Decision Record (ADR) é um documento que captura uma escolha arqui
 | [ADR-005](../docs/08_DECISOES/adr-005-editor-de-zonas-em-svg-dom.md) | Editor de zonas em SVG DOM, e quem cunha o `id` | Aceito | 2026-09-05 | Supersede ADR-001 em parte (só Fabric.js) |
 | [ADR-006](../docs/08_DECISOES/adr-006-autenticacao-da-api-de-variante.md) | Autenticação da API de variante: chave por tenant | Aceito — implementado | 2026-09-08 | — |
 | [ADR-007](../docs/08_DECISOES/adr-007-modelo-3d-manipulavel.md) | Calçado 3D manipulável, e onde o princípio nº1 passa a ser verificado | Aceito — **bloqueado no insumo** | 2026-09-09 | Supersede ADR-001 em parte (só “vetor-only”) |
+| [ADR-008](../docs/08_DECISOES/adr-008-calcado-gerado-sobre-acervo-de-pecas.md) | Calçado gerado por prompt sobre acervo de peças, e por que a zona nasce pronta | Aceito — **bloqueado no acervo** | 2026-09-09 | Supersede ADR-001 em parte (só “sem IA”); completa o ADR-007 |
 
 ## O que cada ADR decidiu, e o que isso obriga no código
 
@@ -89,6 +90,7 @@ descobre a regra depois de já ter violado.
 | ADR-005 | Editor manipula SVG no DOM (Fabric.js **não entra no projeto**); o `id` nasce na normalização; `svg_selector` é lista de ids exatos; o canônico é **imutável** e o editor é somente-leitura sobre ele | Cunhar id no editor; regravar o asset ao marcar zona; seletor de prefixo (`[id^="..."]`); pintar o preview por CSS |
 | ADR-006 | A API de variante autentica por **chave de API do tenant** (hash no banco, header `Authorization: Bearer`, revogável); o `tenant_id` sai da chave e a função valida o `product_id` contra ele antes de tudo | Aceitar `tenant_id` vindo do corpo/URL/header do chamador; chave em query string; chave guardada em claro ou reexibida; logar a chave (só o prefixo); responder 403 para recurso de outro tenant (é 404) |
 | ADR-007 | Produto 3D é **glTF**; recolorir é escrever `baseColorFactor`, nunca renderizar no servidor; o **modo cor chapa** (unlit) é onde “cor no editor = cor na API” é verificável por pixel; zona 3D é **lista de nomes de malha exatos**, nascidos na normalização; material compartilhado é separado no provisionamento | Render 3D no servidor; aprovar cor no modo sombreado; escrever sRGB direto em `baseColorFactor` (é linear — a conversão mora em uma função só); seletor de malha por prefixo; nomear malha no editor; migrar produto SVG para 3D |
+| ADR-008 | O prompt vira **escolha sobre um acervo de peças** mais estilização, validada contra o acervo antes de qualquer uso; o calçado gerado é uma **composição** (peças + cor + parâmetros), não uma malha guardada; **cada peça é uma zona**, e no modo gerado não há marcação; peça só combina com peça da mesma **forma**; acervo do tenant é privado sob RLS | Confiar em id de peça vindo do modelo sem validar contra o acervo (id inexistente é **recusa**, nunca calçado com buraco); gerar geometria por IA; guardar a malha montada em vez da composição; misturar peças de formas diferentes; expor peça de um tenant no catálogo de outro; construir o prompt antes do acervo e da composição |
 
 ### ADR-005 em detalhe, porque é o que rege todo o código do editor
 
@@ -258,6 +260,17 @@ alternativa razoável descartada, e um agente que não as encontre vai refazer a
 
 ## Atualizações deste documento
 
+- **2026-09-09** — entra o **ADR-008**, e com ele a virada de produto do dia. O dono descreveu o produto que quer de verdade — o designer entra sem nada na mão, gera um calçado
+  por prompt, refina por parte, gira e edita cada uma — e isso contradiz o que
+  `memory/identity.md` afirmava (marca traz o modelo; time escala catálogo) e o que o
+  ADR-001 fixou (MVP sem IA). Duas escolhas do dono fecharam a arquitetura: a forma de cada
+  parte vem de um **acervo de peças** que a IA escolhe e estiliza — não de geometria gerada
+  do zero — e os dois modos **convivem**, sem jogar fora nada do que já funciona. O que faz
+  a decisão valer a pena está em D3: como cada peça já nasce nomeada e com material próprio,
+  **o calçado gerado nasce zoneado**, e a etapa de marcar zona — a mais trabalhosa do produto
+  atual, com todas as recusas de clique e o BUG-013/BUG-014 em volta — deixa de existir no
+  modo gerado. O gargalo do projeto muda de natureza no mesmo movimento: deixa de ser
+  técnico e passa a ser de **conteúdo** (as peças não existem).
 - **2026-09-09** — entra o **ADR-007** (calçado 3D manipulável). O dono escolheu a rota A —
   3D de verdade, não carrossel de vistas 2D — e o ADR existe sobretudo para resolver a
   objeção que a escolha levantava: em cena sombreada o pixel não é o hex, e o princípio nº1
