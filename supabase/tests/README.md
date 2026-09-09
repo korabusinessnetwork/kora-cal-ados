@@ -11,6 +11,7 @@ vê coleção de outra. O que não vive aqui: teste de lógica pura (vai junto d
 | `editorDeZonas.test.ts` | O caminho do editor contra o banco real: gravar zona, reler, e o que a RLS recusa |
 | `chaveDeApi.test.ts` | `tenant_api_keys`: o `hash` que nem o dono lê, o delete que não existe, e a chave da concorrente |
 | `apiDeVariante.test.ts` | A API de variante inteira sobre o banco real: o 200 que recolore só a zona pedida, o 404 do concorrente e os 409 de dado do tenant |
+| `eloEditorApi.test.ts` | O elo: a zona gravada **pelo caminho do editor** é a zona que a API pinta — o princípio nº1 como asserção |
 
 ## Como rodar
 
@@ -92,3 +93,42 @@ ainda pega truncamento. Nenhum defeito de produto: o handler estava certo desde 
 
 O que ele **não** cobre: o olho. Nenhuma asserção aqui vê o desenho. Isso é
 `api/_local/roteiroDePassada.md`, passo 17.
+
+## `eloEditorApi.test.ts` — a diferença é **quem produziu o seletor**
+
+`apiDeVariante.test.ts` monta os próprios `svg_selector` chamando `montarSeletorDeZona`
+direto, e grava com `service_role`. Isso prova que a API **consome** o formato. Não prova
+duas coisas:
+
+1. que o que o editor **produz** é aquele formato — entre o clique e a coluna passam
+   `marcarZona` (sobreposição, elemento inexistente, contorno `fill="none"`, preservação de
+   `label`) e `gravarZonaNoBanco` (INSERT × UPDATE sob `unique (product_id, zone_key)`);
+2. que a linha que a **RLS deixa o dono gravar** é a linha que a **`service_role` lê**
+   depois. São dois caminhos de privilégio diferentes sobre a mesma linha, e até 2026-09-09
+   nenhum teste atravessava os dois.
+
+Por isso aqui a zona nasce pelo caminho de verdade, com `cenario.clienteA` (o dono
+autenticado, atravessando a RLS como o navegador atravessa), e só depois a API é chamada.
+Nenhum `svg_selector` é escrito à mão neste arquivo, e nenhum `insert` direto em
+`product_zones` acontece.
+
+A asserção que carrega o peso não é o status: é **`idsQueMudaram`**, que compara o SVG
+devolvido com o canônico linha a linha e exige que os elementos alterados sejam exatamente
+os da zona pedida. Um `svg_selector` que capturasse o calçado inteiro devolveria `200` com o
+desenho destruído, e passaria em qualquer asserção de código de resposta.
+
+✅ **Rodou verde em 2026-09-09**, e foi **verificado por mutação** — que neste projeto é o
+que separa guarda de decoração:
+
+| Mutação no código de produção | O que caiu |
+|---|---|
+| `montarSeletorDeZona` devolve só o primeiro id | zona de vários elementos, e os dois casos de UPDATE |
+| `marcarZona` deixa de preservar `label` ausente (o BUG-014) | os dois casos de UPDATE |
+| `montarSeletorDeZona` acrescenta `#zona-sola` ao seletor | **os três casos novos**, mais 6 de outros arquivos |
+
+A terceira é a que importa: ela é a "zona que pega demais", e sem `idsQueMudaram` ela
+passaria verde.
+
+**O que este teste não alcança:** que o Chrome resolva `#a, #b` nos mesmos elementos que o
+jsdom resolve. Está registrado como passo de olho em `api/_local/roteiroDePassada.md`, não
+como código.

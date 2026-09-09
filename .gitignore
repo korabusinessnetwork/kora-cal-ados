@@ -7,3 +7,7 @@ scripts/variante-teste.svg
 
 # Cache do CLI do Supabase (criado por `npx supabase`), nunca versionado
 supabase/.temp/
+
+# Config de debug do editor, local da máquina. `.claude/commands/` VAI versionado:
+# os slash commands do loop precisam sobreviver à sessão, o launch.json não.
+.claude/launch.json

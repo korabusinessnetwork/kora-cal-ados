@@ -145,6 +145,36 @@ curl -sD - -o /dev/null -X POST "$API/$PRODUTO/variants" \
 enfeite: variante cacheada por um CDN depois de a zona ser remarcada é o mesmo calçado errado,
 num lugar onde ninguém olha.
 
+## Bloco 6b — o elo com o editor, que é o único passo que exige DUAS janelas
+
+Este é o resíduo que `supabase/tests/eloEditorApi.test.ts` **não** alcança: aquele teste
+percorre editor → API por inteiro, mas o lado do editor roda em **jsdom**. O que ninguém
+verifica automaticamente é se o **Chrome** resolve `#a, #b` nos mesmos elementos que o jsdom
+resolve.
+
+O risco é pequeno e vale dizer por quê, para ninguém superestimar o passo: o seletor é uma
+lista de ids exatos — a forma mais simples de seletor que existe — e o editor **não cunha
+id** (ADR-005: ele é somente-leitura sobre o canônico, e os ids nascem em `normalizarSvg`, no
+provisionamento, em Node). Editor e API leem o mesmo arquivo com os mesmos ids. Mas pequeno
+não é zero, e é o único ponto do produto onde duas implementações de DOM leem a mesma string.
+
+Com `npm run dev` numa janela e o servidor da API na outra:
+
+| # | Passo | O que conferir |
+|---|---|---|
+| 19 | No editor, abrir o modelo e marcar uma zona **nova**, com **dois elementos**, e salvar | a zona aparece na lista com os dois |
+| 20 | Recarregar a página | a zona continua lá, com os dois elementos |
+| 21 | `select zone_key, svg_selector from product_zones` daquele produto | o seletor é `#a, #b` — ids exatos, sem prefixo |
+| 22 | `POST` na API com aquela `zone_key` | `200`, e **os dois** elementos saem na cor pedida |
+| 23 | Abrir o SVG devolvido ao lado da tela do editor | o que ficou colorido é o que estava destacado no editor — mesmos elementos, nenhum a mais |
+
+O passo 23 é o princípio nº1 conferido com o olho: "cor no editor = cor na API". Se algum dia
+ele falhar, o suspeito não é o motor (ele é o mesmo módulo dos dois lados) — é o Chrome e o
+jsdom discordando sobre a mesma lista de ids.
+
+**Estado:** ⏳ não percorrido. Os passos 19–23 precisam de alguém no navegador; o resto do
+elo já está coberto por teste automatizado desde 2026-09-09.
+
 ## Bloco 7 — o log, que é onde a chave vaza
 
 Com o servidor local ainda no terminal, olhe **todas** as linhas que ele imprimiu:
