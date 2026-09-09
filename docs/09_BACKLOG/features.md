@@ -179,3 +179,68 @@ passa a ser possível a qualquer momento.
   ele é contrato desde já ou só quando a feature existir?
 
 **Status**: capturada, não especificada. Dívida registrada no ADR-006, seção Consequências.
+
+## Calçado manipulável — girar o modelo com o mouse, em qualquer ângulo
+
+**Fase**: não atribuída. A rota escolhida (B ou A, abaixo) decide se isto é evolução da
+Fase 2 ou uma reabertura do ADR-001 — e essa escolha ainda não foi feita.
+
+**O que é**: hoje o editor mostra **uma vista fixa** do calçado. A pessoa clica nos
+elementos e marca zonas (isso funciona, ADR-005 e `05_FLUXOS/fluxo-marcacao-de-zona.md`),
+mas o modelo não se mexe: não dá para virar de ponta-cabeça, olhar a sola, ver o
+contraforte, girar 15° para conferir como a cor cai na lateral. O pedido é que arrastar com
+o mouse gire o calçado livremente, mantendo tudo o que já existe — clicar numa camada
+(sola, cadarço, cabedal) continua marcando a zona, em qualquer ângulo em que ela esteja.
+
+**Por que importa**: quem aprova uma cor não aprova um lado. O time de produto decide
+olhando o calçado como olharia na mão, e uma vista única esconde exatamente as partes que
+mais recebem cor de contraste — sola por baixo, traseira, entressola. Enquanto for uma
+vista só, "ver a variante" e "ver o produto" continuam sendo coisas diferentes, e a
+aprovação acontece fora do sistema.
+
+**Estado na documentação em 2026-09-09**: **não estava anotado em lugar nenhum** — nem
+aqui, nem nos ADRs, nem no intake (`respostas-intake.md`), nem como item fora de escopo.
+A metade "clicar em cada camada" está feita e documentada; a metade "manipular o modelo"
+nunca foi capturada. Esta entrada existe para corrigir isso.
+
+**As duas rotas, e por que a diferença entre elas é o produto inteiro**:
+
+- **(B) N vistas 2D** — o produto passa a ter várias SVGs (lateral, medial, topo, sola,
+  traseira, ou os 24–36 quadros de um "spin" de e-commerce) e arrastar troca de quadro. O
+  motor continua **exatamente o mesmo**: cada quadro é um SVG chapado que
+  `gerarVarianteDeCor` recolore, e o princípio nº1 continua de pé sem nada novo para
+  provar. O custo é de modelagem de dado, não de render: `products.base_asset_path` é uma
+  coluna **singular**, e `product_zones.svg_selector` aponta ids **daquele um arquivo** —
+  uma zona `sola` que precisa existir nas 24 vistas não cabe nesse schema. Exige tabela de
+  vistas e uma decisão sobre o que a API devolve num POST (uma vista? todas? a vista vem na
+  query string?).
+- **(A) 3D de verdade** — modelo glTF/WebGL, arrastar orbita a câmera. Isto **não é uma
+  feature, é outro produto**: um renderizador 3D com luz, sombra e material entra entre o
+  hex que a pessoa marcou e o pixel que ela vê, que é a mesma objeção — mais forte — que
+  segura o `?format=png` acima. Sob iluminação, a sola `#C0392B` **não aparece**
+  `#C0392B` em pixel nenhum da tela, e o princípio nº1 do `CLAUDE.md` deixa de ser
+  verificável por igualdade. Some-se a isso que o insumo muda: o ADR-001 decidiu MVP
+  **vetor-only**, e o intake diz que os modelos-base são ilustração vetorial ou foto real —
+  ninguém tem glTF de calçado à mão.
+
+**Gatilho para priorizar**: o primeiro "não dá para aprovar assim" vindo de um time de
+produto real, ou o primeiro cliente cujo catálogo já tem spin de e-commerce pronto (nesse
+caso a rota B fica barata, porque o insumo já existe).
+
+**Perguntas em aberto**:
+- Rota B ou A? Enquanto isso não for decidido, nada mais aqui pode ser decidido.
+- Em B, a zona é **por vista** (cada vista tem seus ids e seu mapeamento) ou **por produto**
+  (uma `zone_key` que atravessa as vistas, e o editor marca em cada uma)? A segunda é o que
+  a pessoa espera; a primeira é o que o schema de hoje comporta.
+- Em B, marcar a mesma zona em 24 quadros à mão é trabalho de uma tarde por modelo. Existe
+  correspondência automática de id entre quadros (mesma origem de exportação = mesmos ids),
+  ou isso vira o gargalo que mata a rota?
+- O arrastar e o clicar competem pelo mesmo gesto. Onde fica a fronteira entre "arrastei
+  para girar" e "cliquei para marcar" — limiar de pixels, botão diferente, modo explícito?
+  Errar isso marca zona sem querer, e marcação errada é o modo de falha que o princípio nº1
+  proíbe.
+- A API entra nisso ou fica de fora? Se o cliente pede a variante e recebe uma vista só, o
+  editor manipulável passa a mostrar algo que a API não entrega.
+
+**Status**: capturada, não especificada. Registrada em 2026-09-09 a pedido do dono, depois
+de uma verificação que confirmou ausência total na documentação.
