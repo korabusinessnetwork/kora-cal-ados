@@ -26,6 +26,9 @@ implementação é o que sustenta "cor no editor = cor na API" (princípio nº1 
 | `recolorirModelo3d.ts` | Roda na **geração**: aplica `{zone_key: cor}` sobre o modelo 3D canônico. O gêmeo de `gerarVarianteDeCor`, e o único autorizado a escrever cor em `baseColorFactor` | canônico + zonas + cores → glTF da variante |
 | `corSrgbLinear.ts` | O **único** lugar que converte hex (sRGB) para o float linear do glTF, e de volta (ADR-007 D3) | `#C0392B` ↔ RGB linear |
 | `lerGltf.ts` | Texto → documento e documento → texto, para a normalização e o recolor lerem igual. O `dom.ts` do caminho 3D | — |
+| `medidaDoModelo3d.ts` | A caixa envolvente lida do JSON, sem three: anda pelos nós compondo translação e escala. Recusa geometria girada, porque caixa alinhada aos eixos não sobrevive a rotação | canônico → dois cantos opostos, em metros |
+| `deslocarModelo3d.ts` | Soma um deslocamento à translação dos nós **raiz**, e só neles: filho já herda a do pai | canônico + deslocamento → canônico deslocado |
+| `juntarModelos3d.ts` | N modelos viram um, reindexando acessores, bufferViews, buffers, malhas, materiais, texturas e nós. Sem aritmética de byte: o glTF 2.0 aceita vários buffers num documento | N canônicos → um canônico |
 | `tiposDoGltf.ts` | O subconjunto de glTF que a normalização enxerga. Toda interface tem índice `unknown`: o que não entendemos sai como entrou | — |
 | `fixtures/teste-zona.svg` | Modelo de teste com sola, cabedal e cadarço (2 paths) | — |
 | `fixtures/gltfDeTeste.ts` | Construtor de glTF mínimo + `materiaisUsados`, o invariante "nenhuma zona compartilha material" | descrição → glTF |
@@ -138,3 +141,23 @@ em linear e **não** `0.502`.
   trava a geração das outras.
 - `jsdom` é pesado para função serverless. Confinado ao upload seria o ideal; hoje os dois
   caminhos usam. Revisitar se o tempo de cold start incomodar.
+
+## Montar um calçado é reindexar, não concatenar bytes
+
+O trio `medidaDoModelo3d` + `deslocarModelo3d` + `juntarModelos3d` é o que T14 usa para transformar
+N peças em um calçado. A descoberta que barateou os três: **o glTF 2.0 permite vários `buffers` num
+documento**. Juntar N modelos, então, não exige concatenar binário nem recalcular `byteOffset`,
+que é exatamente onde este tipo de código costuma errar em silêncio. Basta somar deslocamentos aos
+índices, e o único cuidado real é que **índice zero é falsy**: `primitiva.material`, `no.mesh` e
+`attributes.POSITION` valem `0` legitimamente, e reindexar com `if (indice)` pularia o primeiro
+material de cada documento. O defeito apareceria como uma peça vestindo a cor de outra, que é o
+princípio nº1 ao avesso. Comparar com `undefined`, sempre.
+
+Os três recusam em vez de adivinhar, e usam os códigos que já existem: `MODELO_3D_NAO_NORMALIZAVEL`
+para o que não dá para tratar com caixa alinhada aos eixos (rotação, `matrix`), `MODELO_3D_INVALIDO`
+para arquivo quebrado. A recusa de `matrix` em `deslocarModelo3d` não é zelo: o glTF proíbe `matrix`
+junto de `translation` no mesmo nó, então escrever a translação por cima daria um arquivo em que o
+carregador honra a matriz e **o deslocamento some sem erro nenhum**.
+
+Nenhum dos três normaliza. Normalizar é do momento do upload (ADR-005), e uma normalização
+escondida na montagem reescreveria o asset-base do tenant sem ninguém pedir.

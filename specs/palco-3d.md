@@ -169,6 +169,11 @@ O item 5 é o mais importante dos cinco, porque é o único que nenhum teste pod
 testes conferem a caixa envolvente, e caixa envolvente não distingue uma peça que cresceu para
 cima de uma que cresceu para os dois lados.
 
+> **Nota posterior (T14):** `PalcoDaPeca.tsx` foi renomeado para `PalcoDeModelo3d.tsx`. Ele
+> nunca soube o que é uma peça, recebe texto glTF e desenha, e desde T14 o que chega é um calçado
+> montado. As menções ao nome antigo nesta spec ficam como estão, porque descrevem o que foi
+> construído em T13. Ver a decisão D5 de `specs/composicao-em-cena.md`.
+
 ### Conferido pelo dono em 2026-09-10: **passou**
 
 Os cinco itens confirmados em navegador de verdade, em <http://localhost:5173/?tela=palco3d>.

@@ -48,6 +48,18 @@ export interface PecaDoAcervo {
 export interface CategoriaDaForma {
   categoria: string;
   obrigatoria: boolean;
+  /**
+   * Sobre qual categoria esta assenta, quando o calçado é montado em cena (T14).
+   *
+   * Mora na FORMA e não numa lista fixa no código, pela mesma razão que as categorias moram:
+   * chinelo não tem cadarço, e sandália não empilha como tênis. Anatomia é conhecimento da
+   * forma, não do montador.
+   *
+   * Opcional de propósito: categoria sem este campo assenta no chão. É o certo para a sola, e é
+   * o certo para toda forma que ainda não declarou empilhamento nenhum, que continua montando
+   * com cada peça no assento em que foi modelada.
+   */
+  assenta_sobre?: string;
 }
 
 /**

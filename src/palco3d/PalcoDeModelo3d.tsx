@@ -1,5 +1,10 @@
 // O `<canvas>` e o laço de render. **O único arquivo do palco que precisa de GPU.**
 //
+// Chama-se "de modelo" e não "da peça" porque ele nunca soube o que é uma peça: recebe texto glTF
+// e desenha. Em T13 o que chegava era uma peça solta; desde T14 chega um calçado inteiro montado,
+// e o arquivo não mudou uma linha para isso. O nome antigo faria "busca por nome de conceito bate
+// com nome de arquivo" (ADR-003) virar mentira já na primeira reutilização.
+//
 // E por isso o único sem teste unitário: jsdom não tem WebGL, então nada aqui é alcançável por
 // teste. A consequência prática é a regra que este arquivo tem que obedecer: **ele não decide
 // nada**. Onde a câmera fica é `orbita.ts`, o que o ponteiro acertou é `nomeDaMalhaNoPonto.ts`,
@@ -33,8 +38,8 @@ import { orbitaInicial, orbitarPorArraste, posicaoDaCamera, type Orbita } from '
 /** Em que pé está o carregamento da peça, para a tela mostrar em vez de ficar muda. */
 export type EstadoDoPalco = 'carregando' | 'pronto' | 'recusado';
 
-export interface PalcoDaPecaProps {
-  /** O texto glTF da peça. Trocar esta prop troca a peça, sem recriar o contexto WebGL. */
+export interface PalcoDeModelo3dProps {
+  /** O texto glTF a desenhar. Trocar esta prop troca o modelo, sem recriar o contexto WebGL. */
   textoGltf: string;
   /** Cada clique devolve o nome do nó atingido, ou `null` quando o clique foi no vazio. */
   aoSelecionar: (nome: string | null) => void;
@@ -51,7 +56,7 @@ export interface PalcoDaPecaProps {
  */
 const PIXELS_ATE_VIRAR_ARRASTE = 4;
 
-export function PalcoDaPeca({ textoGltf, aoSelecionar, aoMudarEstado }: PalcoDaPecaProps) {
+export function PalcoDeModelo3d({ textoGltf, aoSelecionar, aoMudarEstado }: PalcoDeModelo3dProps) {
   const moldura = useRef<HTMLDivElement | null>(null);
   const palco = useRef<Palco | null>(null);
 
@@ -80,7 +85,7 @@ export function PalcoDaPeca({ textoGltf, aoSelecionar, aoMudarEstado }: PalcoDaP
   }, []);
 
   useEffect(() => {
-    palco.current?.trocarPeca(textoGltf);
+    palco.current?.trocarModelo(textoGltf);
   }, [textoGltf]);
 
   // `touch-action: none` mora no CSS: sem ele o navegador de toque rola a página em vez de
@@ -89,7 +94,7 @@ export function PalcoDaPeca({ textoGltf, aoSelecionar, aoMudarEstado }: PalcoDaP
 }
 
 interface Palco {
-  trocarPeca: (textoGltf: string) => void;
+  trocarModelo: (textoGltf: string) => void;
   destruir: () => void;
 }
 
@@ -216,7 +221,7 @@ function criarPalco(moldura: HTMLDivElement, avisos: AvisosDoPalco): Palco {
   quadro = requestAnimationFrame(desenhar);
 
   return {
-    trocarPeca(textoGltf: string) {
+    trocarModelo(textoGltf: string) {
       pedidoAtual += 1;
       const meuPedido = pedidoAtual;
       // Um arraste em curso passou a apontar para uma peça que vai deixar de existir. Cancelar

@@ -16,6 +16,13 @@ describe('lerTelaDaUrl', () => {
     expect(lerTelaDaUrl('?tela=palco3d')).toBe('palco3d');
   });
 
+  it('abre o calçado montado com ?tela=composicao, que monta o acervo por código', () => {
+    // A terceira tela sem banco. Ela monta as peças do acervo de prova numa cena só, e o
+    // acervo é código: não há requisição para fazer nem sessão para pedir.
+    expect(lerTelaDaUrl('?tela=composicao')).toBe('composicao');
+    expect(lerTelaDaUrl('?tela=COMPOSICAO')).toBe('composicao');
+  });
+
   it('abre a área protegida quando a URL não pede nada', () => {
     expect(lerTelaDaUrl('')).toBe('app');
     expect(lerTelaDaUrl('?')).toBe('app');
@@ -36,6 +43,7 @@ describe('lerTelaDaUrl', () => {
     // Quase acertar não conta: a comparação é com a lista inteira, nunca por prefixo.
     expect(lerTelaDaUrl('?tela=palco')).toBe('app');
     expect(lerTelaDaUrl('?tela=palco3d2')).toBe('app');
+    expect(lerTelaDaUrl('?tela=composicoes')).toBe('app');
   });
 
   it('não deixa a URL escolher a área protegida por atalho: "app" também passa pelo portão', () => {
@@ -52,12 +60,13 @@ describe('urlDaTela', () => {
 
   it('devolve a query do palco 3D, pelo mesmo motivo', () => {
     expect(urlDaTela('palco3d', '/')).toBe('?tela=palco3d');
+    expect(urlDaTela('composicao', '/')).toBe('?tela=composicao');
   });
 
   it('toda tela sem banco volta por onde saiu: a ida e a volta são a mesma lista', () => {
     // Ida e volta casadas. Um endereço que `urlDaTela` escreve e `lerTelaDaUrl` não
     // reconhece manda o F5 para o login, e é um defeito que só aparece recarregando.
-    for (const tela of ['esboco', 'palco3d'] as const) {
+    for (const tela of ['esboco', 'palco3d', 'composicao'] as const) {
       expect(lerTelaDaUrl(urlDaTela(tela, '/'))).toBe(tela);
     }
   });

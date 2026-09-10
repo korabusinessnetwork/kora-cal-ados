@@ -96,10 +96,13 @@ export function catalogoDeProva(): CatalogoDoAcervo {
       {
         id: FORMA_DE_PROVA,
         rotulo: 'Tênis de prova',
+        // A anatomia do tênis, de baixo para cima. É o que `empilharComposicao` lê para fazer
+        // o cabedal subir quando a composição escolhe uma sola mais grossa. A sola não declara
+        // `assenta_sobre` porque ela assenta no chão, que é a ausência do campo.
         categorias: [
           { categoria: 'sola', obrigatoria: true },
-          { categoria: 'cabedal', obrigatoria: true },
-          { categoria: 'cadarco', obrigatoria: false },
+          { categoria: 'cabedal', obrigatoria: true, assenta_sobre: 'sola' },
+          { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal' },
         ],
       },
     ],
@@ -136,6 +139,28 @@ export function gltfDaPecaDeProva(
   }
 
   return montarGltfDePeca(peca, parametros);
+}
+
+/**
+ * A composição demo: um tênis inteiro, com as três categorias e uma cor por peça.
+ *
+ * Existe em `unknown` e não já validada de propósito: ela entra por `validarComposicao` como
+ * entraria a saída de um modelo de linguagem, pelo mesmo portão e com a mesma recusa. Uma
+ * composição demo que pulasse o guarda seria uma demonstração de um caminho que o produto não
+ * usa.
+ *
+ * As cores são as três do calçado de demonstração, e não têm significado de marca: identidade
+ * vem do tenant (CLAUDE.md), e este acervo não pertence a tenant nenhum.
+ */
+export function composicaoDeProva(): unknown {
+  return {
+    forma_id: FORMA_DE_PROVA,
+    pecas: [
+      { peca_id: 'prova-sola-plana', cor: '#F2F2F2' },
+      { peca_id: 'prova-cabedal-baixo', cor: '#1F4FA8' },
+      { peca_id: 'prova-cadarco-reto', cor: '#E8B33C' },
+    ],
+  };
 }
 
 /** Os ids das peças, na ordem em que foram descritas. Para testes percorrerem o acervo inteiro. */

@@ -10,6 +10,8 @@ glTF.
 | Arquivo | Papel | Entrada → saída |
 |---|---|---|
 | `validarComposicao.ts` | O guarda do ADR-008 D1: resolve a composição contra o acervo ou recusa | composição (não confiável) + catálogo → composição validada |
+| `empilharComposicao.ts` | De quanto cada peça sobe para assentar sobre a de baixo (T14) | forma + faixa vertical de cada peça → deslocamento por categoria |
+| `montarComposicao.ts` | A orquestração de T14: mede, empilha, desloca, junta e pinta, nessa ordem | composição validada + provedor de glTF → um glTF só, já colorido |
 | `tiposDaComposicao.ts` | O vocabulário do modo gerado em tipos. Nenhum comportamento | — |
 | `fixtures/acervoDeTeste.ts` | Catálogo escrito à mão, com duas formas. O gêmeo de `render/fixtures/gltfDeTeste.ts` | — |
 
@@ -81,6 +83,26 @@ consequências que estão no código e não em convenção:
 Todos são 422 na API — a composição vem no corpo do pedido, então quem corrige é quem enviou.
 A tabela mora em `docs/07_APIS/endpoints.md`.
 
+## O empilhamento lê a geometria, nunca uma altura declarada
+
+`empilharComposicao` responde uma pergunta só: de quanto cada peça precisa subir para assentar
+sobre a de baixo. Ela existe porque o `assento` que cada peça do acervo carrega é o lugar dela no
+calçado **padrão**: escolher uma sola mais grossa afunda o cabedal dentro dela, escolher uma mais
+fina o deixa flutuando, e nenhum dos dois dá erro. Os dois só ficam errados na tela.
+
+Duas propriedades do desenho merecem ficar escritas:
+
+- **Ela não conhece glTF.** Recebe a faixa vertical (base e topo) de cada peça e devolve números.
+  Quem mede é `medidaDoModelo3d` e quem aplica é `deslocarModelo3d`, os dois em `../render/`.
+  É o que torna a regra testável sem montar modelo 3D nenhum.
+- **A altura vem da malha, não de um campo.** Uma peça cujo campo de altura discorde da própria
+  malha existiria; uma peça cuja malha discorde dela mesma, não. É a mesma escolha do BUG-013:
+  campo redundante que pode divergir é a família de defeito que este projeto persegue.
+
+Quem assenta sobre quem é a **forma** que declara, em `assenta_sobre` (ADR-008 D4). Campo
+opcional: categoria sem ele mantém o assento em que foi modelada, então uma forma que ainda não
+declarou anatomia continua montando exatamente como antes.
+
 ## Limites conhecidos
 
 - **Acervo malformado não tem código próprio.** Faixa invertida (`minimo > maximo`) e id de
@@ -94,3 +116,32 @@ A tabela mora em `docs/07_APIS/endpoints.md`.
 - Os parâmetros são **validados** aqui e **aplicados** no palco (ADR-008 D7). Enquanto o palco
   não existir, nada consome os números — e é por isso que a faixa é conferida aqui, onde há
   quem recuse, e não lá, onde só haveria o que desenhar.
+
+## A ordem da montagem não é livre
+
+`montarComposicao` faz cinco coisas, e a ordem entre elas é a única regra que mora no arquivo:
+
+1. **pede o glTF de cada peça** ao provedor, com os parâmetros já completos;
+2. **mede** cada uma (`medidaDoModelo3d`);
+3. **empilha** (`empilharComposicao`), que só olha números;
+4. **desloca** cada peça (`deslocarModelo3d`) e **junta** as N num documento só (`juntarModelos3d`);
+5. **pinta uma vez**, no calçado inteiro (`recolorirModelo3d`).
+
+Medir vem antes de deslocar porque o deslocamento é calculado sobre onde a peça foi modelada:
+medir depois mediria o resultado do próprio deslocamento e a pilha se acumularia sozinha. Pintar
+vem depois de juntar por três razões, em ordem de peso: é **uma** chamada ao mesmo motor que a API
+chama; a sobreposição de zonas só é detectável olhando o modelo inteiro; e a `zone_key` de uma zona
+é a **categoria**, que só faz sentido no calçado, não dentro de uma peça solta.
+
+O provedor de glTF entra por parâmetro e não por `import`. Hoje a única fonte é o acervo de prova,
+que é código; amanhã é o storage do tenant, que é rede. Amarrar a montagem a uma delas obrigaria a
+reescrever este arquivo na virada, e faria o módulo de composição importar dados de prova para
+sempre.
+
+## O nanômetro que a geometria carrega
+
+A geometria de um glTF é float32, e o `min`/`max` do acessor também. Medir a sola de 18 mm devolve
+`0,017999999225`, e o empilhamento leva essa diferença para cima: as peças de um calçado montado
+ficam a um **nanômetro** do lugar exato. Arredondar dentro da montagem para esconder isso
+inventaria precisão que o arquivo não tem. Quem compara posição em teste compara em micrômetros,
+que é folgado em relação ao float32 e fino demais para alguém enxergar.

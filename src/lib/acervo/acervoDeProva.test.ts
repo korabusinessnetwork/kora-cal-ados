@@ -16,13 +16,16 @@ function pecasDaCategoria(categoria: string): string[] {
 }
 
 describe('catalogoDeProva', () => {
-  it('tem uma forma só, com sola e cabedal obrigatórios e cadarço opcional', () => {
+  it('tem uma forma só, com sola e cabedal obrigatórios, cadarço opcional, e a anatomia declarada', () => {
+    // A ordem da lista é a anatomia de baixo para cima, e `assenta_sobre` é o que `empilharComposicao`
+    // lê para saber quem sobe quando a peça de baixo muda de tamanho. Sola sem `assenta_sobre` não é
+    // esquecimento: é a peça que assenta no chão, e trocar isso por 'chao' inventaria uma categoria.
     expect(CATALOGO.formas).toHaveLength(1);
     expect(CATALOGO.formas[0]?.id).toBe(FORMA_DE_PROVA);
     expect(CATALOGO.formas[0]?.categorias).toEqual([
       { categoria: 'sola', obrigatoria: true },
-      { categoria: 'cabedal', obrigatoria: true },
-      { categoria: 'cadarco', obrigatoria: false },
+      { categoria: 'cabedal', obrigatoria: true, assenta_sobre: 'sola' },
+      { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal' },
     ]);
   });
 

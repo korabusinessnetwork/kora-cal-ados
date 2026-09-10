@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: EXECUTANDO
+status: AGUARDANDO_MATHEUS
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 - **Projeto:** Kora Calçados (codinome)
@@ -10,19 +10,44 @@ status: EXECUTANDO
 - **Branch:** `main` (ver D02 em DECISOES.md: por que não `full-auto/<slug>`)
 - **Início:** 2026-09-10
 - **Fase atual:** Fase C, provar a esteira de ponta a ponta com o acervo de prova
-- **Tarefa atual:** T14 montagem da composição em cena
-- **Próximo passo:** rodar o ciclo spec, build, review de T14: uma composição validada
-  (`validarComposicao`) vira calçado montado na tela, cada peça no seu lugar, e trocar a cor de uma
-  zona muda só aquela peça. É onde as duas metades construídas separadamente se encontram, o
-  validador de composição (T11) e o palco (T13), e é onde o princípio nº1 passa a valer em 3D:
-  cor no editor igual à cor da API, com o mesmo motor nos dois lados.
-  **Atenção:** T14 também exige conferência a olho, e por um motivo mais forte que T13. O que ela
-  entrega é cor na tela, e cor é literalmente o princípio nº1.
-- **Progresso:** 8 de 13 concluídas, 2 pendentes e desbloqueadas, 3 adiadas por decisão do dono
+- **Tarefa atual:** T14 montagem da composição em cena, **construída e revisada**, parada na
+  conferência a olho do dono
+- **Próximo passo:** o dono abre <http://localhost:5173/?tela=composicao> e confere os 5 itens da
+  §8 de `specs/composicao-em-cena.md`. Aprovados, T14 fecha e T15 (o configurador) começa. Achado
+  um defeito, ele vira teste e correção no mesmo commit, e a conferência se repete.
+- **Progresso:** 9 de 13 construídas (T14 aguardando conferência), 1 pendente e desbloqueada,
+  3 adiadas por decisão do dono
 
 ## Motivo da parada (só se AGUARDANDO_MATHEUS ou PAUSADO)
 
-<vazio, voltou a executar em 2026-09-10 depois de o dono aprovar a conferência a olho de T13>
+**T14 exige conferência a olho, por um motivo mais forte que T13: o que ela entrega é cor na tela,
+e cor é literalmente o princípio nº1.** Os 33 critérios automatizáveis estão em sim, com 980 testes
+verdes, typecheck limpo, build passando e 11 mutações mortas nos arquivos escritos aqui (mais 36
+nos três módulos de render entregues em paralelo).
+
+Nenhum teste desta entrega desenhou um pixel, porque jsdom não tem WebGL. O que os testes provam é
+o **número escrito no glTF**; entre esse número e a cor na tela ainda há a conversão de sRGB para
+linear e o renderizador, e é justamente essa distância que o princípio nº1 existe para vigiar.
+
+Abrir <http://localhost:5173/?tela=composicao> e conferir:
+
+1. **O calçado aparece montado**: sola embaixo, cabedal em cima dela, cadarço sobre o cabedal.
+   Nenhuma peça flutuando no ar nem enterrada dentro da outra.
+2. **A cor escolhida é a cor que aparece.** Este é o princípio nº1, literal. Se o hex escolhido e o
+   que está na tela não forem a mesma cor, nada mais importa nesta entrega.
+3. **Trocar a cor de uma zona muda só aquela peça.** A sola vermelha não pode pintar o cadarço.
+4. **Engrossar a sola faz o cabedal e o cadarço subirem junto**, encaixados, sem abrir fresta nem
+   afundar um no outro.
+5. **Clicar numa peça mostra o nome dela**, e o nome bate com a peça em que se clicou.
+
+O item 2 é o mais importante dos cinco.
+
+Duas notas para não parecerem defeito:
+
+- **O arraste continua o de T13**: arrastar para baixo levanta o ponto de vista, que é a convenção
+  do `OrbitControls` do three.
+- **A cor inicial da demo** é a de `composicaoDeProva()`: sola quase branca, cabedal azul, cadarço
+  amarelo. Não é identidade de marca nenhuma, é só um calçado de demonstração.
 
 ## A conferência a olho de T13 (encerrada, aprovada em 2026-09-10)
 

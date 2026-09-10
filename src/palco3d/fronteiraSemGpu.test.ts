@@ -2,7 +2,7 @@
 //
 // Os critérios 18 e 20 da spec (`specs/palco-3d.md`) são os únicos do palco que não descrevem
 // um comportamento e sim uma disciplina de arquitetura: `orbita.ts` não pode importar `three`
-// nem tocar no DOM, e `PalcoDaPeca.tsx` não pode conter regra nenhuma. Disciplina que só existe
+// nem tocar no DOM, e `PalcoDeModelo3d.tsx` não pode conter regra nenhuma. Disciplina que só existe
 // como frase num README dura até a primeira pressa. Estas varreduras são baratas e falham alto.
 //
 // Varredura de FONTE, e não de comportamento, de propósito: o que se quer proteger aqui é
@@ -35,8 +35,8 @@ describe('orbita.ts é aritmética pura (critério 18)', () => {
   });
 });
 
-describe('PalcoDaPeca.tsx não decide nada (critério 20)', () => {
-  const PALCO = fonte('./PalcoDaPeca.tsx');
+describe('PalcoDeModelo3d.tsx não decide nada (critério 20)', () => {
+  const PALCO = fonte('./PalcoDeModelo3d.tsx');
 
   it('não faz aritmética de câmera: quem sabe onde a câmera fica é orbita.ts', () => {
     // Aritmética esférica aqui dentro seria uma segunda implementação da órbita, no único

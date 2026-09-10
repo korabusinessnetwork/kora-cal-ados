@@ -13,6 +13,7 @@ glTF e mais nada.
 | `geometriaDeCaixa.ts` | A geometria grosseira, sem conhecer glTF: 24 vértices, 6 normais, 36 índices e o `min`/`max` do POSITION | dimensões em metros → listas de números |
 | `montarGltfDePeca.ts` | Embrulha a geometria num glTF 2.0 com buffer em `data:` URI, nó/malha/material próprios, e aplica o parâmetro como escala | descrição de peça + parâmetros → texto glTF |
 | `acervoDeProva.ts` | As 5 peças descritas, o `catalogoDeProva()` que `validarComposicao` consome e o `gltfDaPecaDeProva()` | id de peça → texto glTF |
+| `acervoDeProva.ts` (cont.) | `composicaoDeProva()` devolve `unknown`, de propósito: a demo entra por `validarComposicao` pelo mesmo portão que a saída de um modelo de linguagem | — |
 | `gltfValidator.d.ts` | Tipos do validador de referência da Khronos, que é compilado de Dart e não traz os próprios | — |
 
 ## Por que um módulo separado

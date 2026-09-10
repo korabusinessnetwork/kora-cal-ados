@@ -14,7 +14,7 @@
 // pergunta de que lado do portão a tela nova fica.
 
 /** As telas sem banco: nenhuma delas faz uma requisição sequer nem pede sessão. */
-const TELAS_SEM_BANCO = ['esboco', 'palco3d'] as const;
+const TELAS_SEM_BANCO = ['esboco', 'palco3d', 'composicao'] as const;
 
 /** As telas do app. As de `TELAS_SEM_BANCO` dispensam o Supabase; `app` é tudo atrás do portão. */
 export type Tela = 'app' | (typeof TELAS_SEM_BANCO)[number];

@@ -1,8 +1,15 @@
 # src/palco3d, o calçado na tela
 
-A tela `?tela=palco3d`: uma peça do acervo de prova numa cena three.js, girando com o mouse, e
-um clique que devolve o nome da malha atingida. É o ADR-007 D1 (o modelo aparece), D2 (gira com
-o mouse) e D4 (cada malha é endereçável pelo nome) virando algo que se abre no navegador.
+Duas telas sobre o mesmo palco:
+
+- `?tela=palco3d`, **uma peça por vez** do acervo de prova, girando com o mouse, e um clique que
+  devolve o nome da malha atingida. É o ADR-007 D1, D2 e D4 virando algo que se abre no navegador.
+- `?tela=composicao`, o **calçado montado**: as peças de uma composição validada numa cena só,
+  cada uma no seu lugar e na sua cor. É onde o ADR-008 aparece pela primeira vez, e é a tela em que
+  a pergunta do princípio nº1 (a cor escolhida é a cor que aparece?) é respondida a olho.
+
+O componente da cena é o mesmo nas duas, e não precisou mudar para a segunda existir: um calçado
+montado é só um modelo com N zonas, que é o que ele já recebia.
 
 Não fala com o banco e não pede conta. A peça vem de [`../lib/acervo/`](../lib/acervo/), que é
 código e não arquivo baixado, então esta tela abre num clone recém-clonado sem `.env.local`.
@@ -18,11 +25,13 @@ conferência a olho aqui. Então a divisão não é estética:
 | `orbita.ts` | não, e não importa `three` | Aritmética esférica pura: o arraste do ponteiro vira posição de câmera |
 | `carregarPecaNaCena.ts` | não | Texto glTF vira `Object3D`, mais o enquadramento tirado da caixa envolvente |
 | `nomeDaMalhaNoPonto.ts` | não | O ponteiro vira nome de nó, ou `null`. É o ADR-007 D4 como função |
-| `PalcoDaPeca.tsx` | **sim** | O `<canvas>`, o laço de render e as escutas do ponteiro. **O único sem teste** |
-| `TelaDoPalco3d.tsx` | não | A tela: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
+| `PalcoDeModelo3d.tsx` | **sim** | O `<canvas>`, o laço de render e as escutas do ponteiro. **O único sem teste** |
+| `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
+| `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
+| `TelaDaComposicao.tsx` | não | A tela do calçado montado: peça, cor e parâmetro por categoria da forma |
 | `palco3d.css` | | Estilo fora do JSX (regra de white-label do CLAUDE.md) |
 
-`PalcoDaPeca.tsx` não decide nada, de propósito. Se aparecer aritmética de câmera ou lógica de
+`PalcoDeModelo3d.tsx` não decide nada, de propósito. Se aparecer aritmética de câmera ou lógica de
 seleção lá dentro, ela escapou para o lugar onde nenhum teste olha. O critério 20 da spec existe
 para prender essa linha.
 
@@ -68,9 +77,10 @@ lados. É o item 5 da conferência a olho da spec.
 
 ## O que esta pasta NÃO faz
 
-- **Não monta as 5 peças numa cena só.** Aqui aparece uma peça por vez; a montagem é T14.
-- **Não colore nada.** A peça aparece na cor que o material dá (branco padrão do glTF).
-  Recolorir em 3D também é T14.
+- **Não monta o calçado.** Quem monta é [`../lib/composicao/montarComposicao.ts`](../lib/composicao/);
+  aqui a montagem só é chamada e desenhada. Palco que soubesse montar seria a montagem existindo
+  em dois lugares, e o da API seria o outro.
+- **Não colore nada por conta própria.** Quem escreve cor no glTF é `recolorirModelo3d`, e só ele.
 - **Não tem zoom nem pan.** A câmera enquadra sozinha pela caixa envolvente e o mouse só orbita.
 - **Não guarda zona no banco.** No modo gerado, a zona vem da composição (ADR-008 D3).
 - **Não prova que o three.js empacota na Vercel.** Deploy está fora de escopo por decisão do dono.

@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { catalogoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import type { ParametroDePeca } from '../lib/composicao/tiposDaComposicao';
-import { PalcoDaPeca, type EstadoDoPalco } from './PalcoDaPeca';
+import { PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
 
 const CATALOGO = catalogoDeProva();
 const PECAS = CATALOGO.pecas;
@@ -116,7 +116,7 @@ export function TelaDoPalco3d() {
         </section>
 
         <section className="painel palco3d__painel-cena">
-          <PalcoDaPeca
+          <PalcoDeModelo3d
             textoGltf={textoGltf}
             aoSelecionar={aoSelecionar}
             aoMudarEstado={aoMudarEstado}

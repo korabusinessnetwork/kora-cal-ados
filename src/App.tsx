@@ -1,4 +1,4 @@
-// Raiz do app. Monta as telas por `useState`, sem roteador: hoje são três, e uma
+// Raiz do app. Monta as telas por `useState`, sem roteador: hoje são quatro, e uma
 // dependência nova só se paga quando houver URL que precise ser compartilhável.
 //
 // Tudo o que toca o banco vive dentro de `RotaProtegida` — a autenticação é verificada
@@ -26,6 +26,11 @@ import { lerTelaDaUrl, urlDaTela } from './telaInicial';
 // quem paga por ele é quem o abre.
 const TelaDoPalco3d = lazy(async () => ({
   default: (await import('./palco3d/TelaDoPalco3d')).TelaDoPalco3d,
+}));
+
+// Mesma razão, e o mesmo three.js: as duas telas do palco compartilham o chunk tardio.
+const TelaDaComposicao = lazy(async () => ({
+  default: (await import('./palco3d/TelaDaComposicao')).TelaDaComposicao,
 }));
 
 export function App() {
@@ -65,8 +70,36 @@ export function App() {
           <TelaDoPalco3d />
         </Suspense>
         <p className="rodape-telas">
+          <button type="button" onClick={() => irPara('composicao')}>
+            ← ver o calçado montado (as peças juntas)
+          </button>
           <button type="button" onClick={() => irPara('esboco')}>
-            ← ver o esboço do motor (2D, sem banco)
+            ver o esboço do motor (2D, sem banco)
+          </button>
+          <button type="button" onClick={() => irPara('app')}>
+            ir para o editor (pede login)
+          </button>
+        </p>
+      </>
+    );
+  }
+
+  // O calçado montado sai antes do portão pelas mesmas duas razões do palco: as peças são
+  // código, e a tela não tem para onde mandar requisição. É aqui que o princípio nº1 é
+  // conferido a olho em 3D, e exigir login para isso atrasaria a única verificação que
+  // nenhum teste faz.
+  if (tela === 'composicao') {
+    return (
+      <>
+        <Suspense fallback={<main className="tela">Carregando o calçado montado…</main>}>
+          <TelaDaComposicao />
+        </Suspense>
+        <p className="rodape-telas">
+          <button type="button" onClick={() => irPara('palco3d')}>
+            ← ver uma peça por vez (palco 3D)
+          </button>
+          <button type="button" onClick={() => irPara('esboco')}>
+            ver o esboço do motor (2D, sem banco)
           </button>
           <button type="button" onClick={() => irPara('app')}>
             ir para o editor (pede login)
@@ -92,6 +125,9 @@ export function App() {
           <button type="button" onClick={() => irPara('palco3d')}>
             ver o palco 3D (idem)
           </button>
+          <button type="button" onClick={() => irPara('composicao')}>
+            ver o calçado montado (idem)
+          </button>
         </p>
       </main>
     );
@@ -116,6 +152,9 @@ export function App() {
         </button>
         <button type="button" onClick={() => irPara('palco3d')}>
           ver o palco 3D (sem banco, sem conta)
+        </button>
+        <button type="button" onClick={() => irPara('composicao')}>
+          ver o calçado montado (sem banco, sem conta)
         </button>
       </p>
     </ProvedorDeSessao>
