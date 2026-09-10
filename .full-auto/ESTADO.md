@@ -10,10 +10,11 @@ status: EXECUTANDO
 - **Branch:** `main` (ver D02 em DECISOES.md: por que não `full-auto/<slug>`)
 - **Início:** 2026-09-10
 - **Fase atual:** rumo 3D / generativo, camada de composição
-- **Tarefa atual:** T04 validação de composição
-- **Próximo passo:** rodar o ciclo spec → build → review de `validarComposicao.ts`, o módulo que o
-  ADR-008 D1 exige antes de qualquer composição chegar ao palco.
-- **Progresso:** 3 de 9 tarefas concluídas, 3 bloqueadas no acervo
+- **Tarefa atual:** T05 `montarCatalogoParaModelo` — o recorte do acervo que vai para o modelo de linguagem
+- **Próximo passo:** rodar o ciclo spec → build → review de `montarCatalogoParaModelo.ts`. O
+  ponto que carrega o risco: ele decide o que um tenant vê do acervo, e peça de uma marca
+  jamais pode entrar no catálogo que vai para o modelo de linguagem de outra (ADR-008 D6).
+- **Progresso:** 4 de 10 tarefas concluídas, 3 bloqueadas no acervo
 
 ## Motivo da parada (só se AGUARDANDO_MATHEUS ou PAUSADO)
 <vazio>

@@ -16,7 +16,7 @@ por otimismo.
 
 ## Fase B: Composição (a camada que o ADR-008 D1/D2 define)
 
-- [~] T04 `validarComposicao.ts` | trilha: composicao | depende: T03 | pronto quando: recusa com código explícito para id de peça inexistente, categoria faltando, categoria repetida, peças de formas diferentes e parâmetro fora de faixa; nasce com teste; nenhuma composição chega ao palco sem passar por ele (ADR-008, Notas de Implementação)
+- [x] T04 `validarComposicao.ts` | trilha: composicao | depende: T03 | pronto quando: recusa com código explícito para id de peça inexistente, categoria faltando, categoria repetida, peças de formas diferentes e parâmetro fora de faixa; nasce com teste — **feito**, 699 testes verdes, 5 mutações mataram 3/2/2/1/1 testes
 - [ ] T05 `montarCatalogoParaModelo.ts` | trilha: composicao | depende: T04 | pronto quando: dado o acervo visível a um tenant, devolve o catálogo que vai para o modelo de linguagem, **sem** peça de outro tenant, e o teste prova o vazamento impossível
 - [ ] T06 Schema do acervo com RLS | trilha: dados | depende: T04 | pronto quando: migration cria forma/peça/composição com RLS ativa; peça de tenant não aparece para outro tenant; teste de integração prova
 

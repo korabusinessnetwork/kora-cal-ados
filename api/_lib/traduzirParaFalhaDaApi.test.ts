@@ -104,6 +104,39 @@ describe('os códigos de modelo 3D são dado do tenant, como os de SVG', () => {
   );
 });
 
+describe('os códigos de composição são pedido, e é por isso que são 422 e não 409', () => {
+  // Mesma razão do bloco acima: o laço de cobertura os exerceria sozinho, mas o status deles
+  // é **decisão** (spec de `validarComposicao`, critério 3) e vai na direção oposta à dos
+  // códigos 3D, que são 409. Se alguém mover estes para 409 por simetria com os vizinhos, o
+  // laço genérico continua verde e só esta linha fica vermelha.
+  //
+  // A diferença: um modelo 3D quebrado é arquivo GRAVADO do tenant, e um 422 mandaria o
+  // integrador procurar defeito num payload correto. Uma composição inválida chega no CORPO
+  // do pedido, e um 409 o mandaria ao editor de zonas de um produto que talvez nem exista.
+  it.each([
+    'PECA_NAO_ENCONTRADA',
+    'COMPOSICAO_INVALIDA',
+    'FORMAS_MISTURADAS',
+    'PARAMETRO_INVALIDO',
+  ] as const)('%s é 422 e manda corrigir o que foi enviado', (codigo) => {
+    const falha = traduzirParaFalhaDaApi(new ErroDeVariante(codigo, 'A composição tem um problema.'));
+
+    expect(falha.status).toBe(422);
+    expect(falha.codigo).toBe(codigo);
+    expect(STATUS_POR_CODIGO_DO_MOTOR[codigo].familia).toBe('pedido');
+  });
+
+  it('a mensagem de 422 sai limpa, sem o acréscimo que só o 409 recebe', () => {
+    // O acréscimo de "dado do tenant" manda corrigir no editor da marca. Emendado numa
+    // recusa de composição, ele apontaria para o lugar errado — a composição não mora lá.
+    const falha = traduzirParaFalhaDaApi(
+      new ErroDeVariante('PECA_NAO_ENCONTRADA', 'A peça "sola-x" não existe no acervo visível.'),
+    );
+
+    expect(falha.message).toBe('A peça "sola-x" não existe no acervo visível.');
+  });
+});
+
 describe('ZONA_NAO_ENCONTRADA, o único código com dois status', () => {
   it('vinda do motor é 409 — depois da pré-checagem, só sobra seletor gravado quebrado', () => {
     const falha = traduzirParaFalhaDaApi(

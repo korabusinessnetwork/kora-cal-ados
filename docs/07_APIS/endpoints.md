@@ -136,6 +136,10 @@ mudam** — eles são o contrato; o formato ao redor deles não era.
 | `SVG_NAO_NORMALIZAVEL` | 409 | dado do tenant | O asset-base canônico foi corrompido e não passa pela normalização |
 | `MODELO_3D_INVALIDO` | 409 | dado do tenant | O asset-base 3D não é um glTF 2.0 utilizável: JSON malformado, sem `nodes`, sem nó com malha, ou índice de malha/material apontando para o que não existe |
 | `MODELO_3D_NAO_NORMALIZAVEL` | 409 | dado do tenant | É glTF 2.0 e mesmo assim não vira canônico: exige extensão que não suportamos (Draco, meshopt) ou aponta para arquivo externo em `buffers`/`images` |
+| `PECA_NAO_ENCONTRADA` | 422 | pedido | A composição escolheu uma peça que não está no acervo visível ao tenant. É o código do ADR-008 D1: o modelo de linguagem nunca inventa peça |
+| `COMPOSICAO_INVALIDA` | 422 | pedido | A composição não tem a forma de uma composição: falta `forma_id`, `pecas` não é lista, forma desconhecida, categoria obrigatória ausente, categoria repetida, ou peça de categoria que a forma não prevê |
+| `FORMAS_MISTURADAS` | 422 | pedido | A peça existe e o id está certo, mas ela é de outra forma. Peça só encaixa em peça da mesma forma (ADR-008 D4) |
+| `PARAMETRO_INVALIDO` | 422 | pedido | Parâmetro fora da faixa declarada pela peça, não numérico, ou que a peça não declara |
 | `FALHA_INTERNA` | 500 | nossa | Qualquer outro `Error`. Mensagem fixa; o detalhe vai só para o log |
 
 Os dois códigos de modelo 3D são os gêmeos exatos dos de SVG (ADR-007), e ficam na mesma
@@ -144,6 +148,23 @@ marca, no arquivo que subiu. Códigos próprios, e não reuso dos de SVG, porque
 cada par ensina coisa diferente — "exporte com Presentation Attributes" contra "exporte sem
 Draco, com os buffers embutidos" —, e um integrador que recebesse `SVG_INVALIDO` para um glTF
 procuraria o defeito no arquivo errado.
+
+Os quatro códigos de composição (ADR-008) vão na direção **oposta** à dos de modelo 3D, e vale
+dizer por quê, porque a simetria enganaria: eles são **422**, não 409. Um modelo 3D quebrado é
+arquivo já gravado do tenant, e o integrador não tem como consertá-lo; uma composição chega no
+**corpo do pedido**, então é literalmente o pedido que é improcessável e quem corrige é quem
+enviou. Mandá-lo ao editor de zonas o afastaria da causa.
+
+O caso que ainda não existe, anotado antes de aparecer: uma composição **já gravada** que fica
+inválida porque o acervo mudou (peça removida, forma aposentada) é dado do tenant e merece 409.
+Quando esse ponto de chamada existir, a saída é a mesma que `ZONA_NAO_ENCONTRADA` já usa — o
+handler pré-checa e levanta ele mesmo —, e não o mesmo código saindo com dois status da tabela.
+
+`PECA_NAO_ENCONTRADA` merece uma linha à parte porque não é tratamento de erro, é fronteira de
+segurança. A composição pode ter sido escrita por um modelo de linguagem, e o ADR-008 registra
+que "a resposta do modelo vira escolha de arquivo". A validação é por **pertencimento ao
+catálogo**, nunca por formato do id: um id sintaticamente impecável que não está no acervo é
+recusado igual a um id absurdo.
 
 ### As três famílias, e por que "dado do tenant" é 409
 

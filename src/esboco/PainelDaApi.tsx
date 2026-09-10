@@ -68,6 +68,13 @@ const RESPOSTA_DE_ERRO_POR_CODIGO: Readonly<Record<CodigoDeErro, RespostaDeErroM
   // este erro de compilação que avisou que a tela existia, quando os códigos entraram.
   MODELO_3D_INVALIDO: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
   MODELO_3D_NAO_NORMALIZAVEL: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+  // Composição (ADR-008), e aconteceu de novo exatamente como o comentário acima descreve:
+  // os quatro códigos entraram no motor e o erro de compilação apontou para esta tela. 422 e
+  // não 409 porque a composição vem no corpo do pedido — quem corrige é quem enviou.
+  PECA_NAO_ENCONTRADA: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
+  COMPOSICAO_INVALIDA: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
+  FORMAS_MISTURADAS: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
+  PARAMETRO_INVALIDO: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
 };
 
 export function PainelDaApi({ cores, relatorio, erro }: Props) {

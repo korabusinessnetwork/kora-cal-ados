@@ -63,6 +63,19 @@ export const STATUS_POR_CODIGO_DO_MOTOR: Readonly<Record<CodigoDeErro, EntradaDa
   // status é exatamente o 500 surpresa que este arquivo existe para impedir.
   MODELO_3D_INVALIDO: { status: 409, familia: 'dado do tenant' },
   MODELO_3D_NAO_NORMALIZAVEL: { status: 409, familia: 'dado do tenant' },
+  // Os quatro da composição (ADR-008) são **422 e não 409**, ao contrário dos 3D acima, e a
+  // diferença não é de gosto: a composição chega no CORPO do pedido, então é literalmente o
+  // pedido que é improcessável, e o integrador conserta trocando o que enviou. Um 409 aqui o
+  // mandaria ao editor de zonas de um produto que talvez nem exista ainda.
+  //
+  // O dia em que uma composição JÁ GRAVADA ficar inválida porque o acervo mudou (peça
+  // removida, forma aposentada) é outro ponto de chamada, aí sim dado do tenant, e a saída é
+  // a mesma que `ZONA_NAO_ENCONTRADA` já usa: o handler pré-checa e levanta ele mesmo, em vez
+  // de o mesmo código sair com dois status daqui.
+  PECA_NAO_ENCONTRADA: { status: 422, familia: 'pedido' },
+  COMPOSICAO_INVALIDA: { status: 422, familia: 'pedido' },
+  FORMAS_MISTURADAS: { status: 422, familia: 'pedido' },
+  PARAMETRO_INVALIDO: { status: 422, familia: 'pedido' },
 };
 
 type EntradaDeTransporte = EntradaDaTabela & {
