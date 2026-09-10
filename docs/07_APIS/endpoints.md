@@ -134,7 +134,16 @@ mudam** — eles são o contrato; o formato ao redor deles não era.
 | `ZONAS_SOBREPOSTAS` | 409 | dado do tenant | Duas zonas pedidas compartilham elemento (BUG-013) |
 | `SVG_INVALIDO` | 409 | dado do tenant | O asset-base no Storage não é um SVG parseável |
 | `SVG_NAO_NORMALIZAVEL` | 409 | dado do tenant | O asset-base canônico foi corrompido e não passa pela normalização |
+| `MODELO_3D_INVALIDO` | 409 | dado do tenant | O asset-base 3D não é um glTF 2.0 utilizável: JSON malformado, sem `nodes`, sem nó com malha, ou índice de malha/material apontando para o que não existe |
+| `MODELO_3D_NAO_NORMALIZAVEL` | 409 | dado do tenant | É glTF 2.0 e mesmo assim não vira canônico: exige extensão que não suportamos (Draco, meshopt) ou aponta para arquivo externo em `buffers`/`images` |
 | `FALHA_INTERNA` | 500 | nossa | Qualquer outro `Error`. Mensagem fixa; o detalhe vai só para o log |
+
+Os dois códigos de modelo 3D são os gêmeos exatos dos de SVG (ADR-007), e ficam na mesma
+família pela mesma razão: o pedido do integrador está correto e quem corrige é o time da
+marca, no arquivo que subiu. Códigos próprios, e não reuso dos de SVG, porque a mensagem de
+cada par ensina coisa diferente — "exporte com Presentation Attributes" contra "exporte sem
+Draco, com os buffers embutidos" —, e um integrador que recebesse `SVG_INVALIDO` para um glTF
+procuraria o defeito no arquivo errado.
 
 ### As três famílias, e por que "dado do tenant" é 409
 

@@ -86,6 +86,24 @@ describe('a mensagem muda com a família', () => {
   });
 });
 
+describe('os códigos de modelo 3D são dado do tenant, como os de SVG', () => {
+  // O laço de cobertura acima já os exerceria sozinho. Esta asserção existe nomeada porque o
+  // status deles é **decisão** (spec de `normalizarModelo3d`, critério 12), não consequência:
+  // se alguém um dia mover MODELO_3D_* para 422, o laço genérico continua verde e só esta
+  // linha fica vermelha — e o integrador deixaria de ser mandado a corrigir o modelo.
+  it.each(['MODELO_3D_INVALIDO', 'MODELO_3D_NAO_NORMALIZAVEL'] as const)(
+    '%s é 409 e manda corrigir o dado da marca, nunca o pedido',
+    (codigo) => {
+      const falha = traduzirParaFalhaDaApi(new ErroDeVariante(codigo, 'O glTF tem um problema.'));
+
+      expect(falha.status).toBe(409);
+      expect(falha.codigo).toBe(codigo);
+      expect(STATUS_POR_CODIGO_DO_MOTOR[codigo].familia).toBe('dado do tenant');
+      expect(falha.message).toContain('O glTF tem um problema.');
+    },
+  );
+});
+
 describe('ZONA_NAO_ENCONTRADA, o único código com dois status', () => {
   it('vinda do motor é 409 — depois da pré-checagem, só sobra seletor gravado quebrado', () => {
     const falha = traduzirParaFalhaDaApi(

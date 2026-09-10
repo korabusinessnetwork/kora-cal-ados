@@ -38,8 +38,10 @@ const ORIENTACAO_DE_DADO_DO_TENANT =
   'O pedido está correto: o que precisa de correção é o mapeamento de zonas ou o arquivo base deste produto, no editor de zonas da marca. Repetir a chamada não resolve.';
 
 /**
- * Os 7 códigos do motor. Exportada porque o teste itera esta tabela em vez de manter uma
- * lista própria dos códigos — lista paralela envelhece em silêncio, esta não pode.
+ * Todos os códigos do motor. Exportada porque o teste itera esta tabela em vez de manter uma
+ * lista própria dos códigos — lista paralela envelhece em silêncio, esta não pode. (A
+ * contagem não é escrita aqui de propósito: já foram "7" até o ADR-007 acrescentar os dois
+ * de modelo 3D, e um número em comentário é a primeira coisa que fica velha.)
  */
 export const STATUS_POR_CODIGO_DO_MOTOR: Readonly<Record<CodigoDeErro, EntradaDaTabela>> = {
   COR_INVALIDA: { status: 422, familia: 'pedido' },
@@ -54,6 +56,13 @@ export const STATUS_POR_CODIGO_DO_MOTOR: Readonly<Record<CodigoDeErro, EntradaDa
   ZONAS_SOBREPOSTAS: { status: 409, familia: 'dado do tenant' },
   SVG_INVALIDO: { status: 409, familia: 'dado do tenant' },
   SVG_NAO_NORMALIZAVEL: { status: 409, familia: 'dado do tenant' },
+  // Gêmeos 3D dos dois acima, e pela mesma razão em 409: o pedido do integrador está certo,
+  // e o que precisa de correção é o modelo gravado do tenant. Hoje eles não têm como chegar
+  // até aqui — a normalização roda no provisionamento, não na requisição —, e mesmo assim
+  // entram na tabela: `Record<CodigoDeErro, ...>` exige a chave, e um código do motor sem
+  // status é exatamente o 500 surpresa que este arquivo existe para impedir.
+  MODELO_3D_INVALIDO: { status: 409, familia: 'dado do tenant' },
+  MODELO_3D_NAO_NORMALIZAVEL: { status: 409, familia: 'dado do tenant' },
 };
 
 type EntradaDeTransporte = EntradaDaTabela & {

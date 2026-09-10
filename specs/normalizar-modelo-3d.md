@@ -147,3 +147,52 @@ memória da decisão as desfaz na sessão seguinte.
 
 Se a rodada achar defeito de produto, ele vira linha em `memory/bugs.md` e correção no mesmo
 commit — e o loop recomeça do `/review`.
+
+---
+
+## 7. Resultado da revisão — 2026-09-10
+
+**Aprovado sem ressalvas.** Os 15 critérios em "sim"; `npx tsc --noEmit` limpo; `npx vitest
+run` 576/576 (eram 536 antes da entrega, 38 casos novos nos dois arquivos de teste);
+`npm run test:banco` 48/48.
+
+### As três mutações do critério 14
+
+Cada uma aplicada isolada, com o resultado conferido e o arquivo restaurado — a igualdade do
+`md5sum` antes e depois é a prova de que voltou.
+
+| Mutação | O que quebrou |
+|---|---|
+| (a) não duplicar material compartilhado (`darMaterialProprioACadaPrimitiva` sempre segue em frente) | **5 testes**, entre eles o do relatório completo e o das duas primitivas do mesmo nó |
+| (b) cunhar `malha-N` sem checar colisão (o `while (vistos.has(...))` removido) | **2 testes**: "pula o número que o modelador já ocupou" e a **idempotência** — exatamente o par que o spec previu |
+| (c) duplicar malha clonando `accessors` em vez de reusá-los | **1 teste**: "a duplicação NÃO copia geometria" |
+
+**O que a mutação (c) ensinou, e que não estava no spec:** `git checkout --` não restaura
+arquivo untracked, e todos os arquivos mutados aqui nasceram neste mesmo `/build`. Deixar a
+mutação (a) para trás seria plantar no código o defeito silencioso que o módulo existe para
+impedir. A receita corrigida está em `memory/learnings.md`: cópia no scratchpad antes, `md5sum`
+depois.
+
+### Dois desvios do spec, os dois de nomenclatura de arquivo
+
+1. O spec diz `api/_lib/falhaDaApi.ts`; o arquivo real chama-se
+   **`api/_lib/traduzirParaFalhaDaApi.ts`** — o spec herdou o nome antigo do plano da Fase 2.
+   Nenhuma consequência além do nome: o teste que itera a tabela é o daquele arquivo.
+2. O spec previu **dois** lugares enumerando `CodigoDeErro`; existem **três** — o terceiro é
+   `src/esboco/PainelDaApi.tsx`, com o seu próprio `Readonly<Record<CodigoDeErro, ...>>`.
+   Achado pelo `tsc`, não por leitura: `TS2739 ... is missing the following properties`. É
+   precisamente o alarme que o `Record` foi escrito para ser, e ele funcionou.
+
+### Decisões que o build tomou e escreveu no código
+
+- **Textura** (critério 11): **observar, não recusar** — a malha entra em
+  `malhasNaoRecoloriveis` e o modelo passa. O porquê está no comentário do campo: é o gêmeo do
+  gradiente, e `normalizarSvg` também não recusa; quem recusa é o motor na hora de pintar.
+- **Hierarquia** (edge case): nó endereçável dentro de outro são **duas zonas independentes**.
+  O porquê está em `acharEnderecaveis`: em SVG o `fill` é herdado pela árvore, em glTF o
+  material mora na primitive e a cena não o herda — fazer o pai absorver o filho criaria uma
+  zona que pinta pedaço do modelo que ela não lista.
+- **Material único por primitiva, mais rígido que o necessário**: duas primitivas do mesmo nó
+  pertencem à mesma zona e poderiam compartilhar. Não compartilham, para o invariante caber em
+  uma linha ("nenhum índice repetido") e porque a exceção "pode compartilhar dentro do mesmo
+  nó" é o tipo de regra que alguém depois generaliza errado.

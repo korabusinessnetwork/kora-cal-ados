@@ -63,6 +63,11 @@ const RESPOSTA_DE_ERRO_POR_CODIGO: Readonly<Record<CodigoDeErro, RespostaDeErroM
   ZONAS_SOBREPOSTAS: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
   SVG_INVALIDO: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
   SVG_NAO_NORMALIZAVEL: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+  // Gêmeos 3D (ADR-007). O esboço nunca os produz — ele pinta SVG —, mas o
+  // `Record<CodigoDeErro, ...>` acima obriga a linha, e é assim que ele funciona: foi
+  // este erro de compilação que avisou que a tela existia, quando os códigos entraram.
+  MODELO_3D_INVALIDO: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
+  MODELO_3D_NAO_NORMALIZAVEL: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
 };
 
 export function PainelDaApi({ cores, relatorio, erro }: Props) {

@@ -8,7 +8,13 @@ export type CodigoDeErro =
   | 'SVG_INVALIDO'
   | 'SVG_NAO_NORMALIZAVEL'
   | 'ZONAS_SOBREPOSTAS'
-  | 'ZONE_KEY_INVALIDA';
+  | 'ZONE_KEY_INVALIDA'
+  // Os gêmeos tridimensionais de SVG_INVALIDO / SVG_NAO_NORMALIZAVEL (ADR-007). Códigos
+  // próprios e não reuso dos de SVG: a mensagem de um e de outro ensina coisas diferentes
+  // ("exporte com Presentation Attributes" x "exporte sem Draco"), e um integrador que
+  // recebesse SVG_INVALIDO para um glTF procuraria o defeito no arquivo errado.
+  | 'MODELO_3D_INVALIDO'
+  | 'MODELO_3D_NAO_NORMALIZAVEL';
 
 /**
  * Erro de qualquer etapa do motor. Existe para que "a zona não foi aplicada" seja
