@@ -1,0 +1,104 @@
+/* Estilo do palco 3D, separado do JSX (regra de white-label do CLAUDE.md).
+
+   Reaproveita os tokens de `src/esboco/esboco.css`, que é onde eles moram hoje. São
+   PROVISÓRIOS pelo mesmo motivo dito lá: `docs/02_DESIGN_SYSTEM/` está vazio de propósito até a
+   identidade visual existir, e quando existir estes valores viram tema por tenant.
+
+   Regra que não muda com o tema: nada de filtro, sombra ou overlay sobre o canvas. O que o
+   palco mostra é o que a GPU desenhou a partir do glTF, e o princípio nº1 vale em 3D também. */
+
+.palco3d__colunas {
+  display: grid;
+  grid-template-columns: 300px minmax(420px, 1fr) 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.palco3d__painel-cena {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+/* A moldura tem altura própria, em `vh`, porque o canvas não tem tamanho intrínseco: sem uma
+   altura declarada ela colapsa em zero, o palco espera medida positiva para sempre e a tela fica
+   vazia sem erro nenhum. */
+.palco3d__moldura {
+  position: relative;
+  width: 100%;
+  height: min(62vh, 620px);
+  min-height: 320px;
+  border-radius: var(--raio);
+  overflow: hidden;
+  background: #14141b;
+  /* Sem isto o navegador de toque interpreta o arraste como rolagem da página e o palco fica
+     imóvel no celular, sem nenhum erro para explicar por quê. */
+  touch-action: none;
+  cursor: grab;
+}
+.palco3d__moldura:active { cursor: grabbing; }
+.palco3d__moldura canvas { display: block; width: 100%; height: 100%; }
+
+.palco3d__estado {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cor-texto-fraco);
+}
+.palco3d__estado--erro { color: var(--cor-erro); }
+
+.palco3d__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+
+.palco3d__peca {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 11px;
+  background: var(--cor-superficie-alta);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  color: var(--cor-texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.palco3d__peca:hover { border-color: var(--cor-acento); }
+.palco3d__peca--ativa { border-color: var(--cor-acento); background: var(--cor-superficie); }
+.palco3d__peca-rotulo { font-size: 13px; }
+.palco3d__peca-id { font-family: var(--fonte-mono); font-size: 11px; color: var(--cor-texto-fraco); }
+
+.palco3d__faixa { width: 100%; margin: 4px 0 8px; accent-color: var(--cor-acento); }
+
+.palco3d__medida {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--fonte-mono);
+  font-size: 12px;
+  color: var(--cor-texto-fraco);
+}
+.palco3d__medida strong { font-size: 14px; color: var(--cor-texto); }
+
+.palco3d__vazio { margin: 0; font-size: 13px; color: var(--cor-texto-fraco); }
+
+.palco3d__nome {
+  display: block;
+  padding: 10px 12px;
+  background: var(--cor-superficie-alta);
+  border: 1px solid var(--cor-acento);
+  border-radius: var(--raio);
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.palco3d__nota { margin-top: 14px; }
+
+@media (max-width: 1100px) {
+  .palco3d__colunas { grid-template-columns: 1fr; }
+}

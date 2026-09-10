@@ -1,5 +1,5 @@
 // Ponto de entrada do app. Monta o `App`, que decide entre a área protegida (sessão +
-// tenant) e o esboço do motor. O CSS entra aqui, uma vez, para nenhum componente
+// tenant) e as telas sem banco (o esboço do motor e o palco 3D). O CSS entra aqui, uma vez, para nenhum componente
 // importar estilo — a separação que o white-label exige (CLAUDE.md).
 
 import { StrictMode } from 'react';
@@ -9,6 +9,7 @@ import './esboco/esboco.css';
 import './features/produtos/produtos.css';
 import './features/sessao/sessao.css';
 import './features/zonas/zonas.css';
+import './palco3d/palco3d.css';
 
 const raiz = document.getElementById('raiz');
 

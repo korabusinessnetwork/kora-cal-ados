@@ -1,4 +1,4 @@
-// Raiz do app. Monta as telas por `useState`, sem roteador: hoje são duas, e uma
+// Raiz do app. Monta as telas por `useState`, sem roteador: hoje são três, e uma
 // dependência nova só se paga quando houver URL que precise ser compartilhável.
 //
 // Tudo o que toca o banco vive dentro de `RotaProtegida` — a autenticação é verificada
@@ -10,7 +10,7 @@
 // uma requisição sequer. Cobrar credencial de quem não vai usar credencial nenhuma é
 // justamente a "prevenção de erro" do princípio nº1 aplicada ao contrário.
 
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { EsbocoDoEditor } from './esboco/EsbocoDoEditor';
 import { BarraDaSessao } from './features/sessao/BarraDaSessao';
 import { ProvedorDeSessao } from './features/sessao/ContextoDeSessao';
@@ -19,6 +19,14 @@ import { RotaProtegida } from './features/sessao/RotaProtegida';
 import { ConfiguracaoAusente, lerConfiguracaoDoSupabase } from './lib/supabase/configuracaoDoSupabase';
 import type { Tela } from './telaInicial';
 import { lerTelaDaUrl, urlDaTela } from './telaInicial';
+
+// O palco entra por `import()` tardio, e não por import comum, porque ele traz o three.js
+// junto: no chunk principal a biblioteca inteira ia no primeiro carregamento de TODO
+// mundo, inclusive de quem só usa o editor 2D e nunca abre o palco. O peso é do palco, e
+// quem paga por ele é quem o abre.
+const TelaDoPalco3d = lazy(async () => ({
+  default: (await import('./palco3d/TelaDoPalco3d')).TelaDoPalco3d,
+}));
 
 export function App() {
   const [tela, setTela] = useState<Tela>(() => lerTelaDaUrl(window.location.search));
@@ -46,6 +54,28 @@ export function App() {
     );
   }
 
+  // O palco 3D sai aqui pelo mesmo motivo do esboço, e com uma razão a mais: a peça dele
+  // é montada por código (`src/lib/acervo/`), não baixada de lugar nenhum. Exigir
+  // credencial de uma tela que não tem para onde mandar requisição seria pedir senha para
+  // abrir uma porta que não está trancada.
+  if (tela === 'palco3d') {
+    return (
+      <>
+        <Suspense fallback={<main className="tela">Carregando o palco 3D…</main>}>
+          <TelaDoPalco3d />
+        </Suspense>
+        <p className="rodape-telas">
+          <button type="button" onClick={() => irPara('esboco')}>
+            ← ver o esboço do motor (2D, sem banco)
+          </button>
+          <button type="button" onClick={() => irPara('app')}>
+            ir para o editor (pede login)
+          </button>
+        </p>
+      </>
+    );
+  }
+
   // Sem `.env.local` a área protegida não sobe. Falhar aqui, com o que fazer escrito na
   // tela, é melhor que uma tela de login que recusa toda senha sem explicar por quê.
   const problema = conferirConfiguracao();
@@ -58,6 +88,9 @@ export function App() {
           {/* Saída, não beco sem saída: o esboço não precisa de nada disso. */}
           <button type="button" onClick={() => irPara('esboco')}>
             ver o esboço do motor (funciona sem conta e sem `.env.local`)
+          </button>
+          <button type="button" onClick={() => irPara('palco3d')}>
+            ver o palco 3D (idem)
           </button>
         </p>
       </main>
@@ -80,6 +113,9 @@ export function App() {
       <p className="rodape-telas">
         <button type="button" onClick={() => irPara('esboco')}>
           ver o esboço do motor (sem banco, sem conta)
+        </button>
+        <button type="button" onClick={() => irPara('palco3d')}>
+          ver o palco 3D (sem banco, sem conta)
         </button>
       </p>
     </ProvedorDeSessao>

@@ -5,19 +5,28 @@
 // sem sessão" é decisão de segurança, e decisão de segurança escondida num `if` no meio
 // de um componente é a que ninguém revisa e alguém amplia sem perceber.
 //
-// A regra inteira é uma frase: existe UMA tela sem banco, e ela é a única que a URL pode
-// escolher. Qualquer outro valor cai na área protegida, que tem o portão inteiro pela
-// frente. O padrão é o lado seguro, não o lado conveniente.
+// A regra inteira é uma frase: existe uma LISTA de telas sem banco, e só o que está nela
+// a URL pode escolher. Qualquer outro valor cai na área protegida, que tem o portão
+// inteiro pela frente. O padrão é o lado seguro, não o lado conveniente.
+//
+// A lista nasceu com um item só e já tem dois. Ela é explícita, e não um `!== 'app'`, para
+// acrescentar uma tela exigir escrever o nome dela aqui: é a linha onde alguém para e
+// pergunta de que lado do portão a tela nova fica.
 
-/** As telas do app. `esboco` não fala com o Supabase; `app` é tudo que está atrás do portão. */
-export type Tela = 'app' | 'esboco';
+/** As telas sem banco: nenhuma delas faz uma requisição sequer nem pede sessão. */
+const TELAS_SEM_BANCO = ['esboco', 'palco3d'] as const;
+
+/** As telas do app. As de `TELAS_SEM_BANCO` dispensam o Supabase; `app` é tudo atrás do portão. */
+export type Tela = 'app' | (typeof TELAS_SEM_BANCO)[number];
 
 /**
  * A tela que o `npm run dev` abre, lida da query string.
  *
  * `?tela=esboco` abre o esboço do motor sem pedir conta — ele lê um SVG commitado
- * (`src/esboco/produtoDemo.ts`) e não faz uma requisição sequer. Não é bypass de
- * autenticação: não existe caminho daqui para qualquer tela que consulte o banco.
+ * (`src/esboco/produtoDemo.ts`) e não faz uma requisição sequer. `?tela=palco3d` abre o
+ * palco 3D, que monta a peça a partir de código (`src/lib/acervo/`) e também não pede
+ * nada à rede. Não é bypass de autenticação: não existe caminho de nenhuma das duas para
+ * qualquer tela que consulte o banco.
  *
  * Recebe a busca por parâmetro para o teste não depender de `window`.
  */
@@ -26,8 +35,9 @@ export function lerTelaDaUrl(busca: string): Tela {
   // acabou de ler o nome dele num README. `?tela=Esboco` cair na tela de login seria
   // um erro sem mensagem — e mensagem de erro que não existe é a pior de todas.
   const pedida = new URLSearchParams(busca).get('tela')?.trim().toLowerCase();
+  const encontrada = TELAS_SEM_BANCO.find((tela) => tela === pedida);
 
-  return pedida === 'esboco' ? 'esboco' : 'app';
+  return encontrada ?? 'app';
 }
 
 /**
@@ -44,5 +54,5 @@ export function lerTelaDaUrl(busca: string): Tela {
  * capaz de escolher a área protegida.
  */
 export function urlDaTela(tela: Tela, caminho: string): string {
-  return tela === 'esboco' ? '?tela=esboco' : caminho;
+  return tela === 'app' ? caminho : `?tela=${tela}`;
 }
