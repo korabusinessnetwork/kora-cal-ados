@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: AGUARDANDO_MATHEUS
+status: EXECUTANDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 - **Projeto:** Kora Calçados (codinome)
@@ -10,17 +10,23 @@ status: AGUARDANDO_MATHEUS
 - **Branch:** `main` (ver D02 em DECISOES.md: por que não `full-auto/<slug>`)
 - **Início:** 2026-09-10
 - **Fase atual:** Fase C, provar a esteira de ponta a ponta com o acervo de prova
-- **Tarefa atual:** T13 palco 3D no navegador, construída e revisada, **aguardando a conferência a olho**
-- **Próximo passo:** o dono abre <http://localhost:5173/?tela=palco3d> e responde os 5 itens da §7
-  de `specs/palco-3d.md`. Se passar, T13 vira `[x]` e a máquina segue para T14 (montar a composição
-  em cena, com cor por peça). Se algum item falhar, o defeito vira teste e correção no mesmo commit,
-  e a conferência se repete.
-- **Progresso:** 7 de 13 concluídas, 1 construída aguardando conferência, 2 pendentes e desbloqueadas,
-  3 adiadas por decisão do dono
+- **Tarefa atual:** T14 montagem da composição em cena
+- **Próximo passo:** rodar o ciclo spec, build, review de T14: uma composição validada
+  (`validarComposicao`) vira calçado montado na tela, cada peça no seu lugar, e trocar a cor de uma
+  zona muda só aquela peça. É onde as duas metades construídas separadamente se encontram, o
+  validador de composição (T11) e o palco (T13), e é onde o princípio nº1 passa a valer em 3D:
+  cor no editor igual à cor da API, com o mesmo motor nos dois lados.
+  **Atenção:** T14 também exige conferência a olho, e por um motivo mais forte que T13. O que ela
+  entrega é cor na tela, e cor é literalmente o princípio nº1.
+- **Progresso:** 8 de 13 concluídas, 2 pendentes e desbloqueadas, 3 adiadas por decisão do dono
 
 ## Motivo da parada (só se AGUARDANDO_MATHEUS ou PAUSADO)
 
-**T13 exige conferência a olho, e só o dono tem navegador.** É a primeira tarefa desta fase em que
+<vazio, voltou a executar em 2026-09-10 depois de o dono aprovar a conferência a olho de T13>
+
+## A conferência a olho de T13 (encerrada, aprovada em 2026-09-10)
+
+**T13 exigia conferência a olho, e só o dono tem navegador.** É a primeira tarefa desta fase em que
 o princípio nº1 morde: suíte verde não prova que a peça aparece na tela, porque jsdom não tem WebGL
 e nenhum teste desta entrega desenhou um pixel. Os 23 critérios automatizáveis estão todos em sim.
 
@@ -39,6 +45,9 @@ uma que cresceu para os dois lados.
 Nota sobre o arraste, para não parecer defeito: arrastar para **baixo** levanta o ponto de vista.
 É a convenção do `OrbitControls` do three, e é a que mantém os dois eixos com a mesma lógica de
 "agarrar a peça". Se preferir o contrário, é uma linha em `src/palco3d/orbita.ts` e dois testes.
+
+**Resultado: os cinco itens passaram**, sem defeito encontrado. Nenhuma linha de código mudou
+depois da conferência.
 
 ## As quatro decisões que destravaram o plano (2026-09-10)
 

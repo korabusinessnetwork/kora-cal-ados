@@ -169,6 +169,14 @@ O item 5 é o mais importante dos cinco, porque é o único que nenhum teste pod
 testes conferem a caixa envolvente, e caixa envolvente não distingue uma peça que cresceu para
 cima de uma que cresceu para os dois lados.
 
+### Conferido pelo dono em 2026-09-10: **passou**
+
+Os cinco itens confirmados em navegador de verdade, em <http://localhost:5173/?tela=palco3d>.
+Com isso T13 está feita, e o ADR-007 D1, D2 e D4 deixam de ser decisão no papel e passam a ser
+comportamento visto na tela. É a primeira vez neste projeto que um modelo 3D aparece para o dono.
+
+Nada mudou no código depois da conferência: a passada não achou defeito.
+
 ---
 
 ## 8. Resultado da revisão
