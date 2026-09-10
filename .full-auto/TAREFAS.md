@@ -17,8 +17,8 @@ por otimismo.
 ## Fase B: Composição (a camada que o ADR-008 D1/D2 define)
 
 - [x] T04 `validarComposicao.ts` | trilha: composicao | depende: T03 | pronto quando: recusa com código explícito para id de peça inexistente, categoria faltando, categoria repetida, peças de formas diferentes e parâmetro fora de faixa; nasce com teste — **feito**, 699 testes verdes, 5 mutações mataram 3/2/2/1/1 testes
-- [ ] T05 `montarCatalogoParaModelo.ts` | trilha: composicao | depende: T04 | pronto quando: dado o acervo visível a um tenant, devolve o catálogo que vai para o modelo de linguagem, **sem** peça de outro tenant, e o teste prova o vazamento impossível
-- [ ] T06 Schema do acervo com RLS | trilha: dados | depende: T04 | pronto quando: migration cria forma/peça/composição com RLS ativa; peça de tenant não aparece para outro tenant; teste de integração prova
+- [!] T05 `montarCatalogoParaModelo.ts` | trilha: composicao | depende: T06 e P03 | **bloqueio:** o formato da saída é um palpite enquanto não existir o consumidor (a chamada ao modelo, que depende de aprovação de custo), e o critério que importa — nenhuma peça de outro tenant — é propriedade de consulta sob RLS, não de função pura. Construir agora seria formatar para um leitor que não existe. Critério original: pronto quando: dado o acervo visível a um tenant, devolve o catálogo que vai para o modelo de linguagem, **sem** peça de outro tenant, e o teste prova o vazamento impossível
+- [!] T06 Schema do acervo com RLS | trilha: dados | depende: P04 e P05 | **bloqueio:** a migration guardaria peças que ainda não existem, e o critério exige teste de integração contra banco real, que este ambiente não tem autenticado. Além disso P05 (onde a zona 3D é guardada) toca as mesmas tabelas e é decisão de schema do dono. Critério original: pronto quando: migration cria forma/peça/composição com RLS ativa; peça de tenant não aparece para outro tenant; teste de integração prova
 
 ## Fase C: Bloqueadas no acervo (ADR-008, "o gargalo mudou de lugar")
 
@@ -28,4 +28,4 @@ por otimismo.
 
 ## Fase D: Dívida conhecida
 
-- [ ] T10 Typecheck de `supabase/scripts/` | trilha: base | depende: nenhum | pronto quando: a pasta entra no `include` do `tsconfig.json` e `npm run typecheck` passa limpo
+- [x] T10 Typecheck de `supabase/scripts/` | trilha: base | depende: nenhum | **já estava resolvida**: a pasta está no `include` do `tsconfig.json` e `tsc --noEmit --listFiles` confirma os 6 arquivos `.ts` sendo lidos, com a suíte limpa. A pendência anotada estava vencida. Fica de fora só `executar.mjs`, que é JS e exigiria `allowJs`
