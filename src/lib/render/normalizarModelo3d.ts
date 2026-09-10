@@ -16,6 +16,7 @@
 // manipulação de objeto. three.js entra só no navegador (ADR-007, Notas de Implementação).
 
 import { ErroDeVariante } from './erros';
+import { analisarGltf, escreverGltf } from './lerGltf';
 import { aplicarPoliticaDeNome } from './nomeDeMalha';
 import type { DocumentoGltf, MaterialDoGltf, NoDoGltf } from './tiposDoGltf';
 
@@ -87,23 +88,7 @@ export function normalizarModelo3d(gltfTexto: string): ResultadoDeNormalizacao3d
   darMaterialProprioACadaPrimitiva(documento, nos, enderecaveis, relatorio);
   anotarMalhasNaoRecoloriveis(documento, nos, enderecaveis, relatorio);
 
-  return { modelo: `${JSON.stringify(documento, null, 2)}\n`, relatorio };
-}
-
-/** JSON malformado, ou JSON que não é um objeto, é `MODELO_3D_INVALIDO` — não uma exceção crua. */
-function analisarGltf(gltfTexto: string): DocumentoGltf {
-  let analisado: unknown;
-  try {
-    analisado = JSON.parse(gltfTexto);
-  } catch {
-    throw new ErroDeVariante('MODELO_3D_INVALIDO', 'Arquivo não é um glTF válido: JSON malformado.');
-  }
-
-  if (analisado === null || typeof analisado !== 'object' || Array.isArray(analisado)) {
-    throw new ErroDeVariante('MODELO_3D_INVALIDO', 'Arquivo não é um glTF válido: o conteúdo não é um objeto JSON.');
-  }
-
-  return analisado as DocumentoGltf;
+  return { modelo: escreverGltf(documento), relatorio };
 }
 
 /**

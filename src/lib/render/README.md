@@ -23,6 +23,9 @@ implementação é o que sustenta "cor no editor = cor na API" (princípio nº1 
 | `domNode.ts` | Registra o jsdom. **Só o Node importa** — é o que mantém jsdom fora do bundle | — |
 | `normalizarModelo3d.ts` | O gêmeo 3D de `normalizarSvg`: roda no **provisionamento**, dá nome e material próprios a cada malha endereçável, ou recusa (ADR-007 D4/D5) | glTF cru → modelo 3D canônico + relatório |
 | `nomeDeMalha.ts` | A política de nome do canônico 3D — o gêmeo de `idDeElemento.ts`: desambigua repetido, converte nome que quebraria a lista de seletores, cunha `malha-N` em nó anônimo | nós do glTF → todos endereçáveis |
+| `recolorirModelo3d.ts` | Roda na **geração**: aplica `{zone_key: cor}` sobre o modelo 3D canônico. O gêmeo de `gerarVarianteDeCor`, e o único autorizado a escrever cor em `baseColorFactor` | canônico + zonas + cores → glTF da variante |
+| `corSrgbLinear.ts` | O **único** lugar que converte hex (sRGB) para o float linear do glTF, e de volta (ADR-007 D3) | `#C0392B` ↔ RGB linear |
+| `lerGltf.ts` | Texto → documento e documento → texto, para a normalização e o recolor lerem igual. O `dom.ts` do caminho 3D | — |
 | `tiposDoGltf.ts` | O subconjunto de glTF que a normalização enxerga. Toda interface tem índice `unknown`: o que não entendemos sai como entrou | — |
 | `fixtures/teste-zona.svg` | Modelo de teste com sola, cabedal e cadarço (2 paths) | — |
 | `fixtures/gltfDeTeste.ts` | Construtor de glTF mínimo + `materiaisUsados`, o invariante "nenhuma zona compartilha material" | descrição → glTF |
@@ -101,6 +104,27 @@ geometria**: o clone reusa os mesmos `accessors`, então `buffers` não cresce e
 Textura (`baseColorTexture`) é o gêmeo do gradiente, e recebe a mesma resposta: o normalizador
 **não recusa**, apenas nomeia a malha em `malhasNaoRecoloriveis`; quem recusa é o motor, na
 hora de pintar.
+
+## O detalhe invisível: sRGB não é linear
+
+O hex que a pessoa digita é **sRGB**. O `baseColorFactor` do glTF é **linear**. Escrever
+`0xC0 / 255` direto produz uma cor errada de um jeito plausível, alguns tons mais clara, do tipo
+que passa numa conferência a olho e só aparece quando o cliente compara com o Pantone. Num
+sistema cujo princípio nº1 é "cor no editor = cor na API", esse defeito não quebra nada, ele
+fabrica o calçado errado.
+
+Por isso a conversão mora em `corSrgbLinear.ts`, e a regra é sustentada por teste, não por
+disciplina: `soUmLugarEscreveCorNoGltf.test.ts` falha se as constantes da curva (`1.055`,
+`0.04045`, `12.92`) aparecerem em qualquer outro arquivo de produção, se `hexParaLinear` for
+usado fora de `recolorirModelo3d.ts`, ou se alguém dividir um canal por 255.
+
+A curva tem duas partes, e é a segunda que a implementação apressada esquece: perto do preto o
+sRGB é uma reta (divisão por 12.92), não uma potência. Quem só usar `** 2.4` erra justamente nos
+tons escuros, que é onde mora meia paleta de calçado.
+
+Ida e volta sozinha **não** prova a conversão: `c / 255` também volta igual. O que separa a
+fórmula certa da errada é o valor no meio, e por isso o teste afirma que `#808080` vira `0.2159`
+em linear e **não** `0.502`.
 
 ## Limites conhecidos
 
