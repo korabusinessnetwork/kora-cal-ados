@@ -13,6 +13,15 @@ glTF.
 | `tiposDaComposicao.ts` | O vocabulário do modo gerado em tipos. Nenhum comportamento | — |
 | `fixtures/acervoDeTeste.ts` | Catálogo escrito à mão, com duas formas. O gêmeo de `render/fixtures/gltfDeTeste.ts` | — |
 
+## O catálogo que existe fora dos testes
+
+`fixtures/acervoDeTeste.ts` serve aos testes deste módulo e tem duas formas, porque uma só não
+provaria `FORMAS_MISTURADAS`. Ele não é acervo, é fixture.
+
+O acervo de prova de verdade mora em `src/lib/acervo/`, gerado por código e com glTF real por
+trás de cada peça. `catalogoDeProva()` devolve um `CatalogoDoAcervo` que este guarda consome do
+mesmo jeito, e é sobre ele que T13, T14 e T15 são construídos.
+
 ## Por que este módulo existe separado do motor de render
 
 `src/lib/render/` transforma um **arquivo** em outro arquivo. Aqui não há arquivo: a composição

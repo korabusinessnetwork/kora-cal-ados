@@ -10,12 +10,15 @@ status: EXECUTANDO
 - **Branch:** `main` (ver D02 em DECISOES.md: por que não `full-auto/<slug>`)
 - **Início:** 2026-09-10
 - **Fase atual:** Fase C, provar a esteira de ponta a ponta com o acervo de prova
-- **Tarefa atual:** T12 acervo de prova gerado por código
-- **Próximo passo:** rodar o ciclo spec, build, review de T12: gerar por script 5 peças em glTF
-  2.0 válido (2 solas, 2 cabedais, 1 cadarço) de uma forma só. Geometria grosseira de propósito.
-  O projeto já escreve glTF à mão em `src/lib/render/fixtures/gltfDeTeste.ts`, então isto é
-  extensão de algo provado, não técnica nova.
-- **Progresso:** 6 de 13 concluídas, 4 pendentes e desbloqueadas, 3 adiadas por decisão do dono
+- **Tarefa atual:** T13 palco 3D no navegador
+- **Próximo passo:** rodar o ciclo spec, build, review de T13: pôr o modelo na tela com three.js,
+  girando com o mouse, e clicar numa peça identificando-a pelo nome da malha (ADR-007 D1/D2/D4).
+  O combustível já existe: `gltfDaPecaDeProva(id)` devolve o texto e `GLTFLoader.parse(texto)` o
+  recebe direto, sem arquivo em disco.
+  **Atenção:** T13 é a primeira tarefa desta fase que o princípio nº1 obriga a conferir a olho,
+  em navegador de verdade. Suíte verde não prova que a peça aparece. O servidor de dev já está
+  rodando em http://localhost:5173.
+- **Progresso:** 7 de 13 concluídas, 3 pendentes e desbloqueadas, 3 adiadas por decisão do dono
 
 ## Motivo da parada (só se AGUARDANDO_MATHEUS ou PAUSADO)
 <vazio, voltou a executar em 2026-09-10 depois das quatro decisões do dono>
