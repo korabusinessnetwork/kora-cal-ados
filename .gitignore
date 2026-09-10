@@ -11,3 +11,8 @@ supabase/.temp/
 # Config de debug do editor, local da máquina. `.claude/commands/` VAI versionado:
 # os slash commands do loop precisam sobreviver à sessão, o launch.json não.
 .claude/launch.json
+
+# Estado do Full Automático: os cinco arquivos VÃO versionados (são o ponto de salvamento
+# que sobrevive à sessão). O que não vai é o processo: a trava do vigia é de uma máquina só,
+# e `vigia.log` já cai na regra de `*.log` acima.
+.full-auto/.vigia.lock
