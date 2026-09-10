@@ -31,6 +31,7 @@
 
 | `adr-007-modelo-3d-manipulavel.md` | Calçado 3D manipulável: glTF como artefato, recolor por `baseColorFactor`, **modo cor chapa** como o modo que verifica o princípio nº1, zona = lista de nomes de malha | Aceito — **bloqueado no insumo** (não existe glTF no projeto) |
 | `adr-008-calcado-gerado-sobre-acervo-de-pecas.md` | Calçado gerado por prompt: a IA **escolhe e estiliza** peças de um acervo, nunca esculpe; o calçado gerado é uma **composição** (JSON), não uma malha; **cada peça é uma zona**, então marcar zona deixa de existir no modo gerado | Aceito — **bloqueado no acervo** (as peças não existem) |
+| `adr-009-saida-do-cliente.md` | O que a marca leva embora se cancelar: tudo que é dela, em formato aberto; o acervo base da Kora não sai | Aceito |
 
 Numeração é sequencial e nunca reciclada. Espelho deste índice em `memory/decisions.md`
 — os dois precisam estar em sync.

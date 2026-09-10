@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: AGUARDANDO_MATHEUS
+status: EXECUTANDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 - **Projeto:** Kora Calçados (codinome)
@@ -9,22 +9,25 @@ status: AGUARDANDO_MATHEUS
   + `docs/09_BACKLOG/features.md`. A ordem de construção é a do ADR-008: **acervo → composição → prompt**.
 - **Branch:** `main` (ver D02 em DECISOES.md: por que não `full-auto/<slug>`)
 - **Início:** 2026-09-10
-- **Fase atual:** rumo 3D / generativo, camada de composição
-- **Tarefa atual:** nenhuma — tudo o que restou depende do Matheus
-- **Próximo passo:** ao retomar, T05 e T06 destravam com P03 (custo) e P04 (acervo). Se elas
-  continuarem bloqueadas, não há trabalho útil restante neste plano — o gargalo é conteúdo e
-  decisão, como o próprio ADR-008 previu.
-- **Progresso:** 5 de 10 concluídas, 5 bloqueadas (3 no acervo, 2 em decisão do dono)
+- **Fase atual:** Fase C, provar a esteira de ponta a ponta com o acervo de prova
+- **Tarefa atual:** T12 acervo de prova gerado por código
+- **Próximo passo:** rodar o ciclo spec, build, review de T12: gerar por script 5 peças em glTF
+  2.0 válido (2 solas, 2 cabedais, 1 cadarço) de uma forma só. Geometria grosseira de propósito.
+  O projeto já escreve glTF à mão em `src/lib/render/fixtures/gltfDeTeste.ts`, então isto é
+  extensão de algo provado, não técnica nova.
+- **Progresso:** 6 de 13 concluídas, 4 pendentes e desbloqueadas, 3 adiadas por decisão do dono
 
 ## Motivo da parada (só se AGUARDANDO_MATHEUS ou PAUSADO)
+<vazio, voltou a executar em 2026-09-10 depois das quatro decisões do dono>
 
-Não sobrou tarefa útil que não dependa dele. As cinco restantes precisam, nesta ordem: das ~15
-peças da forma de demonstração (P04), da aprovação da primeira dependência paga recorrente
-(P03) e de duas decisões de schema (P05). É exatamente o bloqueio que o ADR-008 anunciou ao
-escrever "o gargalo mudou de lugar: agora é o acervo" — não é impedimento técnico, é conteúdo.
+## As quatro decisões que destravaram o plano (2026-09-10)
 
-O modo automático em si também está pela metade: o Stop hook e o vigia de limite não puderam
-ser instalados (P01), então não há retomada sem ele digitar.
+1. **Acervo**: acervo de prova em geometria grosseira primeiro, para provar a esteira antes de
+   investir em modelagem. Registrada em `memory/restrictions.md`.
+2. **Custo da IA**: adiada, o configurador vem primeiro e custa zero. Registrada em
+   `memory/restrictions.md`.
+3. **Zona 3D**: não guardar, a zona vem da composição. Sem tarefa, sem schema.
+4. **Saída do cliente**: saída completa em formato aberto, virou o ADR-009.
 
 ## Vigia de limite
 Não instalado. O hook de continuidade e o vigia vivem em `.claude/`, e a instalação está
