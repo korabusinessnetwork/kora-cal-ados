@@ -388,3 +388,33 @@ Passada dos dois arquivos escritos aqui, 11 mutações, 11 mortas, restauração
 ### Ressalva aberta
 
 Nenhuma. Restam os 5 itens da §8, que são do dono e não têm substituto em teste.
+
+## Passada automática em navegador de verdade (2026-09-11)
+
+**Nenhum defeito encontrado nos 5 itens.** A conferência do dono continua sendo o portão formal,
+porque a GPU e o monitor dele não são os da passada, mas ela passa a ser confirmação e não
+descoberta.
+
+O que tornou isso possível, e que o projeto vinha assumindo impossível desde T13: "não dá para
+testar" era verdade sobre o **jsdom**, não sobre a máquina. Há Chrome instalado, ele roda WebGL por
+software em modo headless, e o Node 24 traz `WebSocket` global, então dá para dirigi-lo pelo
+protocolo de DevTools sem instalar dependência nenhuma. O resto foi um decodificador de PNG de 70
+linhas sobre o `zlib` do Node, para comparar o pixel desenhado com a amostra HTML ao lado.
+
+| Item | Resultado | Evidência |
+|---|---|---|
+| 1. O calçado aparece montado | passou | Sola embaixo, cabedal sobre ela, cadarço no topo. Nada flutuando nem enterrado |
+| 2. A cor escolhida é a cor que aparece | passou | Matiz na tela contra matiz da amostra: sola 5 contra 6, cabedal 221 contra 219, cadarço 43 contra 42. Brilho a 0,02 do escolhido nas faces de frente |
+| 3. Trocar a cor de uma zona muda só aquela peça | passou | Sola para `#C0392B`: a sola virou vermelha, cabedal e cadarço intactos |
+| 4. Engrossar a sola sobe o resto, encaixado | passou | Espessura de 18 para 40 mm e de volta para 10 mm, sem fresta e sem afundar nos dois sentidos |
+| 5. Clicar numa peça mostra o nome dela | passou | Clique no azul devolveu `prova-cabedal-baixo`, no amarelo `prova-cadarco-reto`, no vazio limpou |
+
+O item 2 é o que mais importava, e é o primeiro número que este projeto tem sobre **cor na tela**,
+e não sobre cor no arquivo. A distância entre os dois é a conversão de sRGB para linear mais o
+renderizador, que é exatamente o que o princípio nº1 existe para vigiar. As faces iluminadas de
+cima saturam (o cadarço sai em brilho 1,00 contra 0,91 escolhido), o que é iluminação e não
+conversão errada: uma conversão trocada moveria o brilho em faixa muito maior e nas três peças.
+
+A sonda foi descartável e não entra no repositório. Transformá-la em teste permanente, pulável
+quando não houver Chrome (o mesmo molde de `skipIf(!temAmbiente)` dos testes de banco), é tarefa
+própria e está anotada como T17.

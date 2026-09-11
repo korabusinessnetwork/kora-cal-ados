@@ -42,6 +42,16 @@ Abrir <http://localhost:5173/?tela=composicao> e conferir:
 
 O item 2 é o mais importante dos cinco.
 
+**Passada automática feita em 2026-09-11, sem defeito nos 5 itens.** Descobriu-se que "só o dono
+pode conferir" era verdade sobre o jsdom, não sobre esta máquina: há Chrome instalado, ele roda
+WebGL por software em modo headless, e o Node 24 dirige o protocolo de DevTools sem dependência
+nenhuma. A cor na tela bateu com o hex escolhido por matiz nas três peças (sola 5 contra 6, cabedal
+221 contra 219, cadarço 43 contra 42), clicar numa peça devolveu o id dela, e engrossar a sola
+subiu o resto encaixado. Detalhes na seção da passada em `specs/composicao-em-cena.md`.
+
+Isso **não fecha T14**: a GPU e o monitor do dono não são os da passada, e o portão formal é dele.
+Mas a conferência passa a ser confirmação, e não descoberta.
+
 Duas notas para não parecerem defeito:
 
 - **O arraste continua o de T13**: arrastar para baixo levanta o ponto de vista, que é a convenção
