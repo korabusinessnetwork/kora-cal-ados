@@ -25,11 +25,19 @@ conferência a olho aqui. Então a divisão não é estética:
 | `orbita.ts` | não, e não importa `three` | Aritmética esférica pura: o arraste do ponteiro vira posição de câmera |
 | `carregarPecaNaCena.ts` | não | Texto glTF vira `Object3D`, mais o enquadramento tirado da caixa envolvente |
 | `nomeDaMalhaNoPonto.ts` | não | O ponteiro vira nome de nó, ou `null`. É o ADR-007 D4 como função |
-| `PalcoDeModelo3d.tsx` | **sim** | O `<canvas>`, o laço de render e as escutas do ponteiro. **O único sem teste** |
+| `PalcoDeModelo3d.tsx` | **sim** | O `<canvas>`, o laço de render, as escutas do ponteiro e a queda do contexto WebGL. **O único sem teste de comportamento**, preso por varredura de fonte |
+| `CampoDeCorDaCategoria.tsx` | não | A cor de uma categoria, pelo seletor do sistema ou digitada em hex |
 | `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
 | `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
 | `TelaDaComposicao.tsx` | não | A tela do calçado montado: peça, cor e parâmetro por categoria da forma |
 | `palco3d.css` | | Estilo fora do JSX (regra de white-label do CLAUDE.md) |
+
+O tipo `EstadoDoPalco` e a função `ehFalha` moram em `PalcoDeModelo3d.tsx`, junto de quem os produz.
+As frases que cada tela mostra têm nome próprio (`textoDoEstadoDaPeca` e
+`textoDoEstadoDaComposicao`) e são exportadas para ter teste em `estadoDoPalco.test.ts`: o que a
+pessoa lê para saber se pode confiar na tela merece teste tanto quanto a regra que escolhe a frase.
+Os quatro estados são tratados por nome, sem `return` de fim servindo de coringa, porque foi o
+coringa que fez a tela afirmar "Peça na cena" com o contexto WebGL morto (A28).
 
 `PalcoDeModelo3d.tsx` não decide nada, de propósito. Se aparecer aritmética de câmera ou lógica de
 seleção lá dentro, ela escapou para o lugar onde nenhum teste olha. O critério 20 da spec existe

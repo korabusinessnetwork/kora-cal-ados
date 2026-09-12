@@ -28,3 +28,9 @@
 2026-09-12 · R2-A20 · o editor de cor do esboço diz o que está errado e de qual zona é cada campo · 77281f9
 2026-09-12 · R2-A11 · o canvas do palco 3D ganha nome e a peça clicada vira região viva, nas duas telas · cf00aab
 2026-09-12 · R2-A10 · falha de rede deixa de virar "conta não vinculada", com estado próprio e "Tentar de novo" · 433e8eb
+2026-09-12 · R3-A27 · a regra do hex vira uma só nos três lugares, e o configurador ganha campo de texto · 995912c, acd3a97
+2026-09-12 · R3-A26 · o descarte de estado ao trocar de produto sai do escuro, sonda lê TODAS as passagens · a5b713a
+2026-09-12 · R3-A29 · a cascata do achatamento de CSS presa por teste, nove mutações rodadas · 4870294
+2026-09-12 · R3-A33 · o baseline para de piscar vermelho sozinho, espera por condição e não por quadro · 1788a10
+2026-09-12 · R3-A30 · em 375 px a cena vem antes dos controles e fica presa no topo enquanto eles rolam · a98a953
+2026-09-12 · R3-A28 · contexto WebGL perdido deixa de ser "Peça na cena", estado e frase próprios · 37b96a6

@@ -178,7 +178,7 @@ Nenhuma. P01, P02 e P04 continuam abertas como estavam, e nenhum item desta roda
 
 ---
 
-## Rodada 3, aberta em 2026-09-12
+## Rodada 3, fechada em 2026-09-12
 
 **Lote:** 5 itens, em `TAREFAS.md`, seção "Refino, rodada 3". Nenhum com risco 4 ou 5.
 
@@ -205,3 +205,116 @@ existe onde digitar o hex do manual da marca. O esboço, que é a demonstração
 que era defeito e não era": o buffer do canvas do palco parecia estar em 300x150 esticado, e era
 artefato de medir com o painel do navegador escondido, onde o `requestAnimationFrame` fica parado; e
 a falta de `maxLength` nos campos, que já é prevenida uma camada abaixo, em `validarZoneKey`.
+
+---
+
+## Rodada 3: o que foi entregue
+
+**6 de 6 entregues, nenhum revertido.** Seis e não cinco porque o sexto item nasceu no meio da
+rodada, e a história dele está abaixo.
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R3-A27 digitar o hex no configurador | produto | `995912c`, `acd3a97` | entregue |
+| R3-A26 teste dos dois hooks que descartam estado | qualidade | `a5b713a` | entregue |
+| R3-A29 cascata do achatamento de CSS presa por teste | qualidade | `4870294` | entregue |
+| R3-A33 o baseline para de piscar vermelho sozinho | qualidade | `1788a10` | entregue |
+| R3-A30 a cena antes dos controles na tela estreita | ux | `a98a953` | entregue |
+| R3-A28 contexto WebGL perdido para de mentir | robustez | `37b96a6` | entregue |
+
+### O item que apareceu no meio da rodada, e por que ele entrou na frente
+
+Rodando o baseline depois do A29, um teste de navegador reprovou sozinho: "a sola não ficou
+vermelha". Ninguém tinha tocado naquele código. Reproduzi 1 vez em 4 execuções da suíte completa, e
+o mesmo arquivo passava 6 de 6 rodando sozinho.
+
+Isso virou item na frente dos outros porque ataca a regra de ouro do refino diretamente. A regra é
+que toda rodada começa e termina com baseline verde, e ela só funciona se vermelho significar "eu
+quebrei". Um baseline que pisca destrói essa leitura, e o estrago não é o teste, é o hábito:
+vermelho intermitente ensina a rodar de novo em vez de investigar, e é assim que uma regressão de
+verdade passa batida no meio de uma rodada.
+
+**E a honestidade sobre ele:** não consegui reproduzir a corrida sob demanda. Tentei duas vezes e as
+duas falharam, e as duas estão escritas em `AUDITORIA.md` com o que cada uma mostrou de errado. O
+conserto foi feito com a falha capturada em mãos e a causa lida no código (o leitor só repete o
+quadro quando ele vem VAZIO, nunca quando vem pintado com a cor antiga), não com a corrida isolada.
+O que afirmo é o que dá para afirmar: a única forma de aquela asserção falhar sem a cor estar errada
+foi removida, e duas mutações no caminho real provam que cor errada continua reprovando.
+
+### O que mudou de verdade
+
+1. **Dá para digitar o hex no configurador (A27).** A marca chega com `#C0392B` no manual e até
+   aqui só existia o conta-gotas do sistema, que aproxima e não acerta. O configurador é o que o
+   ADR-008 chama de produto vendável por si só, e era a única das três telas sem campo de texto.
+
+   A ordem dos dois commits é a lição da rodada anterior aplicada: primeiro a REGRA de quando um
+   hex está completo virou `lib/render/estadoDoHexDigitado.ts`, usada pelos três lugares, e só
+   depois a tela nova. Escrever a tela antes teria criado a QUARTA definição de "isto é uma cor" no
+   mesmo projeto, que é exatamente o que aconteceu com a contagem de elementos antes do R2-A22.
+
+   O que NÃO foi compartilhado, de propósito, é o widget: as duas telas desenham coisas diferentes
+   (o esboço tem paleta de atalho) e moram em áreas diferentes da árvore. Compartilhar a regra e não
+   a marcação é o que impede as telas de divergirem sobre o que é uma cor sem impedi-las de serem
+   telas diferentes.
+
+2. **A tela para de afirmar que está tudo bem quando o 3D caiu (A28).** Com
+   `WEBGL_lose_context.loseContext()` o canvas ficava em branco e a linha de estado seguia dizendo
+   "Peça na cena. Arraste para girar". O defeito de fundo não era a falta do listener, era a escolha
+   da frase: as duas telas decidiam com dois `if` e um `return` de fim que servia de coringa, e o
+   coringa dizia que estava tudo bem. Qualquer estado novo caía nele.
+
+3. **Em 375 px a cena vem antes dos controles, e FICA (A30).** A moldura começava a 1158 px do topo
+   numa tela de 812 na composição: a pessoa escolhia as nove cores e só via o calçado depois de
+   todas. `order` sozinho entregaria "vê ao abrir", que não é a mesma coisa que "vê enquanto
+   escolhe": bastaria rolar até o primeiro campo de cor para o calçado sumir de novo. Com `sticky`,
+   rolando 900 px a moldura continua inteira na tela.
+
+4. **Três pedaços do caminho crítico saíram do escuro (A26, A29).** O descarte de estado ao trocar
+   de produto e a cascata do achatamento de CSS do SVG não tinham teste nenhum, e as duas falham em
+   silêncio: a primeira grava id de outro modelo numa zona que nasce sem pintar nada, a segunda
+   deixa um calçado entrar no catálogo com a sola da cor errada, com editor e API concordando
+   perfeitamente sobre a cor errada.
+
+### Medidas, ponta a ponta
+
+| | Abertura da rodada 3 | Fechamento |
+|---|---|---|
+| Testes verdes | 1104 | **1161** |
+| Arquivos de teste | 74 | **80** |
+| Banco / navegador | 58 / 25 | **58 / 25** |
+| `npm run build` | 507 ms | 564 ms |
+| Chunk principal | 456,92 kB | **457,00 kB** (+0,08) |
+| CSS | 22,26 kB | **22,69 kB** (+0,43) |
+| Chunk do three.js | 618,91 kB | **619,40 kB** (+0,49) |
+| `npm audit` | 0 | **0** |
+
+Uma coluna do `BASELINE.md` mudou para trás nesta rodada: a contagem de arquivos e de linhas não era
+reproduzível, então refiz as quatro com a mesma fórmula em vez de emendar uma quarta numa série que
+ninguém consegue conferir. Está explicado lá.
+
+### Mutações: o que sobreviveu, e o que foi feito com cada uma
+
+Dezenove mutações rodadas na rodada. Duas sobreviveram, e nenhuma das duas foi escondida:
+
+1. **Tirar a âncora do regex de elemento em `calcularEspecificidade`.** Sobreviveu à primeira versão
+   do teste do A29, porque com afirmações só relativas a conta inteira anda junto: toda classe passa
+   a valer 101 e todo id 10.001, e nenhuma comparação inverte. **O teste foi corrigido**, passou a
+   fixar a escala em número cheio (10.000 / 100 / 1), e a mutação morre. O motivo está escrito
+   dentro do próprio teste, para quem for afrouxá-lo depois.
+
+2. **Apagar a guarda `contextoPerdido` do laço de render.** Sobreviveu à suíte inteira, e vai
+   continuar sobrevivendo a qualquer teste de comportamento: jsdom não tem WebGL e o laço de render
+   é a única parte do projeto que nenhum teste alcança. **Passou a ser pega por varredura de
+   fonte** em `fronteiraSemGpu.test.ts`, que é o instrumento que aquele arquivo já usa para os
+   critérios 18, 20 e 21. É a varredura mais colada ao texto do projeto, e o comentário dela diz
+   isso e diz por que a troca vale a pena.
+
+### Nada atrás de flag
+
+Nenhum item desta rodada entrou atrás de configuração. Os seis são visíveis assim que a tela abre.
+
+### Nenhuma pendência nova do dono
+
+As três de sempre continuam: P01 (hook), P02 (revogar a chave `2aec9a55`) e P04 (os 8 tenants órfãos
+de teste). Nenhuma delas é tarefa minha, e nenhuma virou mais urgente nesta rodada.
+
