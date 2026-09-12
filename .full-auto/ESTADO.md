@@ -50,13 +50,13 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   morreram na sonda e estão registradas como tal em `AUDITORIA.md`, entre elas o anel de foco, que
   aparece de verdade num `Tab` de verdade, e o custo de arrastar o seletor de cor, que é de 11 a 26
   ms por mudança e não justifica `debounce` numa tela cujo ponto é a cor aparecer na hora.
-- **Rodada 6, andamento:** **2 de 6**. R6-A51 em `40d28c2` e R6-A50 em `df3e77c`, baseline verde
-  depois de cada um (1255 testes, 25 no navegador, `tsc` e build limpos, `npm audit` em zero).
-- **Próximo passo:** seguir o lote da rodada 6 pela Fase 3, na ordem escrita em `TAREFAS.md`: (a peça clicada mostra id e categoria),
-  **R6-A49** (teste de comportamento da tela da composição), **R6-A48** (a moldura preta vazia do
-  `contexto-negado`), **R6-A42** (README por diretório com varredura) e **R6-A52** (o cliente de
-  banco sai do chunk principal), este por último por ser o único que mexe em como o `App.tsx`
-  carrega as telas. Baseline conferido inteiro depois de cada item, e `git revert` na hora em
+- **Rodada 6, andamento:** **3 de 6**. R6-A51 em `40d28c2`, R6-A50 em `df3e77c` e R6-A49 em
+  `44b2741`, baseline verde depois de cada um (1261 testes, 25 no navegador, `tsc` e build limpos,
+  `npm audit` em zero).
+- **Próximo passo:** seguir o lote da rodada 6 pela Fase 3, na ordem escrita em `TAREFAS.md`:
+  **R6-A48** (a moldura preta vazia do `contexto-negado`), **R6-A42** (README por diretório com
+  varredura) e **R6-A52** (o cliente de banco sai do chunk principal), este por último por ser o
+  único que mexe em como o `App.tsx` carrega as telas. Baseline conferido inteiro depois de cada item, e `git revert` na hora em
   qualquer linha que piorar.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.

@@ -48,3 +48,4 @@
 2026-09-12 · R5-A43 · o painel Peca para de prometer a montagem como tarefa futura e aponta para o calcado montado, com o nome que o rodape usa · d5c262f
 2026-09-12 · R6-A51 · a raiz ganha rede de protecao: excecao de render deixa de apagar a pagina inteira, e o rodape fica fora da rede para a navegacao sobreviver · 40d28c2
 2026-09-12 · R6-A50 · a peca clicada mostra o no E a zona, tirados da montagem em cena, e o botao leva o foco ao seletor de cor daquela categoria · df3e77c
+2026-09-12 · R6-A49 · a TelaDaComposicao, arquivo mais tocado do projeto, ganha 6 testes de comportamento em jsdom · 44b2741

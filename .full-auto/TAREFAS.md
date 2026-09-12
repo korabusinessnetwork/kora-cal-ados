@@ -229,7 +229,13 @@ carrega as telas, e quero o baseline conferido várias vezes antes dele.
       botão que não faz nada. 6 testes novos; a mutação (`zonaDaMalha` devolvendo sempre a primeira
       zona) deixa 3 vermelhos. Conferido no navegador: clicar no cadarço mostrou `prova-cadarco-reto`
       e `cadarco`, e o botão levou o foco a `composicao-cor-cadarco`, rolando a tela até ele.
-- [ ] R6-A49 A tela da composição ganha teste de comportamento | trilha: qualidade | depende: nenhum | pronto quando: `TelaDaComposicao` monta em jsdom e há teste de que colar um JSON válido troca o que está em cena, colar um JSON recusado mantém o calçado anterior e escreve o motivo, e trocar de peça não carrega o parâmetro da peça anterior
+- [x] R6-A49 A tela da composição ganha teste de comportamento | trilha: qualidade | depende: nenhum | pronto quando: `TelaDaComposicao` monta em jsdom e há teste de que colar um JSON válido troca o que está em cena, colar um JSON recusado mantém o calçado anterior e escreve o motivo, e trocar de peça não carrega o parâmetro da peça anterior
+      feito em `44b2741`. 6 testes montando a tela em jsdom, possível só por causa do R5-A46. Duas
+      mutações: apagar o `delete depois.parametros` deixa 6 vermelhos (1 aqui, 5 na regra pura), e
+      fazer o `setErroDaColagem` receber sempre `null` deixa 2, e esses 2 existem só aqui, porque
+      são a parte que teste de função pura nenhuma alcança. Fica registrado o erro da primeira
+      versão do arquivo, que é o motivo de o `forma_id` agora ser lido do acervo: escrito à mão, e
+      errado, ele fazia o teste do caminho de SUCESSO exercitar o da recusa, e passar.
 - [ ] R6-A48 A moldura preta some quando o 3D não vai abrir | trilha: ux | depende: nenhum | pronto quando: no estado `contexto-negado` não existe mais uma caixa preta vazia guardando espaço para o que não vem, a mensagem ocupa esse lugar nas duas telas do palco, e o `contexto-perdido` continua com a moldura de pé (com teste dos dois estados)
 - [ ] R6-A42 README por diretório vira varredura, não lembrete | trilha: qualidade | depende: nenhum | pronto quando: todo diretório com código versionado tem `README.md`, e existe um teste que reprova quando um diretório novo com código nasce sem índice, com contraprova sintética que TEM de reprovar
 - [ ] R6-A52 O cliente de banco sai do chunk que todo mundo baixa | trilha: robustez | depende: nenhum | pronto quando: o chunk principal do `npm run build` não contém mais `@supabase/supabase-js`, as três telas públicas abrem sem baixá-lo, a área protegida continua funcionando, e o número novo do chunk principal está medido no `BASELINE.md`
