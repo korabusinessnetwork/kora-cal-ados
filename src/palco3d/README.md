@@ -25,7 +25,7 @@ conferência a olho aqui. Então a divisão não é estética:
 | `orbita.ts` | não, e não importa `three` | Aritmética esférica pura: o arraste do ponteiro vira posição de câmera |
 | `carregarPecaNaCena.ts` | não | Texto glTF vira `Object3D`, mais o enquadramento tirado da caixa envolvente |
 | `nomeDaMalhaNoPonto.ts` | não | O ponteiro vira nome de nó, ou `null`. É o ADR-007 D4 como função |
-| `PalcoDeModelo3d.tsx` | **sim** | O `<canvas>`, o laço de render, as escutas do ponteiro e a queda do contexto WebGL. **O único sem teste de comportamento**, preso por varredura de fonte |
+| `PalcoDeModelo3d.tsx` | **sim** | O `<canvas>`, o laço de render, as escutas do ponteiro e a queda do contexto WebGL. Do caminho que FUNCIONA nada é alcançável por teste, e ele está preso por varredura de fonte; o caminho em que o contexto nem nasce tem teste de comportamento em `palcoSemWebgl.test.tsx`, porque jsdom sem WebGL é exatamente a máquina sem GPU |
 | `CampoDeCorDaCategoria.tsx` | não | A cor de uma categoria, pelo seletor do sistema ou digitada em hex |
 | `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
 | `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
@@ -36,8 +36,15 @@ O tipo `EstadoDoPalco` e a função `ehFalha` moram em `PalcoDeModelo3d.tsx`, ju
 As frases que cada tela mostra têm nome próprio (`textoDoEstadoDaPeca` e
 `textoDoEstadoDaComposicao`) e são exportadas para ter teste em `estadoDoPalco.test.ts`: o que a
 pessoa lê para saber se pode confiar na tela merece teste tanto quanto a regra que escolhe a frase.
-Os quatro estados são tratados por nome, sem `return` de fim servindo de coringa, porque foi o
+Os cinco estados são tratados por nome, sem `return` de fim servindo de coringa, porque foi o
 coringa que fez a tela afirmar "Peça na cena" com o contexto WebGL morto (A28).
+
+Os dois estados de contexto são separados de propósito. `contexto-perdido` é o contexto que
+EXISTIA e caiu, e costuma voltar sozinho, então a frase manda esperar. `contexto-negado` é o
+contexto que nunca nasceu, numa máquina sem GPU utilizável, e não vai nascer recarregando, então a
+frase manda ir para o esboço, que desenha o mesmo tênis em SVG. Trocar as duas frases custa caro
+nos dois sentidos: uma deixa a pessoa esperando o que não vem, a outra faz ela recarregar e perder
+a composição, que não é gravada em lugar nenhum (ADR-008 D6).
 
 `PalcoDeModelo3d.tsx` não decide nada, de propósito. Se aparecer aritmética de câmera ou lógica de
 seleção lá dentro, ela escapou para o lugar onde nenhum teste olha. O critério 20 da spec existe

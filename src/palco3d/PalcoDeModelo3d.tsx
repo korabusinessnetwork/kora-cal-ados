@@ -50,7 +50,18 @@ export type EstadoDoPalco =
    * contexto caiu manda alguém procurar defeito num arquivo que está perfeito. Mesma decisão, e
    * mesmo motivo, do `falha-ao-carregar` da sessão.
    */
-  | 'contexto-perdido';
+  | 'contexto-perdido'
+  /**
+   * O contexto WebGL nunca chegou a existir. Máquina sem GPU utilizável, driver na lista de
+   * bloqueio do navegador, aceleração desligada nas configurações, navegador antigo.
+   *
+   * Estado próprio, e não `contexto-perdido`, por duas razões. A primeira é a frase: "o 3D caiu"
+   * e "espere que ele costuma voltar sozinho" são as duas falsas aqui, porque nada caiu e nada
+   * vai voltar, recarregar a página não muda nada e mandar recarregar é mandar a pessoa perder a
+   * composição por um problema que não é da aba. A segunda é o que ela deve fazer: no perdido,
+   * esperar; no negado, ir para o esboço, que desenha o mesmo tênis em SVG e não precisa de GPU.
+   */
+  | 'contexto-negado';
 
 /**
  * Os estados em que o que está na moldura NÃO pode ser tomado como verdade.
@@ -60,7 +71,9 @@ export type EstadoDoPalco =
  * outra por uma regra que não é de nenhuma das duas, é do estado.
  */
 export function ehFalha(estado: EstadoDoPalco): boolean {
-  return estado === 'recusado' || estado === 'contexto-perdido';
+  return (
+    estado === 'recusado' || estado === 'contexto-perdido' || estado === 'contexto-negado'
+  );
 }
 
 export interface PalcoDeModelo3dProps {
@@ -110,10 +123,24 @@ export function PalcoDeModelo3d({
     const elemento = moldura.current;
     if (elemento === null) return undefined;
 
-    const criado = criarPalco(elemento, {
-      aoSelecionar: (nome) => selecionar.current(nome),
-      aoMudarEstado: (estado) => mudarEstado.current(estado),
-    });
+    // O `try` existe por um motivo medido, não por precaução genérica: com o `getContext` de
+    // `webgl` devolvendo `null`, o `new WebGLRenderer` do `criarPalco` LANÇA, o erro sobe pelo
+    // efeito até o React, e sem `ErrorBoundary` em lugar nenhum a árvore inteira é desmontada.
+    // Conferido no navegador: a página fica com `body` vazio, sem canvas, sem rodapé e sem jeito
+    // de ir para o esboço, que é a tela que funcionaria perfeitamente nessa máquina.
+    //
+    // Um palco que não pôde nascer é uma falha DESTE palco, e o palco já sabe contar falha: vira
+    // estado, a tela escreve a frase, e o resto da página continua de pé.
+    let criado: Palco;
+    try {
+      criado = criarPalco(elemento, {
+        aoSelecionar: (nome) => selecionar.current(nome),
+        aoMudarEstado: (estado) => mudarEstado.current(estado),
+      });
+    } catch {
+      mudarEstado.current('contexto-negado');
+      return undefined;
+    }
     palco.current = criado;
 
     return () => {

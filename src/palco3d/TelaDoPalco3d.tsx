@@ -177,7 +177,7 @@ function milimetros(metros: number): string {
  * saber se o que está na tela é confiável, e texto que a pessoa lê merece teste tanto quanto a
  * regra que o escolhe.
  *
- * Os quatro estados são tratados por nome, sem um `return` de fim que sirva de coringa. O coringa
+ * Os cinco estados são tratados por nome, sem um `return` de fim que sirva de coringa. O coringa
  * era o defeito: qualquer estado novo caía nele e a tela dizia "Peça na cena" sem que houvesse
  * peça na cena.
  */
@@ -188,6 +188,13 @@ export function textoDoEstadoDaPeca(estado: EstadoDoPalco): string {
     return (
       'O 3D caiu: o navegador tirou o contexto gráfico desta aba. A peça não está sendo ' +
       'desenhada. Se ela não voltar sozinha em alguns segundos, recarregue a página.'
+    );
+  }
+  if (estado === 'contexto-negado') {
+    return (
+      'O 3D não pôde ser iniciado: este navegador não entregou um contexto gráfico (WebGL). ' +
+      'Não adianta recarregar, o 3D não vai abrir nesta máquina. Abra o esboço, que desenha o ' +
+      'mesmo tênis em SVG e não precisa de placa de vídeo.'
     );
   }
 

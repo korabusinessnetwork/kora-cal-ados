@@ -325,6 +325,13 @@ export function textoDoEstadoDaComposicao(estado: EstadoDoPalco, zonas: number):
       'desenhado. Se ele não voltar sozinho em alguns segundos, recarregue a página.'
     );
   }
+  if (estado === 'contexto-negado') {
+    return (
+      'O 3D não pôde ser iniciado: este navegador não entregou um contexto gráfico (WebGL). ' +
+      'Não adianta recarregar, o calçado não vai aparecer nesta máquina. As cores continuam ' +
+      'valendo e o esboço desenha o mesmo tênis em SVG, sem precisar de placa de vídeo.'
+    );
+  }
 
   return `Calçado montado com ${zonas} ${zonas === 1 ? 'zona' : 'zonas'}. Arraste para girar.`;
 }

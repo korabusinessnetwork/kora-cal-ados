@@ -18,7 +18,13 @@ import { ehFalha, type EstadoDoPalco } from './PalcoDeModelo3d';
 import { textoDoEstadoDaComposicao } from './TelaDaComposicao';
 import { textoDoEstadoDaPeca } from './TelaDoPalco3d';
 
-const TODOS: EstadoDoPalco[] = ['carregando', 'pronto', 'recusado', 'contexto-perdido'];
+const TODOS: EstadoDoPalco[] = [
+  'carregando',
+  'pronto',
+  'recusado',
+  'contexto-perdido',
+  'contexto-negado',
+];
 
 describe('quando o que está na moldura não vale', () => {
   it('recusado e contexto perdido são falha, os outros dois não', () => {
@@ -27,6 +33,7 @@ describe('quando o que está na moldura não vale', () => {
       ['pronto', false],
       ['recusado', true],
       ['contexto-perdido', true],
+      ['contexto-negado', true],
     ]);
   });
 
@@ -80,6 +87,31 @@ describe('a frase de cada estado', () => {
     expect(textoDoEstadoDaPeca('contexto-perdido')).not.toBe(textoDoEstadoDaPeca('recusado'));
     expect(textoDoEstadoDaPeca('contexto-perdido')).not.toContain('Peça na cena');
     expect(textoDoEstadoDaComposicao('contexto-perdido', 3)).not.toContain('Arraste para girar');
+  });
+
+  it('contexto negado diz que não vai abrir, e para onde ir (A46)', () => {
+    // O negado e o perdido são notícias opostas, e dar a errada custa caro nos dois sentidos.
+    // Aqui nada caiu: o contexto nunca existiu, porque a máquina não tem GPU utilizável, o driver
+    // está na lista de bloqueio ou a aceleração está desligada. Mandar esperar deixa a pessoa
+    // olhando uma tela que não vai mudar, e mandar recarregar faz ela perder a composição, que
+    // não é gravada em lugar nenhum (ADR-008 D6), por um problema que recarregar não resolve.
+    for (const frase of [
+      textoDoEstadoDaPeca('contexto-negado'),
+      textoDoEstadoDaComposicao('contexto-negado', 3),
+    ]) {
+      expect(frase).toContain('não pôde ser iniciado');
+      expect(frase).toContain('WebGL');
+      expect(frase).toContain('esboço');
+      expect(frase).not.toContain('recarregue a página');
+      expect(frase).not.toContain('não voltar sozinh');
+    }
+  });
+
+  it('contexto negado NÃO é a frase de contexto perdido', () => {
+    // Os dois estados existem separados só por causa das frases. Se elas convergirem, o estado
+    // novo vira peso morto e o defeito volta sem que nada fique vermelho.
+    expect(textoDoEstadoDaPeca('contexto-negado')).not.toContain('O 3D caiu');
+    expect(textoDoEstadoDaComposicao('contexto-negado', 3)).not.toContain('O 3D caiu');
   });
 
   it('recusado continua falando do glTF, e não do contexto', () => {
