@@ -103,4 +103,38 @@ describe('falha ao baixar o asset-base', () => {
       'não tem asset-base gravado',
     );
   });
+
+  it('arquivo vazio no bucket vira erro nomeado, nunca painel em branco', async () => {
+    // O caso que este teste existe para prender: 200 com corpo vazio passava reto, o hook ia
+    // para `pronto` com `svg` vazio, a tela revelava a área e o editor se recusava a montar.
+    // Resultado: painel branco, sem erro e sem o botão de tentar de novo.
+    vi.stubGlobal('fetch', async () => new Response(' \n \t ', { status: 200 }));
+
+    const mensagem = await mensagemDe(baixarAssetBase(clienteFalso(assinaturaOk), CAMINHO));
+
+    expect(mensagem).toContain('vazio');
+    // Erro de dado, não de rede: mandar "tente de novo" aqui faria a pessoa insistir num arquivo
+    // que não vai mudar sozinho.
+    expect(mensagem).toMatch(/administra a marca/i);
+  });
+
+  it('arquivo que não é SVG vira erro nomeado', async () => {
+    // Uma página de erro HTML guardada no lugar do desenho baixa com 200 e tem tamanho. Sem
+    // olhar o conteúdo, ela chegaria ao editor como se fosse o calçado.
+    vi.stubGlobal('fetch', async () => new Response('<html><body>404</body></html>', { status: 200 }));
+
+    expect(await mensagemDe(baixarAssetBase(clienteFalso(assinaturaOk), CAMINHO))).toContain(
+      'não é um SVG',
+    );
+  });
+
+  it('SVG de verdade passa inteiro, byte a byte', async () => {
+    // A outra metade da guarda: ela não pode apertar a ponto de recusar desenho bom, nem mexer
+    // no texto. O editor é somente-leitura sobre o canônico (ADR-005).
+    const desenho =
+      '<?xml version="1.0"?>\n<svg xmlns="http://www.w3.org/2000/svg"><path id="sola"/></svg>';
+    vi.stubGlobal('fetch', async () => new Response(desenho, { status: 200 }));
+
+    expect(await baixarAssetBase(clienteFalso(assinaturaOk), CAMINHO)).toBe(desenho);
+  });
 });

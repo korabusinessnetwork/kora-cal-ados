@@ -70,5 +70,28 @@ export async function baixarAssetBase(
     throw new Error(`Não foi possível baixar o asset-base (${resposta.status}).`);
   }
 
-  return await resposta.text();
+  const texto = await resposta.text();
+
+  // Download que dá certo e traz nada é a pior das falhas possíveis aqui, porque ela não parece
+  // falha: `estado` virava `pronto`, `VisualizacaoDoProduto` revelava a área, e o editor se
+  // recusava a montar sem `svg` — a pessoa ficava olhando um painel branco, sem erro e sem o
+  // botão de tentar de novo, que só aparece no estado de erro. É exatamente o defeito silencioso
+  // que o princípio nº1 persegue, e é barato de acontecer: objeto de 0 byte no bucket, upload
+  // truncado, ou uma página de erro guardada no lugar do desenho.
+  //
+  // A conferência é de forma, não de validade: quem julga se o SVG é bom é o motor, que já recusa
+  // alto e visível. Aqui só se separa "veio desenho" de "não veio nada".
+  if (!texto.trim()) {
+    throw new Error(
+      'O asset-base deste produto está vazio no armazenamento. Avise quem administra a marca: o arquivo precisa ser enviado de novo.',
+    );
+  }
+
+  if (!texto.includes('<svg')) {
+    throw new Error(
+      'O arquivo baixado como asset-base não é um SVG. Avise quem administra a marca: o produto está apontando para o arquivo errado.',
+    );
+  }
+
+  return texto;
 }
