@@ -157,7 +157,15 @@ e o lote já leva três itens de qualidade.
       `public.x` casa com `x`. Conferido no arquivo de verdade: um `create table` acrescentado a
       `20260908_chave_de_api_por_tenant.sql` deixou 5 testes vermelhos, com o nome da tabela na
       mensagem.
-- [ ] R5-A45 As citações de ADR passam a dizer a verdade, e uma varredura confere | trilha: qualidade | depende: nenhum | pronto quando: nenhum lugar do código afirma "ADR-008 D6" para a não persistência da composição, existe varredura que reprova quando um `ADR-XXX DN` escrito em `src/`, `api/` ou `supabase/` não resolve para decisão existente naquele ADR, ela aceita as duas grafias de numeração que os ADRs usam, e uma citação inventada faz o teste reprovar
+- [x] R5-A45 As citações de ADR passam a dizer a verdade, e uma varredura confere | trilha: qualidade | depende: nenhum | pronto quando: nenhum lugar do código afirma "ADR-008 D6" para a não persistência da composição, existe varredura que reprova quando um `ADR-XXX DN` escrito em `src/`, `api/` ou `supabase/` não resolve para decisão existente naquele ADR, ela aceita as duas grafias de numeração que os ADRs usam, e uma citação inventada faz o teste reprovar
+      feito em `7738fc9` e `5c25cdc`. Eram seis lugares, não quatro: duas das citações erradas eu
+      mesmo escrevi hoje no R5-A46, copiando de um vizinho, que é como uma citação errada se
+      multiplica. Corrigidos também `IDEIAS-DE-PRODUTO.md`, que justificava não criar a tabela de
+      composições com um ADR que não decidiu isso, e `RELATORIO-FINAL.md`. A guarda é
+      `docs/08_DECISOES/citacoesDeAdrExistem.test.ts`, 6 testes, e ela pega a metade mecânica; a
+      semântica continua sendo leitura, e isso está dito no arquivo. O `7738fc9` é um buraco achado
+      no meio do caminho: o `tsconfig.json` não incluía `supabase/migrations`, então o teste do
+      R5-A41 rodava sem ser conferido por `tsc`.
 - [ ] R5-A47 Colar a composição de volta na tela | trilha: produto | depende: nenhum | pronto quando: existe onde colar o JSON da composição na tela do calçado montado, um JSON válido monta o calçado descrito, um inválido é recusado por `validarComposicao` com a frase na tela e sem chegar ao palco, e existe teste dos dois caminhos
 - [ ] R5-A44 Os três hooks de rede do editor saem do escuro | trilha: qualidade | depende: nenhum | pronto quando: `useProdutos`, `useAssetBase` e `useZonasDoProduto` recebem o cliente por parâmetro com o valor por omissão de hoje, os pontos de chamada existentes não mudam, e cada um tem teste com componente-sonda provando que a resposta em voo do produto anterior NÃO pinta a tela do produto novo
 - [ ] R5-A43 O palco 3D para de negar o que a composição já faz | trilha: ux | depende: nenhum | pronto quando: a frase do painel "Peça" não afirma mais que montar as cinco peças é a próxima tarefa, aponta para a tela que faz isso, e existe teste de que ela não voltou
