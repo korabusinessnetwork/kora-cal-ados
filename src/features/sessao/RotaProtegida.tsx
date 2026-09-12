@@ -18,7 +18,8 @@ export function RotaProtegida({
 }: {
   children: (tenant: TenantDoUsuario) => ReactNode;
 }) {
-  const { estado, tenants, tenantAtivo, erro, entrar, sair, escolherTenant } = useSessao();
+  const { estado, tenants, tenantAtivo, erro, entrar, sair, escolherTenant, tentarDeNovo } =
+    useSessao();
 
   if (estado === 'carregando') {
     return (
@@ -40,13 +41,37 @@ export function RotaProtegida({
     );
   }
 
+  if (estado === 'falha-ao-carregar') {
+    // A busca dos vínculos falhou, e isso não diz nada sobre o cadastro da pessoa. A tela
+    // antiga dizia, e mandava quem só perdeu a rede por um segundo procurar quem
+    // provisiona. A ação certa aqui é repetir a busca, e ela fica ao lado de sair porque
+    // rede que não volta precisa de uma saída também.
+    return (
+      <main className="sessao-aviso">
+        <h1>Não deu para carregar suas marcas</h1>
+        {/* O `role` fica no parágrafo e não no `<main>`: `role="alert"` na raiz trocaria o
+            marco de conteúdo principal por um aviso, e quem navega por marcos perderia a
+            única região da página. */}
+        <p role="alert">{erro ?? 'Não foi possível carregar seus tenants.'}</p>
+        <div className="sessao-aviso__acoes">
+          <button type="button" onClick={() => void tentarDeNovo()}>
+            Tentar de novo
+          </button>
+          <button type="button" onClick={() => void sair()}>
+            Sair
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   if (estado === 'sem-tenant') {
     // Estado vazio com saída, não beco sem saída: na Fase 1 o vínculo é criado por
     // script (venda manual), então a ação certa é falar com quem provisiona.
     return (
       <main className="sessao-aviso">
         <h1>Sua conta ainda não está vinculada a uma marca</h1>
-        <p>{erro ?? 'Peça a quem cuida do cadastro para vincular seu e-mail a um tenant.'}</p>
+        <p>Peça a quem cuida do cadastro para vincular seu e-mail a um tenant.</p>
         <button type="button" onClick={() => void sair()}>
           Sair
         </button>

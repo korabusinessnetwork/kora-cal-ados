@@ -31,6 +31,7 @@ function montar(parcial: Partial<Sessao> & { estado: EstadoDaSessao }): string {
     sair: async () => {},
     escolherTenant: () => {},
     trocarDeTenant: () => {},
+    tentarDeNovo: async () => {},
     ...parcial,
   };
 
@@ -42,7 +43,14 @@ function montar(parcial: Partial<Sessao> & { estado: EstadoDaSessao }): string {
 }
 
 describe('nada protegido renderiza sem sessão completa', () => {
-  it.each<EstadoDaSessao>(['carregando', 'anonimo', 'entrando', 'sem-tenant', 'escolhendo-tenant'])(
+  it.each<EstadoDaSessao>([
+    'carregando',
+    'anonimo',
+    'entrando',
+    'sem-tenant',
+    'falha-ao-carregar',
+    'escolhendo-tenant',
+  ])(
     'estado %s não deixa o conteúdo protegido sair no HTML',
     (estado) => {
       // Esconder por CSS não serve: o conteúdo estaria no HTML, e é isso que um
@@ -96,9 +104,42 @@ describe('cada estado tem tela própria (CLAUDE.md: carregando/erro/vazio/sucess
   });
 
   it('o erro de sessão chega na tela, não só no console', () => {
-    expect(montar({ estado: 'sem-tenant', erro: 'Não foi possível carregar seus tenants: 500' })).toContain(
-      'Não foi possível carregar seus tenants: 500',
-    );
+    expect(
+      montar({ estado: 'falha-ao-carregar', erro: 'Não foi possível carregar seus tenants: 500' }),
+    ).toContain('Não foi possível carregar seus tenants: 500');
+  });
+
+  it('falha ao carregar fala de rede, não de cadastro, e oferece repetir (A10)', () => {
+    // A tela é escolhida pelo estado, então este teste é o que impede a frase errada de voltar:
+    // mandar quem perdeu a rede procurar quem provisiona é uma resposta que não resolve nada.
+    const html = montar({
+      estado: 'falha-ao-carregar',
+      usuario: { id: 'u', email: 'a@b.c' },
+      erro: 'Não foi possível carregar seus tenants.',
+    });
+
+    expect(html).toContain('Não deu para carregar suas marcas');
+    expect(html).not.toContain('não está vinculada a uma marca');
+    expect(html).toContain('Tentar de novo');
+    expect(html).toContain('Sair'); // repetir é o caminho comum, sair é a saída de quem não volta
+  });
+
+  it('a falha é anunciada, e o anúncio não rouba o marco principal', () => {
+    const html = montar({ estado: 'falha-ao-carregar', erro: 'rede fora' });
+
+    expect(html).toContain('role="alert"');
+    // `role="alert"` no `<main>` trocaria o único marco da página por um aviso.
+    expect(html).not.toMatch(/<main[^>]*role="alert"/);
+  });
+
+  it('sem tenant não vira tela de erro por causa do A10', () => {
+    // O caso legítimo de conta recém-criada continua sendo estado vazio, sem alerta e sem botão
+    // de repetir: não há o que repetir quando a resposta do banco foi "nenhum vínculo".
+    const html = montar({ estado: 'sem-tenant', usuario: { id: 'u', email: 'a@b.c' } });
+
+    expect(html).toContain('não está vinculada a uma marca');
+    expect(html).not.toContain('Tentar de novo');
+    expect(html).not.toContain('role="alert"');
   });
 });
 

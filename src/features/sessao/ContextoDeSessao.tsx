@@ -30,6 +30,11 @@ export type EstadoDaSessao =
   | 'entrando'
   | 'escolhendo-tenant'
   | 'sem-tenant'
+  // Separado de `sem-tenant` porque as duas frases são diferentes e só uma delas é
+  // verdade: "sua conta não está vinculada" é uma afirmação sobre o cadastro, e dizê-la
+  // quando a rede caiu manda a pessoa procurar quem provisiona por um problema que se
+  // resolve clicando de novo.
+  | 'falha-ao-carregar'
   | 'pronta';
 
 export interface Sessao {
@@ -44,6 +49,8 @@ export interface Sessao {
   escolherTenant: (tenantId: string) => void;
   /** Volta para a escolha de marca sem deslogar. Só faz sentido com 2+ tenants. */
   trocarDeTenant: () => void;
+  /** Refaz a busca dos vínculos do usuário já logado. A saída de `falha-ao-carregar`. */
+  tentarDeNovo: () => Promise<void>;
 }
 
 export const ContextoDeSessao = createContext<Sessao | null>(null);
@@ -73,6 +80,9 @@ export function ProvedorDeSessao({
       }
 
       setUsuario(proximo);
+      // Limpa o erro da tentativa anterior ANTES de tentar: senão a tela que conseguiu
+      // carregar na segunda vez continuaria exibindo o aviso da primeira.
+      setErro(null);
 
       try {
         const encontrados = await carregarTenantsDoUsuario(cliente, proximo.id);
@@ -94,7 +104,7 @@ export function ProvedorDeSessao({
         setEstado(escolhido ? 'pronta' : 'escolhendo-tenant');
       } catch (falha) {
         setErro(mensagemDe(falha));
-        setEstado('sem-tenant');
+        setEstado('falha-ao-carregar');
       }
     },
     [cliente],
@@ -160,6 +170,16 @@ export function ProvedorDeSessao({
     if (tenants.length > 1) setEstado('escolhendo-tenant');
   }, [tenants]);
 
+  const tentarDeNovo = useCallback(async () => {
+    // Volta a `carregando` de propósito: é o que apaga a tela de falha enquanto a nova
+    // tentativa corre, e sem isso o botão parece não ter feito nada.
+    setEstado('carregando');
+    // Sem usuário isto cai no caminho de logout de `aplicarUsuario` e termina em `anonimo`,
+    // sem consultar o banco. Não há guarda aqui porque uma guarda escreveria de novo, em
+    // outro lugar, uma regra que a função chamada já cumpre.
+    await aplicarUsuario(usuario);
+  }, [usuario, aplicarUsuario]);
+
   const valor = useMemo<Sessao>(
     () => ({
       estado,
@@ -171,8 +191,20 @@ export function ProvedorDeSessao({
       sair,
       escolherTenant,
       trocarDeTenant,
+      tentarDeNovo,
     }),
-    [estado, usuario, tenants, tenantAtivoId, erro, entrar, sair, escolherTenant, trocarDeTenant],
+    [
+      estado,
+      usuario,
+      tenants,
+      tenantAtivoId,
+      erro,
+      entrar,
+      sair,
+      escolherTenant,
+      trocarDeTenant,
+      tentarDeNovo,
+    ],
   );
 
   return <ContextoDeSessao.Provider value={valor}>{children}</ContextoDeSessao.Provider>;

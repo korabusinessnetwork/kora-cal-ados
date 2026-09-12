@@ -38,6 +38,12 @@ interface ConfiguracaoDoFalso {
   vinculos?: unknown[];
   erroDaConsulta?: unknown;
   erroDeLogin?: unknown;
+  /**
+   * Quantas consultas ainda falham antes de a rede voltar. É o que permite provar o
+   * "tentar de novo": sem isso a segunda tentativa erraria igual à primeira e o teste não
+   * distinguiria um botão que refaz a busca de um botão que não faz nada.
+   */
+  falhasAteVoltar?: number;
 }
 
 function clienteFalso(configuracao: ConfiguracaoDoFalso = {}) {
@@ -49,6 +55,7 @@ function clienteFalso(configuracao: ConfiguracaoDoFalso = {}) {
   };
 
   let aoMudarAuth: ((evento: string, sessao: unknown) => void) | null = null;
+  let falhasRestantes = configuracao.falhasAteVoltar ?? 0;
 
   const cliente = {
     auth: {
@@ -82,6 +89,12 @@ function clienteFalso(configuracao: ConfiguracaoDoFalso = {}) {
       select: () => ({
         eq: async () => {
           chamadas.consultas += 1;
+
+          if (falhasRestantes > 0) {
+            falhasRestantes -= 1;
+            return { data: null, error: { message: 'conexão recusada' } };
+          }
+
           return {
             data: configuracao.vinculos ?? [],
             error: configuracao.erroDaConsulta ?? null,
@@ -313,10 +326,6 @@ describe('provedor de sessão', () => {
   });
 
   it('a consulta que falha não deixa a tela carregando para sempre', async () => {
-    // Hoje a falha cai em `sem-tenant`, e o título que a tela mostra fala de cadastro em vez de
-    // rede. Isso está registrado como A10 em `.full-auto/AUDITORIA.md` e muda na rodada 2. O que
-    // este teste prende é o que não pode mudar em hipótese nenhuma: a tela sai de `carregando`,
-    // não entra em `pronta`, e a pessoa recebe uma mensagem.
     const { cliente } = clienteFalso({
       sessao: { user: USUARIO },
       erroDaConsulta: { message: 'conexão recusada' },
@@ -327,9 +336,79 @@ describe('provedor de sessão', () => {
     expect(sessao.estado).not.toBe('pronta');
     // A mensagem sai genérica, e não com o texto do erro: `carregarTenantsDoUsuario` relança o
     // objeto de erro do supabase-js, que é um objeto simples e não um `Error`, então o detalhe
-    // não entra. Para a pessoa tanto faz, mas quem for mexer em A10 precisa saber disso.
+    // não entra.
     expect(sessao.erro).toBe('Não foi possível carregar seus tenants.');
     expect(sessao.tenantAtivo).toBeNull();
+  });
+
+  it('falha de rede NÃO se confunde com conta sem vínculo (A10)', async () => {
+    // Os dois caíam no mesmo estado, e o estado escolhe a frase da tela: quem só perdeu a rede
+    // lia "sua conta não está vinculada a uma marca" e ia procurar quem provisiona por um
+    // problema que se resolve clicando de novo. São estados diferentes porque são verdades
+    // diferentes.
+    const { cliente } = clienteFalso({
+      sessao: { user: USUARIO },
+      erroDaConsulta: { message: 'conexão recusada' },
+    });
+    const sessao = await montar(cliente);
+
+    expect(sessao.estado).toBe('falha-ao-carregar');
+    expect(sessao.estado).not.toBe('sem-tenant');
+  });
+
+  it('tentar de novo refaz a busca, e a rede que voltou abre o app', async () => {
+    const { cliente, chamadas } = clienteFalso({
+      sessao: { user: USUARIO },
+      vinculos: [vinculo('Alfa')],
+      falhasAteVoltar: 1,
+    });
+    await montar(cliente);
+
+    expect(sessao().estado).toBe('falha-ao-carregar');
+
+    await act(async () => sessao().tentarDeNovo());
+
+    expect(chamadas.consultas).toBe(2);
+    expect(sessao().estado).toBe('pronta');
+    expect(sessao().tenantAtivo?.nome).toBe('Alfa');
+    // O aviso da primeira tentativa não pode sobreviver à tentativa que deu certo.
+    expect(sessao().erro).toBeNull();
+  });
+
+  it('tentar de novo com a rede ainda fora volta à mesma tela, sem virar sem-tenant', async () => {
+    const { cliente, chamadas } = clienteFalso({
+      sessao: { user: USUARIO },
+      erroDaConsulta: { message: 'conexão recusada' },
+    });
+    await montar(cliente);
+
+    await act(async () => sessao().tentarDeNovo());
+
+    expect(chamadas.consultas).toBe(2);
+    expect(sessao().estado).toBe('falha-ao-carregar');
+    expect(sessao().erro).toBe('Não foi possível carregar seus tenants.');
+  });
+
+  it('tentar de novo sem usuário não consulta nada', async () => {
+    // O botão só existe na tela de falha, que só existe com usuário. Chamar sem ele é engano de
+    // programação, e engano de programação não vira consulta ao banco.
+    const { cliente, chamadas } = clienteFalso({ sessao: null });
+    await montar(cliente);
+
+    await act(async () => sessao().tentarDeNovo());
+
+    expect(chamadas.consultas).toBe(0);
+    expect(sessao().estado).toBe('anonimo');
+  });
+
+  it('zero vínculos continua em sem-tenant, e sem erro nenhum', async () => {
+    // O outro lado do A10: separar a falha não pode ter transformado o caso legítimo de conta
+    // recém-criada num aviso de erro.
+    const { cliente } = clienteFalso({ sessao: { user: USUARIO }, vinculos: [] });
+    const sessao = await montar(cliente);
+
+    expect(sessao.estado).toBe('sem-tenant');
+    expect(sessao.erro).toBeNull();
   });
 
   it('desmontar cancela a assinatura de auth', async () => {

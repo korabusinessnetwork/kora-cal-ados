@@ -110,6 +110,9 @@
   padding: 8px 16px; background: var(--cor-superficie-alta); color: var(--cor-texto);
   border: 1px solid var(--cor-borda); border-radius: 7px; font: inherit; cursor: pointer;
 }
+/* Dois botões lado a lado, e "Tentar de novo" primeiro: é a ação que resolve o caso
+   comum, e sair é a saída de quem a rede não devolveu. */
+.sessao-aviso__acoes { display: flex; justify-content: center; gap: 10px; }
 
 /* ── Barra da sessão ────────────────────────────────────────────────── */
 .barra-sessao {

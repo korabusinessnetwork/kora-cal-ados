@@ -8,7 +8,7 @@ toca o banco.
 
 | Arquivo | Papel |
 |---|---|
-| `ContextoDeSessao.tsx` | O estado da sessão e as ações (`entrar`, `sair`, `escolherTenant`, `trocarDeTenant`) |
+| `ContextoDeSessao.tsx` | O estado da sessão e as ações (`entrar`, `sair`, `escolherTenant`, `trocarDeTenant`, `tentarDeNovo`) |
 | `useSessao.ts` | Único jeito de ler a sessão — componente nenhum importa o contexto direto |
 | `carregarTenantsDoUsuario.ts` | A que tenants o usuário pertence e com que papel (campos explícitos) |
 | `tenantLembrado.ts` | Preferência de interface: qual marca ele escolheu por último, por `user_id` |
@@ -38,13 +38,20 @@ contexto ainda confere se o id lembrado está na lista que o banco devolveu.
 
 ## Estados
 
-`carregando` · `anonimo` · `entrando` · `escolhendo-tenant` · `sem-tenant` · `pronta`
+`carregando` · `anonimo` · `entrando` · `escolhendo-tenant` · `sem-tenant` ·
+`falha-ao-carregar` · `pronta`
 
 `entrando` existe separado de `carregando` porque a tela desenhada é outra: mantém o
 formulário montado, então senha errada não custa redigitar o e-mail.
 
 `sem-tenant` é estado vazio **com saída** — na Fase 1 o vínculo é criado por script
 (venda manual), então a ação certa é falar com quem provisiona.
+
+`falha-ao-carregar` existe separado de `sem-tenant` porque as duas frases são diferentes e
+só uma delas é verdade. Os dois caíam no mesmo estado, e o estado escolhe a tela: quem só
+perdeu a rede lia "sua conta não está vinculada a uma marca" e ia procurar quem provisiona
+por um problema que se resolve clicando de novo. A saída deste estado é `tentarDeNovo`,
+que refaz a busca dos vínculos sem deslogar.
 
 ## Mensagem de login é genérica de propósito
 
