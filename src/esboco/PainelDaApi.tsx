@@ -113,7 +113,10 @@ export function PainelDaApi({ cores, relatorio, erro }: Props) {
       ].join('\n');
 
   return (
-    <section className="painel">
+    // A classe extra é só endereço para o CSS: abaixo de 1220 px este painel desce inteiro para a
+    // segunda linha, porque ele é leitura do resultado e as outras duas colunas são o que a pessoa
+    // está manipulando. Mesma decisão, e mesmo motivo, do painel de inspeção do palco 3D.
+    <section className="painel esboco__painel-api">
       <h2 className="painel__titulo">Chamada equivalente</h2>
       <p className="painel__ajuda">
         Mesmo motor dos dois lados: o corpo do <code>200</code> é, byte a byte, o SVG que o

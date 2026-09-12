@@ -50,6 +50,27 @@ body {
 .colunas { display: grid; grid-template-columns: 320px minmax(420px, 1fr) 400px; gap: 20px; align-items: start; }
 .coluna-central { display: flex; flex-direction: column; gap: 16px; }
 
+/* As três colunas são LARGURAS FIXAS somando 1180 px mais o respiro da página, e até aqui não havia
+   media query nenhuma: numa janela de 1024 o documento ficava com 1208 px e a página rolava na
+   horizontal; num celular de 375 px a largura do documento continuava 1208 e o desenho inteiro
+   encolhia. É a tela que o README aponta como a que funciona num clone recém-baixado, sem conta e
+   sem `.env.local`, ou seja, a primeira que alguém abre.
+
+   A saída é a mesma que A01 deu ao palco 3D, e pelo mesmo motivo: sai da linha de cima o painel que
+   pode esperar. A chamada de API é leitura do resultado; as zonas e o preview são o que a pessoa
+   está manipulando, e precisam ficar lado a lado para a comparação "a cor que escolhi é a cor que
+   aparece" acontecer sem rolagem. */
+@media (max-width: 1220px) {
+  .colunas { grid-template-columns: minmax(240px, 320px) minmax(0, 1fr); }
+  .esboco__painel-api { grid-column: 1 / -1; }
+}
+
+/* Abaixo disto não há largura para duas colunas sem espremer o preview, e aí empilhar é o certo. O
+   mesmo 860 px do palco, para as duas telas quebrarem no mesmo lugar. */
+@media (max-width: 860px) {
+  .colunas { grid-template-columns: 1fr; }
+}
+
 .painel {
   background: var(--cor-superficie); border: 1px solid var(--cor-borda);
   border-radius: var(--raio); padding: 18px;
