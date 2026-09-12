@@ -13,6 +13,7 @@ import { montarComposicao, type ProvedorDeGltfDaPeca } from '../lib/composicao/m
 import { validarComposicao } from '../lib/composicao/validarComposicao';
 import type {
   CatalogoDoAcervo,
+  Composicao,
   ComposicaoValidada,
   Forma,
 } from '../lib/composicao/tiposDaComposicao';
@@ -82,6 +83,37 @@ export function mudarEscolhaDaTela(
 }
 
 /**
+ * As escolhas da tela viram a composição do ADR-008: JSON de algumas linhas, e nada além.
+ *
+ * Sai separado de `montarDaTela` porque é o mesmo objeto que a API recebe e que o modelo de
+ * linguagem vai escrever, e a tela precisa poder ENTREGAR isso a quem está montando: a composição
+ * não é gravada em banco (ADR-008 D6), então fechar a aba perdia a montagem inteira.
+ *
+ * Segue a ordem das categorias da FORMA, e não a ordem em que a pessoa mexeu nos controles. Duas
+ * montagens iguais têm que produzir o mesmo texto, senão comparar dois JSON dessa tela vira
+ * adivinhação.
+ *
+ * Categoria sem peça simplesmente não entra: a lista é das peças escolhidas, e `null` ali seria
+ * uma peça chamada "nenhuma" que o validador teria de saber ignorar.
+ */
+export function composicaoDasEscolhas(
+  forma: Forma,
+  escolhas: ReadonlyMap<string, EscolhaDaTela>,
+): Composicao {
+  // `flatMap` e não `filter().map()`: o filtro com predicado de tipo estreita a ESCOLHA, e não o
+  // `pecaId` dentro dela, então o `null` da categoria dispensada sobrevivia até a saída.
+  const pecas = forma.categorias.flatMap(({ categoria }) => {
+    const escolha = escolhas.get(categoria);
+
+    if (escolha?.pecaId == null) return [];
+
+    return [{ peca_id: escolha.pecaId, cor: escolha.cor, parametros: escolha.parametros }];
+  });
+
+  return { forma_id: forma.id, pecas };
+}
+
+/**
  * As escolhas da tela viram calçado montado, passando pelo guarda.
  *
  * Passa por `validarComposicao` mesmo sabendo que a tela só oferece opções válidas. Não é zelo
@@ -95,13 +127,8 @@ export function montarDaTela(
   escolhas: ReadonlyMap<string, EscolhaDaTela>,
   provedorDeGltf: ProvedorDeGltfDaPeca,
 ): MontagemDaTela {
-  const pecas = forma.categorias
-    .map(({ categoria }) => escolhas.get(categoria))
-    .filter((escolha): escolha is EscolhaDaTela => escolha?.pecaId != null)
-    .map(({ pecaId, cor, parametros }) => ({ peca_id: pecaId, cor, parametros }));
-
   try {
-    const composicao = validarComposicao({ forma_id: forma.id, pecas }, catalogo);
+    const composicao = validarComposicao(composicaoDasEscolhas(forma, escolhas), catalogo);
     const { modelo, zonas } = montarComposicao(composicao, provedorDeGltf);
 
     return { modelo, zonas, erro: null };

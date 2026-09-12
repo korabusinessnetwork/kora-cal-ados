@@ -8,6 +8,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  composicaoDasEscolhas,
   escolhasDaComposicao,
   montarDaTela,
   mudarEscolhaDaTela,
@@ -241,6 +242,55 @@ describe('mudarEscolhaDaTela', () => {
     expect(antes.get('cabedal')).toMatchObject({
       pecaId: 'prova-cabedal-baixo',
       parametros: { 'altura-do-cano': 0.075 },
+    });
+  });
+});
+
+describe('composicaoDasEscolhas', () => {
+  it('devolve a composição do ADR-008, e nada além dela', () => {
+    // É o objeto que a API recebe e que o modelo de linguagem vai escrever. Campo a mais aqui
+    // vira campo a mais no contrato público, então a forma é conferida por inteiro.
+    const composicao = composicaoDasEscolhas(FORMA, escolhasDaComposicao(DEMO));
+
+    expect(Object.keys(composicao).sort()).toEqual(['forma_id', 'pecas']);
+    expect(composicao.forma_id).toBe(FORMA.id);
+    expect(composicao.pecas.map(({ peca_id }) => peca_id)).toEqual([
+      'prova-sola-plana',
+      'prova-cabedal-baixo',
+      'prova-cadarco-reto',
+    ]);
+  });
+
+  it('sai na ordem das categorias da forma, e não na ordem em que a pessoa mexeu', () => {
+    // Duas montagens iguais precisam produzir o mesmo texto, senão comparar dois JSON desta tela
+    // vira adivinhação. Aqui as escolhas entram ao contrário de propósito.
+    const inicial = escolhasDaComposicao(DEMO);
+    const trocada = new Map(
+      [...inicial.entries()].reverse() as [string, EscolhaDaTela][],
+    );
+
+    expect(composicaoDasEscolhas(FORMA, trocada)).toEqual(composicaoDasEscolhas(FORMA, inicial));
+  });
+
+  it('categoria dispensada não vira peça nenhuma', () => {
+    // `null` na lista seria uma peça chamada "nenhuma", que o validador teria de saber ignorar.
+    const escolhas = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cadarco', { pecaId: null });
+    const composicao = composicaoDasEscolhas(FORMA, escolhas);
+
+    expect(composicao.pecas).toHaveLength(2);
+    expect(JSON.stringify(composicao)).not.toContain('null');
+  });
+
+  it('é a MESMA composição que a montagem valida', () => {
+    // A garantia que faz o botão de copiar valer alguma coisa: o texto copiado é o que a tela
+    // montou, não uma segunda leitura das escolhas que poderia divergir dela.
+    const escolhas = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
+      pecaId: 'prova-cabedal-cano-alto',
+    });
+
+    expect(montar(escolhas).modelo).not.toBeNull();
+    expect(composicaoDasEscolhas(FORMA, escolhas).pecas[1]).toMatchObject({
+      peca_id: 'prova-cabedal-cano-alto',
     });
   });
 });
