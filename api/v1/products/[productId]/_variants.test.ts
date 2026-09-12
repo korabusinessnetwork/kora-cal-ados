@@ -17,6 +17,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { TETO_DE_BYTES_DO_CORPO } from '../../../_lib/lerCorpoDoPedido';
 import { gerarChaveDeApi } from '../../../_lib/formatoDaChaveDeApi';
 import { MENSAGEM_DE_FALHA_INTERNA } from '../../../_lib/traduzirParaFalhaDaApi';
 import handler from './variants';
@@ -470,6 +471,27 @@ describe('o corpo', () => {
       expect((await envelopeDe(resposta)).error.code).toBe('CORPO_INVALIDO');
     });
   }
+
+  it('corpo acima do teto de bytes é 400 CORPO_INVALIDO, com envelope', async () => {
+    // O teto em si tem teste próprio em `api/_lib/lerCorpoDoPedido.test.ts`, inclusive a prova de
+    // que a leitura para no meio. O que ESTE teste prende é outra coisa: que a recusa atravesse o
+    // handler no envelope certo, em vez de escapar como 500 pelo caminho genérico.
+    const pares: string[] = [];
+    for (let indice = 0; pares.length * 26 < TETO_DE_BYTES_DO_CORPO * 2; indice += 1) {
+      pares.push(`"zona-${indice}":"#C0392B"`);
+    }
+
+    const { cliente } = clienteFalso();
+    const resposta = await handler.fetch(
+      pedidoDeVariante({ corpo: `{${pares.join(',')}}` }),
+      cliente,
+    );
+
+    expect(resposta.status).toBe(400);
+    const envelope = await envelopeDe(resposta);
+    expect(envelope.error.code).toBe('CORPO_INVALIDO');
+    expect(envelope.error.message).toContain(String(TETO_DE_BYTES_DO_CORPO));
+  });
 
   it('cor que não é hex é 422 COR_INVALIDA', async () => {
     const { cliente } = clienteFalso();

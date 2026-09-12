@@ -37,6 +37,7 @@ import { baixarAssetBaseComServiceRole } from '../../../_lib/baixarAssetBaseComS
 import { carregarProdutoDoTenant } from '../../../_lib/carregarProdutoDoTenant';
 import { criarClienteDeServico } from '../../../_lib/clienteDeServico';
 import { lerCoresPedidas } from '../../../_lib/lerCoresPedidas';
+import { lerCorpoDoPedido } from '../../../_lib/lerCorpoDoPedido';
 import {
   listarZonasDoProdutoDoTenant,
   type ZonaDoProdutoDoTenant,
@@ -105,7 +106,7 @@ export default {
 
       // 4 e 5.
       exigirFormatoSuportado(pedido.url);
-      const cores = lerCoresPedidas(await lerCorpoJson(pedido));
+      const cores = lerCoresPedidas(await lerCorpoDoPedido(pedido));
 
       // 6 e 7.
       const zonas = await listarZonasDoProdutoDoTenant(cliente, produto.id, chave.tenantId);
@@ -208,22 +209,6 @@ function exigirFormatoSuportado(url: string): void {
     'FORMATO_NAO_SUPORTADO',
     `Formato "${mostrado}" não é suportado. Use format=svg.`,
   );
-}
-
-/**
- * `pedido.json()` LANÇA em corpo vazio ou malformado, e um `SyntaxError` cru sairia como 500
- * pelo caminho genérico — dizendo ao integrador que o defeito é nosso quando é o JSON dele.
- * O contrato manda `CORPO_INVALIDO` 400.
- */
-async function lerCorpoJson(pedido: Request): Promise<unknown> {
-  try {
-    return await pedido.json();
-  } catch {
-    throw criarFalhaDeTransporte(
-      'CORPO_INVALIDO',
-      'O corpo precisa ser um JSON válido: um objeto de zona para cor, como {"sola": "#C0392B"}.',
-    );
-  }
 }
 
 /**

@@ -25,6 +25,7 @@ módulos na ordem e não decide nada (ver `../README.md`).
 | `tiposDaApi.ts` | `CodigoDeRespostaDaApi` (a união que **estende** `CodigoDeErro` sem editá-lo) e a classe `FalhaDaApi` | **Existe** |
 | `traduzirParaFalhaDaApi.ts` | A tabela código → status → mensagem, num lugar só | **Existe** |
 | `formatoDaChaveDeApi.ts` | Gerar e interpretar `kora_<ambiente>_<prefixo>_<segredo>`; o SHA-256 do segredo | **Existe** |
+| `lerCorpoDoPedido.ts` | Corpo do `Request` → JSON, com **teto de bytes** conferido antes da leitura terminar | **Existe** |
 | `lerCoresPedidas.ts` | Corpo cru → `Record<zone_key, cor>`, delegando a `validarCor`/`validarZoneKey` do motor | **Existe** |
 | `respostaDaApi.ts` | Monta a `Response`: SVG cru no sucesso, envelope JSON no erro | **Existe** |
 | `logDaRequisicao.ts` | A linha de log que conhece o **prefixo** e nunca a chave | **Existe** |
