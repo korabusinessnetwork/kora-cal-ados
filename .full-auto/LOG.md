@@ -12,3 +12,11 @@
 2026-09-10 · T14 · calcado montado em cena, cada peca no lugar e a cor na peca certa · 4b7f520
 2026-09-12 · T15 · configurador sem IA nenhuma, o fallback gratuito do ADR-008 · 11f4e9d
 2026-09-12 · T17 · o primeiro teste que olha a cor na TELA, e nao a cor no arquivo · e49bf84
+2026-09-12 · R1-A01 · cena 3D ao lado dos controles entre 860 e 1100 px, o canvas volta para dentro da tela em 1024x768 · 14796e4
+2026-09-12 · R1-A04 · ProvedorDeSessao ganhou teste, 15 casos com cliente falso, 6 estados e a guarda de escolherTenant · 12701c5
+2026-09-12 · R1-A03 · asset-base vazio ou sem raiz <svg> vira erro nomeado, nunca mais painel em branco · 24e28ac
+2026-09-12 · R1-A02 · a composição montada sai da tela em JSON, com função pura testada e caminho alternativo quando o navegador nega a área de transferência · bdcd6de
+2026-09-12 · R1-A05 · cada tela escreve o próprio título de aba, o mapa cobre as quatro por tipo · 34d56a6
+2026-09-12 · R1-A06 · a categoria dispensada diz "Nenhuma peça", a zone_key saiu da frase em português · 367539a
+2026-09-12 · R1-A07 · o configurador escreve a faixa do parâmetro, mínimo e máximo em milímetros · 231fdb2
+2026-09-12 · R1-A08 · os botões de peça anunciam a escolha por aria-pressed, nas duas telas do palco · 5e35551

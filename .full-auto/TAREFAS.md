@@ -67,11 +67,11 @@ sem conserto em cima. Um item, um commit.
 Lote de 8, nenhum com risco 4 ou 5, com pelo menos um item de cada eixo que tem achado acima do
 corte.
 
-- [ ] R1-A01 Cena 3D ao lado dos controles entre 860 e 1100 px | trilha: ux | depende: nenhum | pronto quando: em 1024x768 o canvas de `?tela=composicao` começa acima de 768 px de altura de página, medido, e em 1440x900 e em 375 px nada muda em relação a hoje
-- [ ] R1-A04 Teste do `ProvedorDeSessao` | trilha: qualidade | depende: nenhum | pronto quando: existe teste do provedor com cliente falso cobrindo os seis estados e a guarda de `escolherTenant`, e uma mutação na escolha do tenant lembrado mata pelo menos um teste
-- [ ] R1-A03 Asset-base vazio é falha nomeada | trilha: robustez | depende: nenhum | pronto quando: baixar um asset-base vazio ou sem raiz `<svg>` leva a tela ao estado de erro com "Tentar de novo" visível, com teste, e nunca ao painel em branco
-- [ ] R1-A02 Copiar a composição em JSON | trilha: produto | depende: nenhum | pronto quando: `?tela=composicao` tem um botão que copia o mesmo JSON que a API recebe, com confirmação na tela, e a função que monta esse JSON é pura e tem teste
-- [ ] R1-A05 Título de aba por tela | trilha: ux | depende: nenhum | pronto quando: cada uma das quatro telas escreve o próprio `document.title`, com teste da função que decide o texto
-- [ ] R1-A06 Categoria dispensada sem chave crua na frase | trilha: ux | depende: nenhum | pronto quando: o botão da categoria opcional não mostra mais "sem cadarco", e nenhuma `zone_key` aparece dentro de prosa em português nessa tela
-- [ ] R1-A07 Faixa do parâmetro visível no configurador | trilha: ux | depende: nenhum | pronto quando: o controle mostra mínimo e máximo em milímetros junto do valor, no mesmo formato da tela `?tela=palco3d`
-- [ ] R1-A08 `aria-pressed` nos botões de peça | trilha: ux | depende: R1-A06 | pronto quando: o botão da peça escolhida e o da categoria dispensada anunciam o estado por `aria-pressed`, conferido na árvore de acessibilidade
+- [x] R1-A01 Cena 3D ao lado dos controles entre 860 e 1100 px | trilha: ux | depende: nenhum | pronto quando: em 1024x768 o canvas de `?tela=composicao` começa acima de 768 px de altura de página, medido, e em 1440x900 e em 375 px nada muda em relação a hoje
+- [x] R1-A04 Teste do `ProvedorDeSessao` | trilha: qualidade | depende: nenhum | pronto quando: existe teste do provedor com cliente falso cobrindo os seis estados e a guarda de `escolherTenant`, e uma mutação na escolha do tenant lembrado mata pelo menos um teste
+- [x] R1-A03 Asset-base vazio é falha nomeada | trilha: robustez | depende: nenhum | pronto quando: baixar um asset-base vazio ou sem raiz `<svg>` leva a tela ao estado de erro com "Tentar de novo" visível, com teste, e nunca ao painel em branco
+- [x] R1-A02 Copiar a composição em JSON | trilha: produto | depende: nenhum | pronto quando: `?tela=composicao` tem um botão que copia o mesmo JSON que a API recebe, com confirmação na tela, e a função que monta esse JSON é pura e tem teste
+- [x] R1-A05 Título de aba por tela | trilha: ux | depende: nenhum | pronto quando: cada uma das quatro telas escreve o próprio `document.title`, com teste da função que decide o texto
+- [x] R1-A06 Categoria dispensada sem chave crua na frase | trilha: ux | depende: nenhum | pronto quando: o botão da categoria opcional não mostra mais "sem cadarco", e nenhuma `zone_key` aparece dentro de prosa em português nessa tela
+- [x] R1-A07 Faixa do parâmetro visível no configurador | trilha: ux | depende: nenhum | pronto quando: o controle mostra mínimo e máximo em milímetros junto do valor, no mesmo formato da tela `?tela=palco3d`
+- [x] R1-A08 `aria-pressed` nos botões de peça | trilha: ux | depende: R1-A06 | pronto quando: o botão da peça escolhida e o da categoria dispensada anunciam o estado por `aria-pressed`, conferido na árvore de acessibilidade

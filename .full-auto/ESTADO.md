@@ -13,8 +13,13 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   isso é decisão do dono.
 - **Baseline:** `BASELINE.md`, verde na abertura. Item que piorar qualquer linha dele volta por
   `git revert` na hora.
-- **Rodada atual:** 1, com 8 itens em `TAREFAS.md`, seção "Refino, rodada 1".
-- **Próximo passo:** executar R1-A01, a cena 3D ao lado dos controles entre 860 e 1100 px.
+- **Rodada 1: FECHADA em 2026-09-12**, 8 de 8 entregues, nenhum revertido. O que entrou, o que foi
+  medido e o que foi conferido a olho está em `REFINO-RODADAS.md`.
+- **Próximo passo:** abrir a rodada 2. Reauditar o que mudou, recalcular os scores e montar o lote a
+  partir do backlog acima do corte, que hoje é A09 (teste de `listarZonasDoProduto`), A10 (erro de
+  rede virando "conta não vinculada") e A11 (canvas sem nome acessível). A auditoria da rodada 1
+  declara que o editor de zonas logado NÃO foi percorrido, então é por ali que a reauditoria começa:
+  é a maior área do sistema ainda não olhada com o app rodando.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

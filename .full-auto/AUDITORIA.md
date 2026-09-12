@@ -26,7 +26,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 
 ## Acima do corte
 
-### A01 | eixo: ux | onde: `src/palco3d/palco3d.css:12` (regra `.palco3d__colunas`)
+### A01 FEITO na rodada 1, commit `14796e4` | eixo: ux | onde: `src/palco3d/palco3d.css:12` (regra `.palco3d__colunas`)
 
 - **hoje:** o grid de três colunas vira uma coluna só abaixo de 1100 px, e a cena 3D é a do meio.
   Numa janela de 1024x768 os controles ocupam de y=309 a y=602 e o canvas começa em **y=789**, ou
@@ -39,7 +39,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
   junto com o controle, a conferência "a cor escolhida é a cor que aparece" não acontece.
 - valor: 5 | esforço: 2 | risco: 1 | **score: 6**
 
-### A02 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx`, `src/palco3d/composicaoDaTela.ts:98`
+### A02 FEITO na rodada 1, commit `bdcd6de` | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx`, `src/palco3d/composicaoDaTela.ts:98`
 
 - **hoje:** não existe nenhuma forma de levar a composição montada para fora da tela. O objeto
   `{ forma_id, pecas }` é construído dentro de `montarDaTela` e morre lá. Por decisão do ADR-008 D6
@@ -52,7 +52,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
   exatamente esse JSON e não deixa ninguém pegá-lo, o que quebra a ponte entre a tela e a API.
 - valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A03 | eixo: robustez | onde: `src/features/produtos/hooks/useAssetBase.ts`, `VisualizacaoDoProduto.tsx:41`
+### A03 FEITO na rodada 1, commit `24e28ac` | eixo: robustez | onde: `src/features/produtos/hooks/useAssetBase.ts`, `VisualizacaoDoProduto.tsx:41`
 
 - **hoje:** um asset-base que baixa com sucesso mas vem **vazio** (arquivo de 0 byte no bucket,
   truncado, ou conteúdo que não é SVG) vira `estado: 'pronto'` com `svg` falsy.
@@ -68,7 +68,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
   funcionando.
 - valor: 5 | esforço: 2 | risco: 2 | **score: 4**
 
-### A04 | eixo: qualidade | onde: `src/features/sessao/ContextoDeSessao.tsx` (190 linhas)
+### A04 FEITO na rodada 1, commit `12701c5` | eixo: qualidade | onde: `src/features/sessao/ContextoDeSessao.tsx` (190 linhas)
 
 - **hoje:** o `ProvedorDeSessao` é a máquina de seis estados que decide quem entra e com que tenant,
   e **não tem teste nenhum**. O único teste da pasta, `RotaProtegida.test.tsx`, monta o
@@ -82,7 +82,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
   forasteiro (`ContextoDeSessao.tsx:148`) que hoje ninguém prende.
 - valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A05 | eixo: ux | onde: `index.html:12`
+### A05 FEITO na rodada 1, commit `34d56a6` | eixo: ux | onde: `index.html:12`
 
 - **hoje:** o título da aba é `Esboço · editor de zonas` nas quatro telas. Quem abre o configurador
   e o editor lado a lado vê duas abas idênticas. `document.title` não é escrito em lugar nenhum de
@@ -92,7 +92,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 - **evidência:** `grep -rn "document.title" src/` não devolve nada, e as quatro telas foram abertas.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A06 | eixo: ux | onde: `src/palco3d/TelaDaComposicao.tsx:190`
+### A06 FEITO na rodada 1, commit `367539a` | eixo: ux | onde: `src/palco3d/TelaDaComposicao.tsx:190`
 
 - **hoje:** o botão da categoria opcional escreve `sem {categoria}`, e como `categoria` é a chave
   crua, a tela mostra **"sem cadarco"**, sem cedilha, dentro de uma frase em português.
@@ -102,7 +102,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 - **evidência:** visto na tela `?tela=composicao`, categoria `cadarco`.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A07 | eixo: ux | onde: `src/palco3d/TelaDaComposicao.tsx:213`
+### A07 FEITO na rodada 1, commit `231fdb2` | eixo: ux | onde: `src/palco3d/TelaDaComposicao.tsx:213`
 
 - **hoje:** o controle de parâmetro mostra o valor atual, mas nunca a faixa. A pessoa arrasta sem
   saber onde está dentro do permitido. A tela irmã `?tela=palco3d` mostra "Faixa 10,0 mm a 40,0 mm"
@@ -111,7 +111,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 - **evidência:** as duas telas abertas lado a lado, com a mesma peça.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A08 | eixo: ux | onde: `src/palco3d/TelaDaComposicao.tsx:175`
+### A08 FEITO na rodada 1, commit `5e35551` | eixo: ux | onde: `src/palco3d/TelaDaComposicao.tsx:175`
 
 - **hoje:** o botão da peça escolhida se distingue **só pela classe CSS** `palco3d__peca--ativa`.
   Não há `aria-pressed` em lugar nenhum de `src/`. Para leitor de tela, os botões de peça são
