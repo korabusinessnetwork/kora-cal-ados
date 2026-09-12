@@ -18,7 +18,7 @@
 // pareceria funcionar e travaria o navegador depois de algumas: o navegador limita quantos
 // contextos existem ao mesmo tempo e descarta os mais velhos em silêncio.
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AmbientLight,
   Color,
@@ -111,6 +111,11 @@ export function PalcoDeModelo3d({
   const moldura = useRef<HTMLDivElement | null>(null);
   const palco = useRef<Palco | null>(null);
 
+  // Estado, e não só o aviso para a tela, porque quem decide se a moldura continua existindo é
+  // este componente: a tela sabe qual frase escrever, e só este arquivo sabe que ali dentro não
+  // vai aparecer nada nunca mais.
+  const [contextoNegado, setContextoNegado] = useState(false);
+
   // Os callbacks entram por referência mutável, e não como dependência do efeito, porque a tela
   // os recria a cada render. Como dependência, o palco inteiro seria destruído e reconstruído a
   // cada tecla digitada, junto com o contexto WebGL.
@@ -125,9 +130,12 @@ export function PalcoDeModelo3d({
 
     // O `try` existe por um motivo medido, não por precaução genérica: com o `getContext` de
     // `webgl` devolvendo `null`, o `new WebGLRenderer` do `criarPalco` LANÇA, o erro sobe pelo
-    // efeito até o React, e sem `ErrorBoundary` em lugar nenhum a árvore inteira é desmontada.
-    // Conferido no navegador: a página fica com `body` vazio, sem canvas, sem rodapé e sem jeito
-    // de ir para o esboço, que é a tela que funcionaria perfeitamente nessa máquina.
+    // efeito até o React, e naquele momento não existia `ErrorBoundary` em lugar nenhum: a árvore
+    // inteira era desmontada. Conferido no navegador: a página ficava com `body` vazio, sem canvas,
+    // sem rodapé e sem jeito de ir para o esboço, que é a tela que funcionaria perfeitamente nessa
+    // máquina. Desde o R6-A51 existe a `RedeDeProtecao` na raiz, mas ela é a rede de baixo, e esta
+    // guarda continua sendo a certa: quem sabe o que fazer com esta falha é este componente, e o
+    // desfecho bom é a tela seguir inteira, não a rede aparecer.
     //
     // Um palco que não pôde nascer é uma falha DESTE palco, e o palco já sabe contar falha: vira
     // estado, a tela escreve a frase, e o resto da página continua de pé.
@@ -139,6 +147,7 @@ export function PalcoDeModelo3d({
       });
     } catch {
       mudarEstado.current('contexto-negado');
+      setContextoNegado(true);
       return undefined;
     }
     palco.current = criado;
@@ -160,6 +169,16 @@ export function PalcoDeModelo3d({
   // arraste e clique. É o mesmo par que `PalcoDeMarcacao` já usa no editor 2D. Sem isto o palco
   // era um `<div>` anônimo com um `<canvas>` dentro, ou seja, não existia para quem navega pela
   // árvore de acessibilidade: nem o nome, nem o aviso de que dá para girar e clicar.
+  // A moldura some quando o contexto foi NEGADO, e só nesse caso. Ela media 532x320 px na janela
+  // de trabalho e 375x340 px em 375x812, medido, e ficava preta e vazia para sempre, empurrando
+  // para baixo a frase que explica o que houve. Guardar lugar para o que não vem é o contrário de
+  // "estados sempre visíveis": é um estado de espera falso.
+  //
+  // No `contexto-perdido` ela FICA, e a diferença entre os dois é justamente essa: lá o contexto
+  // pode voltar, e a moldura é o lugar onde ele volta. É o mesmo motivo pelo qual o R5-A46 separou
+  // os dois estados em vez de juntá-los num "sem 3D".
+  if (contextoNegado) return null;
+
   return (
     <div className="palco3d__moldura" role="group" aria-label={rotulo} ref={moldura} />
   );

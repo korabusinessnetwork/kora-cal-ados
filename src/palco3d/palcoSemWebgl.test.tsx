@@ -4,8 +4,8 @@
 //
 // Este arquivo existe por um defeito medido no navegador, não por precaução: com o
 // `HTMLCanvasElement.prototype.getContext` devolvendo `null` para `webgl*`, o `new WebGLRenderer`
-// lançava de dentro do efeito, o erro subia até o React, e como não existe `ErrorBoundary` em
-// lugar nenhum deste projeto a árvore INTEIRA era desmontada. O `body` ficava vazio: sem o palco,
+// lançava de dentro do efeito, o erro subia até o React, e como naquele momento não existia
+// `ErrorBoundary` em lugar nenhum deste projeto a árvore INTEIRA era desmontada. O `body` ficava vazio: sem o palco,
 // sem o painel de cores, sem o rodapé, sem caminho para o esboço, que é justamente a tela que
 // funcionaria perfeitamente numa máquina sem GPU, porque desenha o mesmo tênis em SVG.
 //
@@ -96,7 +96,23 @@ describe('sem contexto WebGL disponível (A46)', () => {
     );
 
     expect(container.querySelector('#rodape')?.textContent).toBe('ir para o esboço');
-    expect(container.querySelector('.palco3d__moldura')).not.toBeNull();
+  });
+
+  it('a moldura não fica na tela guardando lugar para o que não vem (A48)', () => {
+    // Ela media 532x320 px na janela de trabalho e 375x340 px em 375x812, medido no navegador, e
+    // ficava preta e vazia para sempre, empurrando para baixo a frase que explica o que houve.
+    // Caixa vazia permanente parece estado de espera, e esperar é exatamente o que não adianta:
+    // este navegador não vai entregar contexto gráfico nenhum.
+    montar(
+      <div>
+        {palco()}
+        <p id="rodape">ir para o esboço</p>
+      </div>,
+    );
+
+    expect(container.querySelector('.palco3d__moldura')).toBeNull();
+    // E o que estava ao lado continua onde estava: sumiu a caixa, não a página.
+    expect(container.querySelector('#rodape')?.textContent).toBe('ir para o esboço');
   });
 
   it('desmontar depois da falha não estoura', () => {
