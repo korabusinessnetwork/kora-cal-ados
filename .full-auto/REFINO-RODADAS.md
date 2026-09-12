@@ -482,3 +482,189 @@ Nenhum item desta rodada entrou atrás de configuração. Os seis são visíveis
 
 As três de sempre continuam: P01 (hook), P02 (revogar a chave `2aec9a55`) e P04 (os 8 tenants órfãos
 de teste). Nenhuma delas é tarefa minha, e nenhuma virou mais urgente nesta rodada.
+
+---
+
+## Rodada 5, fechada em 2026-09-12
+
+**Lote:** 6 itens, em `TAREFAS.md`, seção "Refino, rodada 5". Nenhum com risco 4 ou 5.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R5-A46 navegador sem WebGL deixa de apagar a página inteira | robustez | 5 | entregue |
+| R5-A41 tabela nova sem RLS vira teste vermelho | qualidade | 5 | entregue |
+| R5-A45 as citações de ADR passam a dizer a verdade | qualidade | 4 | entregue |
+| R5-A47 colar a composição de volta na tela | produto | 3 | entregue |
+| R5-A44 os três hooks de rede do editor saem do escuro | qualidade | 3 | entregue |
+| R5-A43 o palco 3D para de negar o que a composição já faz | ux | 3 | entregue |
+
+Abaixo do corte e fora do lote: **A42**, README por diretório sem guarda, e **A35**, o canvas sem
+teclado, que atravessa a quinta rodada pelo motivo já escrito.
+
+**De onde veio a lista:** as quatro rodadas anteriores auditaram telas. Esta foi atrás de três
+coisas que tela nenhuma mostra: o que acontece quando a máquina de quem visita **não tem** o que a
+tela precisa, as regras do projeto que existem **só como frase** e não têm guarda nenhuma, e o
+editor logado **por baixo** dos componentes, nos hooks que falam com a rede. Cinco suspeitas
+morreram na sonda e estão em `AUDITORIA.md`.
+
+---
+
+## Rodada 5: o que foi entregue
+
+**6 de 6 entregues, nenhum revertido.**
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R5-A46 o contexto WebGL negado vira estado, não página em branco | robustez | `2077f0a` | entregue |
+| R5-A41 varredura de RLS sobre as migrations | qualidade | `88d273d` | entregue |
+| R5-A45 seis citações de ADR consertadas, mais a varredura | qualidade | `7738fc9`, `5c25cdc` | entregue |
+| R5-A47 colar a composição de volta na tela | produto | `84279b6` | entregue |
+| R5-A44 os três hooks de rede recebem o cliente, e ganham teste | qualidade | `04e890b`, `f699fb3` | entregue |
+| R5-A43 o painel "Peça" para de prometer o que já existe | ux | `d5c262f` | entregue |
+
+### O que mudou de verdade
+
+1. **Máquina sem GPU utilizável para de apagar a página inteira (A46).** Medido antes: com
+   `getContext` devolvendo `null` para `webgl*`, `document.body.innerText` ficava **vazio** e
+   `querySelectorAll('canvas')` devolvia **0**. Não sumia só o palco, sumia o rodapé que levaria ao
+   esboço, que não precisa de WebGL nenhum. Não existe `ErrorBoundary` em `src/`, então não havia
+   onde o erro parar. Agora a falha de criação vira o quinto estado, `contexto-negado`, com frase
+   própria, separada do `contexto-perdido` porque a orientação é oposta: no perdido, esperar; no
+   negado, ir para o esboço, que desenha o mesmo tênis em SVG.
+
+2. **Tabela criada sem RLS agora reprova em `npm test` (A41).** O `CLAUDE.md` mandava lembrar da
+   RLS ao criar tabela, e nada conferia. A varredura é função pura sobre o texto das migrations, e
+   por isso responde tanto a pergunta real quanto uma sintética que TEM de reprovar. Roda sem banco
+   e sem `.env.local`, o que importa: a suíte que fala com o banco pula inteira numa máquina sem
+   credencial, e uma guarda que pula não é guarda.
+
+3. **Seis citações de ADR que mentiam passaram a dizer a verdade, e uma varredura confere (A45).**
+   O defeito original era `ADR-008 D6` citado para a não persistência da composição, quando o D6
+   fala de acervo da Kora contra acervo do tenant. **Duas das seis eu mesmo escrevi nesta rodada**,
+   no A46, copiando a citação errada de um vizinho, que é exatamente como uma citação errada se
+   multiplica. A varredura pega a metade mecânica (o número não existe) e **não** a semântica (o
+   número existe e diz outra coisa), que era a forma do defeito original, e isso está escrito no
+   README de `docs/08_DECISOES/` para ninguém confiar demais na guarda.
+
+4. **O JSON da composição volta para a tela (A47).** Dava para copiar a montagem e não dava para
+   colá-la de volta: o botão de copiar resolvia metade do problema. `escolhasDoTextoColado` é o
+   inverso exato de `composicaoDasEscolhas` e passa pelo **mesmo** `validarComposicao` que a API
+   usa, e não por uma conferência própria, senão a tela passaria a aceitar coisa diferente do que a
+   API aceita. Uma conferência é da tela e não do validador, a da forma trocada, e ela pegou um erro
+   meu de verdade no navegador: colei um `forma_id` inventado e a tela recusou sem derrubar o
+   calçado que estava em cena.
+
+5. **Os três hooks de rede do editor saíram do escuro, e o teste achou dois defeitos (A44).** Eles
+   liam `clienteSupabase()` de dentro, o que os tornava inalcançáveis sem `vi.mock`, que este
+   projeto não usa. Com o cliente por parâmetro, a sonda entrou, e o que ela achou está na seção
+   seguinte, porque vale mais que a mudança em si.
+
+6. **O painel "Peça" parou de prometer o que a tela ao lado já faz (A43).** A frase dizia que montar
+   as cinco peças numa cena só era "a próxima tarefa", e desde o R4-A34 o rodapé logo abaixo
+   oferecia "ver o calçado montado (as peças juntas)": a tela contradizia o próprio botão a dois
+   palmos. Agora ela aponta, com o **mesmo nome** que o rodapé usa, lido de `ROTULO_DA_SAIDA` no
+   teste para os dois não divergirem.
+
+### O achado desta rodada: a guarda contra a corrida não olhava a metade que a tela mostra
+
+Vale mais que qualquer item, do mesmo jeito que a classe CSS duplicada valeu na rodada 4.
+
+Os três hooks já tinham guarda contra a resposta **atrasada**: `vivo` no efeito, e
+`produtoAberto.current` no `gravar` das zonas. As três estavam certas e nenhuma tinha teste. Ao
+escrever a sonda, o que apareceu não foi a resposta atrasada, foi outra coisa: **entre o render que
+troca de id e o efeito que limpa o estado existe uma passagem inteira** em que a lista, o desenho e
+as zonas do id ANTERIOR aparecem sob o id NOVO. Nenhuma das guardas olha essa janela, porque
+nenhuma delas roda ali.
+
+Uma passagem de render é a tela. Em `useProdutos` isso é nome de produto de uma marca visível na
+tela de uma marca **concorrente**, que é precisamente o que o isolamento existe para impedir. No
+editor é pior que exibição: é o desenho errado aceitando clique, e clique ali vira `svg_selector`
+gravado no banco contra outro produto, parecendo correto e sobrevivendo à sessão.
+
+O conserto é uma etiqueta: estado, lista e erro viram um objeto só com o campo `de`, dizendo de qual
+id aquela leitura veio, e o render devolve leitura vazia quando a etiqueta não bate. As guardas
+antigas **continuam**, e não são decorativas: a leitura é um lugar só, e sem elas a resposta morta
+não apareceria (a etiqueta descarta) mas apagaria o que o id novo já mostrou, e ninguém recarregaria
+depois.
+
+Segundo defeito, achado no mesmo caminho: quem trocava de produto no meio de um `gravar` ficava com
+**`salvando` ligado para sempre**, porque quem o desliga é o fim da gravação, e o fim da gravação era
+justamente o trecho que se recusava a escrever quando a pessoa já tinha saído.
+
+**O formato da falha é o que fica:** uma guarda correta, com comentário correto ao lado, cobrindo o
+caso que quem a escreveu imaginou, e cega para o caso vizinho. O que a revelou não foi ler o código,
+foi gravar **todas** as passagens de render, inclusive as intermediárias que o React descarta, e
+afirmar sobre o conjunto em vez de sobre a última.
+
+### Medidas, ponta a ponta
+
+| | Abertura da rodada 5 | Fechamento |
+|---|---|---|
+| Testes verdes | 1198 | **1243** |
+| Arquivos de teste | 85 | **92** |
+| Banco / navegador | 58 / 25 | **58 / 25** |
+| `npm run build` | 512 ms | 483 ms |
+| Chunk principal | 457,16 kB | **457,75 kB** (+0,59) |
+| CSS | 23,30 kB | **23,81 kB** (+0,51) |
+| Chunk do three.js | 619,40 kB | **619,48 kB** (+0,08) |
+| `npm audit` | 0 | **0** |
+
+Dos 45 testes novos, seis arquivos foram criados na rodada, todos sobre coisas que não tinham teste
+nenhum: o palco sem WebGL, a RLS das migrations, as citações de ADR, e os três hooks de rede. O
+sétimo arquivo novo é o da tela do palco, que só passou a ser montável em jsdom **por causa do
+A46**: sem ele, montar a tela num teste estouraria no `WebGLRenderer`.
+
+### Mutações: quatro guardas, quatro mortas, e uma que sobreviveu primeiro
+
+No A44 rodei uma mutação por guarda, e as quatro morreram:
+
+1. etiqueta fora do render, nos três hooks: **4 vermelhos**, um por hook mais o do `gravar`;
+2. `if (!vivo) return` apagado dos três efeitos: **3 vermelhos**;
+3. `aindaVale()` apagado da releitura de depois de gravar: **1 vermelho**;
+4. o fim da gravação de volta atrás do `aindaVale()`: **1 vermelho**.
+
+A quarta **sobreviveu na primeira tentativa**, e isso está aqui porque é o tipo de coisa que se
+esconde fácil: meu teste só olhava a tela do produto NOVO, e ali a etiqueta já resolvia sozinha. O
+que o desligamento sem guarda acrescenta só aparece quando a pessoa **volta** para o produto em que
+a gravação começou. Estendi o teste até essa volta, e aí a mutação morre. Mutação que sobrevive não
+diz que a guarda é inútil, diz que o teste estava perguntando a coisa errada.
+
+No A43 a mutação é a frase antiga de volta no lugar: **2 dos 3 testes** ficam vermelhos, e o
+terceiro é o de contraprova, que continua verde de propósito, porque ele afirma só que a tela montou.
+
+Os outros itens: o A46 teve a sua (removi o `try`, e os 4 testes do arquivo morrem), o A41 e o A45
+são varreduras cuja contraprova é o texto sintético que TEM de reprovar, e o A47 é caminho de tela
+conferido no navegador.
+
+### Uma linha do baseline mudou de significado, e para melhor
+
+O `tsc --noEmit` das colunas antigas olhava menos arquivos que o desta. O `include` do
+`tsconfig.json` não continha `supabase/migrations` nem `docs/08_DECISOES`, então a varredura de RLS
+criada no A41 rodava em `vitest` sem nunca passar pelo compilador: **a pior forma de passar limpo é
+passar limpo porque ninguém olhou**. Corrigido em commit separado, `7738fc9`, de propósito, para
+ficar legível no histórico.
+
+### A piscada do `test:banco`, reconferida
+
+No commit do A41 ficou registrado que uma execução do `test:banco` devolveu `1 failed | 57 passed` e
+a execução seguinte devolveu 58 de 58, sem que eu tivesse capturado a mensagem. Prometi reconferir
+no fechamento. **Reconferido: três execuções nesta rodada, todas 58 de 58**, uma no A44, uma no A43
+e uma no fechamento. A piscada não voltou, e como não tenho a mensagem daquela vez, ela fica
+registrada como episódio não explicado, e não como problema resolvido. O suspeito continua sendo a
+cota de autenticação do plano gratuito, que é o D10.
+
+### Nada atrás de flag
+
+Nenhum item desta rodada entrou atrás de configuração. Os seis estão visíveis assim que a tela abre,
+ou reprovam em `npm test`.
+
+### Nenhuma pendência nova do dono
+
+As três de sempre continuam: P01 (hook), P02 (revogar a chave `2aec9a55`) e P04 (os 8 tenants órfãos
+de teste). Nenhuma virou mais urgente nesta rodada.
+
+### Um limite de verificação, dito por inteiro
+
+A tela do editor logado, que é onde os três hooks do A44 rodam de verdade, **não foi conferida no
+navegador**: ela exige login, e eu não preencho credencial. O que sustenta o A44 são os 16 testes
+novos, as quatro mutações e o baseline inteiro verde, não olho em tela.

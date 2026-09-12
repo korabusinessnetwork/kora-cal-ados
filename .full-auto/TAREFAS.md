@@ -188,4 +188,11 @@ e o lote já leva três itens de qualidade.
       produto no meio de um `gravar` deixava `salvando` ligado para sempre. Quatro mutações, uma
       por guarda, todas mortas. A tela do editor não foi conferida no navegador porque exige
       login, e eu não preencho credencial.
-- [ ] R5-A43 O palco 3D para de negar o que a composição já faz | trilha: ux | depende: nenhum | pronto quando: a frase do painel "Peça" não afirma mais que montar as cinco peças é a próxima tarefa, aponta para a tela que faz isso, e existe teste de que ela não voltou
+- [x] R5-A43 O palco 3D para de negar o que a composição já faz | trilha: ux | depende: nenhum | pronto quando: a frase do painel "Peça" não afirma mais que montar as cinco peças é a próxima tarefa, aponta para a tela que faz isso, e existe teste de que ela não voltou
+      feito em `d5c262f`. A frase aponta para o calçado montado com o MESMO nome que o rodapé usa
+      para aquele destino, e o teste lê esse nome de `ROTULO_DA_SAIDA` em vez de repetir a string,
+      para os dois não divergirem (ADR-003). O teste monta a tela de verdade em jsdom e lê a frase
+      do DOM, não do arquivo-fonte: só é possível por causa do R5-A46, que fez a tela sobreviver à
+      falta de WebGL. Três testes, sendo um de contraprova (a tela montou mesmo), e a frase antiga
+      de volta no lugar deixa 2 dos 3 vermelhos. Conferido no navegador em `?tela=palco3d`, e o
+      botão que a frase cita leva mesmo ao calçado montado.

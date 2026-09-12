@@ -580,7 +580,7 @@ tela e nunca pelos hooks que falam com a rede.
 Método de sempre: sondar em vez de supor. Cinco suspeitas morreram na sonda e estão em "o que eu
 achei que era defeito e não era", no fim desta seção.
 
-### A46 | eixo: robustez | onde: `src/palco3d/PalcoDeModelo3d.tsx:159` (`criarPalco`)
+### A46 FEITO na rodada 5, commit `2077f0a` | eixo: robustez | onde: `src/palco3d/PalcoDeModelo3d.tsx:159` (`criarPalco`)
 
 **hoje:** `new WebGLRenderer()` é chamado dentro de um `useEffect` sem `try`. Num navegador sem
 WebGL o three lança, o erro sobe do efeito, e **a página inteira fica em branco**. Não é só o
@@ -603,7 +603,7 @@ falta é alguém entregar a falha a ela.
 
 valor: 5 | esforço: 2 | risco: 2 | **score: 4**
 
-### A41 | eixo: qualidade | onde: `supabase/migrations/` e `supabase/tests/`
+### A41 FEITO na rodada 5, commit `88d273d` | eixo: qualidade | onde: `supabase/migrations/` e `supabase/tests/`
 
 **hoje:** as 6 tabelas existentes têm RLS ligada e pelo menos uma policy, conferido uma a uma.
 O que não existe é **guarda para a próxima**. O `CLAUDE.md` diz em letra: "Ao criar tabela/função
@@ -627,7 +627,7 @@ isso hoje é a que mais facilmente some em silêncio.
 
 valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A45 | eixo: qualidade | onde: `src/palco3d/` (quatro arquivos) e o projeto inteiro
+### A45 FEITO na rodada 5, commits `7738fc9` e `5c25cdc` | eixo: qualidade | onde: `src/palco3d/` (quatro arquivos) e o projeto inteiro
 
 **hoje:** quatro lugares afirmam que "a composição não é gravada em banco **(ADR-008 D6)**", e o D6
 do ADR-008 é "Acervo base é da Kora; acervo do tenant é privado, sob RLS". Não fala de composição
@@ -652,7 +652,7 @@ que existe mas fala de outra coisa) continua sendo leitura, e isso fica dito no 
 
 valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A47 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx` (o bloco "Copiar composição")
+### A47 FEITO na rodada 5, commit `84279b6` | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx` (o bloco "Copiar composição")
 
 **hoje:** dá para copiar o JSON da montagem e não dá para colá-lo de volta. O botão de copiar existe
 justamente porque fechar a aba perde a montagem inteira, e sem o caminho de volta ele resolve
@@ -677,7 +677,7 @@ segunda validação que costuma ser o risco desse tipo de entrada.
 
 valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A44 | eixo: qualidade | onde: `src/features/*/hooks/` (três arquivos)
+### A44 FEITO na rodada 5, commits `04e890b` e `f699fb3` | eixo: qualidade | onde: `src/features/*/hooks/` (três arquivos)
 
 **hoje:** `useZonasDoProduto` (135 linhas), `useProdutos` (55) e `useAssetBase` (55) não têm teste
 nenhum, e os três guardam a MESMA regra, escrita três vezes à mão: a `let vivo = true` com limpeza
@@ -703,7 +703,7 @@ o mesmo cliente falso que o resto da pasta já usa.
 
 valor: 4 | esforço: 3 | risco: 1 | **score: 3**
 
-### A43 | eixo: ux | onde: `src/palco3d/TelaDoPalco3d.tsx:67`
+### A43 FEITO na rodada 5, commit `d5c262f` | eixo: ux | onde: `src/palco3d/TelaDoPalco3d.tsx:67`
 
 **hoje:** o painel "Peça" diz, para quem visita, "Uma peça por vez. Montar as cinco numa cena só, e
 colori-las, **é a próxima tarefa**". Isso deixou de ser verdade: a tela da composição monta as cinco

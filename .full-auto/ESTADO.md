@@ -32,18 +32,23 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   vale guardar: **`.palco` é declarada em DOIS arquivos** (`esboco/esboco.css` e
   `features/zonas/zonas.css`), e `position: sticky` ficou sem efeito duas vezes, em silêncio,
   enquanto o `order` da mesma regra funcionava.
-- **Rodada 5: ABERTA em 2026-09-12** (`46a590b`), 6 itens, nenhum com risco 4 ou 5. Diferente das
-  quatro anteriores, que auditaram telas: esta foi atrás do que acontece quando a máquina de quem
-  visita não tem o que a tela precisa, das regras do projeto que existem só como frase e não têm
-  guarda nenhuma, e dos hooks de rede do editor logado. **5 de 6 entregues**: R5-A46 (`2077f0a`),
-  R5-A41 (`88d273d`), R5-A45 (`7738fc9`, `5c25cdc`), R5-A47 (`84279b6`) e R5-A44 (`04e890b`,
-  `f699fb3`). O A44 foi o único da rodada que achou defeito em vez de só cobrir o que já estava
-  certo: a lista, o desenho e as zonas do id anterior apareciam sob o id novo durante a passagem de
-  render entre a troca e o efeito, e as duas guardas que existiam não olhavam essa janela.
-- **Próximo passo:** R5-A43, a frase do painel "Peça". Depois, fechar a rodada 5 pela Fase 4, e nela
-  reconferir a piscada do `test:banco` prometida no commit do R5-A41 (na verificação do A44 ele
-  passou 58/58). Cada item pelo cinto de segurança: árvore limpa, baseline verde nas duas pontas, um
-  commit por mudança, `git revert` na hora se qualquer linha do `BASELINE.md` piorar.
+- **Rodada 5: FECHADA em 2026-09-12**, 6 de 6 entregues, nenhum revertido. Diferente das quatro
+  anteriores, que auditaram telas: esta foi atrás do que acontece quando a máquina de quem visita
+  não tem o que a tela precisa, das regras do projeto que existem só como frase e não têm guarda
+  nenhuma, e dos hooks de rede do editor logado. Baseline verde nas duas pontas: 1243 testes, 58 no
+  banco, 25 no navegador, `tsc` e build limpos, `npm audit` em zero. O achado da rodada, e é o que
+  vale guardar: **as três guardas contra corrida dos hooks só olhavam a resposta ATRASADA**, e
+  nenhuma delas via a passagem de render entre a troca de id e o efeito, em que a lista do id
+  anterior aparecia inteira sob o id novo. Uma mutação sobreviveu na primeira tentativa e está
+  relatada em `REFINO-RODADAS.md`, com o que foi feito com ela (o teste é que perguntava a coisa
+  errada). Limite de verificação dito por inteiro: a tela do editor logado não foi conferida no
+  navegador, porque exige login e eu não preencho credencial.
+- **Próximo passo:** abrir a rodada 6 pela Fase 5, reauditando o que mudou desde a última auditoria
+  mais o backlog que sobrou (**A42**, README por diretório sem guarda, e **A35**, o canvas sem
+  teclado, que já atravessou duas rodadas). Anotados para essa auditoria, ainda não virados em item:
+  `supabase/migrations/` não tem `README.md`, que o ADR-003 pede por diretório, e a moldura preta
+  grande que fica na tela quando o `contexto-negado` nunca resolve. Se a reauditoria não achar nada
+  acima do corte, o desfecho é `status: CONCLUIDO` mais relatório final.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 
