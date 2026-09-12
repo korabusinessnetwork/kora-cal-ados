@@ -9,6 +9,7 @@
 // guarda estado e desenha.
 
 import { useCallback, useMemo, useState } from 'react';
+import { useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
 
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
@@ -34,14 +35,10 @@ const DO_ACERVO: ProvedorDeGltfDaPeca = (peca, parametros) =>
 
 const PASSOS_DO_PARAMETRO = 40;
 
-/** Estado do botão de copiar. `falhou` é visível de propósito: cópia silenciosa engana. */
-type EstadoDaCopia = 'pronta' | 'copiada' | 'falhou';
-
 export function TelaDaComposicao() {
   const [escolhas, setEscolhas] = useState(() => escolhasDaComposicao(DEMO));
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [estado, setEstado] = useState<EstadoDoPalco>('carregando');
-  const [copia, setCopia] = useState<EstadoDaCopia>('pronta');
 
   // Remonta só quando as escolhas mudam. Sem o memo, cada render entregaria um texto glTF novo ao
   // palco, e ele recarregaria o calçado inteiro a cada movimento do mouse.
@@ -57,25 +54,15 @@ export function TelaDaComposicao() {
     [escolhas],
   );
 
+  // O descarte do aviso ao mudar a composição é do próprio hook, e não um `setCopia('pronta')`
+  // dentro de `mudar()` como já foi: com a regra amarrada ao texto, o caminho novo que mudasse a
+  // composição sem passar por `mudar()` não teria como esquecer de apagar o aviso.
+  const copia = useCopiaDeTexto(textoDaComposicao);
+
   const aoSelecionar = useCallback((nome: string | null) => setSelecionada(nome), []);
   const aoMudarEstado = useCallback((novo: EstadoDoPalco) => setEstado(novo), []);
 
-  async function copiar() {
-    try {
-      await navigator.clipboard.writeText(textoDaComposicao);
-      setCopia('copiada');
-    } catch {
-      // A área de transferência é negada em página sem HTTPS, em aba sem foco e por permissão do
-      // navegador. Sumir em silêncio aqui seria pior que não ter o botão: a pessoa colaria o que
-      // estivesse na área de transferência antes e acharia que foi a composição.
-      setCopia('falhou');
-    }
-  }
-
   function mudar(categoria: string, mudanca: Partial<EscolhaDaTela>) {
-    // A composição mudou, então o aviso de "copiada" passou a falar de um texto que não é mais o
-    // que está na tela.
-    setCopia('pronta');
     // A transição em si mora em `composicaoDaTela`, com teste. Ela já esteve aqui, e foi aqui que
     // o BUG-019 nasceu: regra dentro do `.tsx` é regra no único arquivo desta pasta que jsdom não
     // alcança. Este componente decide QUANDO muda, nunca O QUE a mudança faz.
@@ -122,15 +109,15 @@ export function TelaDaComposicao() {
           {/* A composição não é gravada em banco (ADR-008 D6), então sem isto fechar a aba perde
               a montagem inteira. O que sai daqui é o MESMO JSON que a API recebe. */}
           <div className="palco3d__saida">
-            <button type="button" className="palco3d__copiar" onClick={() => void copiar()}>
+            <button type="button" className="palco3d__copiar" onClick={copia.copiar}>
               Copiar composição
             </button>
             <p className="palco3d__saida-ajuda" role="status">
-              {copia === 'copiada'
+              {copia.estado === 'copiada'
                 ? 'Composição copiada. É o mesmo JSON que a API recebe.'
                 : 'Leva o JSON desta montagem para onde você quiser, inclusive para a API.'}
             </p>
-            {copia === 'falhou' && (
+            {copia.estado === 'falhou' && (
               <>
                 <p className="palco3d__saida-erro" role="alert">
                   O navegador não deixou copiar (acontece fora de HTTPS ou sem permissão).
