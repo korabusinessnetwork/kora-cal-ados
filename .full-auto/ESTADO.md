@@ -15,9 +15,12 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   `git revert` na hora.
 - **Rodada 1: FECHADA em 2026-09-12**, 8 de 8 entregues, nenhum revertido. O que entrou, o que foi
   medido e o que foi conferido a olho está em `REFINO-RODADAS.md`.
-- **Rodada 2: ABERTA em 2026-09-12**, 8 itens, reauditoria escrita em `AUDITORIA.md`.
-- **Próximo passo:** executar R2-A18, a confirmação ao gravar a zona, que é o maior score do lote e
-  o único dos quatro estados obrigatórios do `CLAUDE.md` que falta no editor.
+- **Rodada 2: FECHADA em 2026-09-12**, 8 de 8 entregues, nenhum revertido. Baseline verde nas duas
+  pontas: 1104 testes, 58 no banco, 25 no navegador, `tsc` e build limpos, `npm audit` em zero. O
+  que entrou, o que foi medido e os três limites de verificação estão em `REFINO-RODADAS.md`.
+- **Próximo passo:** abrir a rodada 3. A reauditoria começa pelo que mudou desde a rodada 2 mais o
+  backlog que sobrou em `AUDITORIA.md`, que hoje tem A12, A13, A14, A15, A16, A23, A24 e A25,
+  todos abaixo do corte, então a rodada 3 depende de achado novo para existir.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

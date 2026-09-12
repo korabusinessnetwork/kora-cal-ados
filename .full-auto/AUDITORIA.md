@@ -121,7 +121,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 - **evidência:** `grep -rn "aria-pressed" src/` não devolve nada.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A09 | eixo: qualidade | onde: `src/features/zonas/listarZonasDoProduto.ts`
+### A09 FEITO na rodada 2, commit `640234c` | eixo: qualidade | onde: `src/features/zonas/listarZonasDoProduto.ts`
 
 - **hoje:** é o único módulo de `src/features/zonas/` sem teste ao lado. Os outros doze têm. Ele tem
   três comportamentos escritos em comentário e não presos por ninguém: recusa id vazio antes da
@@ -131,7 +131,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 - **evidência:** `ls src/features/zonas/`, um `.test` para cada arquivo menos este.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A10 | eixo: robustez | onde: `src/features/sessao/ContextoDeSessao.tsx:95` e `RotaProtegida.tsx:43`
+### A10 FEITO na rodada 2, commit `433e8eb` | eixo: robustez | onde: `src/features/sessao/ContextoDeSessao.tsx:95` e `RotaProtegida.tsx:43`
 
 - **hoje:** se `carregarTenantsDoUsuario` falhar por rede, o `catch` põe o estado em `sem-tenant`.
   A tela então mostra o título **"Sua conta ainda não está vinculada a uma marca"** com a mensagem
@@ -144,7 +144,7 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 - **depende:** A04, porque mexer na máquina de estados sem teste é refatorar no escuro.
 - valor: 4 | esforço: 2 | risco: 2 | **score: 2**
 
-### A11 | eixo: ux | onde: `src/palco3d/PalcoDeModelo3d.tsx`, `TelaDaComposicao.tsx:124`
+### A11 FEITO na rodada 2, commit `cf00aab` | eixo: ux | onde: `src/palco3d/PalcoDeModelo3d.tsx`, `TelaDaComposicao.tsx:124`
 
 - **hoje:** o `<canvas>` da cena não tem nome acessível, e o resultado do clique numa peça aparece
   num `<code>` que muda sem nenhuma região viva. Não há `aria-live` em lugar nenhum de `src/`.
@@ -162,7 +162,7 @@ real para auditoria é como nasceu o P04), a leitura do editor logado foi de CÓ
 linha. O que foi percorrido no navegador de verdade: a tela de login e o esboço do motor, que é o
 editor 2D rodando sem banco.
 
-### A18 | eixo: ux | onde: `src/features/zonas/EditorDeZonas.tsx:164`, `FormularioDeNovaZona.tsx`
+### A18 FEITO na rodada 2, commit `53078f8` | eixo: ux | onde: `src/features/zonas/EditorDeZonas.tsx:164`, `FormularioDeNovaZona.tsx`
 
 - **hoje:** gravar zona não diz que gravou. `aoSalvar` limpa marcação, rótulo, chave e cor, e mais
   nada acontece: não há mensagem, não há região viva. Quem CRIA zona vê a lista crescer, mas quem
@@ -175,7 +175,7 @@ editor 2D rodando sem banco.
   que não existe.
 - valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A19 | eixo: ux | onde: `src/features/zonas/FormularioDeNovaZona.tsx:62`
+### A19 FEITO na rodada 2, commit `06dc545` | eixo: ux | onde: `src/features/zonas/FormularioDeNovaZona.tsx:62`
 
 - **hoje:** clicar numa parte do calçado muda "3 elementos marcados" e não anuncia nada. O clique
   acontece num SVG, o contorno é a confirmação, e contorno não é lido. Não existe **nenhum**
@@ -185,7 +185,7 @@ editor 2D rodando sem banco.
   camada `aria-hidden="true"`, de propósito.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A22 | eixo: qualidade | onde: `src/features/produtos/VisualizacaoDoProduto.tsx:43`
+### A22 FEITO na rodada 2, commit `5d5fc02` | eixo: qualidade | onde: `src/features/produtos/VisualizacaoDoProduto.tsx:43`
 
 - **hoje:** a mesma frase, "N elementos", está escrita em quatro lugares, de três jeitos:
   `PainelDeZonas.tsx:151` tem a função `contar`, `FormularioDeNovaZona.tsx:63` repete a regra em
@@ -197,7 +197,7 @@ editor 2D rodando sem banco.
   regra já decidida e esquecida, não uma preferência minha.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A17 | eixo: ux | onde: `src/esboco/esboco.css:50` (regra `.colunas`)
+### A17 FEITO na rodada 2, commit `01e8841` | eixo: ux | onde: `src/esboco/esboco.css:50` (regra `.colunas`)
 
 - **hoje:** o esboço tem três colunas fixas e **nenhuma media query**. Medido: em 1024 px de
   viewport o documento fica com **1208 px** e a página rola na horizontal; em 375 px o viewport
@@ -211,7 +211,7 @@ editor 2D rodando sem banco.
   conta e sem `.env.local`. É a primeira coisa que alguém abre, e abre torta.
 - valor: 3 | esforço: 2 | risco: 1 | **score: 2**
 
-### A20 | eixo: ux | onde: `src/esboco/PainelDeZonas.tsx:41` e `:88`
+### A20 FEITO na rodada 2, commit `77281f9` | eixo: ux | onde: `src/esboco/PainelDeZonas.tsx:41` e `:88`
 
 - **hoje:** no editor de cor do esboço, digitar hex inválido muda **só a classe CSS**: sem
   `aria-invalid`, sem mensagem, sem rótulo em nenhum dos dois campos (nem o `type="color"` nem o
@@ -262,6 +262,20 @@ O ADR-003 pede arquivo pequeno de responsabilidade única, e `zonas.css` tem 575
 arquivo grande sem necessidade concreta é refatorar por métrica, e o risco de mexer em CSS sem
 teste visual passa o ganho.
 valor: 2 | esforço: 4 | risco: 3 | **score: -6**
+
+### A25 | eixo: qualidade | `EditorDeZonas` não é montável em teste neste projeto
+
+Nasceu dentro do A18. A confirmação de gravação some quando a próxima marcação começa, e isso
+ficou verificado por leitura, não por teste: montar `EditorDeZonas` exige o cliente Supabase, e
+substituí-lo exigiria mock de módulo, que este projeto não usa em lugar nenhum (`grep -rn "vi.mock"
+src/` devolve zero). A saída seria injetar as dependências de rede por prop, como `ProvedorDeSessao`
+já faz com `cliente`, e aí o componente inteiro passa a ser testável com o mesmo cliente falso dos
+outros arquivos.
+
+Não é defeito de comportamento, é um buraco de verificação num componente de 200 linhas que fica no
+caminho crítico do princípio nº1. O risco 3 é honesto: mexer na assinatura de um componente que
+ninguém consegue testar hoje é exatamente o tipo de mudança que quebra calada.
+valor: 3 | esforço: 3 | risco: 3 | **score: -3**
 
 ### A23 | eixo: produto | a lista de modelos não diz quantos são
 

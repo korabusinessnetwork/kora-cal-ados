@@ -76,20 +76,26 @@ mensagem, e A04 é só teste. Por isso nenhum precisou de flag de configuração
 
 ---
 
-## Rodada 2, aberta em 2026-09-12
+## Rodada 2, fechada em 2026-09-12
 
 **Lote:** 8 itens, em `TAREFAS.md`, seção "Refino, rodada 2". Nenhum com risco 4 ou 5.
 
 | Item | Eixo | Score | Situação |
 |---|---|---|---|
-| R2-A18 confirmação ao gravar a zona | ux | 4 | pendente |
-| R2-A09 teste de `listarZonasDoProduto` | qualidade | 3 | pendente |
-| R2-A19 contagem de marcados vira região viva | ux | 3 | pendente |
-| R2-A22 uma função só para "N elementos" | qualidade | 3 | pendente |
-| R2-A10 falha de rede deixa de virar "conta não vinculada" | robustez | 2 | pendente |
-| R2-A11 nome acessível no palco e peça clicada viva | ux | 2 | pendente |
-| R2-A17 esboço cabe na tela | ux | 2 | pendente |
-| R2-A20 o editor de cor do esboço anuncia o que está errado | ux | 2 | pendente |
+| R2-A22 uma função só para "N elementos" | qualidade | 3 | entregue, `5d5fc02` |
+| R2-A18 confirmação ao gravar a zona | ux | 4 | entregue, `53078f8` |
+| R2-A19 contagem de marcados vira região viva | ux | 3 | entregue, `06dc545` |
+| R2-A09 teste de `listarZonasDoProduto` | qualidade | 3 | entregue, `640234c` |
+| R2-A17 esboço cabe na tela | ux | 2 | entregue, `01e8841` |
+| R2-A20 o editor de cor do esboço anuncia o que está errado | ux | 2 | entregue, `77281f9` |
+| R2-A11 nome acessível no palco e peça clicada viva | ux | 2 | entregue, `cf00aab` |
+| R2-A10 falha de rede deixa de virar "conta não vinculada" | robustez | 2 | entregue, `433e8eb` |
+
+A tabela está na ordem de execução, não na de score. A única troca deliberada foi pôr A22 na frente
+de A18: a confirmação de A18 escreve uma contagem de elementos, e executá-la antes teria criado a
+QUINTA implementação do plural justo no item cujo trabalho era acabar com as quatro.
+
+**8 de 8 entregues, nenhum revertido.**
 
 **De onde veio a lista:** a reauditoria foi atrás do que a rodada 1 declarou não ter olhado, o editor
 de zonas logado. Sem senha do `aurora-demo` registrada em lugar nenhum, e sem provisionar tenant
@@ -101,3 +107,71 @@ achados novos saíram daí: A17 a A20 e A22.
 **Sem item de produto, e isto é declarado:** nenhum achado de produto ficou acima do corte. O
 candidato forte virou a ideia I06, porque fazer uma segunda cópia do contrato da API dentro do
 editor é o erro que o comentário do painel do esboço registra ter custado semanas.
+
+### O que mudou de verdade
+
+- **O editor de zonas passou a confirmar.** Gravar dizia "gravou" apagando a tela e mais nada. Quem
+  cria zona vê a lista crescer, mas quem ACRESCENTA elemento a uma zona que já existe tinha como
+  única prova um número mudando num painel que pode estar fora da vista. Agora a frase nomeia a zona
+  e diz se ela nasceu ou se cresceu, e some no primeiro clique da marcação seguinte.
+- **`aria-live` deixou de ser zero no projeto.** A abertura da rodada registrou que
+  `grep -rn "aria-live" src/` não devolvia nada, e três telas trabalham por clique num desenho, com
+  o resultado aparecendo em outro canto. Agora a contagem de marcados, a peça clicada do palco e a
+  do calçado montado são regiões vivas educadas.
+- **Falha de rede parou de mentir sobre o cadastro.** Era o item de robustez: `sem-tenant` era o
+  destino tanto de quem não tem vínculo quanto de quem perdeu a conexão, e como o estado escolhe a
+  tela, a segunda pessoa lia "sua conta não está vinculada a uma marca" e ia procurar quem
+  provisiona por um problema que um clique resolve.
+- **O esboço voltou a caber na tela** entre 860 e 1220 px, onde três colunas fixas estouravam a
+  largura da janela.
+- **Uma frase, uma implementação.** "N elementos" estava escrita em quatro lugares de três jeitos, e
+  o quarto tinha esquecido do plural. Agora é `src/lib/texto/contarElementos.ts`, com o adjetivo
+  chegando flexionado nas duas formas em vez de derivado, porque "marcado/marcados" e
+  "marcável/marcáveis" não seguem a mesma regra.
+
+### Medidas
+
+Na tabela de três colunas do `BASELINE.md`. Em resumo: **1047 para 1104 testes verdes** desde a
+abertura do refino, 58 no banco e 25 no navegador intactos, `tsc` limpo, build limpo, `npm audit`
+em zero. Os bytes subiram: chunk principal +1,34 kB, CSS +0,51 kB, chunk do three.js +0,04 kB. Isso
+é o peso de texto que passou a existir, e nenhum deles veio de tentativa revertida.
+
+### Verificação de cada item, e os limites dela
+
+Cada item rodou a verificação completa do `BASELINE.md` antes do commit, e cada mudança de
+comportamento foi checada por mutação, com o número de testes mortos registrado no commit e no
+`TAREFAS.md`. Três coisas ficam ditas em vez de escondidas:
+
+1. **A11 foi conferido no DOM renderizado, não na árvore de acessibilidade** do navegador embutido.
+   Essa árvore não calcula nome acessível de conteúdo aninhado nem expõe estado ARIA, então afirmar
+   por ela seria afirmar sobre a ferramenta e não sobre a página. A prova são os atributos lidos na
+   página viva mais o clique de verdade em cada tela.
+2. **A18 tem uma parte verificada por leitura**: que a confirmação some no clique seguinte. Montar
+   `EditorDeZonas` em teste exigiria mock de módulo, que este projeto não usa em lugar nenhum. Virou
+   o achado **A25**, com score -3, no backlog.
+3. **A mutação que sobreviveu em A10 virou apagamento, não desculpa.** A guarda de usuário nulo em
+   `tentarDeNovo` não tinha efeito observável, porque `aplicarUsuario(null)` já faz a mesma coisa.
+   Código sem efeito observável é código morto, e ele saiu.
+
+### O editor logado continua sem ter sido usado por mim
+
+Mesma limitação da rodada 1, e ela não diminuiu: A18 e A19 mexem numa tela que eu li no código e
+não operei com uma conta de verdade. A saída seria provisionar um tenant no Supabase real, e isso é
+criar linha em banco real para auditoria, exatamente como nasceu o P04. Quem tiver a senha do
+`aurora-demo` fecha essa conferência em dois minutos: marcar elementos, gravar, e ver a frase.
+
+### Nada atrás de flag
+
+Nenhum item desta rodada entrou atrás de configuração. Todos mexem em texto, atributo de
+acessibilidade, CSS de quebra de layout ou estado de erro, e nenhum altera o fluxo principal a
+ponto de justificar um interruptor.
+
+### Pendências novas do dono
+
+Nenhuma. P01, P02 e P04 continuam abertas como estavam, e nenhum item desta rodada dependeu delas.
+
+### Achado novo registrado
+
+- **A25** | qualidade | `EditorDeZonas` não é montável em teste neste projeto, porque a rede chega
+  por import e não por prop. Score -3, fica no backlog: mexer na assinatura de um componente de 200
+  linhas que ninguém consegue testar hoje é o tipo de mudança que quebra calada.

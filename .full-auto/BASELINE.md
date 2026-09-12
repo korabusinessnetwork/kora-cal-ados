@@ -30,27 +30,36 @@ E o fluxo principal, à mão, em `npm run dev`:
 
 ## Medidas
 
-| Medida | Abertura do refino | Fechamento da rodada 1 |
-|---|---|---|
-| Testes verdes | **1047** passando, 58 pulados, 70 arquivos | **1072** passando, 58 pulados, 71 arquivos |
-| Testes contra o banco real | 58 de 58 | **58 de 58** |
-| Testes em navegador | 25 | **25** |
-| `tsc --noEmit` | limpo | limpo |
-| `npm run build` | limpo, 695 ms | limpo, **419 ms** |
-| `npm audit` | 0 vulnerabilidades | **0 vulnerabilidades** |
-| Bundle: chunk principal | 455,03 kB (gzip 131,84 kB) | **455,58 kB** (gzip 132,03 kB) |
-| Bundle: chunk do three.js, sob demanda | 618,87 kB (gzip 156,56 kB) | 618,87 kB (gzip 156,56 kB) |
-| Bundle: CSS | 20,76 kB (gzip 3,90 kB) | **21,75 kB** (gzip 4,04 kB) |
-| Arquivos `.ts`/`.tsx` | 174 | 176 |
-| Linhas de TypeScript | 26.626 | 27.264 |
-| `any`, `@ts-ignore`, `catch` vazio em `src/` e `api/` | zero de cada | zero de cada |
-| `console.log` fora de teste | 1, proposital | 1, proposital |
-| Linter configurado | nenhum | nenhum (A13, no backlog) |
-| CI | nenhum | nenhum (A14, no backlog) |
+| Medida | Abertura do refino | Fechamento da rodada 1 | Fechamento da rodada 2 |
+|---|---|---|---|
+| Testes verdes | **1047** passando, 58 pulados, 70 arquivos | **1072** passando, 58 pulados, 71 arquivos | **1104** passando, 58 pulados, 74 arquivos |
+| Testes contra o banco real | 58 de 58 | **58 de 58** | **58 de 58** |
+| Testes em navegador | 25 | **25** | **25** |
+| `tsc --noEmit` | limpo | limpo | limpo |
+| `npm run build` | limpo, 695 ms | limpo, **419 ms** | limpo, **507 ms** |
+| `npm audit` | 0 vulnerabilidades | **0 vulnerabilidades** | **0 vulnerabilidades** |
+| Bundle: chunk principal | 455,03 kB (gzip 131,84 kB) | **455,58 kB** (gzip 132,03 kB) | **456,92 kB** (gzip 132,43 kB) |
+| Bundle: chunk do three.js, sob demanda | 618,87 kB (gzip 156,56 kB) | 618,87 kB (gzip 156,56 kB) | **618,91 kB** (gzip 156,58 kB) |
+| Bundle: CSS | 20,76 kB (gzip 3,90 kB) | **21,75 kB** (gzip 4,04 kB) | **22,26 kB** (gzip 4,12 kB) |
+| Arquivos `.ts`/`.tsx` | 174 | 176 | 180 |
+| Linhas de TypeScript | 26.626 | 27.264 | 27.890 |
+| `any`, `@ts-ignore`, `catch` vazio em `src/` e `api/` | zero de cada | zero de cada | zero de cada |
+| `console.log` fora de teste | 1, proposital | 1, proposital | 1, proposital |
+| Linter configurado | nenhum | nenhum (A13, no backlog) | nenhum (A13, no backlog) |
+| CI | nenhum | nenhum (A14, no backlog) | nenhum (A14, no backlog) |
 
-Sobre os dois números que pioraram: o chunk principal cresceu **0,55 kB** e o CSS **0,99 kB**, que é
-o custo em bytes dos oito itens da rodada. O tempo de build não é vitória de ninguém, é ruído de
-medição da mesma máquina, e só está aqui porque a medida é feita do mesmo jeito nas duas pontas.
+Sobre os números que pioraram na rodada 1: o chunk principal cresceu **0,55 kB** e o CSS **0,99 kB**,
+que é o custo em bytes dos oito itens da rodada. O tempo de build não é vitória de ninguém, é ruído
+de medição da mesma máquina, e só está aqui porque a medida é feita do mesmo jeito nas duas pontas.
+
+E os da rodada 2: chunk principal **+1,34 kB**, CSS **+0,51 kB**, chunk do three.js **+0,04 kB**.
+Os três são o peso do texto que passou a existir, que é literalmente o que oito itens de UX e
+robustez compram: `aria-label`, mensagens escritas e a tela nova de falha de rede. Nenhum item foi
+revertido, então nenhum destes bytes é desperdício de tentativa.
+
+A contagem de arquivos de teste vai de 71 para 74 porque a rodada 2 criou três: `contarElementos`,
+`listarZonasDoProduto` e o `PainelDeZonas` do esboço. As colunas contam o TOTAL de arquivos, pulados
+inclusive, senão os 6 do banco entrariam e sairiam conforme a máquina tivesse `.env.local`.
 
 ## O que o baseline NÃO cobre, e vale saber
 

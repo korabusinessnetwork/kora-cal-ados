@@ -20,3 +20,11 @@
 2026-09-12 · R1-A06 · a categoria dispensada diz "Nenhuma peça", a zone_key saiu da frase em português · 367539a
 2026-09-12 · R1-A07 · o configurador escreve a faixa do parâmetro, mínimo e máximo em milímetros · 231fdb2
 2026-09-12 · R1-A08 · os botões de peça anunciam a escolha por aria-pressed, nas duas telas do palco · 5e35551
+2026-09-12 · R2-A22 · uma função só para "N elementos", e o quarto lugar parou de escrever "1 elementos marcáveis" · 5d5fc02
+2026-09-12 · R2-A18 · gravar a zona passa a dizer o que foi gravado, nomeando a zona e se ela nasceu ou cresceu · 53078f8
+2026-09-12 · R2-A19 · a contagem de marcados vira região viva educada, o par do contorno para quem não o enxerga · 06dc545
+2026-09-12 · R2-A09 · listarZonasDoProduto sai de único módulo de zonas sem teste, 6 casos com cliente falso · 640234c
+2026-09-12 · R2-A17 · o esboço cabe na tela abaixo de 1220 px, duas quebras e o painel da API descendo para a linha inteira · 01e8841
+2026-09-12 · R2-A20 · o editor de cor do esboço diz o que está errado e de qual zona é cada campo · 77281f9
+2026-09-12 · R2-A11 · o canvas do palco 3D ganha nome e a peça clicada vira região viva, nas duas telas · cf00aab
+2026-09-12 · R2-A10 · falha de rede deixa de virar "conta não vinculada", com estado próprio e "Tentar de novo" · 433e8eb
