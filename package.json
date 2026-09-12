@@ -17,6 +17,7 @@
     "semear-zonas": "node --env-file=.env.local supabase/scripts/executar.mjs supabase/scripts/semearZonasDeTeste.ts",
     "criar-chave": "node --env-file=.env.local supabase/scripts/executar.mjs supabase/scripts/criarChaveDeApi.ts",
     "revogar-chave": "node --env-file=.env.local supabase/scripts/executar.mjs supabase/scripts/revogarChaveDeApi.ts",
+    "exportar-tenant": "node --env-file=.env.local supabase/scripts/executar.mjs supabase/scripts/exportarTenant.ts",
     "test:banco": "node --env-file=.env.local ./node_modules/vitest/vitest.mjs run supabase/tests"
   },
   "dependencies": {

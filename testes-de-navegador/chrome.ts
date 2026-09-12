@@ -200,7 +200,7 @@ export class AbaDeTeste {
 
     this.#processo.kill();
     await new Promise((pronto) => this.#processo.once('exit', pronto));
-    rmSync(this.#perfil, { recursive: true, force: true });
+    await apagarPerfil(this.#perfil);
   }
 
   #ouvir(): void {
@@ -292,4 +292,28 @@ function conectar(endereco: string): Promise<WebSocket> {
       once: true,
     });
   });
+}
+
+/**
+ * Apaga o perfil temporário sem nunca derrubar o teste por causa da limpeza.
+ *
+ * No Windows o `exit` do processo do Chrome chega ANTES de o sistema soltar os handles dos
+ * arquivos do perfil, e o `rmSync` imediato falha com EPERM. Isso apareceu de verdade: uma
+ * suíte com 1047 testes passando foi reportada como vermelha por causa de uma pasta de cache
+ * que não quis sumir. Cinco tentativas espaçadas cobrem a janela; se ainda assim não for,
+ * fica um aviso e o sistema operacional limpa o `TEMP` depois. Falha de faxina não é falha de
+ * teste, e tratar as duas igual ensina o time a ignorar vermelho.
+ */
+async function apagarPerfil(perfil: string): Promise<void> {
+  for (let tentativa = 0; tentativa < 5; tentativa++) {
+    try {
+      rmSync(perfil, { recursive: true, force: true });
+
+      return;
+    } catch {
+      await new Promise((pronto) => setTimeout(pronto, 100 * (tentativa + 1)));
+    }
+  }
+
+  console.warn(`Aviso: não consegui apagar o perfil temporário "${perfil}".`);
 }
