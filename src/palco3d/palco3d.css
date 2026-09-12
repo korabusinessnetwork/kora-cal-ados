@@ -152,9 +152,19 @@
 
 /* O seletor de cor e o hex lado a lado, sempre. Ver o hex escrito ao lado da amostra é o que
    permite conferir "a cor escolhida é a cor que aparece" sem abrir o inspetor. */
-.palco3d__cor { display: flex; align-items: center; gap: 8px; }
-.palco3d__cor input { width: 40px; height: 28px; padding: 0; border: 1px solid var(--cor-borda); background: none; }
-.palco3d__cor code { font-family: var(--fonte-mono); font-size: 12px; color: var(--cor-texto-fraco); }
+/* `flex-wrap` porque o erro do hex é o terceiro filho e precisa cair na linha de baixo, ocupando a
+   largura toda: espremido ao lado dos dois campos ele viraria uma coluna de duas letras. */
+.palco3d__cor { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.palco3d__cor input[type="color"] { width: 40px; height: 28px; padding: 0; border: 1px solid var(--cor-borda); background: none; }
+.palco3d__hex {
+  width: 96px; padding: 5px 7px; border: 1px solid var(--cor-borda); border-radius: 6px;
+  background: var(--cor-superficie-alta); color: var(--cor-texto);
+  font-family: var(--fonte-mono); font-size: 12px; text-transform: uppercase;
+}
+/* Só a borda muda, sem fundo preenchido: o campo fica ao lado de uma amostra de cor, e pintar o
+   fundo dele de vermelho competiria com a própria cor que a pessoa está escolhendo. */
+.palco3d__hex--invalido { border-color: var(--cor-erro); }
+.palco3d__hex-erro { flex-basis: 100%; margin: 0; font-size: 11px; line-height: 1.5; color: var(--cor-erro); }
 
 .palco3d__parametro { display: grid; gap: 2px; font-size: 12px; color: var(--cor-texto-fraco); }
 .palco3d__parametro strong { color: var(--cor-texto); }

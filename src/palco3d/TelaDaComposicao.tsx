@@ -21,6 +21,7 @@ import {
   mudarEscolhaDaTela,
   type EscolhaDaTela,
 } from './composicaoDaTela';
+import { CampoDeCorDaCategoria } from './CampoDeCorDaCategoria';
 import { PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
 
 const CATALOGO = catalogoDeProva();
@@ -263,15 +264,14 @@ function ControleDaCategoria({
 
       {peca ? (
         <div className="palco3d__ajustes">
-          <label className="palco3d__cor">
-            <input
-              type="color"
-              value={escolha.cor ?? '#FFFFFF'}
-              aria-label={`cor da zona ${categoria}`}
-              onChange={(evento) => aoMudar({ cor: evento.target.value.toUpperCase() })}
-            />
-            <code>{escolha.cor ?? 'cor da peça'}</code>
-          </label>
+          {/* O `<code>` que mostrava o hex saiu: era texto morto ao lado de um seletor que só o
+              conta-gotas alcançava. Agora o mesmo hex é editável, que é o que faz a cor do manual da
+              marca conseguir entrar na tela (R3-A27). */}
+          <CampoDeCorDaCategoria
+            categoria={categoria}
+            cor={escolha.cor ?? '#FFFFFF'}
+            aoTrocar={(cor) => aoMudar({ cor })}
+          />
 
           {parametro ? (
             <label className="palco3d__parametro">
