@@ -22,7 +22,7 @@ import {
   type EscolhaDaTela,
 } from './composicaoDaTela';
 import { CampoDeCorDaCategoria } from './CampoDeCorDaCategoria';
-import { PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
+import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
 
 const CATALOGO = catalogoDeProva();
 const FORMA = CATALOGO.formas[0];
@@ -155,12 +155,10 @@ export function TelaDaComposicao() {
               />
               <p
                 className={
-                  estado === 'recusado'
-                    ? 'palco3d__estado palco3d__estado--erro'
-                    : 'palco3d__estado'
+                  ehFalha(estado) ? 'palco3d__estado palco3d__estado--erro' : 'palco3d__estado'
                 }
               >
-                {textoDoEstado(estado, montagem.zonas.length)}
+                {textoDoEstadoDaComposicao(estado, montagem.zonas.length)}
               </p>
             </>
           )}
@@ -325,9 +323,22 @@ function milimetros(metros: number): string {
   return `${(metros * 1000).toFixed(1).replace('.', ',')} mm`;
 }
 
-function textoDoEstado(estado: EstadoDoPalco, zonas: number): string {
+/**
+ * A frase de cada estado do palco, nesta tela.
+ *
+ * Separada da irmã de `TelaDoPalco3d` de propósito: o que está na cena é diferente nas duas, e uma
+ * frase só teria que falar de "peça" e de "calçado montado" ao mesmo tempo. O que as duas dividem
+ * é o `ehFalha`, que é a REGRA de quando o que está na moldura não vale, e essa é uma só.
+ */
+export function textoDoEstadoDaComposicao(estado: EstadoDoPalco, zonas: number): string {
   if (estado === 'carregando') return 'Montando o calçado…';
   if (estado === 'recusado') return 'O calçado montado foi recusado pelo carregador.';
+  if (estado === 'contexto-perdido') {
+    return (
+      'O 3D caiu: o navegador tirou o contexto gráfico desta aba. O calçado não está sendo ' +
+      'desenhado. Se ele não voltar sozinho em alguns segundos, recarregue a página.'
+    );
+  }
 
   return `Calçado montado com ${zonas} ${zonas === 1 ? 'zona' : 'zonas'}. Arraste para girar.`;
 }

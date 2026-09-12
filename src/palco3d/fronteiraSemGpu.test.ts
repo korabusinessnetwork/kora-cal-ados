@@ -62,6 +62,24 @@ describe('PalcoDeModelo3d.tsx não decide nada (critério 20)', () => {
     expect(PALCO).toContain("from './carregarPecaNaCena'");
   });
 
+  it('para de desenhar quando a GPU tira o contexto (A28)', () => {
+    // Esta é a varredura mais colada ao texto do arquivo inteiro, e é de propósito. A guarda vive
+    // dentro do laço de render, que é a única parte do projeto que NENHUM teste de comportamento
+    // alcança: jsdom não tem WebGL. Rodar a mutação que apaga a guarda confirmou o buraco, ela
+    // sobrevive a toda a suíte. Sobrou o que este arquivo já faz com os critérios 18 e 20, que é
+    // ler a fonte e falhar alto.
+    //
+    // Se alguém reescrever a guarda de outro jeito, este teste vai reclamar de um código correto.
+    // A troca é consciente: um falso alarme que se resolve lendo dez linhas custa menos que a
+    // tela voltar a afirmar "Peça na cena" com o contexto morto.
+    expect(PALCO).toMatch(/function desenhar\(\) \{\s*if \(!vivo \|\| contextoPerdido\) return;/);
+    expect(PALCO).toContain("addEventListener('webglcontextlost'");
+    expect(PALCO).toContain("addEventListener('webglcontextrestored'");
+    // `preventDefault` é o que autoriza o navegador a devolver o contexto. Sem ele o evento de
+    // volta nunca chega, e a tela fica em branco até alguém recarregar por conta própria.
+    expect(PALCO).toContain('evento.preventDefault()');
+  });
+
   it('libera o contexto WebGL ao sair da tela (critério 21)', () => {
     // Vazar contexto trava o navegador depois de algumas trocas de tela, e o navegador descarta
     // os contextos velhos em silêncio: não existe erro para procurar quando acontece.

@@ -36,7 +36,32 @@ import { nomeDaMalhaNoPonto } from './nomeDaMalhaNoPonto';
 import { orbitaInicial, orbitarPorArraste, posicaoDaCamera, type Orbita } from './orbita';
 
 /** Em que pé está o carregamento da peça, para a tela mostrar em vez de ficar muda. */
-export type EstadoDoPalco = 'carregando' | 'pronto' | 'recusado';
+export type EstadoDoPalco =
+  | 'carregando'
+  | 'pronto'
+  | 'recusado'
+  /**
+   * A GPU tirou o contexto de baixo do palco. Acontece de verdade, sem ninguém ter feito nada
+   * errado: driver que reinicia, máquina que dorme, aba de fundo que o navegador resolve
+   * sacrificar, outra página que estourou o limite de contextos.
+   *
+   * Estado próprio, e não `recusado`, porque as duas notícias são diferentes e só uma delas é
+   * verdade: "o glTF não pôde ser lido" é uma afirmação sobre o MODELO, e dizê-la quando o
+   * contexto caiu manda alguém procurar defeito num arquivo que está perfeito. Mesma decisão, e
+   * mesmo motivo, do `falha-ao-carregar` da sessão.
+   */
+  | 'contexto-perdido';
+
+/**
+ * Os estados em que o que está na moldura NÃO pode ser tomado como verdade.
+ *
+ * Mora aqui, junto do tipo que ela classifica, e não na tela que a usa primeiro: as duas telas do
+ * palco precisam da mesma resposta, e a segunda a importar da primeira amarraria uma tela na
+ * outra por uma regra que não é de nenhuma das duas, é do estado.
+ */
+export function ehFalha(estado: EstadoDoPalco): boolean {
+  return estado === 'recusado' || estado === 'contexto-perdido';
+}
 
 export interface PalcoDeModelo3dProps {
   /** O texto glTF a desenhar. Trocar esta prop troca o modelo, sem recriar o contexto WebGL. */
@@ -157,6 +182,7 @@ function criarPalco(moldura: HTMLDivElement, avisos: AvisosDoPalco): Palco {
   let arrastando: { x: number; y: number; andou: number } | null = null;
   let quadro = 0;
   let vivo = true;
+  let contextoPerdido = false;
 
   function posicionarCamera() {
     const posicao = posicaoDaCamera(orbita, alvo);
@@ -165,7 +191,7 @@ function criarPalco(moldura: HTMLDivElement, avisos: AvisosDoPalco): Palco {
   }
 
   function desenhar() {
-    if (!vivo) return;
+    if (!vivo || contextoPerdido) return;
     quadro = requestAnimationFrame(desenhar);
 
     const largura = moldura.clientWidth;
@@ -233,6 +259,44 @@ function criarPalco(moldura: HTMLDivElement, avisos: AvisosDoPalco): Palco {
     };
   }
 
+  /**
+   * A GPU levou o contexto embora.
+   *
+   * Sem isto o palco continuava chamando `render` num contexto morto: o canvas congelava no
+   * último quadro ou ficava preto, e a linha de estado seguia dizendo "Peça na cena. Arraste para
+   * girar", que é uma afirmação falsa sobre a tela. Conferido forçando
+   * `WEBGL_lose_context.loseContext()` no navegador, antes deste conserto.
+   *
+   * `preventDefault` é o que autoriza o navegador a tentar devolver o contexto depois. Sem ele o
+   * evento de volta nunca chega e o palco fica preto até alguém recarregar a página por conta
+   * própria, sem saber que era isso que faltava.
+   *
+   * Parar o laço não é economia, é a diferença entre a tela admitir que caiu e a tela insistir.
+   */
+  function aoPerderContexto(evento: Event) {
+    evento.preventDefault();
+    contextoPerdido = true;
+    cancelAnimationFrame(quadro);
+    avisos.aoMudarEstado('contexto-perdido');
+  }
+
+  /**
+   * O navegador devolveu o contexto.
+   *
+   * O `WebGLRenderer` já escuta este mesmo evento e reinicializa o estado interno dele; como ele
+   * se registra no construtor, o listener dele roda antes deste. O que falta, e é o que está
+   * aqui, é religar o laço, porque quem o desligou foi este arquivo.
+   */
+  function aoVoltarContexto() {
+    contextoPerdido = false;
+    if (!vivo) return;
+
+    quadro = requestAnimationFrame(desenhar);
+    avisos.aoMudarEstado(pecaAtual === null ? 'carregando' : 'pronto');
+  }
+
+  renderizador.domElement.addEventListener('webglcontextlost', aoPerderContexto);
+  renderizador.domElement.addEventListener('webglcontextrestored', aoVoltarContexto);
   renderizador.domElement.addEventListener('pointerdown', aoApertar);
   renderizador.domElement.addEventListener('pointermove', aoMover);
   renderizador.domElement.addEventListener('pointerup', aoSoltar);
@@ -281,6 +345,8 @@ function criarPalco(moldura: HTMLDivElement, avisos: AvisosDoPalco): Palco {
       vivo = false;
       cancelAnimationFrame(quadro);
 
+      renderizador.domElement.removeEventListener('webglcontextlost', aoPerderContexto);
+      renderizador.domElement.removeEventListener('webglcontextrestored', aoVoltarContexto);
       renderizador.domElement.removeEventListener('pointerdown', aoApertar);
       renderizador.domElement.removeEventListener('pointermove', aoMover);
       renderizador.domElement.removeEventListener('pointerup', aoSoltar);

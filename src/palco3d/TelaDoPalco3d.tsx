@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { catalogoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import type { ParametroDePeca } from '../lib/composicao/tiposDaComposicao';
-import { PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
+import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
 
 const CATALOGO = catalogoDeProva();
 const PECAS = CATALOGO.pecas;
@@ -125,8 +125,8 @@ export function TelaDoPalco3d() {
             aoSelecionar={aoSelecionar}
             aoMudarEstado={aoMudarEstado}
           />
-          <p className={estado === 'recusado' ? 'palco3d__estado palco3d__estado--erro' : 'palco3d__estado'}>
-            {textoDoEstado(estado)}
+          <p className={ehFalha(estado) ? 'palco3d__estado palco3d__estado--erro' : 'palco3d__estado'}>
+            {textoDoEstadoDaPeca(estado)}
           </p>
         </section>
 
@@ -170,9 +170,26 @@ function milimetros(metros: number): string {
   return `${(metros * 1000).toFixed(1).replace('.', ',')} mm`;
 }
 
-function textoDoEstado(estado: EstadoDoPalco): string {
+/**
+ * A frase de cada estado do palco.
+ *
+ * Exportada para ter teste, pelo mesmo motivo de `mensagemDoHex`: é o texto que a pessoa lê para
+ * saber se o que está na tela é confiável, e texto que a pessoa lê merece teste tanto quanto a
+ * regra que o escolhe.
+ *
+ * Os quatro estados são tratados por nome, sem um `return` de fim que sirva de coringa. O coringa
+ * era o defeito: qualquer estado novo caía nele e a tela dizia "Peça na cena" sem que houvesse
+ * peça na cena.
+ */
+export function textoDoEstadoDaPeca(estado: EstadoDoPalco): string {
   if (estado === 'carregando') return 'Carregando a peça…';
   if (estado === 'recusado') return 'A peça foi recusada pelo carregador. O glTF não pôde ser lido.';
+  if (estado === 'contexto-perdido') {
+    return (
+      'O 3D caiu: o navegador tirou o contexto gráfico desta aba. A peça não está sendo ' +
+      'desenhada. Se ela não voltar sozinha em alguns segundos, recarregue a página.'
+    );
+  }
 
   return 'Peça na cena. Arraste para girar, clique para identificar.';
 }
