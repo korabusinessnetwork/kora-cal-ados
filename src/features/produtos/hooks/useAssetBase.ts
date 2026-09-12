@@ -17,6 +17,28 @@ export interface AssetBaseCarregado {
 }
 
 /**
+ * O desenho, ETIQUETADO com o caminho de onde ele veio.
+ *
+ * Estado, svg e erro num objeto só, e não em três `useState`: os três descrevem a mesma coisa,
+ * "o que sabemos hoje sobre este arquivo", e separados existe o instante em que o estado já é de
+ * um produto e o desenho ainda é do outro.
+ */
+interface LeituraDoAsset {
+  /** De qual caminho é este desenho. É a etiqueta que impede o desenho errado de aparecer. */
+  de: string;
+  estado: AssetBaseCarregado['estado'];
+  svg: string | null;
+  erro: string | null;
+}
+
+const aindaNaoBaixado = (de: string): LeituraDoAsset => ({
+  de,
+  estado: 'carregando',
+  svg: null,
+  erro: null,
+});
+
+/**
  * O cliente entra por parâmetro, com o de hoje como padrão.
  *
  * Existe para este hook ter teste. Sem o parâmetro, `clienteSupabase()` é lido de dentro, e como
@@ -37,34 +59,43 @@ export function useAssetBase(
   const banco = useRef(cliente);
   banco.current = cliente;
 
-  const [estado, setEstado] = useState<AssetBaseCarregado['estado']>('carregando');
-  const [svg, setSvg] = useState<string | null>(null);
-  const [erro, setErro] = useState<string | null>(null);
+  const [leitura, setLeitura] = useState<LeituraDoAsset>(() => aindaNaoBaixado(baseAssetPath));
   // Contador em vez de um `recarregar` que chama a função direto: assim a tentativa nova
   // passa pelo MESMO efeito, com a mesma limpeza do `vivo` — dois caminhos de download
   // acabariam divergindo justamente no cancelamento.
   const [tentativa, setTentativa] = useState(0);
 
+  // A etiqueta é conferida durante o RENDER, e não só no efeito. Entre o render que troca de
+  // produto e o efeito que limpa o estado existe uma passagem inteira em que o desenho ainda é o
+  // do produto anterior sob o caminho do novo, e é sobre o desenho que a pessoa CLICA para marcar
+  // zona. Um clique nessa passagem grava `svg_selector` contra o desenho errado, e o registro
+  // sobrevive à sessão parecendo correto.
+  const daTela = leitura.de === baseAssetPath ? leitura : aindaNaoBaixado(baseAssetPath);
+
   useEffect(() => {
     let vivo = true;
-    setEstado('carregando');
-    setSvg(null);
-    setErro(null);
+    // Necessário pelo `tentativa`: no botão de recarregar a etiqueta não muda, e sem esta linha
+    // a tentativa nova começaria mostrando o desenho da anterior.
+    setLeitura(aindaNaoBaixado(baseAssetPath));
 
     baixarAssetBase(banco.current, baseAssetPath)
       .then((texto) => {
         if (!vivo) return;
-        setSvg(texto);
-        setEstado('pronto');
+        setLeitura({ de: baseAssetPath, estado: 'pronto', svg: texto, erro: null });
       })
       .catch((falha: unknown) => {
         if (!vivo) return;
-        setErro(falha instanceof Error ? falha.message : 'Falha ao baixar o asset-base.');
-        setEstado('erro');
+        setLeitura({
+          de: baseAssetPath,
+          estado: 'erro',
+          svg: null,
+          erro: falha instanceof Error ? falha.message : 'Falha ao baixar o asset-base.',
+        });
       });
 
     // A URL assinada expira em 5 min; abrir outro produto antes disso não pode fazer o
-    // desenho anterior aparecer no lugar do novo.
+    // desenho anterior aparecer no lugar do novo. A etiqueta acima já impediria a exibição; o
+    // `vivo` impede antes disso, que a resposta morta chegue a mexer no estado e re-renderizar.
     return () => {
       vivo = false;
     };
@@ -72,5 +103,5 @@ export function useAssetBase(
 
   const recarregar = useCallback(() => setTentativa((numero) => numero + 1), []);
 
-  return { estado, svg, erro, recarregar };
+  return { estado: daTela.estado, svg: daTela.svg, erro: daTela.erro, recarregar };
 }

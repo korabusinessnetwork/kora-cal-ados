@@ -19,6 +19,29 @@ export interface ListaDeProdutosCarregada {
 }
 
 /**
+ * A leitura inteira, ETIQUETADA com a marca de onde ela veio.
+ *
+ * Estado, lista e erro num objeto só, e não em três `useState`, porque os três são a mesma
+ * notícia: "o que sabemos hoje sobre a marca X". Separados, existe o instante em que o estado
+ * já é de uma marca e a lista ainda é de outra, que é exatamente o defeito que este hook
+ * precisa não ter.
+ */
+interface LeituraDaLista {
+  /** De qual marca é esta leitura. É a etiqueta que impede a lista de uma aparecer sob a outra. */
+  de: string;
+  estado: EstadoDaLista;
+  produtos: Produto[];
+  erro: string | null;
+}
+
+const aindaNaoLido = (de: string): LeituraDaLista => ({
+  de,
+  estado: 'carregando',
+  produtos: [],
+  erro: null,
+});
+
+/**
  * O cliente entra por parâmetro, com o de hoje como padrão.
  *
  * Existe para este hook ter teste. Sem o parâmetro, `clienteSupabase()` é lido de dentro, e como
@@ -39,38 +62,53 @@ export function useProdutos(
   const banco = useRef(cliente);
   banco.current = cliente;
 
-  const [estado, setEstado] = useState<EstadoDaLista>('carregando');
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [erro, setErro] = useState<string | null>(null);
+  const [leitura, setLeitura] = useState<LeituraDaLista>(() => aindaNaoLido(tenantId));
   const [tentativa, setTentativa] = useState(0);
+
+  // A etiqueta é conferida durante o RENDER, e não só no efeito, e é isso que fecha a janela
+  // inteira. Entre o render que troca de marca e o efeito que limpa o estado existe uma passagem
+  // em que a lista ainda é da marca anterior sob o id da nova. Uma passagem é a tela: o produto é
+  // multi-tenant com marcas CONCORRENTES, e um nome de produto da marca A visível por um frame na
+  // tela da marca B é exatamente o vazamento que o isolamento existe para impedir.
+  const daTela = leitura.de === tenantId ? leitura : aindaNaoLido(tenantId);
 
   const recarregar = useCallback(() => setTentativa((n) => n + 1), []);
 
   useEffect(() => {
     let vivo = true;
-    setEstado('carregando');
-    setErro(null);
+    // Necessário pelo `tentativa`: quando é o botão de recarregar que dispara, a etiqueta não
+    // mudou, e sem esta linha a tentativa nova começaria mostrando o resultado da anterior.
+    setLeitura(aindaNaoLido(tenantId));
 
     listarProdutos(banco.current, tenantId)
       .then((achados) => {
         if (!vivo) return;
-        setProdutos(achados);
-        setEstado(achados.length === 0 ? 'vazia' : 'pronta');
+        setLeitura({
+          de: tenantId,
+          estado: achados.length === 0 ? 'vazia' : 'pronta',
+          produtos: achados,
+          erro: null,
+        });
       })
       .catch((falha: unknown) => {
         if (!vivo) return;
         // Lista vazia por engano seria lida como "essa marca não tem produto". O erro
         // precisa dizer que foi falha, não ausência.
-        setErro(falha instanceof Error ? falha.message : 'Falha ao carregar os produtos.');
-        setEstado('erro');
+        setLeitura({
+          de: tenantId,
+          estado: 'erro',
+          produtos: [],
+          erro: falha instanceof Error ? falha.message : 'Falha ao carregar os produtos.',
+        });
       });
 
     // Trocar de marca com uma requisição em voo não pode deixar o produto da marca
-    // anterior aparecer na tela da nova.
+    // anterior aparecer na tela da nova. A etiqueta acima já impediria a exibição; o `vivo`
+    // impede antes disso, que a resposta morta chegue a mexer no estado e re-renderizar.
     return () => {
       vivo = false;
     };
   }, [tenantId, tentativa]);
 
-  return { estado, produtos, erro, recarregar };
+  return { estado: daTela.estado, produtos: daTela.produtos, erro: daTela.erro, recarregar };
 }

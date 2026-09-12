@@ -34,6 +34,36 @@ export interface ZonasCarregadas {
 }
 
 /**
+ * A leitura das zonas, ETIQUETADA com o produto de onde ela veio.
+ *
+ * Estado, lista e erro num objeto só, e não em três `useState`, porque os três são a mesma
+ * notícia: "o que sabemos hoje sobre as zonas do produto X".
+ */
+interface LeituraDasZonas {
+  /** De qual produto é esta leitura. É a etiqueta que impede a lista errada de aparecer. */
+  de: string;
+  estado: EstadoDasZonas;
+  zonas: ZonaDoProduto[];
+  erro: string | null;
+}
+
+/** O estado da gravação, etiquetado pelo mesmo motivo, e com um efeito colateral bom: ver abaixo. */
+interface Gravacao {
+  de: string;
+  salvando: boolean;
+  erro: string | null;
+}
+
+const aindaNaoLido = (de: string): LeituraDasZonas => ({
+  de,
+  estado: 'carregando',
+  zonas: [],
+  erro: null,
+});
+
+const semGravacao = (de: string): Gravacao => ({ de, salvando: false, erro: null });
+
+/**
  * O cliente entra por parâmetro, com o de hoje como padrão.
  *
  * Existe para este hook ter teste. Sem o parâmetro, `clienteSupabase()` é lido de dentro, e como
@@ -55,11 +85,8 @@ export function useZonasDoProduto(
   const banco = useRef(cliente);
   banco.current = cliente;
 
-  const [estado, setEstado] = useState<EstadoDasZonas>('carregando');
-  const [zonas, setZonas] = useState<ZonaDoProduto[]>([]);
-  const [erro, setErro] = useState<string | null>(null);
-  const [salvando, setSalvando] = useState(false);
-  const [erroAoGravar, setErroAoGravar] = useState<string | null>(null);
+  const [leitura, setLeitura] = useState<LeituraDasZonas>(() => aindaNaoLido(productId));
+  const [gravacao, setGravacao] = useState<Gravacao>(() => semGravacao(productId));
   const [tentativa, setTentativa] = useState(0);
 
   // Qual produto está aberto AGORA. `gravar` compara contra isto depois do await, porque
@@ -68,30 +95,47 @@ export function useZonasDoProduto(
   const produtoAberto = useRef(productId);
   produtoAberto.current = productId;
 
+  // A etiqueta é conferida durante o RENDER, e não só no efeito, e é isso que fecha a janela
+  // inteira. Entre o render que troca de produto e o efeito que limpa o estado existe uma passagem
+  // em que as zonas ainda são as do produto anterior sob o id do novo. Uma passagem é a tela, e
+  // aqui a tela aceita clique: marcar em cima da lista errada grava no banco um `svg_selector` que
+  // aponta para outro produto, e isso sobrevive à sessão parecendo correto.
+  const daTela = leitura.de === productId ? leitura : aindaNaoLido(productId);
+  // A mesma etiqueta na gravação resolve de quebra um travamento: quem trocava de produto no meio
+  // de um `gravar` ficava com `salvando` ligado para sempre, porque quem o desliga é o fim da
+  // gravação, e o fim da gravação é justamente o trecho que se recusa a escrever na tela de outro
+  // produto. Etiquetado, o produto novo nasce sem gravação nenhuma em andamento.
+  const gravacaoDaTela = gravacao.de === productId ? gravacao : semGravacao(productId);
+
   const recarregar = useCallback(() => setTentativa((n) => n + 1), []);
 
   useEffect(() => {
     let vivo = true;
-    setEstado('carregando');
-    setErro(null);
-    setErroAoGravar(null);
+    // Necessário pelo `tentativa`: quando é o botão de recarregar que dispara, a etiqueta não
+    // mudou, e sem esta linha a tentativa nova começaria mostrando o resultado da anterior.
+    setLeitura(aindaNaoLido(productId));
+    setGravacao((antes) => (antes.de === productId ? { ...antes, erro: null } : antes));
 
     listarZonasDoProduto(banco.current, productId)
       .then((achadas) => {
         if (!vivo) return;
-        setZonas(achadas);
         // Zona vazia não é erro nem estado próprio: produto novo simplesmente ainda não
         // foi mapeado. Quem escreve "nenhuma zona marcada" é a UI.
-        setEstado('pronta');
+        setLeitura({ de: productId, estado: 'pronta', zonas: achadas, erro: null });
       })
       .catch((falha: unknown) => {
         if (!vivo) return;
-        setErro(mensagemDe(falha, 'Não foi possível carregar as zonas deste produto.'));
-        setEstado('erro');
+        setLeitura({
+          de: productId,
+          estado: 'erro',
+          zonas: [],
+          erro: mensagemDe(falha, 'Não foi possível carregar as zonas deste produto.'),
+        });
       });
 
     // Trocar de produto com requisição em voo não pode deixar a zona do produto anterior
-    // aparecer no novo — seria marcar em cima do desenho errado.
+    // aparecer no novo — seria marcar em cima do desenho errado. A etiqueta acima já impediria a
+    // exibição; o `vivo` impede antes disso, que a resposta morta chegue a mexer no estado.
     return () => {
       vivo = false;
     };
@@ -101,25 +145,35 @@ export function useZonasDoProduto(
     async (zona: ZonaParaGravar): Promise<boolean> => {
       const alvo = productId;
       const aindaVale = () => produtoAberto.current === alvo;
+      /**
+       * Escrever na gravação DESTE produto, onde quer que a pessoa esteja agora.
+       *
+       * Diferente da leitura, aqui não se pergunta se o produto ainda está aberto: a etiqueta
+       * `de` já garante que isto não aparece na tela de outro produto, e o resultado de uma
+       * gravação que terminou é notícia verdadeira sobre o produto em que ela começou. Quem
+       * trocou de produto e voltou tem direito de ver que aquela gravação acabou, e se ela
+       * falhou, de ver por quê.
+       */
+      const naGravacaoDoAlvo = (mudanca: Omit<Gravacao, 'de'>) =>
+        setGravacao((antes) => (antes.de === alvo ? { de: alvo, ...mudanca } : antes));
 
       if (!tenantId.trim()) {
         // Sem tenant, `product_zones.tenant_id` (not null) viraria linha órfã que a RLS
         // esconde de todo mundo. Recusa antes da rede, como as outras guardas.
-        setErroAoGravar('Escolha uma marca antes de gravar a zona.');
+        setGravacao({ de: alvo, salvando: false, erro: 'Escolha uma marca antes de gravar a zona.' });
         return false;
       }
 
-      setSalvando(true);
-      setErroAoGravar(null);
+      setGravacao({ de: alvo, salvando: true, erro: null });
       const doBanco = banco.current;
 
       try {
         await gravarZonaNoBanco(doBanco, { tenantId, productId: alvo, zona });
       } catch (falha: unknown) {
-        if (aindaVale()) {
-          setErroAoGravar(mensagemDe(falha, 'Não foi possível gravar a zona.'));
-          setSalvando(false);
-        }
+        naGravacaoDoAlvo({
+          salvando: false,
+          erro: mensagemDe(falha, 'Não foi possível gravar a zona.'),
+        });
         return false;
       }
 
@@ -129,27 +183,38 @@ export function useZonasDoProduto(
       // mudou em outra zona no meio tempo.
       try {
         const atuais = await listarZonasDoProduto(doBanco, alvo);
-        if (aindaVale()) {
-          setZonas(atuais);
-          setEstado('pronta');
-          setErroAoGravar(null);
-        }
+        // Aqui o `aindaVale` é obrigatório, e não decorativo: a leitura é um lugar só, e
+        // escrever nele a lista do produto antigo apagaria a lista do novo, que não seria
+        // recarregada por ninguém. A etiqueta impede a lista errada de APARECER; é esta guarda
+        // que impede a resposta morta de ATROPELAR o estado.
+        if (aindaVale()) setLeitura({ de: alvo, estado: 'pronta', zonas: atuais, erro: null });
       } catch (falha: unknown) {
         // A gravação passou: devolver false aqui faria a tela pedir para gravar de novo
         // uma zona que já está no banco. O que falhou foi a lista, e é a lista que avisa.
         if (aindaVale()) {
-          setErro(mensagemDe(falha, 'A zona foi gravada, mas a lista não pôde ser recarregada.'));
-          setEstado('erro');
+          setLeitura((antes) => ({
+            ...antes,
+            estado: 'erro',
+            erro: mensagemDe(falha, 'A zona foi gravada, mas a lista não pôde ser recarregada.'),
+          }));
         }
       }
 
-      if (aindaVale()) setSalvando(false);
+      naGravacaoDoAlvo({ salvando: false, erro: null });
       return true;
     },
     [productId, tenantId],
   );
 
-  return { estado, zonas, erro, salvando, erroAoGravar, recarregar, gravar };
+  return {
+    estado: daTela.estado,
+    zonas: daTela.zonas,
+    erro: daTela.erro,
+    salvando: gravacaoDaTela.salvando,
+    erroAoGravar: gravacaoDaTela.erro,
+    recarregar,
+    gravar,
+  };
 }
 
 function mensagemDe(falha: unknown, padrao: string): string {
