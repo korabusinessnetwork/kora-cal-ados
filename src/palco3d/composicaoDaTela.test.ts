@@ -7,7 +7,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { escolhasDaComposicao, montarDaTela, type EscolhaDaTela } from './composicaoDaTela';
+import {
+  escolhasDaComposicao,
+  montarDaTela,
+  mudarEscolhaDaTela,
+  type EscolhaDaTela,
+} from './composicaoDaTela';
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
 import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
@@ -122,5 +127,120 @@ describe('montarDaTela', () => {
     const soASola = new Map<string, EscolhaDaTela>([['sola', { pecaId: 'prova-sola-plana' }]]);
 
     expect(montar(soASola).erro).toMatch(/cabedal/);
+  });
+});
+
+describe('mudarEscolhaDaTela', () => {
+  // BUG-019, encontrado pela conferência a olho do dono e não pela suíte: trocar o cabedal baixo
+  // pelo cano alto pintava a tela inteira de vermelho com `PARAMETRO_INVALIDO`. As duas peças têm
+  // um parâmetro com o mesmo nome, `altura-do-cano`, e faixas que mal se encostam, então o valor
+  // da peça velha chegava na peça nova já fora de faixa.
+
+  it('trocar o cabedal baixo pelo cano alto não carrega a altura da peça anterior', () => {
+    // O caso exato do relato: 0,075 é o padrão do cabedal baixo e está fora dos 0,1 a 0,22 do cano
+    // alto. Sem descartar, a tela monta nada e mostra só a linha de erro.
+    const antes = escolhasDaComposicao(DEMO);
+    expect(antes.get('cabedal')?.parametros).toEqual({ 'altura-do-cano': 0.075 });
+
+    const depois = mudarEscolhaDaTela(antes, 'cabedal', { pecaId: 'prova-cabedal-cano-alto' });
+
+    expect(depois.get('cabedal')?.parametros).toBeUndefined();
+    expect(montar(depois).erro).toBeNull();
+    expect(montar(depois).modelo).toContain('prova-cabedal-cano-alto');
+  });
+
+  it('o caminho de volta também não carrega, porque a faixa é apertada nos dois sentidos', () => {
+    // 0,14 é o padrão do cano alto e está fora dos 0,05 a 0,12 do baixo. Um conserto que só
+    // olhasse o sentido do relato deixaria metade do defeito em pé.
+    const comCanoAlto = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
+      pecaId: 'prova-cabedal-cano-alto',
+    });
+    const montado = montar(comCanoAlto);
+    expect(montado.erro).toBeNull();
+
+    const deVolta = mudarEscolhaDaTela(
+      escolhasDaComposicao(validarComposicao(
+        {
+          forma_id: FORMA.id,
+          pecas: [
+            { peca_id: 'prova-sola-plana' },
+            { peca_id: 'prova-cabedal-cano-alto' },
+            { peca_id: 'prova-cadarco-reto' },
+          ],
+        },
+        CATALOGO,
+      )),
+      'cabedal',
+      { pecaId: 'prova-cabedal-baixo' },
+    );
+
+    expect(deVolta.get('cabedal')?.parametros).toBeUndefined();
+    expect(montar(deVolta).erro).toBeNull();
+  });
+
+  it('a cor sobrevive à troca de peça, porque cor é escolha da marca sobre a zona', () => {
+    // Descartar a cor junto seria trocar um defeito por outro: quem pintou o cabedal de azul e
+    // trocou o modelo continua querendo azul, e ver a cor sumir sozinha é a surpresa que o
+    // princípio nº1 proíbe.
+    const depois = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
+      pecaId: 'prova-cabedal-cano-alto',
+    });
+
+    expect(depois.get('cabedal')?.cor).toBe(DEMO.pecas[1]?.cor);
+  });
+
+  it('mexer só na cor preserva o parâmetro já escolhido', () => {
+    // O descarte é da troca de peça, não de qualquer mudança. Se pintar a zona zerasse a altura,
+    // a pessoa perderia o ajuste sem ter tocado nele.
+    const comAltura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
+      parametros: { 'altura-do-cano': 0.11 },
+    });
+    const pintado = mudarEscolhaDaTela(comAltura, 'cabedal', { cor: '#C0392B' });
+
+    expect(pintado.get('cabedal')).toMatchObject({
+      pecaId: 'prova-cabedal-baixo',
+      cor: '#C0392B',
+      parametros: { 'altura-do-cano': 0.11 },
+    });
+  });
+
+  it('reescolher a mesma peça não é troca, e não apaga o ajuste', () => {
+    // Clicar de novo no botão que já está ligado é gesto comum. Zerar a altura ali seria perda de
+    // trabalho sem nenhuma mudança na tela para explicá-la.
+    const comAltura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
+      parametros: { 'altura-do-cano': 0.11 },
+    });
+    const denovo = mudarEscolhaDaTela(comAltura, 'cabedal', { pecaId: 'prova-cabedal-baixo' });
+
+    expect(denovo.get('cabedal')?.parametros).toEqual({ 'altura-do-cano': 0.11 });
+  });
+
+  it('tirar a categoria opcional descarta o parâmetro dela junto', () => {
+    // Sair para `null` é troca de peça como qualquer outra. Guardar o parâmetro de uma peça que
+    // não está mais em cena é estado fantasma esperando para reaparecer errado.
+    const semCadarco = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cadarco', { pecaId: null });
+
+    expect(semCadarco.get('cadarco')).toEqual({ pecaId: null, cor: DEMO.pecas[2]?.cor });
+    expect(montar(semCadarco).erro).toBeNull();
+  });
+
+  it('categoria que a tela ainda não tinha entra com a peça escolhida', () => {
+    const vazio = new Map<string, EscolhaDaTela>();
+    const depois = mudarEscolhaDaTela(vazio, 'sola', { pecaId: 'prova-sola-tratorada' });
+
+    expect(depois.get('sola')).toEqual({ pecaId: 'prova-sola-tratorada' });
+  });
+
+  it('devolve um mapa novo e não mexe no que recebeu', () => {
+    // O estado da tela é substituído, nunca editado por dentro: o React não redesenha um mapa
+    // mutado no lugar, e a tela ficaria mostrando o calçado antigo.
+    const antes = escolhasDaComposicao(DEMO);
+    const depois = mudarEscolhaDaTela(antes, 'cabedal', { pecaId: 'prova-cabedal-cano-alto' });
+
+    expect(depois).not.toBe(antes);
+    expect(antes.get('cabedal')).toMatchObject({
+      pecaId: 'prova-cabedal-baixo',
+      parametros: { 'altura-do-cano': 0.075 },
+    });
   });
 });

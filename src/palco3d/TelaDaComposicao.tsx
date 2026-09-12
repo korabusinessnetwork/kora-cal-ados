@@ -14,7 +14,12 @@ import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/ac
 import { validarComposicao } from '../lib/composicao/validarComposicao';
 import type { ParametroDePeca, PecaDoAcervo } from '../lib/composicao/tiposDaComposicao';
 import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
-import { escolhasDaComposicao, montarDaTela, type EscolhaDaTela } from './composicaoDaTela';
+import {
+  escolhasDaComposicao,
+  montarDaTela,
+  mudarEscolhaDaTela,
+  type EscolhaDaTela,
+} from './composicaoDaTela';
 import { PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
 
 const CATALOGO = catalogoDeProva();
@@ -43,14 +48,10 @@ export function TelaDaComposicao() {
   const aoMudarEstado = useCallback((novo: EstadoDoPalco) => setEstado(novo), []);
 
   function mudar(categoria: string, mudanca: Partial<EscolhaDaTela>) {
-    setEscolhas((atual) => {
-      const proxima = new Map(atual);
-      const antes = proxima.get(categoria) ?? { pecaId: null };
-
-      proxima.set(categoria, { ...antes, ...mudanca });
-
-      return proxima;
-    });
+    // A transição em si mora em `composicaoDaTela`, com teste. Ela já esteve aqui, e foi aqui que
+    // o BUG-019 nasceu: regra dentro do `.tsx` é regra no único arquivo desta pasta que jsdom não
+    // alcança. Este componente decide QUANDO muda, nunca O QUE a mudança faz.
+    setEscolhas((atual) => mudarEscolhaDaTela(atual, categoria, mudanca));
     // A seleção é do calçado que saiu de cena. Mantê-la faria a tela seguir apontando para um nó
     // que talvez nem exista mais na montagem nova.
     setSelecionada(null);

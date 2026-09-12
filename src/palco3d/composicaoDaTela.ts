@@ -47,6 +47,41 @@ export function escolhasDaComposicao(composicao: ComposicaoValidada): Map<string
 }
 
 /**
+ * Uma mudança numa categoria, com a única regra de transição que a tela tem.
+ *
+ * **Trocar de peça descarta os parâmetros da peça anterior.** Existe por causa do BUG-019: o
+ * cabedal baixo e o cabedal cano alto têm um parâmetro com o MESMO nome, `altura-do-cano`, e
+ * faixas que mal se encostam (0,05 a 0,12 contra 0,1 a 0,22). Carregar 0,075 da peça velha para a
+ * nova produzia `PARAMETRO_INVALIDO` e a tela inteira virava uma linha vermelha, sem que ninguém
+ * tivesse feito nada errado: a pessoa só trocou de peça.
+ *
+ * Descartar, e não aparar para dentro da faixa nova. Aparar mudaria o número que a pessoa escolheu
+ * sem avisar, e "valor aproximado que ninguém pediu" é a mesma família de defeito que o princípio
+ * nº1 persegue na cor. Sem parâmetro, `validarComposicao` preenche o padrão declarado pela peça
+ * nova, que é a resposta que ela mesma dá para "que tamanho eu tenho quando ninguém escolheu".
+ *
+ * A **cor** sobrevive à troca de propósito: cor é escolha da marca sobre a zona, não propriedade
+ * da peça. Quem pintou o cabedal de azul e trocou o modelo continua querendo azul.
+ *
+ * Esta função mora aqui, e não dentro do componente, porque foi exatamente ali que o BUG-019
+ * nasceu: transição de estado dentro do `.tsx` é regra no único arquivo desta pasta que nenhum
+ * teste alcança.
+ */
+export function mudarEscolhaDaTela(
+  escolhas: ReadonlyMap<string, EscolhaDaTela>,
+  categoria: string,
+  mudanca: Partial<EscolhaDaTela>,
+): Map<string, EscolhaDaTela> {
+  const antes = escolhas.get(categoria) ?? { pecaId: null };
+  const trocouDePeca = mudanca.pecaId !== undefined && mudanca.pecaId !== antes.pecaId;
+  const depois = { ...antes, ...mudanca };
+
+  if (trocouDePeca) delete depois.parametros;
+
+  return new Map(escolhas).set(categoria, depois);
+}
+
+/**
  * As escolhas da tela viram calçado montado, passando pelo guarda.
  *
  * Passa por `validarComposicao` mesmo sabendo que a tela só oferece opções válidas. Não é zelo
