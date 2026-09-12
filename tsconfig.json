@@ -12,5 +12,5 @@
     "types": ["vitest/globals", "vite/client", "node"],
     "verbatimModuleSyntax": true
   },
-  "include": ["api", "src", "supabase/scripts", "supabase/tests", "vite.config.ts"]
+  "include": ["api", "src", "supabase/scripts", "supabase/tests", "testes-de-navegador", "vite.config.ts"]
 }

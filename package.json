@@ -11,6 +11,7 @@
     "build": "vite build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:navegador": "vitest run testes-de-navegador",
     "typecheck": "tsc --noEmit",
     "provisionar": "node --env-file=.env.local supabase/scripts/executar.mjs supabase/scripts/provisionarTenant.ts",
     "semear-zonas": "node --env-file=.env.local supabase/scripts/executar.mjs supabase/scripts/semearZonasDeTeste.ts",
