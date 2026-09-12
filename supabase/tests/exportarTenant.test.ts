@@ -78,7 +78,11 @@ describe.skipIf(!temAmbiente)('exportação de tenant contra o banco real', () =
 
   afterAll(async () => {
     if (cenario) await limpar(cenario);
-  });
+    // O mesmo teto do `beforeAll`, e o mesmo dos outros cinco arquivos de banco. Sem ele vale o
+    // padrão de 10 s do vitest, e `limpar` não cabe nele: são uma remoção no Storage, dois
+    // `deleteUser` e um delete de tenants, cada um uma ida à rede. O arquivo reprovava inteiro com
+    // os 58 testes VERDES, porque quem estourava era a limpeza, depois do último `expect`.
+  }, 120_000);
 
   it('a zona marcada está dentro do zip, com a chave e o seletor', () => {
     // **O teste que o ADR-009 pede em letra.** Semeou, exportou, e a `zone_key` está no pacote.

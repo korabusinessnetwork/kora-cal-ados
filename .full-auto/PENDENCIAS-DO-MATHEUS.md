@@ -27,6 +27,30 @@ e `.full-auto/ESTADO.md`.
 - **Como confirmar que funcionou:** a linha continua em `tenant_api_keys` com `revoked_at` preenchido, e um `curl` com ela passa a devolver 401.
 - **Por que eu não fiz:** revogar é irreversível para quem estiver usando a chave, e o trabalho local ainda pode precisar dela. Quando você fechar o assunto, rode.
 
+## P04 Apagar 8 tenants de teste órfãos no Supabase real [prioridade: média]
+
+- **Por quê:** uma rodada de `npm run test:banco` reprovou na limpeza (o `afterAll` de
+  `exportarTenant.test.ts` estourava o teto de 10 s do vitest) e deixou o cenário dela no projeto
+  real. O defeito do teste já está corrigido no commit `fix(teste): limpeza do teste de exportacao`,
+  mas o lixo daquela rodada continua lá.
+- **O que ficou:** 8 tenants com slug `marca-a-<8 hex>` e `marca-b-<8 hex>`, criados em
+  2026-09-12 17:50 UTC: `c74282fe`, `e05f8690`, `4afaf21f`, `9383cb74` (um par de cada). Junto vão
+  os produtos em cascade, os usuários `a-`, `b-` e `m-<hex>@teste.kora`, e os SVG que o cenário
+  subiu em `assets-base/tenants/<id>/products/`.
+- **Risco de deixar como está:** nenhum imediato. São fixtures com slug aleatório, isolados por RLS
+  como qualquer tenant, e não aparecem em tela nenhuma do produto. O incômodo é acumular a cada
+  rodada que reprovar no meio.
+- **Por que eu não fiz:** apagar linha em banco real é ação irreversível e sobre dado real. Escrevi
+  a faxina, e o classificador do modo automático recusou executá-la, que é o comportamento certo
+  dele. Não contornei.
+- **Passo a passo:** a limpeza é a mesma que `limpar()` faz em toda rodada verde, restrita ao padrão
+  do slug. Se você quiser rodar, o caminho curto é pelo painel do Supabase: em **Table editor,
+  tenants**, filtrar `slug` por `like marca-%`, conferir que são só os 8 acima e apagar; depois em
+  **Authentication, Users**, buscar `@teste.kora` e apagar; e em **Storage, assets-base**, remover
+  as pastas `tenants/<id>` dos 4 pares.
+- **Como confirmar que funcionou:** `select count(*) from tenants where slug like 'marca-%'` devolve
+  0, e `npm run test:banco` continua 58 de 58.
+
 ## P03 Normalizar o travessão no repositório inteiro [prioridade: baixa]
 
 - **Por quê:** sua regra é não usar travessão em português. O repositório inteiro usa, porque foi escrito antes de a regra entrar. Aplicá-la só em arquivo novo cria inconsistência num projeto cuja tese é justamente consistência para agentes.
