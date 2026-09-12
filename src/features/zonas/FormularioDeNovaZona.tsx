@@ -73,7 +73,13 @@ export function FormularioDeNovaZona(props: PropsDoFormularioDeNovaZona): ReactE
         </p>
       )}
 
-      <p className="zona-form__contagem">
+      {/* Região viva, e a primeira do projeto: o clique acontece no SVG, e a confirmação de que ele
+          entrou na marcação é o contorno no desenho, que é uma camada `aria-hidden="true"` de
+          propósito. Sem isto, quem não enxerga o contorno clica no calçado e não recebe resposta
+          nenhuma. `polite` porque a pessoa está no meio de uma sequência de cliques e interromper a
+          cada um seria pior que o silêncio; `atomic` porque a frase só significa alguma coisa
+          inteira, e ler só o número mudado ("4") não diz de quê. */}
+      <p className="zona-form__contagem" aria-live="polite" aria-atomic="true">
         {contarElementos(quantidadeMarcada, { singular: 'marcado', plural: 'marcados' })}
       </p>
 

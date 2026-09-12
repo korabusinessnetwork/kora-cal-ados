@@ -167,4 +167,15 @@ describe('formulário de nova zona', () => {
   it('sem confirmação, nenhuma região de status é renderizada', () => {
     expect(formulario()).not.toContain('role="status"');
   });
+
+  // O clique acontece no SVG e o contorno que o confirma é `aria-hidden` de propósito (R2-A19):
+  // sem região viva, quem não enxerga o contorno clica no calçado e não recebe resposta nenhuma.
+  it('a contagem de marcados é região viva educada e lida inteira', () => {
+    const html = formulario({ quantidadeMarcada: 4 });
+    const contagem = /<p class="zona-form__contagem"[^>]*>/.exec(html)?.[0] ?? '';
+
+    expect(contagem).toContain('aria-live="polite"');
+    expect(contagem).toContain('aria-atomic="true"');
+    expect(html).toContain('4 elementos marcados');
+  });
 });
