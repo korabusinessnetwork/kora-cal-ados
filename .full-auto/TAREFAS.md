@@ -175,5 +175,17 @@ e o lote já leva três itens de qualidade.
       um `forma_id` que eu tinha inventado e a tela recusou sem derrubar o calçado. Conferido
       também que as cores coladas são as cores na tela, e que uma peça inexistente mostra
       `PECA_NAO_ENCONTRADA` sem encostar na montagem. 7 testes novos.
-- [ ] R5-A44 Os três hooks de rede do editor saem do escuro | trilha: qualidade | depende: nenhum | pronto quando: `useProdutos`, `useAssetBase` e `useZonasDoProduto` recebem o cliente por parâmetro com o valor por omissão de hoje, os pontos de chamada existentes não mudam, e cada um tem teste com componente-sonda provando que a resposta em voo do produto anterior NÃO pinta a tela do produto novo
+- [x] R5-A44 Os três hooks de rede do editor saem do escuro | trilha: qualidade | depende: nenhum | pronto quando: `useProdutos`, `useAssetBase` e `useZonasDoProduto` recebem o cliente por parâmetro com o valor por omissão de hoje, os pontos de chamada existentes não mudam, e cada um tem teste com componente-sonda provando que a resposta em voo do produto anterior NÃO pinta a tela do produto novo
+      feito em dois commits: `04e890b` (o cliente por parâmetro, nenhum ponto de chamada mudou) e
+      `f699fb3` (os 16 testes e o defeito que eles acharam). As duas guardas que já existiam,
+      `vivo` e `produtoAberto.current`, só olhavam a resposta ATRASADA. Nenhuma das duas olhava a
+      janela entre o render que troca de id e o efeito que limpa o estado, e nessa janela a lista,
+      o desenho e as zonas do anterior apareciam inteiros sob o id novo. Uma passagem de render é a
+      tela: em `useProdutos` é nome de produto de uma marca na tela de uma CONCORRENTE, e no editor
+      é o desenho errado aceitando clique. A correção é uma etiqueta `de` na leitura, conferida
+      durante o render. As guardas antigas continuam, e não são decorativas: sem elas a resposta
+      morta apagaria o que o id novo já mostrou. Segundo defeito achado no caminho: trocar de
+      produto no meio de um `gravar` deixava `salvando` ligado para sempre. Quatro mutações, uma
+      por guarda, todas mortas. A tela do editor não foi conferida no navegador porque exige
+      login, e eu não preencho credencial.
 - [ ] R5-A43 O palco 3D para de negar o que a composição já faz | trilha: ux | depende: nenhum | pronto quando: a frase do painel "Peça" não afirma mais que montar as cinco peças é a próxima tarefa, aponta para a tela que faz isso, e existe teste de que ela não voltou

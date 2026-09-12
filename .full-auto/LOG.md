@@ -44,3 +44,4 @@
 2026-09-12 · R5-A41 · tabela criada sem RLS vira teste vermelho, varredura de fonte sobre as migrations que roda sem banco · 88d273d
 2026-09-12 · R5-A45 · seis citacoes de ADR-008 D6 passam a dizer a verdade, e uma varredura confere que todo ADR-XXX DN do codigo existe · 7738fc9, 5c25cdc
 2026-09-12 · R5-A47 · o JSON da composicao volta para a tela pelo mesmo guarda que a API usa, e recusa nao encosta no calcado que esta na tela · 84279b6
+2026-09-12 · R5-A44 · os tres hooks de rede do editor recebem o cliente por parametro, e a etiqueta de origem tira a lista do id anterior da tela do id novo no mesmo render · 04e890b, f699fb3
