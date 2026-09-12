@@ -40,6 +40,7 @@ desconhecido.
 | `tenis-demo-cru.svg` | Asset-base **cru**, sujo de propósito (ver abaixo) |
 | `produtoDemo.test.ts` | Prende a premissa do esboço: o que a tela afirma é verdade |
 | `PainelDaApi.test.tsx` | Prende cada string do contrato mostrado no painel (rota, corpo, envelope, status) |
+| `PainelDaApi.copia.test.tsx` | Prende o botão de copiar o corpo: o que ele copia, e que a recusa da área de transferência aparece na tela. Separado do de cima porque precisa de jsdom, e aquele não |
 | `ComparativoDeNormalizacao.test.tsx` | Prende o comparativo (BUG-011 e BUG-012) |
 | `esboco.css` | Estilo separado do JSX (regra de white-label do CLAUDE.md) |
 
