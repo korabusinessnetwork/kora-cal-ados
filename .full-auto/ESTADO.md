@@ -24,8 +24,18 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   funcionar. Baseline verde nas duas pontas: 1161 testes, 58 no banco, 25 no navegador, `tsc` e
   build limpos, `npm audit` em zero. Duas mutações sobreviveram e as duas estão relatadas em
   `REFINO-RODADAS.md`, com o que foi feito com cada uma.
-- **Próximo passo:** abrir a rodada 4, reauditando a partir do que mudou nas rodadas 1 a 3 mais o
-  backlog que sobrou (A12 a A16, A23, A24, A25, A31, A32, todos abaixo do corte hoje).
+- **Rodada 4: FECHADA em 2026-09-12**, 6 de 6 entregues, nenhum revertido. Quatro dos seis achados
+  vieram do **esboço**, a tela que um clone recém-baixado abre e que as três rodadas anteriores não
+  tinham varrido. Baseline verde nas duas pontas: 1198 testes, 58 no banco, 25 no navegador, `tsc` e
+  build limpos, `npm audit` em zero. Uma mutação sobreviveu e está relatada em `REFINO-RODADAS.md`,
+  com o conserto que ela recebeu (foi no teste, não no código). A armadilha da rodada, e é a que
+  vale guardar: **`.palco` é declarada em DOIS arquivos** (`esboco/esboco.css` e
+  `features/zonas/zonas.css`), e `position: sticky` ficou sem efeito duas vezes, em silêncio,
+  enquanto o `order` da mesma regra funcionava.
+- **Próximo passo:** abrir a rodada 5, reauditando a partir do que mudou na rodada 4 mais o backlog
+  que sobrou (A12 a A16, A23, A24, A25, A31, A32, A35, todos abaixo do corte hoje). Se a
+  reauditoria não achar nada acima do corte, o modo encerra com `status: CONCLUIDO` e relatório
+  final, em vez de inventar lote.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

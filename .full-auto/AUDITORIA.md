@@ -441,7 +441,7 @@ o sistema com o navegador em 375 px e forçar os estados chatos, mais leitura da
 
 Duas suspeitas morreram na sonda e estão registradas no fim da seção.
 
-### A39 | eixo: ux | onde: `src/esboco/` (a folha de estilo do esboço)
+### A39 | eixo: ux | onde: `src/esboco/` (a folha de estilo do esboço) | **FEITO na rodada 4**
 
 - **hoje:** em 375x812, na tela do esboço, o SVG do calçado começa a **998 px** do topo, numa página
   de 2529 px, enquanto o primeiro controle de zona está a **396 px**, dentro da primeira tela. Quem
@@ -456,7 +456,7 @@ Duas suspeitas morreram na sonda e estão registradas no fim da seção.
   zona e ver a cor". Aqui não se vê.
 - valor: 5 | esforço: 2 | risco: 2 | **score: 4**
 
-### A37 | eixo: robustez | onde: `api/v1/products/[productId]/variants.ts:219` (`lerCorpoJson`)
+### A37 | eixo: robustez | onde: `api/v1/products/[productId]/variants.ts:219` (`lerCorpoJson`) | **FEITO na rodada 4**
 
 - **hoje:** `await pedido.json()` lê e parseia o corpo INTEIRO sem teto de bytes. O teto que existe é
   o de 90 zonas em `lerCoresPedidas`, e ele só é conferido depois do parse. O comentário do próprio
@@ -476,7 +476,7 @@ Duas suspeitas morreram na sonda e estão registradas no fim da seção.
   com laço errado, ou chave vazada, que é o ator que o teto de zonas já mira.
 - valor: 4 | esforço: 2 | risco: 2 | **score: 2**
 
-### A38 | eixo: produto | onde: `src/esboco/` (o painel "Chamada equivalente")
+### A38 | eixo: produto | onde: `src/esboco/` (o painel "Chamada equivalente") | **FEITO na rodada 4**
 
 - **hoje:** o esboço monta na tela a chamada inteira, rota, `Authorization`, `Content-Type` e o JSON
   das 9 zonas, que é precisamente o que um integrador quer levar para o terminal ou para o ERP, e
@@ -491,7 +491,7 @@ Duas suspeitas morreram na sonda e estão registradas no fim da seção.
   usado por duas telas sobe para `src/lib/`. Primeiro commit sobe a regra, segundo usa nas duas.
 - valor: 3 | esforço: 2 | risco: 1 | **score: 2**
 
-### A40 | eixo: qualidade | onde: `package.json` (`@types/three`)
+### A40 | eixo: qualidade | onde: `package.json` (`@types/three`) | **FEITO na rodada 4**
 
 - **hoje:** `three` roda em **0.186.0** e `@types/three` está preso em **^0.185.4**. O `tsc --noEmit`
   confere todas as chamadas de three contra a superfície da r185 enquanto a r186 executa. Num
@@ -506,7 +506,7 @@ Duas suspeitas morreram na sonda e estão registradas no fim da seção.
   a acusar erro, que é justamente o que o item existe para descobrir, e é visível na hora.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A36 | eixo: ux | onde: `src/esboco/` (`.editor__atalho`, a paleta de atalhos)
+### A36 | eixo: ux | onde: `src/esboco/` (`.editor__atalho`, a paleta de atalhos) | **FEITO na rodada 4**
 
 - **hoje:** os oito atalhos de cor são botões de **22x22 px**, colados uns nos outros, e o único
   nome acessível deles é o `title` com o hex (`#B23A2E`). Dois problemas num só: 22 px está abaixo
@@ -517,7 +517,7 @@ Duas suspeitas morreram na sonda e estão registradas no fim da seção.
   `outerHTML` mostra `title="#1B1B1F"` sem `aria-label` nem texto.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A34 | eixo: ux | onde: `src/App.tsx:57` (o rodapé do esboço)
+### A34 | eixo: ux | onde: `src/App.tsx:57` (o rodapé do esboço) | **FEITO na rodada 4**
 
 - **hoje:** o rodapé do esboço tem **uma** saída, "ir para o editor (pede login)". As outras três
   telas oferecem as três irmãs cada uma. Ou seja: a tela que um clone abre sem conta oferece como
@@ -530,7 +530,7 @@ Duas suspeitas morreram na sonda e estão registradas no fim da seção.
 
 ## Abaixo do corte na rodada 4
 
-### A35 | eixo: ux | onde: `src/palco3d/PalcoDeModelo3d.tsx` (o `<canvas>`)
+### A35 | eixo: ux | onde: `src/palco3d/PalcoDeModelo3d.tsx` (o `<canvas>`) | **abaixo do corte, continua no backlog**
 
 - **hoje:** o `<canvas>` do palco não tem `tabindex`, nem `role`, nem `aria-label`. Girar o calçado
   é só arrasto de mouse, então quem usa teclado não gira, e quem usa leitor de tela não recebe uma

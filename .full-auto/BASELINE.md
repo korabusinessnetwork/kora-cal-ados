@@ -5,8 +5,8 @@ refino começa com ele verde e termina com ele verde. Item que piora qualquer li
 revertido na hora, não consertado em cima.
 
 Medido em 2026-09-12, na branch `refino/kora-calcados`. As colunas são, da esquerda para a direita:
-a abertura do refino (`08e4d1d`), o fechamento da rodada 1 (`5e35551`), o da rodada 2 (`d091065`) e
-o da rodada 3 (`37b96a6`).
+a abertura do refino (`08e4d1d`), o fechamento da rodada 1 (`5e35551`), o da rodada 2 (`d091065`),
+o da rodada 3 (`37b96a6`) e o da rodada 4 (`edf3d40`).
 
 ## Como verificar
 
@@ -31,23 +31,23 @@ E o fluxo principal, à mão, em `npm run dev`:
 
 ## Medidas
 
-| Medida | Abertura do refino | Fechamento da rodada 1 | Fechamento da rodada 2 | Fechamento da rodada 3 |
-|---|---|---|---|---|
-| Testes verdes | **1047** passando, 58 pulados, 70 arquivos | **1072** passando, 58 pulados, 71 arquivos | **1104** passando, 58 pulados, 74 arquivos | **1161** passando, 58 pulados, 80 arquivos |
-| Testes contra o banco real | 58 de 58 | **58 de 58** | **58 de 58** | **58 de 58** |
-| Testes em navegador | 25 | **25** | **25** | **25** |
-| `tsc --noEmit` | limpo | limpo | limpo | limpo |
-| `npm run build` | limpo, 695 ms | limpo, **419 ms** | limpo, **507 ms** | limpo, **564 ms** |
-| `npm audit` | 0 vulnerabilidades | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** |
-| Bundle: chunk principal | 455,03 kB (gzip 131,84 kB) | **455,58 kB** (gzip 132,03 kB) | **456,92 kB** (gzip 132,43 kB) | **457,00 kB** (gzip 132,51 kB) |
-| Bundle: chunk do three.js, sob demanda | 618,87 kB (gzip 156,56 kB) | 618,87 kB (gzip 156,56 kB) | **618,91 kB** (gzip 156,58 kB) | **619,40 kB** (gzip 156,71 kB) |
-| Bundle: CSS | 20,76 kB (gzip 3,90 kB) | **21,75 kB** (gzip 4,04 kB) | **22,26 kB** (gzip 4,12 kB) | **22,69 kB** (gzip 4,21 kB) |
-| Arquivos `.ts`/`.tsx` em `src` + `api` + `supabase` | 169 | 170 | 174 | **182** |
-| Linhas de TypeScript nesses arquivos | 25.598 | 26.218 | 26.844 | **27.889** |
-| `any`, `@ts-ignore`, `catch` vazio em `src/` e `api/` | zero de cada | zero de cada | zero de cada | zero de cada |
-| `console.log` fora de teste | 1, proposital | 1, proposital | 1, proposital | 1, proposital |
-| Linter configurado | nenhum | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) |
-| CI | nenhum | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) |
+| Medida | Abertura do refino | Fechamento da rodada 1 | Fechamento da rodada 2 | Fechamento da rodada 3 | Fechamento da rodada 4 |
+|---|---|---|---|---|---|
+| Testes verdes | **1047** passando, 58 pulados, 70 arquivos | **1072** passando, 58 pulados, 71 arquivos | **1104** passando, 58 pulados, 74 arquivos | **1161** passando, 58 pulados, 80 arquivos | **1198** passando, 58 pulados, 85 arquivos |
+| Testes contra o banco real | 58 de 58 | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** |
+| Testes em navegador | 25 | **25** | **25** | **25** | **25** |
+| `tsc --noEmit` | limpo | limpo | limpo | limpo | limpo |
+| `npm run build` | limpo, 695 ms | limpo, **419 ms** | limpo, **507 ms** | limpo, **564 ms** | limpo, **512 ms** |
+| `npm audit` | 0 vulnerabilidades | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** |
+| Bundle: chunk principal | 455,03 kB (gzip 131,84 kB) | **455,58 kB** (gzip 132,03 kB) | **456,92 kB** (gzip 132,43 kB) | **457,00 kB** (gzip 132,51 kB) | **457,16 kB** (gzip 132,93 kB) |
+| Bundle: chunk do three.js, sob demanda | 618,87 kB (gzip 156,56 kB) | 618,87 kB (gzip 156,56 kB) | **618,91 kB** (gzip 156,58 kB) | **619,40 kB** (gzip 156,71 kB) | 619,40 kB (gzip 156,71 kB) |
+| Bundle: CSS | 20,76 kB (gzip 3,90 kB) | **21,75 kB** (gzip 4,04 kB) | **22,26 kB** (gzip 4,12 kB) | **22,69 kB** (gzip 4,21 kB) | **23,30 kB** (gzip 4,29 kB) |
+| Arquivos `.ts`/`.tsx` em `src` + `api` + `supabase` | 169 | 170 | 174 | **182** | **191** |
+| Linhas de TypeScript nesses arquivos | 25.598 | 26.218 | 26.844 | **27.889** | **28.867** |
+| `any`, `@ts-ignore`, `catch` vazio em `src/` e `api/` | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada |
+| `console.log` fora de teste | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital |
+| Linter configurado | nenhum | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) |
+| CI | nenhum | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) |
 
 Sobre os números que pioraram na rodada 1: o chunk principal cresceu **0,55 kB** e o CSS **0,99 kB**,
 que é o custo em bytes dos oito itens da rodada. O tempo de build não é vitória de ninguém, é ruído
@@ -66,7 +66,18 @@ E os da rodada 3: chunk principal **+0,08 kB**, CSS **+0,43 kB**, chunk do three
 Os 57 testes novos (1104 para 1161) saem de seis arquivos, quatro deles criados na rodada. Nenhum
 item foi revertido.
 
-**Duas linhas desta tabela foram RECALCULADAS nesta rodada, e os números das colunas antigas
+E os da rodada 4: chunk principal **+0,16 kB**, CSS **+0,61 kB**, chunk do three.js **igual**. O
+número do chunk principal esconde duas forças em sentidos opostos, e as duas estão medidas: o A34
+tirou **1,02 kB** dele, porque quatro rodapés escritos à mão viraram um módulo de dados mais um
+componente burro, e os outros itens repuseram 1,18 kB de texto novo. Foi a primeira vez em quatro
+rodadas que um item ENCOLHEU o bundle, e o motivo é que ele consertou uma duplicação e não só
+acrescentou comportamento. O CSS é o preço do que passou a existir na tela: a coluna única do
+esboço em 375 px, os atalhos de 24 px e a linha do botão de copiar. Nenhum item foi revertido.
+
+A contagem de arquivos vai de 182 para 191 na mesma fórmula do parágrafo abaixo, e a de linhas de
+27.889 para 28.867. Quase toda a diferença é teste: dos 9 arquivos novos, 5 são de teste.
+
+**Duas linhas desta tabela foram RECALCULADAS na rodada 3, e os números das colunas antigas
 mudaram.** A contagem de arquivos e de linhas das rodadas anteriores não era reproduzível: nenhuma
 combinação de diretórios que eu tentasse devolvia os 180 arquivos registrados no fechamento da
 rodada 2. Em vez de emendar uma quarta coluna numa série que não dá para conferir, refiz as quatro

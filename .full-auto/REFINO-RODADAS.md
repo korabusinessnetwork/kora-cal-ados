@@ -318,3 +318,167 @@ Nenhum item desta rodada entrou atrás de configuração. Os seis são visíveis
 As três de sempre continuam: P01 (hook), P02 (revogar a chave `2aec9a55`) e P04 (os 8 tenants órfãos
 de teste). Nenhuma delas é tarefa minha, e nenhuma virou mais urgente nesta rodada.
 
+---
+
+## Rodada 4, fechada em 2026-09-12
+
+**Lote:** 6 itens, em `TAREFAS.md`, seção "Refino, rodada 4". Nenhum com risco 4 ou 5.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R4-A39 o calçado antes da lista de zonas na tela estreita | ux | 4 | entregue |
+| R4-A40 os tipos do three acompanham o three | qualidade | 3 | entregue |
+| R4-A36 atalhos de cor de 24 px com nome que se lê | ux | 3 | entregue |
+| R4-A34 o esboço oferece as três irmãs | ux | 3 | entregue |
+| R4-A37 corpo grande demais recusado antes de ser lido | robustez | 2 | entregue |
+| R4-A38 copiar a chamada equivalente do esboço | produto | 2 | entregue |
+
+Abaixo do corte e fora do lote: **A35**, o canvas sem nome acessível nem teclado, com score -1.
+
+**De onde veio a lista:** as rodadas 1 a 3 varreram o editor logado, o palco 3D e o motor. A tela
+que um clone recém-baixado abre, o esboço, nunca tinha sido varrida, e quatro dos seis achados
+vieram dela. Isso não é coincidência: o esboço é a tela que a equipe já conhece de cor, então
+ninguém a percorre com olhos de quem chega.
+
+**Quatro suspeitas morreram antes de virar item**, e estão escritas em `AUDITORIA.md`, na seção "o
+que eu achei que era defeito e não era": a zona de gradiente que parecia não recolorir, as
+dependências que pareciam atrasadas, o log de requisição que parecia vazar dado, e um contraste que
+parecia abaixo do mínimo.
+
+---
+
+## Rodada 4: o que foi entregue
+
+**6 de 6 entregues, nenhum revertido.**
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R4-A39 o calçado antes da lista de zonas em 375 px | ux | `637cf15` | entregue |
+| R4-A40 os tipos do three acompanham o three | qualidade | `5edce98`, `f5ee209` | entregue |
+| R4-A34 o rodapé de saídas vira um só, para as quatro telas | ux | `2259266` | entregue |
+| R4-A36 atalhos de cor de 24 px com nome que se lê | ux | `8798467` | entregue |
+| R4-A37 corpo grande demais recusado antes de ser lido | robustez | `c8f65f1` | entregue |
+| R4-A38 a regra da cópia sobe, e o esboço ganha o botão | produto | `9520052`, `a7caf05`, `edf3d40` | entregue |
+
+### A armadilha desta rodada: uma classe CSS declarada em dois arquivos
+
+Vale mais que qualquer item, porque vai acontecer de novo.
+
+No A39 o `position: sticky` da minha regra **não teve efeito nenhum, duas vezes, em silêncio**,
+enquanto o `order: -1` da MESMA regra funcionava. Da primeira vez porque a minha media query estava
+na linha 70 de `src/esboco/esboco.css` e `.palco { position: relative }` na linha 116 do mesmo
+arquivo. Movi o bloco para depois, e continuou sem efeito: `src/features/zonas/zonas.css` declara
+`.palco { position: relative }` de novo, e a duplicação é deliberada e documentada. Media query não
+acrescenta especificidade, então quem decide é a ordem no bundle, e o outro arquivo vinha depois.
+
+O conserto foi mirar em `.colunas .palco`, especificidade 0,2,0, que ganha dos dois.
+
+**O que fica registrado é o formato da falha, não o conserto.** Uma declaração de uma regra some e a
+outra, do mesmo bloco, fica, sem erro em lugar nenhum, sem aviso no build e sem teste vermelho. A
+única coisa que denuncia é medir o efeito no navegador em vez de olhar o arquivo e concluir que
+está escrito. Quem for mexer em `.palco` daqui para a frente: ela mora em **dois** arquivos.
+
+### O que mudou de verdade
+
+1. **Em 375 px o esboço mostra o calçado antes da lista de zonas, e ele fica (A39).** O `<svg>`
+   começava a **1000 px** do topo numa tela de 812: a pessoa lia as nove zonas e só via o tênis
+   depois de todas. Agora começa a **199 px**. Os dois números foram medidos do mesmo jeito, com a
+   regra neutralizada e recolocada em tempo de execução, para as duas pontas serem comparáveis.
+   Mesma decisão do R3-A30, e agora na terceira tela.
+
+2. **O rodapé de saídas virou UM, e o bundle encolheu (A34).** O esboço era a única das quatro telas
+   que não oferecia as irmãs, e a saída fácil era escrever o quinto rodapé à mão. Consertei a classe
+   do defeito: `saidasDaTela.ts` (dados) mais `RodapeDeTelas.tsx` (componente burro), usados nos
+   cinco pontos de chamada do `App.tsx`. Uma tela nova não tem como nascer com o mesmo buraco, e o
+   chunk principal **encolheu de 457,00 para 455,98 kB**, a primeira vez em quatro rodadas que um
+   item tira peso em vez de pôr.
+
+3. **Corpo de pedido grande demais é recusado antes de ser lido (A37).** Medido antes do conserto:
+   um corpo de 7.088.891 bytes era inteiramente lido e parseado em 202 ms, custando 13,4 MB de
+   heap, para só então ser recusado por passar de 90 zonas. Em função serverless, cobrada por tempo
+   e por memória, isso é conta paga para recusar pedido. O teto de 64 kB tem **duas** conferências,
+   e as duas precisam existir: o `content-length` é barato e recusa antes de ler um byte, mas quem o
+   escreve é o cliente; a contagem durante a leitura é a que não depende da palavra dele.
+
+4. **Os oito atalhos de cor viraram alvo de 24 px com nome que se lê (A36).** Medido no fechamento,
+   em 375x812: 24x24 px, e o primeiro com nome acessível `preto (#1B1B1F)`. O nome por extenso
+   passou a viver junto do hex em `produtoDemo.ts`, e não numa tabela paralela na tela, porque
+   tabela paralela é exatamente a forma como um nono hex entraria sem nome.
+
+5. **A regra de copiar virou uma só, e o esboço ganhou o botão (A38).** A ordem é a lição do R3-A27
+   aplicada: a regra SOBE primeiro para `src/lib/copia/` e a composição migra, e só então a segunda
+   tela ganha o botão. A segunda tela nunca chega a ser a segunda implementação. Duas coisas que
+   eram responsabilidade de quem chamava entraram no hook: o descarte do aviso, agora chaveado pelo
+   texto (era um `setCopia('pronta')` escrito à mão dentro do `mudar()`, que qualquer caminho novo
+   podia esquecer), e o diagnóstico da falha, que não fala do que está sendo copiado.
+
+6. **Os tipos do three passaram a ser os da versão que roda (A40).** O segundo commit é o que impede
+   a volta: varredura de fonte comparando as faixas declaradas entre si e o instalado contra o
+   declarado, com guarda `not.toBeNull()` para que duas leituras nulas não passem por "iguais".
+
+### Medidas, ponta a ponta
+
+| | Abertura da rodada 4 | Fechamento |
+|---|---|---|
+| Testes verdes | 1161 | **1198** |
+| Arquivos de teste | 80 | **85** |
+| Banco / navegador | 58 / 25 | **58 / 25** |
+| `npm run build` | 564 ms | 512 ms |
+| Chunk principal | 457,00 kB | **457,16 kB** (+0,16) |
+| CSS | 22,69 kB | **23,30 kB** (+0,61) |
+| Chunk do three.js | 619,40 kB | 619,40 kB (igual) |
+| `npm audit` | 0 | **0** |
+
+Dos 37 testes novos, **34 estão nos 5 arquivos criados na rodada**, todos os 5 sobre coisas que
+antes não tinham teste nenhum: o teto de bytes do corpo, a regra da cópia, o botão de copiar do
+esboço, o conjunto de saídas de cada tela e o casamento das versões do three. Os 3 restantes
+entraram em arquivos que já existiam.
+
+### Mutações: o que sobreviveu, e o que foi feito com cada uma
+
+Cinco mutações rodadas nesta rodada, três no A37 e duas no A38, que são os dois itens cujo código
+novo é lógica pura. Os outros quatro itens não foram verificados por mutação, e não vale fingir que
+foram: o A39 e o A36 são medida no navegador, o A34 é o conjunto de saídas preso por teste, e o A40
+é varredura de fonte. Uma das cinco sobreviveu:
+
+1. **Apagar `{ stream: true }` do `TextDecoder.decode` em `lerCorpoDoPedido`.** Sobreviveu aos 11
+   testes, porque um corpo pequeno chega num pedaço só e a decodificação isolada de um pedaço
+   inteiro dá no mesmo. **O conserto foi no TESTE**: um `ReadableStream` que parte os dois bytes do
+   `ç` (0xC3 0xA7) entre dois pedaços à força, e aí a mutação morre com
+   `expected { sola: '#C0392B', …(1) } to deeply equal { sola: '#C0392B', nota: 'cadarço' }`. O dano
+   que isso evita não apareceria como erro: apareceria como `zone_key` que não casa com zona
+   nenhuma do produto, ou seja, como "zona inexistente", longe da causa.
+
+As outras quatro morreram, entre elas as duas do A38: copiar `requisicao` no lugar do corpo mata o
+teste que afirma, pelo lado negativo, que a chave de exemplo não vai junto; e apagar o bloco do
+aviso de falha mata o teste do caminho negado.
+
+### Duas correções minhas, ditas por inteiro
+
+Nenhuma das duas quebrou nada, e as duas teriam virado teste mentiroso se ficassem:
+
+1. **Uma asserção tautológica** no teste do A34: `expect(ROTULO_DA_SAIDA[destino]).toBe(...)` com os
+   dois lados idênticos, que passa sempre. Virou a afirmação de verdade: nenhuma saída oferecida cai
+   num rótulo que não existe.
+
+2. **Duas asserções apertadas demais** no teste do A37, que contavam bytes entregues pelo stream.
+   As duas reprovaram, e o motivo é que o runtime adianta pedaços por conta própria: contar bytes
+   mede o prefetch dele, não o que o módulo leu. A do `content-length` passou a afirmar
+   `pedido.bodyUsed === false`, que responde exatamente a pergunta; a do streaming afirma
+   `entregues < TOTAL / 2` com um comentário dizendo que o número exato não é afirmável e por quê.
+
+### Um item ficou de fora, inteiro e de propósito
+
+**A35**, o canvas do palco sem `tabindex`, `role` nem `aria-label`, continua no backlog. A metade
+barata (dar nome acessível) não resolve a metade que importa (girar o modelo pelo teclado), e
+entregar só a barata deixaria a tela parecendo acessível sem ser. Fica inteiro para uma rodada que
+comporte a metade cara.
+
+### Nada atrás de flag
+
+Nenhum item desta rodada entrou atrás de configuração. Os seis são visíveis assim que a tela abre.
+
+### Nenhuma pendência nova do dono
+
+As três de sempre continuam: P01 (hook), P02 (revogar a chave `2aec9a55`) e P04 (os 8 tenants órfãos
+de teste). Nenhuma delas é tarefa minha, e nenhuma virou mais urgente nesta rodada.

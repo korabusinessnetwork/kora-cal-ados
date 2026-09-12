@@ -34,3 +34,9 @@
 2026-09-12 · R3-A33 · o baseline para de piscar vermelho sozinho, espera por condição e não por quadro · 1788a10
 2026-09-12 · R3-A30 · em 375 px a cena vem antes dos controles e fica presa no topo enquanto eles rolam · a98a953
 2026-09-12 · R3-A28 · contexto WebGL perdido deixa de ser "Peça na cena", estado e frase próprios · 37b96a6
+2026-09-12 · R4-A39 · em 375 px o calcado do esboco vem antes da lista de zonas e fica preso no topo, 1000 para 199 px · 637cf15
+2026-09-12 · R4-A40 · os tipos do three passam a ser os da versao que roda, com varredura de fonte que impede a volta · 5edce98, f5ee209
+2026-09-12 · R4-A34 · quatro rodapes escritos a mao viram um modulo de dados e um componente burro, e o chunk encolheu · 2259266
+2026-09-12 · R4-A36 · os oito atalhos de cor viram alvo de 24 px com o nome da cor junto do hex · 8798467
+2026-09-12 · R4-A37 · corpo grande demais e recusado antes de ser lido inteiro, teto de 64 kB em duas conferencias · c8f65f1
+2026-09-12 · R4-A38 · a regra da copia sobe para src/lib, a composicao migra e o esboco ganha o botao que copia o corpo · 9520052, a7caf05, edf3d40
