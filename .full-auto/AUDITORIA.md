@@ -566,3 +566,200 @@ Duas suspeitas morreram na sonda e estão registradas no fim da seção.
 4. **Contraste.** Varri as duas telas calculando a razão de contraste WCAG de todo elemento com
    texto contra o fundo herdado dele. Nenhum elemento abaixo do mínimo, nem na composição nem no
    esboço.
+
+---
+
+## Achados da reauditoria da rodada 5 (2026-09-12)
+
+A rodada 4 varreu o esboço, a tela que um clone recém-baixado abre. Esta foi atrás de três coisas
+que as quatro rodadas anteriores não tinham olhado: **o que acontece quando a máquina de quem
+visita não tem o que a tela precisa**, **as regras do projeto que existem só como frase e não têm
+guarda nenhuma**, e **o editor logado por baixo dos componentes**, que sempre foi auditado pela
+tela e nunca pelos hooks que falam com a rede.
+
+Método de sempre: sondar em vez de supor. Cinco suspeitas morreram na sonda e estão em "o que eu
+achei que era defeito e não era", no fim desta seção.
+
+### A46 | eixo: robustez | onde: `src/palco3d/PalcoDeModelo3d.tsx:159` (`criarPalco`)
+
+**hoje:** `new WebGLRenderer()` é chamado dentro de um `useEffect` sem `try`. Num navegador sem
+WebGL o three lança, o erro sobe do efeito, e **a página inteira fica em branco**. Não é só o
+palco: some o cabeçalho, some o painel de peças, some o rodapé que levaria para o esboço, que não
+precisa de WebGL nenhum. Não existe nenhum `ErrorBoundary` em `src/`, então não há onde o erro parar.
+
+**evidência, medida no navegador e não deduzida:** com
+`HTMLCanvasElement.prototype.getContext` devolvendo `null` para `webgl*` e o componente remontado
+pela troca de tela, `document.body.innerText` ficou **vazio** e `document.querySelectorAll('canvas')`
+devolveu **0**. O console mostrou `THREE.WebGLRenderer: Error creating WebGL context` seguido de
+`Uncaught` vindo do `react-dom_client`.
+
+**depois:** a falha de criação vira o mesmo estado de falha que o A28 já criou para o contexto
+PERDIDO, com frase própria, e as outras telas continuam alcançáveis.
+
+**por que o A28 não cobriu isto:** ele tratou o contexto que CAI depois de existir
+(`webglcontextlost`). Aqui o contexto nunca chega a existir, e o caminho é outro: não há evento,
+há exceção no construtor. A máquina de estado já está pronta (`EstadoDoPalco`, `ehFalha`), o que
+falta é alguém entregar a falha a ela.
+
+valor: 5 | esforço: 2 | risco: 2 | **score: 4**
+
+### A41 | eixo: qualidade | onde: `supabase/migrations/` e `supabase/tests/`
+
+**hoje:** as 6 tabelas existentes têm RLS ligada e pelo menos uma policy, conferido uma a uma.
+O que não existe é **guarda para a próxima**. O `CLAUDE.md` diz em letra: "Ao criar tabela/função
+nova, lembrar que RLS precisa ser configurada", e "lembrar" é a palavra que denuncia: a regra vive
+na memória de quem escreve. `isolamento.test.ts` confere o isolamento das tabelas que ele conhece
+pelo nome, roda **contra o Supabase real** e é um dos 58 que **PULAM** numa máquina sem
+`.env.local`. Ou seja, uma tabela nova sem RLS entra no repositório com a suíte verde.
+
+**evidência:** `grep -c "create table" supabase/migrations/` devolve 6 e
+`grep -c "enable row level security"` devolve 6, mas os dois números baterem hoje é coincidência
+mantida à mão. `npx vitest run` mostra `58 skipped` nesta máquina quando `.env.local` não é
+carregado, e é nesses 58 que o isolamento mora.
+
+**depois:** varredura de fonte sobre `supabase/migrations/*.sql`, no molde de
+`semServiceRoleNoFront.test.ts`, reprovando quando uma tabela criada não tem `enable row level
+security`. Roda em `npm test`, sem banco, sem `.env.local` e sem rede.
+
+**por que vale mais que parece:** `memory/identity.md` chama isolamento entre tenants concorrentes
+de inegociável e o ADR-002 o trata como requisito comercial, não técnico. A verificação que protege
+isso hoje é a que mais facilmente some em silêncio.
+
+valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A45 | eixo: qualidade | onde: `src/palco3d/` (quatro arquivos) e o projeto inteiro
+
+**hoje:** quatro lugares afirmam que "a composição não é gravada em banco **(ADR-008 D6)**", e o D6
+do ADR-008 é "Acervo base é da Kora; acervo do tenant é privado, sob RLS". Não fala de composição
+nem de persistência. A decisão citada **não existe com esse número**, e olhando o ADR inteiro ela
+não existe com número nenhum: o D2 chega a dizer o contrário em espírito, que a composição é "leve
+de guardar e de mandar" e que "um calçado gerado pode ser aberto de novo daqui a um ano".
+
+**evidência:** `grep -rn "ADR-008 D6" src/` devolve `composicaoDaTela.ts:90`,
+`estadoDoPalco.test.ts:68`, `palco3d.css:215` e `TelaDaComposicao.tsx:109`, os quatro com a mesma
+frase. `grep -E "^### D[0-9]" docs/08_DECISOES/adr-008-*.md` mostra D1 a D7, e o D6 é o do acervo.
+
+**por que é perigoso e não só feio:** o `CLAUDE.md` decide conflito assim, em letra: "Se doc e
+código conflitarem, **a documentação prevalece**". Um agente que for mexer nisso vai ler o D6, não
+vai achar decisão nenhuma sobre persistir composição, e a conclusão razoável dele é que o código
+está errado e a composição deveria ser gravada. A citação errada não confunde: ela aponta para a
+conclusão oposta à verdadeira, e o mecanismo de resolver conflito do projeto a obedece.
+
+**depois:** as quatro citações passam a dizer o que é verdade, e uma varredura de fonte confere que
+todo `ADR-XXX DN` escrito em `src/`, `api/` e `supabase/` resolve para uma decisão que existe
+naquele ADR. A varredura pega a metade mecânica (número inexistente); a metade semântica (número
+que existe mas fala de outra coisa) continua sendo leitura, e isso fica dito no teste.
+
+valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A47 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx` (o bloco "Copiar composição")
+
+**hoje:** dá para copiar o JSON da montagem e não dá para colá-lo de volta. O botão de copiar existe
+justamente porque fechar a aba perde a montagem inteira, e sem o caminho de volta ele resolve
+metade do problema: o JSON vai para a API, para o bloco de notas de alguém, para um chamado, e
+nunca mais volta para a tela que o produziu.
+
+**evidência:** os únicos caminhos que escrevem `escolhas` são `escolhasDaComposicao(DEMO)` na
+montagem inicial e `mudarEscolhaDaTela` no clique. Não existe entrada de texto na tela, e recarregar
+a página volta para a composição de demonstração.
+
+**depois:** um campo onde colar o JSON, validado por `validarComposicao` antes de entrar na tela,
+com a falha escrita em palavras. Composição inválida não chega ao palco.
+
+**por que o esforço é 2 e não 4:** as três peças já existem e já têm teste.
+`validarComposicao(entrada: unknown, catalogo)` aceita exatamente o que um `JSON.parse` devolve e já
+recusa peça fora do acervo e forma misturada; `escolhasDaComposicao` converte composição validada em
+estado de tela. O que falta é o campo e a ligação.
+
+**por que o risco é 1:** o guarda que impede composição estragada de chegar ao palco é o mesmo que a
+API usa, e ele já tem teste. O caminho novo não inventa validação própria, e é justamente inventar a
+segunda validação que costuma ser o risco desse tipo de entrada.
+
+valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A44 | eixo: qualidade | onde: `src/features/*/hooks/` (três arquivos)
+
+**hoje:** `useZonasDoProduto` (135 linhas), `useProdutos` (55) e `useAssetBase` (55) não têm teste
+nenhum, e os três guardam a MESMA regra, escrita três vezes à mão: a `let vivo = true` com limpeza
+no `return` do efeito, que impede a resposta do produto anterior de pintar a tela do produto novo.
+O `useZonasDoProduto` guarda mais quatro: a comparação `produtoAberto.current === alvo` depois de
+cada `await`, a recusa sem tenant antes da rede, a falha de gravação que não pode apagar a lista já
+carregada, e a falha da RELEITURA que devolve `true` porque a gravação passou.
+
+**evidência:** `grep -rl "useZonasDoProduto\|useProdutos\|useAssetBase" --include=*.test.*` devolve
+**vazio** para os três.
+
+**por que isto é o princípio nº1 e não higiene:** o modo de falhar de todas essas regras é o
+silêncio. A zona do produto anterior aparecendo sobre o desenho do produto novo é marcar zona em
+cima do desenho errado, que é literalmente o que o `CLAUDE.md` proíbe em "zona errada falha alto e
+visível, nunca aplica a cor silenciosamente no lugar errado".
+
+**por que o risco é 1, e não o 3 do A25:** o A25 continua parado porque montar `EditorDeZonas` exige
+o cliente Supabase e o projeto não usa `vi.mock` em lugar nenhum. Aqui o obstáculo não existe:
+`listarZonasDoProduto`, `gravarZonaNoBanco`, `listarProdutos` e `baixarAssetBase` **já recebem o
+cliente por parâmetro**, e `clienteSupabase()` é instância única memoizada. Um parâmetro opcional
+com esse valor por omissão deixa os pontos de chamada existentes intactos e abre os três hooks para
+o mesmo cliente falso que o resto da pasta já usa.
+
+valor: 4 | esforço: 3 | risco: 1 | **score: 3**
+
+### A43 | eixo: ux | onde: `src/palco3d/TelaDoPalco3d.tsx:67`
+
+**hoje:** o painel "Peça" diz, para quem visita, "Uma peça por vez. Montar as cinco numa cena só, e
+colori-las, **é a próxima tarefa**". Isso deixou de ser verdade: a tela da composição monta as cinco
+e colore cada uma. Desde o R4-A34 a frase ficou pior, porque o rodapé logo abaixo dela oferece "ver
+o calçado montado (as peças juntas)", ou seja, a tela contradiz o próprio botão a dois palmos de
+distância.
+
+**evidência:** a frase está na tela, conferida no navegador em `?tela=palco3d`. A capacidade que ela
+nega está em `?tela=composicao`, que monta o calçado inteiro e tem campo de cor por categoria.
+
+**depois:** a frase diz o que é verdade e aponta para onde a coisa acontece.
+
+**por que é ux e não só texto:** é a única afirmação do projeto inteiro sobre o que ele ainda não
+sabe fazer, e ela está errada. `grep -rniE "próxima tarefa|em breve|por enquanto"` nos `.tsx` não
+devolve nenhuma outra, então é instância, não classe, e o conserto é uma frase.
+
+valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A42 | eixo: qualidade | README por diretório sem guarda (backlog)
+
+O ADR-003 manda que **todo diretório novo ganhe um README.md de índice**, e sete diretórios com
+código não têm: `src`, `api/v1`, `api/v1/products`, `api/v1/products/[productId]`,
+`src/features/produtos/hooks`, `src/features/zonas/hooks` e `supabase`. Nada confere isso, e a
+prova de que a regra escapa é que **eu mesmo a furei na rodada 4**: `src/lib/copia/` entrou sem
+linha no índice de `src/lib/`, e o conserto foi um terceiro commit depois de eu notar a olho.
+
+Fica no backlog e não no lote por dois motivos ditos: é o menor score dos sete achados, e o lote já
+leva três itens de qualidade. Um quarto tiraria atenção do A46, que é o que apaga a página inteira.
+
+valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+---
+
+### O que eu achei que era defeito e não era (rodada 5)
+
+1. **Oito diretórios de andaime vazios em `src/`** (`components`, `components/shared`, `constants`,
+   `context`, `hooks`, `pages`, `styles`, `utils`). Pareciam sobra de template contrariando o
+   ADR-003, e um agente poria um componente em `src/components/` só porque a pasta existe. Mas
+   `git ls-files` neles devolve **vazio**: o git não versiona diretório vazio, então eles são
+   sujeira desta cópia de trabalho e **um clone não os tem**. Não é defeito do projeto.
+
+2. **`ADR-004 D1` em `recolorirModelo3d.ts:149`.** Parecia a segunda citação quebrada, porque o
+   ADR-004 não tem nenhum cabeçalho `### D1`. Mas ele numera as decisões do dono numa tabela
+   (`| 1 | Zona com gradiente/pattern | Erro ZONA_NAO_RECOLORIVEL |`), e a decisão 1 é exatamente o
+   que o comentário afirma. É notação diferente, não citação errada, e é por isso que a varredura
+   do A45 tem de aceitar as duas grafias em vez de exigir `### D1`.
+
+3. **Nove pacotes atrás no `npm outdated`.** Todos a uma minor de distância, `npm audit` em zero
+   vulnerabilidades. Já tinha sido julgado assim na rodada 4 e continua valendo: atraso de minor
+   sem CVE não é defeito, é rotina de manutenção.
+
+4. **Troca rápida de peça no palco 3D.** Suspeita de vazar contexto WebGL ou deixar a peça errada
+   na cena. Sondado com 30 trocas em cerca de 2 segundos: **um** canvas ao final, estado "Peça na
+   cena", zero erro no console. O `pedidoAtual` numerado faz o que o comentário dele promete.
+
+5. **RLS das tabelas de hoje.** Conferida uma a uma: as 6 têm `enable row level security` e pelo
+   menos uma policy, inclusive `tenant_api_keys`, que é a mais nova. O A41 não é uma tabela
+   desprotegida, é a ausência de guarda para a próxima, e a diferença importa para não relatar
+   risco que não existe.
