@@ -42,6 +42,9 @@ export function PainelDeZonas({
               <button
                 type="button"
                 className={`zona ${selecionada ? 'zona--ativa' : ''}`}
+                // A zona escolhida existia só na classe `zona--ativa`, ou seja, só na cor da
+                // borda, e cor não é anúncio. Mesmo conserto que A08 fez nas telas do palco.
+                aria-pressed={selecionada}
                 onClick={() => aoSelecionar(zona.zone_key)}
               >
                 <span
@@ -58,6 +61,7 @@ export function PainelDeZonas({
               {selecionada && (
                 <EditorDeCor
                   cor={cor ?? '#808080'}
+                  zoneKey={zona.zone_key}
                   aoTrocar={(nova) => aoTrocarCor(zona.zone_key, nova)}
                 />
               )}
@@ -69,8 +73,17 @@ export function PainelDeZonas({
   );
 }
 
-function EditorDeCor({ cor, aoTrocar }: { cor: string; aoTrocar: (cor: string) => void }) {
+function EditorDeCor({
+  cor,
+  aoTrocar,
+  zoneKey,
+}: {
+  cor: string;
+  aoTrocar: (cor: string) => void;
+  zoneKey: string;
+}) {
   const [texto, setTexto] = useState(cor);
+  const idDoErro = `esboco-hex-erro-${zoneKey}`;
 
   // Só sobe cor completa: reagir a cada tecla faria "#F" virar erro de cor inválida na
   // cara do usuário enquanto ele ainda digita.
@@ -83,9 +96,13 @@ function EditorDeCor({ cor, aoTrocar }: { cor: string; aoTrocar: (cor: string) =
 
   return (
     <div className="editor">
+      {/* Os dois campos editam a MESMA cor e precisavam dizer qual é a zona: sem rótulo, a árvore de
+          acessibilidade mostrava dois campos cujo nome era o próprio valor ("#E9E4DA"), e com nove
+          zonas na tela nada distinguia um do outro. */}
       <input
         type="color"
         className="editor__roda"
+        aria-label={`cor da zona ${zoneKey}`}
         value={cor}
         onChange={(evento) => {
           setTexto(evento.target.value);
@@ -95,10 +112,23 @@ function EditorDeCor({ cor, aoTrocar }: { cor: string; aoTrocar: (cor: string) =
       <input
         type="text"
         className={`editor__hex ${valido ? '' : 'editor__hex--invalido'}`}
+        aria-label={`hex da zona ${zoneKey}`}
+        aria-invalid={!valido}
+        aria-describedby={valido ? undefined : idDoErro}
         value={texto}
         spellCheck={false}
         onChange={(evento) => digitar(evento.target.value)}
       />
+      {/* Hex incompleto mudava SÓ a classe CSS: borda vermelha, sem uma palavra dizendo o que ela
+          quer. Quem não enxerga a borda não recebia nada. Não é `role="alert"` de propósito, e a
+          razão é a mesma que o editor de verdade registra: anunciar cada tecla enquanto a pessoa
+          ainda digita "#F" ensina a ignorar alerta justo onde ele custa caro. O texto fica visível e
+          ligado ao campo por `aria-describedby`, que é lido quando o foco chega nele. */}
+      {!valido && (
+        <p className="editor__erro" id={idDoErro}>
+          Cor incompleta. O formato é #RGB ou #RRGGBB, e o preview só muda quando ela fecha.
+        </p>
+      )}
       <div className="editor__paleta">
         {paletaDeAtalho.map((atalho) => (
           <button
