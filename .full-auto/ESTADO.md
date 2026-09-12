@@ -1,7 +1,26 @@
 # Estado do Full Automático
 
-status: CONCLUIDO
+status: EXECUTANDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
+
+## Modo atual: refino (desde 2026-09-12)
+
+A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda agora é a skill
+`full-automatico-refino`: sem plano de entrada, a lista sai de uma auditoria minha, registrada em
+`AUDITORIA.md`.
+
+- **Branch:** `refino/kora-calcados`, a partir de `08e4d1d`. **Sem merge em `main` e sem deploy**,
+  isso é decisão do dono.
+- **Baseline:** `BASELINE.md`, verde na abertura. Item que piorar qualquer linha dele volta por
+  `git revert` na hora.
+- **Rodada atual:** 1, com 8 itens em `TAREFAS.md`, seção "Refino, rodada 1".
+- **Próximo passo:** executar R1-A01, a cena 3D ao lado dos controles entre 860 e 1100 px.
+- **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
+  itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
+
+---
+
+## Registro da construção, encerrada em 2026-09-12
 
 - **Projeto:** Kora Calçados (codinome)
 - **Plano de origem:** não existe `PLANO.md`. O plano deste projeto é a soma de
