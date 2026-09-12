@@ -11,7 +11,11 @@
 
 import { describe, expect, it } from 'vitest';
 import { ErroDeVariante } from '../../lib/render/erros';
-import { motivoDaRecusaDeClique, preservarOuLimpar } from './EditorDeZonas';
+import {
+  mensagemDeZonaGravada,
+  motivoDaRecusaDeClique,
+  preservarOuLimpar,
+} from './EditorDeZonas';
 
 describe('campo vazio numa zona que já existe', () => {
   it('preserva o que está gravado em vez de apagar', () => {
@@ -74,5 +78,31 @@ describe('recusa de clique falada em cima do elemento, não da zona', () => {
       'Esse elemento não aceita cor.',
     );
     expect(motivoDaRecusaDeClique('qualquer coisa')).toBe('Esse elemento não aceita cor.');
+  });
+});
+
+// Gravar não dizia que gravou (R2-A18). O que a frase precisa provar é que ela distingue as duas
+// coisas que a MESMA tela, com a MESMA marcação, faz conforme a chave já existir.
+describe('a confirmação do que foi gravado', () => {
+  it('diz "criada" quando a zona não existia', () => {
+    expect(mensagemDeZonaGravada('sola', false, 3)).toBe('Zona "sola" criada com 3 elementos.');
+  });
+
+  it('diz "atualizada" quando a chave já existia', () => {
+    expect(mensagemDeZonaGravada('sola', true, 3)).toBe(
+      'Zona "sola" atualizada com a marcação de 3 elementos.',
+    );
+  });
+
+  it('nomeia a zona, porque "salvo com sucesso" não deixa conferir nada', () => {
+    expect(mensagemDeZonaGravada('cadarco-lateral', false, 1)).toContain('"cadarco-lateral"');
+  });
+
+  // A contagem passa pela mesma função das outras telas, então o singular vale aqui também.
+  it('concorda no singular', () => {
+    expect(mensagemDeZonaGravada('sola', false, 1)).toBe('Zona "sola" criada com 1 elemento.');
+    expect(mensagemDeZonaGravada('sola', true, 1)).toBe(
+      'Zona "sola" atualizada com a marcação de 1 elemento.',
+    );
   });
 });

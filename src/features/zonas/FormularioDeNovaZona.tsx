@@ -28,6 +28,8 @@ export interface PropsDoFormularioDeNovaZona {
   salvando: boolean;
   /** Erro vindo do banco (ex.: a tradução do 23505). */
   erro: string | null;
+  /** O que acabou de ser gravado, ou null. Some no primeiro clique da próxima marcação. */
+  confirmacao: string | null;
   aoMudarRotulo(valor: string): void;
   aoMudarZoneKey(valor: string): void;
   aoMudarCorDefault(valor: string): void;
@@ -37,6 +39,7 @@ export interface PropsDoFormularioDeNovaZona {
 
 export function FormularioDeNovaZona(props: PropsDoFormularioDeNovaZona): ReactElement {
   const { rotulo, zoneKey, corDefault, quantidadeMarcada, zonaExistente, salvando, erro } = props;
+  const { confirmacao } = props;
 
   const erroDaChave = mensagemDoMotor(() => validarZoneKey(zoneKey));
   // Cor vazia é ausência de cor padrão, não erro: `cor_default` é opcional na tabela.
@@ -57,6 +60,16 @@ export function FormularioDeNovaZona(props: PropsDoFormularioDeNovaZona): ReactE
       {erro !== null && (
         <p className="zonas__erro" role="alert">
           {erro}
+        </p>
+      )}
+
+      {/* `role="status"` e não `alert`: sucesso é notícia boa, e interromper a leitura de quem usa
+          leitor de tela para anunciar que deu certo é o mesmo vício que o painel de zonas evita ao
+          não alertar hex pela metade. Fica ACIMA da contagem porque a contagem já voltou a zero: a
+          frase é o que explica por que ela zerou. */}
+      {confirmacao !== null && (
+        <p className="zona-form__confirmacao" role="status">
+          {confirmacao}
         </p>
       )}
 

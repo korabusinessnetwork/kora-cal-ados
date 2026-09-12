@@ -17,6 +17,7 @@ const formulario = (props: Partial<Parameters<typeof FormularioDeNovaZona>[0]> =
       zonaExistente={false}
       salvando={false}
       erro={null}
+      confirmacao={null}
       aoMudarRotulo={() => {}}
       aoMudarZoneKey={() => {}}
       aoMudarCorDefault={() => {}}
@@ -152,5 +153,18 @@ describe('formulário de nova zona', () => {
     const html = formulario({ rotulo: 'Cadarço lateral', erro: 'x', quantidadeMarcada: 0 });
 
     expect(html).not.toMatch(/kora|aurora|calçados aurora|runner/i);
+  });
+
+  // A confirmação existe porque gravar não dizia que gravou: é o único dos quatro estados
+  // obrigatórios do CLAUDE.md que faltava nesta tela (R2-A18).
+  it('a confirmação aparece como região de status, não como alerta', () => {
+    const html = formulario({ confirmacao: 'Zona "sola" criada com 3 elementos.' });
+
+    expect(html).toContain('role="status"');
+    expect(html).toContain('Zona &quot;sola&quot; criada com 3 elementos.');
+  });
+
+  it('sem confirmação, nenhuma região de status é renderizada', () => {
+    expect(formulario()).not.toContain('role="status"');
   });
 });

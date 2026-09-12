@@ -258,6 +258,21 @@
   line-height: 1.5;
 }
 
+/* A confirmação do que acabou de ser gravado. Tem a mesma forma de bloco do erro logo acima, e
+   não a de uma legenda, porque as duas respondem à MESMA pergunta ("o que aconteceu com o meu
+   clique em salvar?") e a resposta não pode mudar de lugar conforme seja boa ou ruim. Só a cor da
+   borda muda, e ela vem de `--cor-ok`, que já existe. Sem fundo próprio: verde chapado num painel
+   escuro puxa o olho para longe do calçado, que é o que a pessoa está conferindo. */
+.zona-form__confirmacao {
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--cor-ok);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cor-texto);
+}
+
 /* Quantos elementos entram nesta zona agora. É o número que o time confere antes de
    gravar — marcar os 8 ilhoses precisa aparecer como 8 —, então ele fica com a cor de
    texto cheia, não a fraca de ajuda: é informação de conferência, não legenda. */

@@ -12,6 +12,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import { alvosPintaveis } from '../../lib/render/alvosPintaveis';
+import { contarElementos } from '../../lib/texto/contarElementos';
 import { analisarSvg } from '../../lib/render/dom';
 import { ErroDeVariante } from '../../lib/render/erros';
 import { relatorioDeZonas } from '../../lib/render/gerarVarianteDeCor';
@@ -49,6 +50,10 @@ export function EditorDeZonas({
   // Recusa vinda do motor (sobreposição, `fill="none"`, chave inválida): é diferente do erro
   // do banco e precisa aparecer com o motivo real, não como "não deu certo".
   const [recusa, setRecusa] = useState<string | null>(null);
+  // O sucesso da gravação, e o único dos quatro estados obrigatórios do CLAUDE.md que esta tela não
+  // tinha. Quem CRIA zona vê a lista crescer; quem acrescenta elemento a uma zona que já existe só
+  // tinha como prova a contagem daquela linha mudando, num painel que pode estar fora da vista.
+  const [confirmacao, setConfirmacao] = useState<string | null>(null);
 
   // Índice id → elemento. `getElementById` não é confiável num documento XML vindo do
   // `DOMParser` (o `id` só é ID de verdade quando um DTD o declara, e o canônico não tem
@@ -133,6 +138,10 @@ export function EditorDeZonas({
       }
 
       setRecusa(null);
+      // A confirmação vale para a marcação que acabou de ser gravada. No primeiro clique da
+      // próxima ela já não é verdade sobre o que está na tela, e mensagem de sucesso que sobrevive
+      // ao seu assunto é pior que mensagem nenhuma: ela passa a confirmar a coisa errada.
+      setConfirmacao(null);
       marcacao.alternar(id);
     },
     [chave, elementosPorId, marcacao],
@@ -159,8 +168,12 @@ export function EditorDeZonas({
     }
 
     setRecusa(null);
+    // Lidos ANTES da gravação: `marcacao.limpar()` zera a contagem logo abaixo, e a mensagem fala
+    // do que foi enviado, não do que sobrou na tela.
+    const gravada = mensagemDeZonaGravada(chave, zonaExistente, marcacao.idsMarcados.length);
     if (!(await zonas.gravar(linha))) return;
 
+    setConfirmacao(gravada);
     marcacao.limpar();
     setRotulo('');
     setZoneKey('');
@@ -214,6 +227,7 @@ export function EditorDeZonas({
           zonaExistente={zonaExistente}
           salvando={zonas.salvando}
           erro={recusa ?? zonas.erroAoGravar}
+          confirmacao={confirmacao}
           aoMudarRotulo={(valor) => {
             setRotulo(valor);
             // Sugere a chave enquanto ninguém a editou à mão: `zone_key` vira contrato com o
@@ -229,6 +243,7 @@ export function EditorDeZonas({
           aoCancelar={() => {
             marcacao.limpar();
             setRecusa(null);
+            setConfirmacao(null);
           }}
         />
       </aside>
@@ -248,6 +263,29 @@ export function preservarOuLimpar(
   const limpo = valor.trim();
   if (limpo !== '') return limpo;
   return zonaExistente ? undefined : null;
+}
+
+/**
+ * O que a tela diz depois de gravar. Nomeia a zona e diz qual das duas coisas aconteceu, porque
+ * "salvo com sucesso" não distingue criar de acrescentar, e é justamente essa distinção que a
+ * pessoa precisa conferir: a mesma tela, com a mesma marcação, faz INSERT ou UPDATE conforme a
+ * chave já existir.
+ *
+ * A contagem é a dos elementos ENVIADOS, e a frase diz isso ("com a marcação de N elementos") em
+ * vez de afirmar que a zona ganhou N: `marcarZona` faz união com o que já estava gravado, então um
+ * elemento remarcado entra na conta do envio e não acrescenta nada à zona. Quem mostra o número
+ * final é o painel, que relê do banco.
+ */
+export function mensagemDeZonaGravada(
+  zoneKey: string,
+  zonaExistente: boolean,
+  quantidadeMarcada: number,
+): string {
+  const elementos = contarElementos(quantidadeMarcada);
+
+  return zonaExistente
+    ? `Zona "${zoneKey}" atualizada com a marcação de ${elementos}.`
+    : `Zona "${zoneKey}" criada com ${elementos}.`;
 }
 
 /**
