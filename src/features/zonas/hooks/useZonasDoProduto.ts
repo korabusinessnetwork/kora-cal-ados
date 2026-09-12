@@ -14,6 +14,7 @@
 // um motivo que não tem nada a ver com zona. Quem tem o tenant em mãos é quem chama.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { clienteSupabase } from '../../../lib/supabase/cliente';
 import { listarZonasDoProduto } from '../listarZonasDoProduto';
 import { gravarZonaNoBanco } from '../gravarZonaNoBanco';
@@ -32,7 +33,28 @@ export interface ZonasCarregadas {
   gravar(zona: ZonaParaGravar): Promise<boolean>;
 }
 
-export function useZonasDoProduto(productId: string, tenantId: string): ZonasCarregadas {
+/**
+ * O cliente entra por parâmetro, com o de hoje como padrão.
+ *
+ * Existe para este hook ter teste. Sem o parâmetro, `clienteSupabase()` é lido de dentro, e como
+ * este projeto não usa `vi.mock` em lugar nenhum, montar o hook num teste exigiria ou rede de
+ * verdade ou o singleton global remendado, que vaza para o arquivo de teste seguinte. Com ele, a
+ * sonda passa um cliente de mentira e o caminho da rede fica alcançável.
+ *
+ * Não entra na lista de dependências do efeito, e sim por referência: uma chamada que criasse o
+ * cliente na própria linha (`useProdutos(id, criarCliente())`) daria identidade nova a cada render
+ * e o efeito recarregaria para sempre. Mesmo desenho, e mesmo motivo, dos callbacks do
+ * `PalcoDeModelo3d`. A consequência é dita por inteiro: trocar de cliente NÃO recarrega sozinho,
+ * e quem precisar disso troca o que já recarrega, que é o id.
+ */
+export function useZonasDoProduto(
+  productId: string,
+  tenantId: string,
+  cliente: SupabaseClient = clienteSupabase(),
+): ZonasCarregadas {
+  const banco = useRef(cliente);
+  banco.current = cliente;
+
   const [estado, setEstado] = useState<EstadoDasZonas>('carregando');
   const [zonas, setZonas] = useState<ZonaDoProduto[]>([]);
   const [erro, setErro] = useState<string | null>(null);
@@ -54,7 +76,7 @@ export function useZonasDoProduto(productId: string, tenantId: string): ZonasCar
     setErro(null);
     setErroAoGravar(null);
 
-    listarZonasDoProduto(clienteSupabase(), productId)
+    listarZonasDoProduto(banco.current, productId)
       .then((achadas) => {
         if (!vivo) return;
         setZonas(achadas);
@@ -89,10 +111,10 @@ export function useZonasDoProduto(productId: string, tenantId: string): ZonasCar
 
       setSalvando(true);
       setErroAoGravar(null);
-      const cliente = clienteSupabase();
+      const doBanco = banco.current;
 
       try {
-        await gravarZonaNoBanco(cliente, { tenantId, productId: alvo, zona });
+        await gravarZonaNoBanco(doBanco, { tenantId, productId: alvo, zona });
       } catch (falha: unknown) {
         if (aindaVale()) {
           setErroAoGravar(mensagemDe(falha, 'Não foi possível gravar a zona.'));
@@ -106,7 +128,7 @@ export function useZonasDoProduto(productId: string, tenantId: string): ZonasCar
       // no plano para o last-write-wins — quem gravou vê imediatamente o que o colega
       // mudou em outra zona no meio tempo.
       try {
-        const atuais = await listarZonasDoProduto(cliente, alvo);
+        const atuais = await listarZonasDoProduto(doBanco, alvo);
         if (aindaVale()) {
           setZonas(atuais);
           setEstado('pronta');
