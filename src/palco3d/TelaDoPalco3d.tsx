@@ -126,7 +126,7 @@ export function TelaDoPalco3d() {
           </p>
         </section>
 
-        <section className="painel">
+        <section className="painel palco3d__painel-inspecao">
           <h2 className="painel__titulo">Malha clicada</h2>
           <p className="painel__ajuda">
             O endereço de uma zona 3D é o nome do nó (ADR-007 D4). É este texto que a composição

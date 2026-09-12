@@ -99,7 +99,23 @@
 
 .palco3d__nota { margin-top: 14px; }
 
-@media (max-width: 1100px) {
+/* A largura intermediária, onde as três colunas não cabem e uma coluna só seria pior.
+
+   Uma coluna só empurrava a cena para depois de todos os controles: numa janela de 1024x768 o
+   canvas começava em y=789, ou seja, fora da tela, e quem escolhia a cor não via o calçado
+   enquanto escolhia. Nesta tela isso não é desconforto de layout, é o princípio nº1 perdendo a
+   única conferência que ele tem, que é a olho.
+
+   A saída é tirar da linha de cima o painel que pode esperar. Controle e cena ficam lado a lado,
+   e a inspeção (o que foi clicado, as zonas) desce inteira para a segunda linha: ela é leitura do
+   resultado, não é o que a pessoa está manipulando. */
+@media (min-width: 861px) and (max-width: 1100px) {
+  .palco3d__colunas { grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); }
+  .palco3d__painel-inspecao { grid-column: 1 / -1; }
+}
+
+/* Abaixo disso não há largura para duas colunas sem espremer a cena, e aí empilhar é o certo. */
+@media (max-width: 860px) {
   .palco3d__colunas { grid-template-columns: 1fr; }
 }
 

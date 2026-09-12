@@ -115,7 +115,7 @@ export function TelaDaComposicao() {
           )}
         </section>
 
-        <section className="painel">
+        <section className="painel palco3d__painel-inspecao">
           <h2 className="painel__titulo">Peça clicada</h2>
           <p className="painel__ajuda">
             O nome do nó é o id da peça (ADR-007 D4), e a zona que a API recolore é a categoria
