@@ -65,11 +65,7 @@ body {
   .esboco__painel-api { grid-column: 1 / -1; }
 }
 
-/* Abaixo disto não há largura para duas colunas sem espremer o preview, e aí empilhar é o certo. O
-   mesmo 860 px do palco, para as duas telas quebrarem no mesmo lugar. */
-@media (max-width: 860px) {
-  .colunas { grid-template-columns: 1fr; }
-}
+/* A quebra estreita do esboço mora mais abaixo, junto de `.palco`, e o motivo está escrito lá. */
 
 .painel {
   background: var(--cor-superficie); border: 1px solid var(--cor-borda);
@@ -122,6 +118,42 @@ body {
   border-radius: var(--raio); padding: 24px; display: grid; place-items: center;
 }
 .palco--congelado { outline: 1px dashed var(--cor-erro); outline-offset: -1px; }
+
+/* Abaixo de 860 px não há largura para duas colunas sem espremer o preview, e aí empilhar é o
+   certo. O mesmo 860 px do palco 3D, para as duas telas quebrarem no mesmo lugar.
+
+   Empilhar na ordem do DOM, porém, colocava a lista de zonas inteira antes do calçado: em 375x812 o
+   SVG começava a 998 px do topo e o primeiro controle de zona a 396, ou seja, quem escolhia a cor
+   no celular mexia num controle visível com o calçado 186 px abaixo da dobra. A tela cujo motivo de
+   existir é "escolhi esta cor e é esta que aparece" não mostrava a segunda metade da frase.
+
+   `order` sobe o calçado e `sticky` o mantém à vista enquanto a lista rola por baixo. Só `order`
+   entregaria "vê ao abrir" e não "vê enquanto escolhe", que é a diferença que importa aqui. É a
+   mesma dupla do A30 no palco 3D, na tela que o A30 não olhou.
+
+   `display: contents` na coluna central é o que torna isso possível sem mexer no JSX: sem ele o
+   único item que o grid enxerga é a coluna inteira, e subir a coluna subiria junto o comparativo de
+   normalização, que é leitura de resultado e pode esperar. Dissolvida, o preview e o comparativo
+   viram itens do grid e cada um vai para o seu lugar.
+
+   O SELETOR É `.colunas .palco`, E NÃO `.palco`, por causa do `position`. `.palco` é classe
+   GLOBAL e está declarada em dois arquivos: aqui e em `src/features/zonas/zonas.css:66`, onde a
+   repetição é deliberada e documentada. As duas têm a mesma especificidade, media query não
+   acrescenta nenhuma, e quem vence é a última que o bundle escreve — que hoje é a do editor. A
+   primeira versão deste item usou `.palco` e o `sticky` saiu sem efeito nenhum, sem erro nenhum
+   para avisar: o `order` funcionou e o `position` continuou `relative`. Descendo de `.colunas`,
+   que só existe no esboço, a regra ganha por especificidade em vez de por sorte na ordem, e o
+   editor logado não é tocado. */
+@media (max-width: 860px) {
+  .colunas { grid-template-columns: 1fr; }
+  .coluna-central { display: contents; }
+  .colunas .palco {
+    order: -1;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+}
 .palco__area { position: relative; width: 100%; }
 .palco__svg svg { width: 100%; height: auto; display: block; }
 .palco__svg [id^="zona-"] { cursor: pointer; }
