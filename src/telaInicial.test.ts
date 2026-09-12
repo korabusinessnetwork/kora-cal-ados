@@ -3,7 +3,7 @@
 // aqui, o teste do valor desconhecido é o que obriga a pensar em que lado ela cai.
 
 import { describe, expect, it } from 'vitest';
-import { lerTelaDaUrl, urlDaTela } from './telaInicial';
+import { lerTelaDaUrl, tituloDaTela, urlDaTela } from './telaInicial';
 
 describe('lerTelaDaUrl', () => {
   it('abre o esboço com ?tela=esboco, que é a tela sem banco', () => {
@@ -74,5 +74,29 @@ describe('urlDaTela', () => {
   it('limpa a query ao voltar para o app, em vez de escrever ?tela=app', () => {
     expect(urlDaTela('app', '/')).toBe('/');
     expect(urlDaTela('app', '/qualquer')).not.toContain('tela=');
+  });
+});
+
+describe('tituloDaTela', () => {
+  it('cada tela tem o próprio título, e nenhum se repete', () => {
+    // O defeito que criou esta função: as quatro telas herdavam o mesmo título fixo do
+    // `index.html`, então duas abas abertas lado a lado eram indistinguíveis.
+    const titulos = (['app', 'esboco', 'palco3d', 'composicao'] as const).map(tituloDaTela);
+
+    expect(new Set(titulos).size).toBe(titulos.length);
+  });
+
+  it('o título nomeia a tela antes do produto', () => {
+    // Aba estreita corta o fim: o que sobra tem que ser o que distingue uma aba da outra.
+    expect(tituloDaTela('composicao')).toBe('Calçado montado · Kora Calçados');
+    expect(tituloDaTela('app')).toMatch(/^Editor de zonas/);
+  });
+
+  it('nenhum título ainda chama a tela de "esboço" quando ela não é o esboço', () => {
+    // O título antigo, "Esboço · editor de zonas", nomeava duas telas ao mesmo tempo e
+    // aparecia nas quatro.
+    expect(tituloDaTela('palco3d')).not.toMatch(/esboço/i);
+    expect(tituloDaTela('composicao')).not.toMatch(/esboço/i);
+    expect(tituloDaTela('app')).not.toMatch(/esboço/i);
   });
 });

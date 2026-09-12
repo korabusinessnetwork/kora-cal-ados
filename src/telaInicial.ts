@@ -56,3 +56,34 @@ export function lerTelaDaUrl(busca: string): Tela {
 export function urlDaTela(tela: Tela, caminho: string): string {
   return tela === 'app' ? caminho : `?tela=${tela}`;
 }
+
+/**
+ * O nome do produto na aba do navegador.
+ *
+ * É o codinome, e não o nome real: o nome real ainda não existe (`memory/identity.md`, Bloco 7 do
+ * intake pendente). Está num lugar só para o dia em que existir ser uma linha, e não uma caçada.
+ */
+const NOME_DO_PRODUTO = 'Kora Calçados';
+
+/** O que cada tela escreve na aba. Frase da tela primeiro, produto depois, como faz todo app. */
+const TITULO_DA_TELA: Record<Tela, string> = {
+  app: 'Editor de zonas',
+  esboco: 'Esboço do motor',
+  palco3d: 'Palco 3D',
+  composicao: 'Calçado montado',
+};
+
+/**
+ * O título da aba para uma tela.
+ *
+ * Existe porque as quatro telas dividiam o mesmo título fixo do `index.html`, "Esboço · editor de
+ * zonas": quem abre o configurador e o editor lado a lado via duas abas idênticas, e o título
+ * ainda por cima nomeava só uma das quatro. Aba é o único rótulo que sobrevive à janela
+ * minimizada.
+ *
+ * Puro, e escrito aqui e não no componente, pelo mesmo motivo do resto deste arquivo: é a única
+ * parte da decisão que dá para prender em teste.
+ */
+export function tituloDaTela(tela: Tela): string {
+  return `${TITULO_DA_TELA[tela]} · ${NOME_DO_PRODUTO}`;
+}

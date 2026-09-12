@@ -10,7 +10,7 @@
 // uma requisição sequer. Cobrar credencial de quem não vai usar credencial nenhuma é
 // justamente a "prevenção de erro" do princípio nº1 aplicada ao contrário.
 
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { EsbocoDoEditor } from './esboco/EsbocoDoEditor';
 import { BarraDaSessao } from './features/sessao/BarraDaSessao';
 import { ProvedorDeSessao } from './features/sessao/ContextoDeSessao';
@@ -18,7 +18,7 @@ import { TelaDeProdutos } from './features/produtos/TelaDeProdutos';
 import { RotaProtegida } from './features/sessao/RotaProtegida';
 import { ConfiguracaoAusente, lerConfiguracaoDoSupabase } from './lib/supabase/configuracaoDoSupabase';
 import type { Tela } from './telaInicial';
-import { lerTelaDaUrl, urlDaTela } from './telaInicial';
+import { lerTelaDaUrl, tituloDaTela, urlDaTela } from './telaInicial';
 
 // O palco entra por `import()` tardio, e não por import comum, porque ele traz o three.js
 // junto: no chunk principal a biblioteca inteira ia no primeiro carregamento de TODO
@@ -35,6 +35,12 @@ const TelaDaComposicao = lazy(async () => ({
 
 export function App() {
   const [tela, setTela] = useState<Tela>(() => lerTelaDaUrl(window.location.search));
+
+  // A aba acompanha a tela. Fica aqui, e não em cada tela, porque quem sabe qual delas está aberta
+  // é este componente: espalhar o título pelas quatro faria duas delas discordarem um dia.
+  useEffect(() => {
+    document.title = tituloDaTela(tela);
+  }, [tela]);
 
   // Trocar de tela troca o endereço junto. Sem isso um F5 no esboço devolveria a tela
   // de login, e o link não serviria para mandar a alguém "abre isto aqui".
