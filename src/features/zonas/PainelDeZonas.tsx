@@ -14,6 +14,7 @@
 // (`relatorioDeZonas`) e `sobreposicoes` (`zonasSobrepostas`) é o `EditorDeZonas`.
 
 import type { ReactElement } from 'react';
+import { contarElementos } from '../../lib/texto/contarElementos';
 import type { Sobreposicao } from '../../lib/render/zonasSobrepostas';
 
 export interface ZonaNoPainel {
@@ -54,7 +55,7 @@ export function PainelDeZonas(props: PropsDoPainelDeZonas): ReactElement {
           key={`${sobreposicao.zone_key_a}|${sobreposicao.zone_key_b}`}
         >
           As zonas <code>{sobreposicao.zone_key_a}</code> e{' '}
-          <code>{sobreposicao.zone_key_b}</code> dividem {contar(sobreposicao.elementos)}. Enquanto
+          <code>{sobreposicao.zone_key_b}</code> dividem {contarElementos(sobreposicao.elementos)}. Enquanto
           isso existir, gerar variante pedindo cor para as duas falha: a ordem das chaves no pedido
           é que decidiria a cor do que elas dividem. Remarque uma das duas.
         </p>
@@ -115,7 +116,7 @@ function ItemDeZona({ zona, emFoco, aoFocar, aoMudarCor }: PropsDoItemDeZona): R
         <code className="painel-zonas__chave">{zona.zone_key}</code>
         {/* Sem `label`, só a chave: "sem nome" faria procurar um texto que ninguém escreveu. */}
         {zona.label !== null && <span className="painel-zonas__rotulo">{zona.label}</span>}
-        <span className="painel-zonas__contagem">{contar(zona.elementos)}</span>
+        <span className="painel-zonas__contagem">{contarElementos(zona.elementos)}</span>
       </button>
 
       {zona.elementos === 0 && (
@@ -145,9 +146,4 @@ function ItemDeZona({ zona, emFoco, aoFocar, aoMudarCor }: PropsDoItemDeZona): R
       )}
     </li>
   );
-}
-
-/** Contagem com plural certo — "1 elementos" na tela do time lê como bug do sistema. */
-function contar(elementos: number): string {
-  return elementos === 1 ? '1 elemento' : `${elementos} elementos`;
 }

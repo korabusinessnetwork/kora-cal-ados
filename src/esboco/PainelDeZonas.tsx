@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import type { ZonaDoProduto } from './produtoDemo';
 import { paletaDeAtalho } from './produtoDemo';
+import { contarElementos } from '../lib/texto/contarElementos';
 
 interface Props {
   zonas: ZonaDoProduto[];
@@ -49,7 +50,7 @@ export function PainelDeZonas({
                 />
                 <span className="zona__nome">{zona.rotulo}</span>
                 <span className="zona__meta">
-                  {elementos} {elementos === 1 ? 'elemento' : 'elementos'}
+                  {contarElementos(elementos)}
                 </span>
                 <code className="zona__hex">{cor ?? 'gradiente'}</code>
               </button>

@@ -10,6 +10,7 @@
 
 import type { FormEvent, ReactElement } from 'react';
 import { ErroDeVariante } from '../../lib/render/erros';
+import { contarElementos } from '../../lib/texto/contarElementos';
 import { validarCor } from '../../lib/render/validarCor';
 import { sugerirZoneKey, validarZoneKey } from '../../lib/render/validarZoneKey';
 
@@ -60,7 +61,7 @@ export function FormularioDeNovaZona(props: PropsDoFormularioDeNovaZona): ReactE
       )}
 
       <p className="zona-form__contagem">
-        {quantidadeMarcada === 1 ? '1 elemento marcado' : `${quantidadeMarcada} elementos marcados`}
+        {contarElementos(quantidadeMarcada, { singular: 'marcado', plural: 'marcados' })}
       </p>
 
       <div className="zona-form__campo">

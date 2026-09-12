@@ -9,6 +9,7 @@
 // Apresentacional: não busca nada, não guarda estado.
 
 import type { ReactNode } from 'react';
+import { contarElementos } from '../../lib/texto/contarElementos';
 
 export interface PropsDaVisualizacaoDoProduto {
   nome: string;
@@ -40,7 +41,9 @@ export function VisualizacaoDoProduto({
         </button>
         <h1 className="produto__titulo">{nome}</h1>
         {elementosMarcaveis !== null && (
-          <span className="produto__selo">{elementosMarcaveis} elementos marcáveis</span>
+          <span className="produto__selo">
+            {contarElementos(elementosMarcaveis, { singular: 'marcável', plural: 'marcáveis' })}
+          </span>
         )}
       </div>
 
