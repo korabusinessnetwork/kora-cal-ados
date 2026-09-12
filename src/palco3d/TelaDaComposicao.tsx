@@ -276,6 +276,16 @@ function ControleDaCategoria({
                   aoMudar({ parametros: { [parametro.nome]: Number(evento.target.value) } })
                 }
               />
+              {/* A faixa escrita, e não só o trilho do controle. Sem ela o número muda enquanto a
+                  pessoa arrasta e não há como saber se 18,0 mm é o começo, o meio ou o fim do que a
+                  peça aceita: o trilho mostra a POSIÇÃO, nunca os extremos. Quem confere "a espessura
+                  que escolhi é a espessura que vai sair" precisa dos dois números à vista, que é o
+                  princípio nº1 valendo para parâmetro do mesmo jeito que vale para cor.
+                  Mesmo texto e mesma ordem da tela `?tela=palco3d`: é o mesmo dado, e duas telas do
+                  palco escrevendo a mesma medida de jeitos diferentes é o começo de elas divergirem. */}
+              <span className="palco3d__limites">
+                faixa {milimetros(parametro.minimo)} a {milimetros(parametro.maximo)}
+              </span>
             </label>
           ) : null}
         </div>
