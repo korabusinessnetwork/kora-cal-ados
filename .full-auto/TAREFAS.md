@@ -208,7 +208,17 @@ robustez (A51 e A52), produto (A50), qualidade (A49 e A42), ux (A48).
 Ordem de execução pelo score, com o A52 por último porque é o único que mexe em como o `App.tsx`
 carrega as telas, e quero o baseline conferido várias vezes antes dele.
 
-- [ ] R6-A51 A raiz ganha rede de proteção contra exceção de render | trilha: robustez | depende: nenhum | pronto quando: existe um `ErrorBoundary` acima das quatro telas, um componente que lança durante o render deixa a página COM conteúdo (mensagem do que houve mais as saídas para outra tela) em vez de `document.body` vazio, e existe teste que monta um filho que lança e afirma que a saída continua no DOM
+- [x] R6-A51 A raiz ganha rede de proteção contra exceção de render | trilha: robustez | depende: nenhum | pronto quando: existe um `ErrorBoundary` acima das quatro telas, um componente que lança durante o render deixa a página COM conteúdo (mensagem do que houve mais as saídas para outra tela) em vez de `document.body` vazio, e existe teste que monta um filho que lança e afirma que a saída continua no DOM
+      feito em `40d28c2`. A rede é uma classe (`src/RedeDeProtecao.tsx`), a única do projeto, porque
+      `getDerivedStateFromError` só existe em classe. Cada tela entra dentro dela e o rodapé fica
+      FORA: a exceção não leva junto a navegação, e o `key={tela}` impede que a falha antiga
+      sobreviva à troca de tela. Uma segunda rede no `main.tsx` atende o caso em que quem lança é o
+      próprio `App`. As saídas são `<a href>`, porque com a árvore morta não existe estado de
+      navegação para um `onClick` mexer. Conferido no navegador com um `throw` proposital dentro da
+      `TelaDoPalco3d`, revertido em seguida, e foi ALI que apareceu o defeito que o teste não via: a
+      rede desenhando as próprias saídas deixava a mesma lista de três destinos duas vezes na tela,
+      uma em links e outra em botões. Daí o `comSaidas={false}` que o `App` usa. 6 testes novos, e a
+      mutação (`getDerivedStateFromError` devolvendo `{falha: null}`) deixa 4 deles vermelhos.
 - [ ] R6-A50 A peça clicada mostra os dois lados do endereço | trilha: produto | depende: nenhum | pronto quando: clicar numa peça no calçado montado mostra o id do nó E a categoria daquela peça, com o mesmo nome de categoria que a lista de zonas usa, e existe teste de que os dois vêm da MESMA composição em cena (id inventado não inventa categoria)
 - [ ] R6-A49 A tela da composição ganha teste de comportamento | trilha: qualidade | depende: nenhum | pronto quando: `TelaDaComposicao` monta em jsdom e há teste de que colar um JSON válido troca o que está em cena, colar um JSON recusado mantém o calçado anterior e escreve o motivo, e trocar de peça não carrega o parâmetro da peça anterior
 - [ ] R6-A48 A moldura preta some quando o 3D não vai abrir | trilha: ux | depende: nenhum | pronto quando: no estado `contexto-negado` não existe mais uma caixa preta vazia guardando espaço para o que não vem, a mensagem ocupa esse lugar nas duas telas do palco, e o `contexto-perdido` continua com a moldura de pé (com teste dos dois estados)
