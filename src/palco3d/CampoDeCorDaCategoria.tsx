@@ -31,6 +31,18 @@ export interface CampoDeCorDaCategoriaProps {
   aoTrocar: (cor: string) => void;
 }
 
+/**
+ * O id do seletor de cor de uma categoria, no DOM.
+ *
+ * Existe como função, e não como texto escrito em dois lugares, porque quem precisa dele é OUTRA
+ * parte da tela: o painel "Peça clicada" leva o foco até o controle da zona que a pessoa acabou de
+ * clicar. O mesmo texto escrito à mão em dois lugares diverge no dia em que um dos dois mudar, e
+ * o sintoma seria um botão que não faz nada (ADR-003, "um termo, um nome, sempre").
+ */
+export function idDoCampoDeCor(categoria: string): string {
+  return `composicao-cor-${categoria}`;
+}
+
 export function CampoDeCorDaCategoria({ categoria, cor, aoTrocar }: CampoDeCorDaCategoriaProps) {
   // O texto cru do campo, separado da cor em vigor. Sem essa separação, cada tecla mandaria um
   // valor pela metade para o motor e o calçado piscaria durante a digitação.
@@ -57,6 +69,7 @@ export function CampoDeCorDaCategoria({ categoria, cor, aoTrocar }: CampoDeCorDa
     <div className="palco3d__cor">
       <input
         type="color"
+        id={idDoCampoDeCor(categoria)}
         value={cor}
         aria-label={`cor da zona ${categoria}`}
         onChange={(evento) => escolherNoSeletor(evento.target.value)}

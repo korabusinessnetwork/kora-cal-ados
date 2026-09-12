@@ -97,6 +97,32 @@
   word-break: break-all;
 }
 
+/* --- Os dois lados do endereço da peça clicada ---
+
+   O painel dizia "são os dois lados do mesmo endereço" e mostrava um lado só. Agora mostra os
+   dois, e os rótulos "nó" e "zona" precisam ser pequenos e apagados de propósito: o que a pessoa
+   procura com o olho são os dois valores em fonte mono, e um rótulo do mesmo tamanho competiria
+   com eles. */
+.palco3d__endereco { margin: 0; }
+.palco3d__endereco dt {
+  margin-bottom: 3px;
+  font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--cor-texto-fraco);
+}
+.palco3d__endereco dd { margin: 0 0 10px; }
+.palco3d__endereco dd:last-child { margin-bottom: 0; }
+
+/* O caminho entre a peça clicada e a cor dela, que antes era a memória de quem estava olhando. */
+.palco3d__ir-para-cor {
+  margin-top: 6px; padding: 0;
+  background: none; border: none; color: var(--cor-acento);
+  font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer;
+}
+
+/* Malha fora de toda zona: falha alto e visível, porque a alternativa é a tela chutar uma
+   categoria, e zona errada em silêncio é o que o princípio nº1 proíbe. */
+.palco3d__sem-zona { display: block; font-size: 12px; line-height: 1.5; color: var(--cor-erro); }
+
 .palco3d__nota { margin-top: 14px; }
 
 /* A largura intermediária, onde as três colunas não cabem e uma coluna só seria pior.

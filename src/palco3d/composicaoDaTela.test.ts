@@ -13,6 +13,7 @@ import {
   escolhasDoTextoColado,
   montarDaTela,
   mudarEscolhaDaTela,
+  zonaDaMalha,
   type EscolhaDaTela,
 } from './composicaoDaTela';
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
@@ -400,5 +401,50 @@ describe('colar uma composição de volta na tela (A47)', () => {
 
     expect(() => validarComposicao(JSON.parse(comCorInvalida), CATALOGO)).toThrow();
     expect(escolhasDoTextoColado(comCorInvalida, FORMA, CATALOGO).escolhas).toBeNull();
+  });
+});
+
+describe('zonaDaMalha, o outro lado do endereço da peça clicada (A50)', () => {
+  it('a malha clicada devolve a zona da montagem que está em cena', () => {
+    // O painel prometia "os dois lados do mesmo endereço" e entregava um: o id do nó. Este é o
+    // outro, e é o lado que a API recolore e o único que tem controle de cor na tela.
+    const { zonas } = montar(escolhasDaComposicao(DEMO));
+
+    expect(zonaDaMalha(zonas, 'prova-cabedal-baixo')).toBe('cabedal');
+    expect(zonaDaMalha(zonas, 'prova-sola-plana')).toBe('sola');
+  });
+
+  it('malha que não está na cena não ganha categoria inventada', () => {
+    // Zona errada em silêncio é o que o princípio nº1 proíbe. `prova-cabedal-cano-alto` EXISTE no
+    // catálogo, e é da categoria `cabedal`, mas não é a peça que está montada: se a resposta viesse
+    // do catálogo em vez da cena, esta linha devolveria "cabedal" e a tela mandaria a pessoa pintar
+    // uma zona a partir de uma peça que ela não está vendo.
+    const { zonas } = montar(escolhasDaComposicao(DEMO));
+
+    expect(CATALOGO.pecas.find(({ id }) => id === 'prova-cabedal-cano-alto')?.categoria).toBe(
+      'cabedal',
+    );
+    expect(zonaDaMalha(zonas, 'prova-cabedal-cano-alto')).toBeNull();
+    expect(zonaDaMalha(zonas, 'nome-que-nao-existe')).toBeNull();
+  });
+
+  it('sem nada clicado não há endereço nenhum', () => {
+    const { zonas } = montar(escolhasDaComposicao(DEMO));
+
+    expect(zonaDaMalha(zonas, null)).toBeNull();
+  });
+
+  it('trocar a peça de uma categoria muda a malha que responde por aquela zona', () => {
+    // A resposta acompanha a cena, e é isso que faz o endereço continuar verdadeiro depois de
+    // qualquer troca. Sem isto, o painel diria "cabedal" para uma malha que saiu do calçado.
+    const trocado = mudarEscolhaDaTela(
+      escolhasDaComposicao(DEMO),
+      'cabedal',
+      { pecaId: 'prova-cabedal-cano-alto' },
+    );
+    const { zonas } = montar(trocado);
+
+    expect(zonaDaMalha(zonas, 'prova-cabedal-cano-alto')).toBe('cabedal');
+    expect(zonaDaMalha(zonas, 'prova-cabedal-baixo')).toBeNull();
   });
 });

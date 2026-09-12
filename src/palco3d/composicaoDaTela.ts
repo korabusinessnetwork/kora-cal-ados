@@ -211,3 +211,22 @@ function mensagemDe(erro: unknown): string {
 
   return 'A composição foi recusada, e o motivo não veio em forma de erro.';
 }
+
+/**
+ * A zona a que uma malha clicada pertence, segundo a montagem que está EM CENA.
+ *
+ * O painel "Peça clicada" dizia, no próprio texto de ajuda, que o nome do nó e a categoria "são os
+ * dois lados do mesmo endereço", e mostrava um lado só. O outro lado, que é justamente o que a API
+ * recolore e o que tem controle de cor na tela, a pessoa tinha de achar casando com o olho o id que
+ * apareceu aqui com a lista de zonas mais abaixo.
+ *
+ * A resposta sai das `zonas` da montagem, e não do catálogo, de propósito: o catálogo sabe a que
+ * categoria uma peça PODE servir, e a pergunta da tela é outra, "a peça que eu acabei de clicar,
+ * nesta cena, é de que zona". Malha que não está em zona nenhuma devolve `null`, e a tela diz isso
+ * em vez de inventar uma categoria: zona errada em silêncio é o que o princípio nº1 proíbe.
+ */
+export function zonaDaMalha(zonas: readonly Zona3d[], malha: string | null): string | null {
+  if (malha === null) return null;
+
+  return zonas.find(({ malhas }) => malhas.includes(malha))?.zone_key ?? null;
+}
