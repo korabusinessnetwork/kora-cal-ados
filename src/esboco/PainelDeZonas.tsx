@@ -6,6 +6,7 @@ import { useState } from 'react';
 import type { ZonaDoProduto } from './produtoDemo';
 import { paletaDeAtalho } from './produtoDemo';
 import { contarElementos } from '../lib/texto/contarElementos';
+import { estadoDoHexDigitado } from '../lib/render/estadoDoHexDigitado';
 
 interface Props {
   zonas: ZonaDoProduto[];
@@ -16,7 +17,6 @@ interface Props {
   aoTrocarCor: (zoneKey: string, cor: string) => void;
 }
 
-const HEX_COMPLETO = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 export function PainelDeZonas({
   zonas,
@@ -89,10 +89,10 @@ function EditorDeCor({
   // cara do usuário enquanto ele ainda digita.
   function digitar(valor: string) {
     setTexto(valor);
-    if (HEX_COMPLETO.test(valor.trim())) aoTrocar(valor.trim());
+    if (estadoDoHexDigitado(valor) === 'completo') aoTrocar(valor.trim());
   }
 
-  const valido = HEX_COMPLETO.test(texto.trim());
+  const valido = estadoDoHexDigitado(texto) === 'completo';
 
   return (
     <div className="editor">

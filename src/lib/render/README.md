@@ -18,6 +18,7 @@ implementação é o que sustenta "cor no editor = cor na API" (princípio nº1 
 | `validarZoneKey.ts` | `zone_key` é chave pública da API — slug estável; `sugerirZoneKey` propõe a partir do rótulo digitado | texto → chave, ou erro |
 | `lerRegrasCss.ts` | Lê o `<style>` do próprio SVG (o jsdom não monta CSSOM em `image/svg+xml`) | texto CSS → regras com especificidade |
 | `validarCor.ts` | Só aceita hex (ADR-004, q3) | `#f00` → `#FF0000`, ou erro |
+| `estadoDoHexDigitado.ts` | Em que pé está o hex sendo digitado, para a tela saber quando é cedo para reclamar | `#C0` → `rascunho`, `#GGG` → `errado` |
 | `erros.ts` | `ErroDeVariante` + códigos de erro (contrato de API) | — |
 | `dom.ts` | Abstrai de onde vem o DOM. No navegador usa `DOMParser` nativo | — |
 | `domNode.ts` | Registra o jsdom. **Só o Node importa** — é o que mantém jsdom fora do bundle | — |

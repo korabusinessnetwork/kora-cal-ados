@@ -13,29 +13,12 @@
 // para reclamar**, nunca o que é um hex.
 
 import { ErroDeVariante } from '../../lib/render/erros';
+import { estadoDoHexDigitado } from '../../lib/render/estadoDoHexDigitado';
 import { validarCor } from '../../lib/render/validarCor';
 import type { CoresPorZona } from '../../lib/render/gerarVarianteDeCor';
 
 /** `zone_key` → o texto cru do campo, exatamente como foi digitado. */
 export type CoresEmEdicao = Record<string, string>;
-
-/**
- * Rascunho = texto que ainda pode virar um hex se a pessoa continuar digitando: `#`, `#C`,
- * `#C0`, `#C039`, `#C0392`. Até 5 dígitos, porque com 6 já é hex completo (e com 3 também,
- * na forma curta) — aí `validarCor` decide, não esta regra.
- *
- * O que é rascunho não vira erro; qualquer outra coisa vira. `vermelho`, `#GGG`, `C0392B`
- * sem `#` e `#C0392BB` são erro na hora: nenhuma tecla a mais os transforma em cor, então
- * esperar até o salvar só adiaria a mesma má notícia para o pior momento.
- *
- * O limite dos dois lados importa: erro cedo demais acusa quem não errou, tarde demais
- * deixa texto claramente errado sem aviso.
- */
-const RASCUNHO_DE_HEX = /^#[0-9a-fA-F]{0,5}$/;
-
-function ehRascunho(texto: string): boolean {
-  return RASCUNHO_DE_HEX.test(texto);
-}
 
 /**
  * Só o que `validarCor` aceita, já normalizado em `#RRGGBB` maiúsculo — é isto que vai
@@ -68,7 +51,11 @@ export function errosDeCor(emEdicao: CoresEmEdicao): Record<string, string> {
 
   for (const [zoneKey, texto] of Object.entries(emEdicao)) {
     const cru = texto.trim();
-    if (cru === '' || ehRascunho(cru)) continue;
+    // Campo vazio é ausência de preview e rascunho ainda pode virar cor: nenhum dos dois é erro.
+    // Quem sabe distinguir os três casos é `estadoDoHexDigitado`, em `lib/render/`, porque a mesma
+    // pergunta é feita pelo esboço e pela tela da composição (R3-A27).
+    const estado = estadoDoHexDigitado(cru);
+    if (estado === 'vazio' || estado === 'rascunho') continue;
 
     try {
       validarCor(cru, zoneKey);
