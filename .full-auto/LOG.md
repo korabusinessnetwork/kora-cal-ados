@@ -50,3 +50,4 @@
 2026-09-12 · R6-A50 · a peca clicada mostra o no E a zona, tirados da montagem em cena, e o botao leva o foco ao seletor de cor daquela categoria · df3e77c
 2026-09-12 · R6-A49 · a TelaDaComposicao, arquivo mais tocado do projeto, ganha 6 testes de comportamento em jsdom · 44b2741
 2026-09-12 · R6-A48 · a moldura preta vazia some no contexto-negado e a mensagem sobe de 365 para 143 px do topo, e continua de pe no contexto-perdido · 9a1a72d
+2026-09-12 · R6-A42 · os nove diretorios sem indice ganham README, a raiz inclusive, e diretorio com codigo e sem README passa a reprovar em npm test · cc80ca4, ac2d3ae

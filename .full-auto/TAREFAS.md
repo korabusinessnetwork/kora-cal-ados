@@ -248,5 +248,20 @@ carrega as telas, e quero o baseline conferido várias vezes antes dele.
       teste vizinho perdeu a linha que exigia a moldura de pé depois da falha, que era a afirmação
       contrária a esta. Dois comentários que diziam "não existe `ErrorBoundary` em lugar nenhum"
       passaram para o passado no mesmo commit, porque o R6-A51 os tornou falsos.
-- [ ] R6-A42 README por diretório vira varredura, não lembrete | trilha: qualidade | depende: nenhum | pronto quando: todo diretório com código versionado tem `README.md`, e existe um teste que reprova quando um diretório novo com código nasce sem índice, com contraprova sintética que TEM de reprovar
+- [x] R6-A42 README por diretório vira varredura, não lembrete | trilha: qualidade | depende: nenhum | pronto quando: todo diretório com código versionado tem `README.md`, e existe um teste que reprova quando um diretório novo com código nasce sem índice, com contraprova sintética que TEM de reprovar
+      feito em `cc80ca4` e `ac2d3ae`. Nove diretórios estavam sem índice, e a RAIZ do projeto era
+      um deles: um clone recém-baixado não tinha uma linha dizendo o que o projeto é nem como rodar.
+      A raiz entrou de propósito, e não por completude: com ela escrita, a varredura não precisa de
+      lista de exceção nenhuma, e lista de exceção é onde uma regra vai morrer devagar. Duas
+      decisões separam a guarda de um alarme falso permanente, e as duas têm teste: diretório vazio
+      não conta, senão as pastas de andaime nunca versionadas de uma cópia de trabalho antiga fariam
+      a varredura reprovar numa máquina e passar noutra a partir do mesmo commit; e `.md` sozinho
+      não é código, senão cada pasta de `docs/` precisaria de um índice para explicar os `.md` ao
+      lado. A contraprova sintética cria uma árvore temporária e a varre com a MESMA função que
+      varre o projeto: sem índice reprova, com índice passa. Três mutações mortas à mão: apagar o
+      `README.md` de `src/lib/render/fixtures/` reprova e nomeia o diretório, `temIndice: true` mata
+      a contraprova sintética, e `temCodigo` devolvendo sempre `false` derruba três dos cinco
+      testes. A guarda mora ao lado dos ADRs, como a de citações, porque fica junto da autoridade
+      que lê. O que ela NÃO promete, e está escrito nela: que o índice esteja bom, atualizado ou
+      verdadeiro. Isso continua sendo leitura humana.
 - [ ] R6-A52 O cliente de banco sai do chunk que todo mundo baixa | trilha: robustez | depende: nenhum | pronto quando: o chunk principal do `npm run build` não contém mais `@supabase/supabase-js`, as três telas públicas abrem sem baixá-lo, a área protegida continua funcionando, e o número novo do chunk principal está medido no `BASELINE.md`
