@@ -63,8 +63,14 @@ export function TelaDoPalco3d() {
       <div className="palco3d__colunas">
         <section className="painel">
           <h2 className="painel__titulo">Peça</h2>
+          {/* A frase dizia "montar as cinco numa cena só, e colori-las, é a próxima tarefa", e
+              isso deixou de ser verdade no dia em que a tela do calçado montado nasceu. Texto que
+              promete o que já existe é pior que texto nenhum: quem lê conclui que o produto não
+              faz, e não vai procurar. Por isso a frase agora APONTA, com o mesmo nome que o rodapé
+              usa para aquele destino (ADR-003, "um termo, um nome, sempre"). */}
           <p className="painel__ajuda">
-            Uma peça por vez. Montar as cinco numa cena só, e colori-las, é a próxima tarefa.
+            Uma peça por vez, isolada, para conferir o parâmetro e o nome do nó. As cinco juntas, e
+            já coloridas, estão no calçado montado, no rodapé desta tela.
           </p>
           <ul className="palco3d__lista">
             {PECAS.map((candidata) => (
