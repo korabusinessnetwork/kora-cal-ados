@@ -154,6 +154,79 @@ Primeira passada em 2026-09-12, sobre o commit `08e4d1d`, branch `refino/kora-ca
 
 ---
 
+## Achados da reauditoria da rodada 2 (2026-09-12)
+
+Esta leva saiu de onde a auditoria da rodada 1 admitiu não ter ido: o editor de zonas logado. Sem
+senha do `aurora-demo` registrada, e sem provisionar tenant novo só para olhar (criar linha no banco
+real para auditoria é como nasceu o P04), a leitura do editor logado foi de CÓDIGO, com endereço de
+linha. O que foi percorrido no navegador de verdade: a tela de login e o esboço do motor, que é o
+editor 2D rodando sem banco.
+
+### A18 | eixo: ux | onde: `src/features/zonas/EditorDeZonas.tsx:164`, `FormularioDeNovaZona.tsx`
+
+- **hoje:** gravar zona não diz que gravou. `aoSalvar` limpa marcação, rótulo, chave e cor, e mais
+  nada acontece: não há mensagem, não há região viva. Quem CRIA zona vê a lista crescer, mas quem
+  acrescenta elemento a uma zona existente tem como única prova a contagem daquela zona mudando de
+  "3 elementos" para "4 elementos", num painel que pode estar fora da vista.
+- **depois:** confirmação nomeada, dizendo qual zona e o que aconteceu com ela, apagada assim que a
+  próxima marcação começa.
+- **evidência:** leitura de `aoSalvar` e do formulário inteiro. O `CLAUDE.md` cobra os quatro
+  estados com "feedback humano", e carregando, erro e vazio existem nesta tela; sucesso é o único
+  que não existe.
+- valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A19 | eixo: ux | onde: `src/features/zonas/FormularioDeNovaZona.tsx:62`
+
+- **hoje:** clicar numa parte do calçado muda "3 elementos marcados" e não anuncia nada. O clique
+  acontece num SVG, o contorno é a confirmação, e contorno não é lido. Não existe **nenhum**
+  `aria-live` em `src/` (`grep -rn "aria-live" src/` devolve zero).
+- **depois:** a contagem vira região viva educada, que é o par do contorno para quem não o enxerga.
+- **evidência:** `grep` acima, mais a leitura do palco (`PalcoDeMarcacao.tsx`), cujo realce é uma
+  camada `aria-hidden="true"`, de propósito.
+- valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A22 | eixo: qualidade | onde: `src/features/produtos/VisualizacaoDoProduto.tsx:43`
+
+- **hoje:** a mesma frase, "N elementos", está escrita em quatro lugares, de três jeitos:
+  `PainelDeZonas.tsx:151` tem a função `contar`, `FormularioDeNovaZona.tsx:63` repete a regra em
+  linha, `esboco/PainelDeZonas.tsx:52` repete de novo, e `VisualizacaoDoProduto.tsx:43` **não trata
+  o plural**: um modelo com 1 elemento marcável mostra "1 elementos marcáveis".
+- **depois:** uma função só, usada pelos quatro, com o plural certo em todos.
+- **evidência:** os quatro trechos, lidos. O comentário do próprio projeto em `PainelDeZonas.tsx:150`
+  diz que "1 elementos" na tela do time lê como bug do sistema, o que torna a quarta ocorrência uma
+  regra já decidida e esquecida, não uma preferência minha.
+- valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A17 | eixo: ux | onde: `src/esboco/esboco.css:50` (regra `.colunas`)
+
+- **hoje:** o esboço tem três colunas fixas e **nenhuma media query**. Medido: em 1024 px de
+  viewport o documento fica com **1208 px** e a página rola na horizontal; em 375 px o viewport
+  reportado vira 1208, ou seja, o celular desenha a página inteira encolhida. Só a partir de ~1425
+  px o layout cabe.
+- **depois:** o mesmo tratamento que A01 deu ao palco, duas quebras: painel que pode esperar desce,
+  e abaixo disso empilha.
+- **evidência:** `document.documentElement.scrollWidth` contra `window.innerWidth` nas três
+  larguras, no navegador.
+- **por que dói:** é a tela que o README aponta como a que funciona num clone recém-baixado, sem
+  conta e sem `.env.local`. É a primeira coisa que alguém abre, e abre torta.
+- valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+### A20 | eixo: ux | onde: `src/esboco/PainelDeZonas.tsx:41` e `:88`
+
+- **hoje:** no editor de cor do esboço, digitar hex inválido muda **só a classe CSS**: sem
+  `aria-invalid`, sem mensagem, sem rótulo em nenhum dos dois campos (nem o `type="color"` nem o
+  texto). E os botões de zona marcam a selecionada só pela classe `zona--ativa`, sem `aria-pressed`,
+  que é o mesmo defeito que A08 consertou nas telas do palco.
+- **depois:** rótulo nos dois campos, estado inválido anunciado com o motivo escrito, e a zona
+  selecionada anunciada.
+- **evidência:** digitado hex inválido na tela; o campo ficou com `editor__hex--invalido` e
+  `aria-invalid` nulo, sem nenhum texto de erro no bloco. O editor de verdade
+  (`features/zonas/PainelDeZonas.tsx`) já faz tudo isto certo, então a tela de demonstração do motor
+  é a que está atrás.
+- valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+---
+
 ## Abaixo do corte (backlog, não entra em rodada)
 
 ### A12 | eixo: ux | `sair()` sem estado de carregando
@@ -189,3 +262,15 @@ O ADR-003 pede arquivo pequeno de responsabilidade única, e `zonas.css` tem 575
 arquivo grande sem necessidade concreta é refatorar por métrica, e o risco de mexer em CSS sem
 teste visual passa o ganho.
 valor: 2 | esforço: 4 | risco: 3 | **score: -6**
+
+### A23 | eixo: produto | a lista de modelos não diz quantos são
+
+`ListaDeProdutos.tsx` tem o título "Modelos" e nenhuma contagem, e o cabeçalho do produto aberto
+mostra "N elementos marcáveis" mas não quantas zonas já foram mapeadas.
+valor: 2 | esforço: 1 | risco: 1 | **score: 1**
+
+### A24 | eixo: ux | o foco não começa no primeiro campo do login
+
+`TelaDeLogin.tsx` não põe foco no e-mail ao abrir. Quem usa teclado tabula duas vezes antes de
+digitar. Foco automático também tem contra: rouba a rolagem em tela pequena.
+valor: 2 | esforço: 1 | risco: 2 | **score: -1**

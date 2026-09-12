@@ -76,6 +76,28 @@ mensagem, e A04 é só teste. Por isso nenhum precisou de flag de configuração
 
 ---
 
-## Rodada 2, a montar
+## Rodada 2, aberta em 2026-09-12
 
-A reauditoria da rodada 2 parte do backlog de `AUDITORIA.md` acima do corte: A09, A10 e A11.
+**Lote:** 8 itens, em `TAREFAS.md`, seção "Refino, rodada 2". Nenhum com risco 4 ou 5.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R2-A18 confirmação ao gravar a zona | ux | 4 | pendente |
+| R2-A09 teste de `listarZonasDoProduto` | qualidade | 3 | pendente |
+| R2-A19 contagem de marcados vira região viva | ux | 3 | pendente |
+| R2-A22 uma função só para "N elementos" | qualidade | 3 | pendente |
+| R2-A10 falha de rede deixa de virar "conta não vinculada" | robustez | 2 | pendente |
+| R2-A11 nome acessível no palco e peça clicada viva | ux | 2 | pendente |
+| R2-A17 esboço cabe na tela | ux | 2 | pendente |
+| R2-A20 o editor de cor do esboço anuncia o que está errado | ux | 2 | pendente |
+
+**De onde veio a lista:** a reauditoria foi atrás do que a rodada 1 declarou não ter olhado, o editor
+de zonas logado. Sem senha do `aurora-demo` registrada em lugar nenhum, e sem provisionar tenant
+novo só para auditar, porque criar linha no banco real para olhar uma tela é exatamente como nasceu
+o P04, o editor logado foi lido no código, com endereço de linha, e o que foi percorrido no
+navegador foi a tela de login e o esboço do motor, que é o editor 2D rodando sem banco. Cinco
+achados novos saíram daí: A17 a A20 e A22.
+
+**Sem item de produto, e isto é declarado:** nenhum achado de produto ficou acima do corte. O
+candidato forte virou a ideia I06, porque fazer uma segunda cópia do contrato da API dentro do
+editor é o erro que o comentário do painel do esboço registra ter custado semanas.

@@ -48,3 +48,17 @@ nº1 proíbe. Vira achado de auditoria assim que houver como abri-la.
 **Por que não faço sozinho:** escrever o arquivo cabe no projeto, mas ligar o Actions e cadastrar os
 segredos (`.env.local` do banco, e uma imagem com Chrome para os testes de navegador não sumirem em
 silêncio) é ação sua, na sua conta. Está como A14 no backlog da auditoria, e como pendência sua.
+
+## I06 O editor real mostrar a chamada de API equivalente, como o esboço mostra
+
+O esboço tem o painel "chamada equivalente", que é onde o princípio nº1 fica visível: o hex da tela
+é o hex do corpo do pedido. O editor de verdade, que é onde as zonas do cliente são mapeadas, não
+tem nada disso, então quem acabou de mapear não tem como entregar ao cliente o exemplo de chamada
+com as chaves que acabou de criar.
+
+Por que é ideia e não tarefa: o painel do esboço é a representação do contrato da API, e o
+comentário dele registra que já exibiu, por semanas, um contrato que nunca existiu. Fazer uma
+SEGUNDA cópia no editor é repetir esse erro de propósito. O caminho certo é extrair o montador do
+exemplo para um módulo usado pelos dois, e isso é mexer no que representa o contrato, com o risco
+que isso carrega. Score pelo critério do refino: valor 4, esforço 3, risco 3, o que dá -1, abaixo
+do corte. Vale a decisão do dono, não a minha.

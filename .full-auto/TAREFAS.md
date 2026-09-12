@@ -75,3 +75,20 @@ corte.
 - [x] R1-A06 Categoria dispensada sem chave crua na frase | trilha: ux | depende: nenhum | pronto quando: o botão da categoria opcional não mostra mais "sem cadarco", e nenhuma `zone_key` aparece dentro de prosa em português nessa tela
 - [x] R1-A07 Faixa do parâmetro visível no configurador | trilha: ux | depende: nenhum | pronto quando: o controle mostra mínimo e máximo em milímetros junto do valor, no mesmo formato da tela `?tela=palco3d`
 - [x] R1-A08 `aria-pressed` nos botões de peça | trilha: ux | depende: R1-A06 | pronto quando: o botão da peça escolhida e o da categoria dispensada anunciam o estado por `aria-pressed`, conferido na árvore de acessibilidade
+
+# Refino, rodada 2 (2026-09-12)
+
+Lote de 8, nenhum com risco 4 ou 5. A reauditoria está em `AUDITORIA.md`, na seção da rodada 2.
+
+Sem item do eixo **produto** nesta rodada, e isto é declarado, não esquecido: nenhum achado de
+produto ficou acima do corte. O candidato forte, mostrar a chamada de API equivalente dentro do
+editor real, deu score -1 pelo risco de fazer uma segunda cópia do contrato, e virou a ideia I06.
+
+- [ ] R2-A18 Confirmação ao gravar a zona | trilha: ux | depende: nenhum | pronto quando: gravar mostra uma mensagem que nomeia a zona e diz se ela foi criada ou se ganhou elementos, a mensagem some quando a próxima marcação começa, e há teste dos dois textos
+- [ ] R2-A09 Teste de `listarZonasDoProduto` | trilha: qualidade | depende: nenhum | pronto quando: existe teste com cliente falso para a recusa de id vazio, a ordenação por `created_at` e o erro que sobe em vez de virar lista vazia, e uma mutação em cada um dos três mata pelo menos um teste
+- [ ] R2-A19 A contagem de marcados vira região viva | trilha: ux | depende: R2-A18 | pronto quando: clicar num elemento do palco muda um texto dentro de uma região `aria-live` educada, com teste de que o atributo está no elemento que contém a contagem
+- [ ] R2-A22 Uma função só para "N elementos" | trilha: qualidade | depende: nenhum | pronto quando: os quatro lugares que escrevem a contagem usam a mesma função, `VisualizacaoDoProduto` mostra "1 elemento marcável" no singular, e a função tem teste de 0, 1 e 2
+- [ ] R2-A10 Falha de rede deixa de virar "conta não vinculada" | trilha: robustez | depende: nenhum | pronto quando: com `carregarTenantsDoUsuario` falhando, a tela diz que não deu para carregar e oferece "Tentar de novo" ao lado de "Sair", o caso de zero vínculos continua com o texto de cadastro, e os dois estão no teste do provedor
+- [ ] R2-A11 Nome acessível no palco 3D e peça clicada como região viva | trilha: ux | depende: nenhum | pronto quando: o canvas das duas telas do palco tem nome acessível e a caixa da peça clicada é `aria-live` educada, conferido no DOM renderizado
+- [ ] R2-A17 Esboço cabe na tela | trilha: ux | depende: nenhum | pronto quando: em 1024 e em 375 o `scrollWidth` do documento é igual à largura da janela, medido, e em 1440 nada muda em relação a hoje
+- [ ] R2-A20 O editor de cor do esboço anuncia o que está errado | trilha: ux | depende: nenhum | pronto quando: os dois campos de cor têm rótulo acessível, hex inválido tem `aria-invalid` e mensagem escrita, e a zona selecionada na lista tem `aria-pressed`

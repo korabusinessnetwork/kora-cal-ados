@@ -15,11 +15,9 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   `git revert` na hora.
 - **Rodada 1: FECHADA em 2026-09-12**, 8 de 8 entregues, nenhum revertido. O que entrou, o que foi
   medido e o que foi conferido a olho está em `REFINO-RODADAS.md`.
-- **Próximo passo:** abrir a rodada 2. Reauditar o que mudou, recalcular os scores e montar o lote a
-  partir do backlog acima do corte, que hoje é A09 (teste de `listarZonasDoProduto`), A10 (erro de
-  rede virando "conta não vinculada") e A11 (canvas sem nome acessível). A auditoria da rodada 1
-  declara que o editor de zonas logado NÃO foi percorrido, então é por ali que a reauditoria começa:
-  é a maior área do sistema ainda não olhada com o app rodando.
+- **Rodada 2: ABERTA em 2026-09-12**, 8 itens, reauditoria escrita em `AUDITORIA.md`.
+- **Próximo passo:** executar R2-A18, a confirmação ao gravar a zona, que é o maior score do lote e
+  o único dos quatro estados obrigatórios do `CLAUDE.md` que falta no editor.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 
