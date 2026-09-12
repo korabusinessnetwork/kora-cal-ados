@@ -104,6 +104,35 @@ describe.skipIf(CHROME === null)('a cor escolhida é a cor que aparece, medida e
     await parar?.();
   });
 
+  /**
+   * Relê a tela até a condição valer, e devolve a última medida mesmo quando ela não valeu.
+   *
+   * Existe porque `LER_PIXELS` responde no segundo quadro depois do pedido, e isso garante que o
+   * quadro é RECENTE, não que ele já contenha a mudança recém pedida. Entre escrever no campo e a
+   * peça sair repintada existem o commit do React e o desenho seguinte do palco, e nada obriga os
+   * dois a caberem em dois quadros numa máquina carregada. O leitor só repete a leitura quando o
+   * quadro vem inteiro vazio, nunca quando ele vem pintado com a cor ANTIGA, que é justamente o
+   * caso desta corrida.
+   *
+   * Não é hipótese: em 2026-09-12 a suíte completa reprovou 1 vez em 4 execuções aqui, com
+   * "a sola não ficou vermelha", e o mesmo teste passava sozinho. Esperar pela condição, e não por
+   * um número fixo de quadros, é o molde que `ESPERAR_CENA` já usa neste arquivo pelo mesmo motivo.
+   *
+   * Devolver a última medida em vez de estourar mantém a mensagem de falha sendo a do `expect` que
+   * chamou, que é a que diz o que se esperava ver na tela. Um teste que fica vermelho continua
+   * ficando vermelho, e só perde a parte da vermelhidão que era ansiedade.
+   */
+  async function medirAte(condicao: (medida: Medida) => boolean, limiteMs = 5_000): Promise<Medida> {
+    const limite = Date.now() + limiteMs;
+    let medida = await aba.avaliar<Medida>(LER_PIXELS);
+
+    while (!condicao(medida) && Date.now() < limite) {
+      medida = await aba.avaliar<Medida>(LER_PIXELS);
+    }
+
+    return medida;
+  }
+
   it('o calçado aparece montado, com as três peças na tela', async () => {
     // O item 1 da conferência a olho. Uma tela preta, um erro de validação ou um calçado sem uma
     // das peças caem todos aqui, antes de qualquer pergunta sobre cor.
@@ -154,7 +183,7 @@ describe.skipIf(CHROME === null)('a cor escolhida é a cor que aparece, medida e
 
     await aba.avaliar(escreverNoControle('cor da zona sola', '#cc2222'));
 
-    const depois = await aba.avaliar<Medida>(LER_PIXELS);
+    const depois = await medirAte((medida) => grupoDaCor(medida, '#CC2222') !== undefined);
 
     expect(grupoDaCor(depois, '#CC2222'), 'a sola não ficou vermelha').toBeDefined();
     expect(grupoDaCor(depois, PEDIDAS.sola), 'sobrou branco onde a sola estava').toBeUndefined();
@@ -162,8 +191,11 @@ describe.skipIf(CHROME === null)('a cor escolhida é a cor que aparece, medida e
     expect(grupoDaCor(depois, PEDIDAS.cabedal)?.pixels).toBe(azulAntes?.pixels);
     expect(grupoDaCor(depois, PEDIDAS.cadarco)?.pixels).toBe(amareloAntes?.pixels);
 
-    // Devolve a tela ao estado inicial para os testes seguintes não herdarem a sola vermelha.
+    // Devolve a tela ao estado inicial para os testes seguintes não herdarem a sola vermelha, e
+    // espera a volta acontecer: sair daqui com a tela em trânsito empurraria esta mesma corrida
+    // para dentro do teste seguinte, onde ela seria ainda mais difícil de ler.
     await aba.avaliar(escreverNoControle('cor da zona sola', PEDIDAS.sola.toLowerCase()));
+    await medirAte((medida) => grupoDaCor(medida, PEDIDAS.sola) !== undefined);
   });
 
   it('clicar numa peça devolve o nome dela, e o nome bate com a peça clicada', async () => {
@@ -182,14 +214,20 @@ describe.skipIf(CHROME === null)('a cor escolhida é a cor que aparece, medida e
     // relatado não foi um valor errado, foi a tela inteira virar uma linha de erro.
     await aba.avaliar(clicarBotao('Cabedal cano alto'));
 
-    const alto = await aba.avaliar<Medida>(LER_PIXELS);
+    // Trocar de modelo é mais lento que trocar uma cor: recarrega geometria. A mesma espera, pelo
+    // mesmo motivo.
+    const alto = await medirAte(
+      (medida) => medida.pintados > 2_000 && grupoDaCor(medida, PEDIDAS.cabedal) !== undefined,
+    );
 
     expect(alto.pintados, 'a tela apagou ao trocar para o cano alto').toBeGreaterThan(2_000);
     expect(grupoDaCor(alto, PEDIDAS.cabedal), 'o cabedal sumiu no cano alto').toBeDefined();
 
     await aba.avaliar(clicarBotao('Cabedal baixo'));
 
-    const baixo = await aba.avaliar<Medida>(LER_PIXELS);
+    const baixo = await medirAte(
+      (medida) => medida.pintados > 2_000 && grupoDaCor(medida, PEDIDAS.cabedal) !== undefined,
+    );
 
     expect(baixo.pintados, 'a tela apagou na volta para o cabedal baixo').toBeGreaterThan(2_000);
     expect(grupoDaCor(baixo, PEDIDAS.cabedal), 'o cabedal sumiu na volta').toBeDefined();

@@ -386,6 +386,30 @@ que ninguém escolheu é um anel que ninguém garante em outro navegador, não p
 foco sumir.
 valor: 2 | esforço: 2 | risco: 1 | **score: 0**
 
+### A33 | eixo: qualidade | o baseline pisca vermelho sozinho
+
+`testes-de-navegador/corNaTela.test.ts > trocar a cor de uma zona muda só aquela peça` reprovou
+sozinho, sem ninguém ter tocado no código, com **"a sola não ficou vermelha: expected undefined to
+be defined"**. Capturado em 12/09/2026: 1 reprovação em 4 execuções de `npm test` completo, e o
+mesmo arquivo passa 6 de 6 quando roda sozinho.
+
+Por que isto é o achado mais caro da rodada, apesar de ser "só um teste": a regra de ouro do refino
+é que toda rodada começa e termina com baseline verde, e ela pressupõe que vermelho significa "eu
+quebrei". Um baseline que pisca destrói essa leitura, e o risco não é o teste, é o hábito que ele
+cria: o vermelho intermitente ensina a rodar de novo em vez de investigar, e é exatamente assim que
+uma regressão de verdade passa batida.
+
+Causa provável, lida no código e não medida: `escreverNoControle` dispara o evento, e a leitura vem
+logo em seguida esperando dois `requestAnimationFrame`, o que garante que o quadro é RECENTE, não
+que ele já contenha a mudança pedida. Entre as duas coisas há o commit do React e o desenho seguinte
+do palco. O leitor só repete a leitura quando o quadro vem inteiro vazio, nunca quando ele vem
+pintado com a cor ANTIGA, que é justamente este caso.
+
+Honestidade sobre a evidência: **não consegui reproduzir a corrida sob demanda**. Tentei duas vezes,
+e as duas tentativas estão registradas no item "o que eu achei que era defeito e não era" abaixo,
+porque falharam em provar o que eu queria provar.
+valor: 5 | esforço: 1 | risco: 1 | **score: 7**
+
 ### O que eu achei que era defeito e não era
 
 Registrado porque suspeita descartada também é resultado, e porque quem reler isto merece saber que
@@ -399,5 +423,11 @@ o caminho foi sondado em vez de suposto.
 2. **"Falta limite de tamanho nos campos do editor."** Não há `maxLength` em nenhum input do
    projeto, mas `validarZoneKey` corta em 40 caracteres com mensagem que diz o que corrigir, e a
    gravação recusa antes da rede. É prevenção, só que na camada de baixo.
-3. **"Duplo clique em gravar pode criar zona duas vezes."** `FormularioDeNovaZona` desabilita os
+3. **As duas tentativas de reproduzir a corrida do A33 que não funcionaram.** A primeira leu o
+   framebuffer sem esperar quadro nenhum: reproduziu "quadro vazio", que é outro caso, e que o
+   leitor já trata com retry. A segunda rodou o arquivo seis vezes com seis processos ocupando a
+   CPU, e passou seis vezes. Ou seja, a correção do A33 foi feita com a falha capturada em mãos mas
+   sem reprodução sob demanda, e isso está dito no commit dela também.
+
+4. **"Duplo clique em gravar pode criar zona duas vezes."** `FormularioDeNovaZona` desabilita os
    três campos e os dois botões enquanto `salvando` é verdadeiro. Já estava resolvido.
