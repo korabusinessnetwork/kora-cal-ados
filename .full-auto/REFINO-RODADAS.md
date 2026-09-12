@@ -175,3 +175,33 @@ Nenhuma. P01, P02 e P04 continuam abertas como estavam, e nenhum item desta roda
 - **A25** | qualidade | `EditorDeZonas` não é montável em teste neste projeto, porque a rede chega
   por import e não por prop. Score -3, fica no backlog: mexer na assinatura de um componente de 200
   linhas que ninguém consegue testar hoje é o tipo de mudança que quebra calada.
+
+---
+
+## Rodada 3, aberta em 2026-09-12
+
+**Lote:** 5 itens, em `TAREFAS.md`, seção "Refino, rodada 3". Nenhum com risco 4 ou 5.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R3-A27 digitar o hex no configurador | produto | 4 | pendente |
+| R3-A26 teste dos dois hooks que descartam estado ao trocar de produto | qualidade | 4 | pendente |
+| R3-A29 empate de especificidade e seletor descendente presos por teste | qualidade | 3 | pendente |
+| R3-A30 o palco aparece antes dos controles na tela estreita | ux | 3 | pendente |
+| R3-A28 contexto WebGL perdido para de mentir | robustez | 2 | pendente |
+
+**Por que cinco e não oito:** cinco é o que passou do corte com evidência. As duas primeiras rodadas
+levaram oito porque havia oito; completar esta com itens do backlog abaixo do corte seria trocar a
+régua do score por vontade de ter lista maior. Os quatro eixos estão representados, e o eixo de
+produto, que faltou na rodada 2, voltou com o maior score do lote.
+
+**De onde veio a lista:** as duas primeiras rodadas varreram o que se vê. Esta foi atrás do que não
+tem teste no caminho crítico do editor e do que acontece quando uma peça de infraestrutura falha por
+baixo. O achado mais caro é o A27, e ele é de produto, não de acessibilidade: o configurador, que o
+ADR-008 chama de produto vendável por si só, escolhe cor apenas pelo seletor do sistema, então não
+existe onde digitar o hex do manual da marca. O esboço, que é a demonstração, sempre teve o campo.
+
+**Duas suspeitas morreram na sonda** e estão escritas em `AUDITORIA.md`, na seção "o que eu achei
+que era defeito e não era": o buffer do canvas do palco parecia estar em 300x150 esticado, e era
+artefato de medir com o painel do navegador escondido, onde o `requestAnimationFrame` fica parado; e
+a falta de `maxLength` nos campos, que já é prevenida uma camada abaixo, em `validarZoneKey`.

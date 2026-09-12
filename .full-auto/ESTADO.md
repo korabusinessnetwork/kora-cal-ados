@@ -18,9 +18,11 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
 - **Rodada 2: FECHADA em 2026-09-12**, 8 de 8 entregues, nenhum revertido. Baseline verde nas duas
   pontas: 1104 testes, 58 no banco, 25 no navegador, `tsc` e build limpos, `npm audit` em zero. O
   que entrou, o que foi medido e os três limites de verificação estão em `REFINO-RODADAS.md`.
-- **Próximo passo:** abrir a rodada 3. A reauditoria começa pelo que mudou desde a rodada 2 mais o
-  backlog que sobrou em `AUDITORIA.md`, que hoje tem A12, A13, A14, A15, A16, A23, A24 e A25,
-  todos abaixo do corte, então a rodada 3 depende de achado novo para existir.
+- **Rodada 3: ABERTA em 2026-09-12**, 5 itens, reauditoria escrita em `AUDITORIA.md`. Cinco e não
+  oito porque cinco foi o que passou do corte com evidência: o backlog herdado (A12 a A16, A23,
+  A24, A25) está todo abaixo dele, e os achados novos são A26 a A32.
+- **Próximo passo:** executar R3-A27, o campo de texto para digitar o hex no configurador, que é o
+  maior score do lote e o único item de produto.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

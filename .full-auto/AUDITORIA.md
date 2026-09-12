@@ -288,3 +288,116 @@ valor: 2 | esforço: 1 | risco: 1 | **score: 1**
 `TelaDeLogin.tsx` não põe foco no e-mail ao abrir. Quem usa teclado tabula duas vezes antes de
 digitar. Foco automático também tem contra: rouba a rolagem em tela pequena.
 valor: 2 | esforço: 1 | risco: 2 | **score: -1**
+
+---
+
+## Achados da reauditoria da rodada 3 (2026-09-12)
+
+As duas primeiras rodadas varreram o que se vê. Esta foi atrás de duas coisas mais difíceis de
+olhar: o que não tem teste no caminho crítico do editor, e o que acontece quando uma peça de
+infraestrutura falha por baixo. O método foi o de sempre, sondar em vez de supor, e duas suspeitas
+morreram na sonda, registradas abaixo em "o que eu achei que era defeito e não era".
+
+### A27 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx:267`
+
+- **hoje:** o configurador escolhe cor SÓ pelo seletor do sistema operacional. O único campo é um
+  `<input type="color">`, e o hex ao lado é um `<code>`, texto morto. Não existe onde digitar
+  `#C0392B`.
+- **depois:** campo de texto ao lado do seletor, como o esboço já tem, aceitando `#RGB` e `#RRGGBB`,
+  com o preview mudando só quando a cor fecha.
+- **evidência:** as linhas 267 a 273 lidas, e o contraste com `src/esboco/PainelDeZonas.tsx`, que
+  tem os dois campos desde sempre. A marca chega com o hex do manual dela na mão; o configurador é
+  a tela que o ADR-008 chama de produto vendável por si só, e nela a cor exata só dá para ser
+  perseguida no conta-gotas. É o princípio nº1 pelo avesso: a cor que sai é a que entrou, mas não há
+  como fazer entrar a cor certa.
+- valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A26 | eixo: qualidade | onde: `src/features/zonas/hooks/useMarcacaoDeZona.ts:37` e `usePreviewDeCor.ts:43`
+
+- **hoje:** os dois hooks descartam o estado quando o `productId` muda, e esse descarte é a única
+  coisa que impede a marcação de um modelo de ser gravada em outro e a cor de um calçado de pintar
+  o calçado seguinte, porque `sola` existe nos dois. Os dois fazem isso com a técnica delicada de
+  chamar `setState` DURANTE o render, e os dois comentários explicam que um `useEffect` deixaria
+  passar um render intermediário. Nada disso tem teste: `grep -rln "useMarcacaoDeZona" src/*.test.*`
+  e o mesmo para `usePreviewDeCor` devolvem zero.
+- **depois:** teste de cada um montando um componente-sonda, trocando o `productId` e afirmando que
+  o estado zerou no MESMO render, não no seguinte.
+- **evidência:** os dois arquivos lidos e o grep. Diferente do A25, aqui não há obstáculo nenhum:
+  nenhum dos dois toca a rede, e a rodada 1 já deixou no projeto o padrão de montar React em jsdom
+  com sonda (`ContextoDeSessao.test.tsx`), sem testing-library e sem `vi.mock`.
+- valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A29 | eixo: qualidade | onde: `src/lib/render/lerRegrasCss.ts:52`
+
+- **hoje:** `calcularEspecificidade` decide qual regra CSS ganha quando duas pintam o mesmo
+  elemento, e é ela que define a cor do canônico que vai para o Storage. Os testes cobrem id contra
+  classe, inline contra classe e `!important`, mas **não** o empate de especificidade, onde vence a
+  última declarada, nem o seletor descendente. Achatar errado aqui muda a cor do arquivo canônico
+  em silêncio, e o canônico é o que o editor e a API leem.
+- **depois:** teste dos dois casos.
+- **evidência:** sondei o comportamento atual antes de chamar de achado, e ele está **certo**:
+  `.st0{#111} .st1{#222}` num elemento com as duas classes dá `#222222`, e `#g .st0` (10100) ganha
+  de `.st0` (100). O achado não é bug, é comportamento correto que ninguém prende. O arquivo diz de
+  si mesmo que é parser conservador porque errar aqui custa caro, e é justamente a parte cara que
+  está descoberta.
+- valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A30 | eixo: ux | onde: `src/palco3d/palco3d.css` (`.palco3d__colunas`)
+
+- **hoje:** em 375 px, na tela da composição, o palco 3D começa a **1158 px** do topo, numa página
+  de 2116 px. Quem troca a cor de uma peça mexe num controle lá em cima e o calçado está três telas
+  abaixo. A tela que existe para mostrar a cor escolhida não mostra nada enquanto se escolhe. No
+  palco 3D é o mesmo, começando a 657 px de 1590.
+- **depois:** abaixo da quebra estreita, o palco vem ANTES dos controles, ou fica preso no topo.
+- **evidência:** medido no navegador em 375x812, `getBoundingClientRect().top` da moldura contra
+  `scrollHeight` do documento, nas duas telas do palco.
+- valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A28 | eixo: robustez | onde: `src/palco3d/PalcoDeModelo3d.tsx:236`
+
+- **hoje:** não há escuta de `webglcontextlost`. Contexto WebGL se perde na vida real: reset de
+  driver, troca de GPU em notebook híbrido, contextos demais abertos. Quando acontece, o painel
+  fica vazio, o laço de render continua chamando `render()` num contexto morto para sempre, e a
+  frase embaixo do palco **continua dizendo "Peça na cena. Arraste para girar, clique para
+  identificar."**
+- **depois:** o evento é escutado, o laço para e a tela diz que o 3D caiu e como voltar.
+- **evidência:** forçado no navegador com `WEBGL_lose_context.loseContext()`. `gl.isContextLost()`
+  virou `true`, a captura de tela mostra o painel vazio, e o texto de estado seguiu afirmando que a
+  peça está em cena. É o modo de falha que o `CLAUDE.md` proíbe em letra: estado sempre visível, e
+  aqui a tela afirma o contrário do que mostra.
+- valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+### A31 | eixo: ux | marcar zona é tarefa só de mouse (backlog)
+
+`PalcoDeMarcacao.tsx:93` é um `<div onClick>` sobre o SVG injetado, e os elementos de dentro não
+são focáveis. Não existe caminho de teclado para a tarefa central do editor. O conserto não é
+barato e tem um obstáculo concreto: o comentário do arquivo registra que o markup precisa bater
+BYTE A BYTE com a saída de `gerarVarianteDeCor` num teste, então acrescentar `tabindex` ao markup
+quebraria essa comparação, e a alternativa é mexer no DOM por ref depois de montado, no arquivo
+mais delicado do editor.
+valor: 4 | esforço: 4 | risco: 4 | **score: -4**
+
+### A32 | eixo: ux | o projeto não define nenhum estilo de foco (backlog)
+
+`grep -rn ":focus" src/ --include="*.css"` devolve zero. Conferido no navegador com Tab de verdade:
+`:focus-visible` casa e o Chrome desenha o anel padrão dele, visível sobre o fundo escuro. Ou seja,
+hoje **funciona**, por conta do navegador, não por decisão do projeto. Fica anotado porque um anel
+que ninguém escolheu é um anel que ninguém garante em outro navegador, não porque eu tenha visto
+foco sumir.
+valor: 2 | esforço: 2 | risco: 1 | **score: 0**
+
+### O que eu achei que era defeito e não era
+
+Registrado porque suspeita descartada também é resultado, e porque quem reler isto merece saber que
+o caminho foi sondado em vez de suposto.
+
+1. **"O canvas do palco renderiza em 300x150 e é esticado."** Medi o buffer do canvas e ele estava
+   em 300 por 150, o padrão do HTML, dentro de uma caixa CSS de 607 por 476. Parecia render borrado
+   e esticado. Era artefato da MEDIÇÃO: com o painel do navegador escondido o `requestAnimationFrame`
+   fica parado, e é dentro dele que `setSize` roda. Com o painel à vista, o buffer é 607x476, igual
+   à caixa. Não há defeito.
+2. **"Falta limite de tamanho nos campos do editor."** Não há `maxLength` em nenhum input do
+   projeto, mas `validarZoneKey` corta em 40 caracteres com mensagem que diz o que corrigir, e a
+   gravação recusa antes da rede. É prevenção, só que na camada de baixo.
+3. **"Duplo clique em gravar pode criar zona duas vezes."** `FormularioDeNovaZona` desabilita os
+   três campos e os dois botões enquanto `salvando` é verdadeiro. Já estava resolvido.
