@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import {
   composicaoDasEscolhas,
   escolhasDaComposicao,
+  escolhasDoTextoColado,
   montarDaTela,
   mudarEscolhaDaTela,
   type EscolhaDaTela,
@@ -292,5 +293,112 @@ describe('composicaoDasEscolhas', () => {
     expect(composicaoDasEscolhas(FORMA, escolhas).pecas[1]).toMatchObject({
       peca_id: 'prova-cabedal-cano-alto',
     });
+  });
+});
+
+
+describe('colar uma composição de volta na tela (A47)', () => {
+  // O ciclo fechado: o texto que a tela produz é o texto que a tela lê. Sem isto, o botão de
+  // copiar resolvia metade do problema, porque o JSON saía e nunca mais voltava.
+  const TEXTO_DA_DEMO = JSON.stringify(composicaoDasEscolhas(FORMA, escolhasDaComposicao(DEMO)));
+
+  it('o que a tela copia é o que a tela cola, e dá o mesmo calçado', () => {
+    // A afirmação que vale o item. Ida e volta pela MESMA tela têm que fechar; se não fecharem,
+    // o botão de copiar entrega um texto que só serve para outro lugar.
+    const colagem = escolhasDoTextoColado(TEXTO_DA_DEMO, FORMA, CATALOGO);
+
+    expect(colagem.erro).toBeNull();
+    expect(colagem.escolhas).not.toBeNull();
+    expect(composicaoDasEscolhas(FORMA, colagem.escolhas ?? new Map())).toEqual(
+      composicaoDasEscolhas(FORMA, escolhasDaComposicao(DEMO)),
+    );
+  });
+
+  it('uma composição diferente da que está na tela monta o calçado DELA', () => {
+    // Sem esta, "colar funciona" poderia ser verdade só porque colei o que já estava na tela.
+    const outra = JSON.stringify({
+      forma_id: FORMA.id,
+      pecas: [
+        { peca_id: 'prova-sola-tratorada', cor: '#C0392B' },
+        { peca_id: 'prova-cabedal-cano-alto', cor: '#101010' },
+      ],
+    });
+    const colagem = escolhasDoTextoColado(outra, FORMA, CATALOGO);
+
+    expect(colagem.erro).toBeNull();
+    expect(colagem.escolhas?.get('sola')).toMatchObject({ pecaId: 'prova-sola-tratorada' });
+    expect(colagem.escolhas?.get('cabedal')).toMatchObject({ pecaId: 'prova-cabedal-cano-alto' });
+    // O cadarço é opcional e não foi colado, então some da tela em vez de ficar o de antes.
+    expect(colagem.escolhas?.has('cadarco')).toBe(false);
+    expect(montar(colagem.escolhas ?? new Map()).modelo).not.toBeNull();
+  });
+
+  it('peça que não existe é recusada, com o código do contrato de API', () => {
+    // O mesmo código que a integração recebe, e não uma frase inventada só para esta tela: ver os
+    // dois lados com o mesmo nome é o que impede "o editor disse uma coisa e a API disse outra".
+    const colagem = escolhasDoTextoColado(
+      JSON.stringify({ forma_id: FORMA.id, pecas: [{ peca_id: 'nao-existe' }] }),
+      FORMA,
+      CATALOGO,
+    );
+
+    expect(colagem.escolhas).toBeNull();
+    expect(colagem.erro).toContain('PECA_NAO_ENCONTRADA');
+  });
+
+  it('recusa NÃO devolve escolhas, nem pela metade', () => {
+    // O caminho que protege a montagem que está na tela. Se a recusa devolvesse um mapa vazio ou
+    // parcial, quem colou errado perderia o calçado bom, que é o oposto do que o campo veio fazer.
+    for (const texto of [
+      '',
+      '   ',
+      'não é json',
+      '{"forma_id": "' + FORMA.id + '", "pecas": [{"peca_id": "prova-sola-plana", "cor": "vermelho"}]}',
+      '{"forma_id": "forma-que-nao-existe", "pecas": []}',
+    ]) {
+      const colagem = escolhasDoTextoColado(texto, FORMA, CATALOGO);
+
+      expect(colagem.escolhas).toBeNull();
+      expect(colagem.erro).not.toBeNull();
+      expect(colagem.erro).not.toBe('');
+    }
+  });
+
+  it('texto que não é JSON não fala de posição de caractere', () => {
+    // A mensagem do `JSON.parse` é "Unexpected token ... at position 3", que não ensina nada a
+    // quem colou metade do bloco. A frase da tela ensina: copie das chaves de abrir às de fechar.
+    const colagem = escolhasDoTextoColado('{"forma_id":', FORMA, CATALOGO);
+
+    expect(colagem.erro).toContain('chaves');
+    expect(colagem.erro).not.toContain('position');
+  });
+
+  it('composição de OUTRA forma é recusada, em vez de montar sem as peças que não encaixam', () => {
+    // O princípio nº1 na forma mais literal: zona errada falha alto, nunca aplica no lugar errado.
+    // Para `validarComposicao` uma composição de outra forma é perfeitamente válida; quem está
+    // presa a uma forma só é a TELA, então a recusa é daqui. Sem ela, as categorias da outra forma
+    // virariam chaves que nenhum controle desta tela lê, e a montagem sairia sem elas, em silêncio.
+    const colagem = escolhasDoTextoColado(
+      JSON.stringify({ forma_id: 'bota-de-cano-longo', pecas: [] }),
+      FORMA,
+      CATALOGO,
+    );
+
+    expect(colagem.escolhas).toBeNull();
+    expect(colagem.erro).toContain('bota-de-cano-longo');
+    expect(colagem.erro).toContain(FORMA.id);
+  });
+
+  it('passa pelo MESMO guarda que a API usa, e não por uma conferência própria', () => {
+    // Contraprova de que não nasceu um segundo validador. Se a tela tivesse o dela, ela passaria a
+    // aceitar ou recusar coisas diferentes do que a API aceita ou recusa, e colar aqui deixaria de
+    // ser ensaio da chamada de verdade. Cor inválida é recusa lá; tem que ser recusa aqui.
+    const comCorInvalida = JSON.stringify({
+      forma_id: FORMA.id,
+      pecas: [{ peca_id: 'prova-sola-plana', cor: '#GGG' }],
+    });
+
+    expect(() => validarComposicao(JSON.parse(comCorInvalida), CATALOGO)).toThrow();
+    expect(escolhasDoTextoColado(comCorInvalida, FORMA, CATALOGO).escolhas).toBeNull();
   });
 });

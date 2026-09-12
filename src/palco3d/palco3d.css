@@ -213,9 +213,8 @@
 /* --- A saída da composição ---
 
    A composição não é gravada em lugar nenhum: não existe tabela para ela. Este bloco é a única
-   porta pela qual ela sai
-   da tela, então ele não pode parecer enfeite de rodapé: fica separado dos controles por uma
-   borda, do mesmo jeito que as categorias se separam entre si. */
+   porta pela qual ela sai da tela, então ele não pode parecer enfeite de rodapé: fica separado
+   dos controles por uma borda, do mesmo jeito que as categorias se separam entre si. */
 .palco3d__saida {
   margin-top: 16px;
   padding-top: 14px;
@@ -263,3 +262,37 @@
   line-height: 1.5;
   white-space: pre;
 }
+
+/* --- A entrada da composição ---
+
+   O caminho de volta. Divide a borda de cima com a saída, e não ganha uma própria, porque copiar
+   e colar são as duas metades de um ciclo só: separá-los por borda faria a colagem parecer outro
+   assunto, e ela é o mesmo. */
+.palco3d__entrada {
+  margin-top: 14px;
+}
+
+.palco3d__entrada-rotulo {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--cor-texto-fraco);
+}
+
+/* `resize: vertical` e não livre: crescer para os lados estouraria a coluna do painel, e a coluna
+   é o que mantém a cena visível ao lado. */
+.palco3d__entrada-texto {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 10px;
+  resize: vertical;
+  background: var(--cor-superficie-alta);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  color: var(--cor-texto);
+  font-family: var(--fonte-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.palco3d__entrada-texto:focus { outline: 2px solid var(--cor-acento); outline-offset: 1px; }

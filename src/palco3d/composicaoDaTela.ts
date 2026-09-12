@@ -114,6 +114,66 @@ export function composicaoDasEscolhas(
   return { forma_id: forma.id, pecas };
 }
 
+/** O caminho de volta: ou as escolhas prontas, ou a frase que diz o que corrigir. Nunca os dois. */
+export type ColagemDaComposicao =
+  | { escolhas: Map<string, EscolhaDaTela>; erro: null }
+  | { escolhas: null; erro: string };
+
+/**
+ * O JSON de uma composição volta a ser o estado da tela.
+ *
+ * O inverso exato de `composicaoDasEscolhas`, e é isso que fecha o ciclo: dava para copiar a
+ * montagem e não dava para colá-la de volta, então o botão de copiar resolvia metade do problema.
+ * O JSON ia para a API, para o bloco de notas de alguém, para um chamado, e nunca mais voltava
+ * para a tela que o produziu.
+ *
+ * Passa pelo MESMO `validarComposicao` que a API usa, e não por uma conferência própria. Um
+ * segundo guarda seria uma segunda implementação da regra, e a tela passaria a aceitar ou recusar
+ * coisas diferentes do que a API aceita ou recusa. Colar aqui é ensaiar a chamada de verdade.
+ *
+ * Recusa a forma trocada antes de qualquer outra coisa, e essa conferência é daqui, não do
+ * validador: para o validador uma composição de outra forma é perfeitamente válida, e é a TELA que
+ * está presa a uma forma só. Sem esta recusa, as categorias da outra forma virariam chaves que
+ * nenhum controle desta tela lê, e a montagem sairia sem elas, em silêncio. É o princípio nº1 na
+ * sua forma mais literal: zona errada falha alto e visível, nunca aplica no lugar errado.
+ */
+export function escolhasDoTextoColado(
+  texto: string,
+  forma: Forma,
+  catalogo: CatalogoDoAcervo,
+): ColagemDaComposicao {
+  if (texto.trim() === '') {
+    return { escolhas: null, erro: 'Cole o JSON de uma composição para montá-la aqui.' };
+  }
+
+  let entrada: unknown;
+  try {
+    entrada = JSON.parse(texto);
+  } catch {
+    // A mensagem do `JSON.parse` fala de posição de caractere, que não ajuda quem colou torto.
+    return {
+      escolhas: null,
+      erro: 'O texto colado não é JSON. Copie o bloco inteiro, das chaves de abrir às de fechar.',
+    };
+  }
+
+  const formaPedida = (entrada as { forma_id?: unknown } | null)?.forma_id;
+  if (formaPedida !== forma.id) {
+    return {
+      escolhas: null,
+      erro:
+        `Esta composição é da forma "${String(formaPedida)}", e esta tela monta a forma ` +
+        `"${forma.id}". Montá-la aqui daria um calçado sem as peças que não existem nesta forma.`,
+    };
+  }
+
+  try {
+    return { escolhas: escolhasDaComposicao(validarComposicao(entrada, catalogo)), erro: null };
+  } catch (erro) {
+    return { escolhas: null, erro: mensagemDe(erro) };
+  }
+}
+
 /**
  * As escolhas da tela viram calçado montado, passando pelo guarda.
  *

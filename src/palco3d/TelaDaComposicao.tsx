@@ -18,6 +18,7 @@ import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
 import {
   composicaoDasEscolhas,
   escolhasDaComposicao,
+  escolhasDoTextoColado,
   montarDaTela,
   mudarEscolhaDaTela,
   type EscolhaDaTela,
@@ -61,6 +62,24 @@ export function TelaDaComposicao() {
 
   const aoSelecionar = useCallback((nome: string | null) => setSelecionada(nome), []);
   const aoMudarEstado = useCallback((novo: EstadoDoPalco) => setEstado(novo), []);
+
+  // O texto colado e o diagnóstico dele. Separados das `escolhas` porque uma colagem recusada não
+  // pode encostar no calçado que está na tela: a pessoa perderia a montagem boa por ter colado
+  // errado, que é o oposto do que este campo veio fazer.
+  const [colado, setColado] = useState('');
+  const [erroDaColagem, setErroDaColagem] = useState<string | null>(null);
+
+  function montarOColado() {
+    if (FORMA === undefined) return;
+
+    const colagem = escolhasDoTextoColado(colado, FORMA, CATALOGO);
+    setErroDaColagem(colagem.erro);
+    if (colagem.escolhas === null) return;
+
+    setEscolhas(colagem.escolhas);
+    // Mesma razão do `mudar()`: a seleção é do calçado que saiu de cena.
+    setSelecionada(null);
+  }
 
   function mudar(categoria: string, mudanca: Partial<EscolhaDaTela>) {
     // A transição em si mora em `composicaoDaTela`, com teste. Ela já esteve aqui, e foi aqui que
@@ -126,6 +145,40 @@ export function TelaDaComposicao() {
                 <pre className="palco3d__saida-texto">{textoDaComposicao}</pre>
               </>
             )}
+          </div>
+
+          {/* O caminho de volta, colado ao de ida de propósito: copiar sem colar resolvia metade
+              do problema, e as duas metades do mesmo ciclo separadas na tela deixariam a segunda
+              parecendo recurso avançado. */}
+          <div className="palco3d__entrada">
+            <label className="palco3d__entrada-rotulo" htmlFor="composicao-colada">
+              Colar uma composição
+            </label>
+            <textarea
+              id="composicao-colada"
+              className="palco3d__entrada-texto"
+              rows={4}
+              spellCheck={false}
+              placeholder='{"forma_id": "…", "pecas": [ … ]}'
+              value={colado}
+              onChange={(evento) => setColado(evento.target.value)}
+            />
+            <button type="button" className="palco3d__copiar" onClick={montarOColado}>
+              Montar o que está colado
+            </button>
+            {/* Região viva: quem colou está olhando a caixa de texto, e o que a colagem produziu
+                aparece ou aqui ou no palco, em outro canto da tela. */}
+            <div aria-live="polite" aria-atomic="true">
+              {erroDaColagem === null ? (
+                <p className="palco3d__saida-ajuda">
+                  Passa pelo mesmo guarda que a API usa. Recusa aqui é recusa lá.
+                </p>
+              ) : (
+                <p className="palco3d__saida-erro" role="alert">
+                  {erroDaColagem} O calçado na tela continua sendo o de antes.
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
