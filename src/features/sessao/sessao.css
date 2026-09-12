@@ -138,3 +138,19 @@
   background: none; border: none; color: var(--cor-texto-fraco);
   font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer;
 }
+
+/* O rodapé também aparece dentro da rede de proteção, e lá as saídas são `<a href>` em vez de
+   botões, porque lá o `App` pode não existir mais para atender um clique. Mesma aparência de
+   propósito: quem vê a rede tem de reconhecer as mesmas saídas de sempre. A margem é só dos
+   links, e não da regra de cima, para o rodapé de botões continuar exatamente como está. */
+.rodape-telas a {
+  margin: 0 7px; color: var(--cor-texto-fraco); font-size: 12px; text-decoration: underline;
+}
+
+/* ── Rede de proteção (ErrorBoundary) ───────────────────────────────── */
+.rede-de-protecao__motivo code {
+  display: inline-block; padding: 6px 10px; max-width: 100%;
+  background: var(--cor-superficie-alta); border: 1px solid var(--cor-borda); border-radius: 7px;
+  font-family: var(--fonte-mono); font-size: 12px; color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}

@@ -4,6 +4,14 @@
 // Tudo o que toca o banco vive dentro de `RotaProtegida` — a autenticação é verificada
 // antes de a tela existir, não dentro dela.
 //
+// Cada tela entra dentro de uma `RedeDeProtecao`, e o rodapé fica FORA dela: assim uma exceção
+// numa tela não leva junto a navegação, e os botões do rodapé continuam funcionando de verdade,
+// porque quem guarda o estado deles é este componente, que não caiu. É por isso que aqui a rede vai
+// com `comSaidas={false}`: as saídas já estão na tela, no rodapé, e a rede desenhando as dela
+// deixaria a mesma lista de três destinos duas vezes, uma embaixo da outra. O `key={tela}` não é enfeite:
+// sem ele, trocar de tela reaproveitaria a mesma instância da rede, com a falha antiga dentro, e o
+// botão do rodapé pareceria não fazer nada.
+//
 // A ordem das checagens aqui é deliberada, e já foi o contrário: a configuração do
 // Supabase é conferida DEPOIS de saber qual tela vai abrir, não antes. Conferir antes
 // derrubava o app inteiro por falta de `.env.local` — inclusive o esboço, que não faz
@@ -12,6 +20,7 @@
 
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { EsbocoDoEditor } from './esboco/EsbocoDoEditor';
+import { RedeDeProtecao } from './RedeDeProtecao';
 import { RodapeDeTelas } from './RodapeDeTelas';
 import { BarraDaSessao } from './features/sessao/BarraDaSessao';
 import { ProvedorDeSessao } from './features/sessao/ContextoDeSessao';
@@ -56,7 +65,9 @@ export function App() {
   if (tela === 'esboco') {
     return (
       <>
-        <EsbocoDoEditor />
+        <RedeDeProtecao key={tela} atual="esboco" comSaidas={false}>
+          <EsbocoDoEditor />
+        </RedeDeProtecao>
         <RodapeDeTelas atual="esboco" irPara={irPara} />
       </>
     );
@@ -69,9 +80,11 @@ export function App() {
   if (tela === 'palco3d') {
     return (
       <>
-        <Suspense fallback={<main className="tela">Carregando o palco 3D…</main>}>
-          <TelaDoPalco3d />
-        </Suspense>
+        <RedeDeProtecao key={tela} atual="palco3d" comSaidas={false}>
+          <Suspense fallback={<main className="tela">Carregando o palco 3D…</main>}>
+            <TelaDoPalco3d />
+          </Suspense>
+        </RedeDeProtecao>
         <RodapeDeTelas atual="palco3d" irPara={irPara} />
       </>
     );
@@ -84,9 +97,11 @@ export function App() {
   if (tela === 'composicao') {
     return (
       <>
-        <Suspense fallback={<main className="tela">Carregando o calçado montado…</main>}>
-          <TelaDaComposicao />
-        </Suspense>
+        <RedeDeProtecao key={tela} atual="composicao" comSaidas={false}>
+          <Suspense fallback={<main className="tela">Carregando o calçado montado…</main>}>
+            <TelaDaComposicao />
+          </Suspense>
+        </RedeDeProtecao>
         <RodapeDeTelas atual="composicao" irPara={irPara} />
       </>
     );
@@ -110,17 +125,19 @@ export function App() {
 
   return (
     <ProvedorDeSessao>
-      <RotaProtegida>
-        {(tenant) => (
-          <>
-            <BarraDaSessao />
-            {/* `key` no tenant: trocar de marca REMONTA a tela. Sem isso o estado da
-                anterior (produto aberto, SVG baixado) sobreviveria à troca e mostraria o
-                modelo de um concorrente sob o nome da marca nova. */}
-            <TelaDeProdutos key={tenant.id} tenantId={tenant.id} />
-          </>
-        )}
-      </RotaProtegida>
+      <RedeDeProtecao key={tela} atual="app" comSaidas={false}>
+        <RotaProtegida>
+          {(tenant) => (
+            <>
+              <BarraDaSessao />
+              {/* `key` no tenant: trocar de marca REMONTA a tela. Sem isso o estado da
+                  anterior (produto aberto, SVG baixado) sobreviveria à troca e mostraria o
+                  modelo de um concorrente sob o nome da marca nova. */}
+              <TelaDeProdutos key={tenant.id} tenantId={tenant.id} />
+            </>
+          )}
+        </RotaProtegida>
+      </RedeDeProtecao>
       <RodapeDeTelas atual="app" irPara={irPara} />
     </ProvedorDeSessao>
   );
