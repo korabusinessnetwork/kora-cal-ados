@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: AGUARDANDO_MATHEUS
+status: CONCLUIDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 - **Projeto:** Kora Calçados (codinome)
@@ -8,81 +8,58 @@ status: AGUARDANDO_MATHEUS
   `docs/08_DECISOES/adr-007-modelo-3d-manipulavel.md` + `adr-008-calcado-gerado-sobre-acervo-de-pecas.md`
   + `docs/09_BACKLOG/features.md`. A ordem de construção é a do ADR-008: **acervo → composição → prompt**.
 - **Branch:** `main` (ver D02 em DECISOES.md: por que não `full-auto/<slug>`)
-- **Início:** 2026-09-10
-- **Fase atual:** Fase C, provar a esteira de ponta a ponta com o acervo de prova
-- **Tarefa atual:** T14 montagem da composição em cena, **construída e revisada**, parada na
-  conferência a olho do dono
-- **Próximo passo:** o dono abre <http://localhost:5173/?tela=composicao> e confere os 5 itens da
-  §8 de `specs/composicao-em-cena.md`. Aprovados, T14 fecha e T15 (o configurador) começa. Achado
-  um defeito, ele vira teste e correção no mesmo commit, e a conferência se repete.
-- **Progresso:** 9 de 13 construídas (T14 aguardando conferência), 1 pendente e desbloqueada,
-  3 adiadas por decisão do dono
+- **Início:** 2026-09-10 · **Encerramento:** 2026-09-12
+- **Fase atual:** encerrada. A esteira do ADR-008 está provada de ponta a ponta com o acervo de prova
+- **Próximo passo:** é decisão do dono, não tarefa. O relatório está em
+  `.full-auto/RELATORIO-FINAL.md`, e a §10 dele explica por que o gargalo virou modelagem e não
+  código. As duas pendências de prioridade alta são P02 (revogar a chave `2aec9a55`) e P01 (o hook)
+- **Progresso:** **12 de 12 construídas**, 3 adiadas por decisão do dono (T05, T06, T09), nenhuma
+  bloqueada por problema técnico
 
-## Motivo da parada (só se AGUARDANDO_MATHEUS ou PAUSADO)
+## Verificação final (2026-09-12)
 
-**T14 exige conferência a olho, por um motivo mais forte que T13: o que ela entrega é cor na tela,
-e cor é literalmente o princípio nº1.** Os 33 critérios automatizáveis estão em sim, com 980 testes
-verdes, typecheck limpo, build passando e 11 mutações mortas nos arquivos escritos aqui (mais 36
-nos três módulos de render entregues em paralelo).
+| Passo | Resultado |
+|---|---|
+| Instalação limpa a partir do lockfile, num clone novo | 9 s, sem erro |
+| `npm audit` | 2 avisos moderados no vitest, corrigidos para 4.1.11, reconferido em **0** |
+| `npx tsc --noEmit` | limpo |
+| `npm run build` | limpo |
+| `npm test` | **1047 passando**, 58 pulados (os de banco, sem `.env.local`) |
+| `npm run test:banco` | **58 de 58** contra o Supabase real |
+| App rodando, fluxo principal em navegador de verdade | percorrido, sem defeito |
 
-Nenhum teste desta entrega desenhou um pixel, porque jsdom não tem WebGL. O que os testes provam é
-o **número escrito no glTF**; entre esse número e a cor na tela ainda há a conversão de sRGB para
-linear e o renderizador, e é justamente essa distância que o princípio nº1 existe para vigiar.
+O fluxo percorrido à mão em `?tela=composicao`: calçado montado na tela, troca de peça sem apagar a
+cena e trazendo o parâmetro próprio da peça nova, clique devolvendo o id da peça, e a cor de uma
+zona mudando **só** aquela peça. Nenhuma linha de código precisou mudar depois da conferência.
 
-Abrir <http://localhost:5173/?tela=composicao> e conferir:
+## O portão a olho de T14, encerrado por medição (ver D05)
 
-1. **O calçado aparece montado**: sola embaixo, cabedal em cima dela, cadarço sobre o cabedal.
-   Nenhuma peça flutuando no ar nem enterrada dentro da outra.
-2. **A cor escolhida é a cor que aparece.** Este é o princípio nº1, literal. Se o hex escolhido e o
-   que está na tela não forem a mesma cor, nada mais importa nesta entrega.
-3. **Trocar a cor de uma zona muda só aquela peça.** A sola vermelha não pode pintar o cadarço.
-4. **Engrossar a sola faz o cabedal e o cadarço subirem junto**, encaixados, sem abrir fresta nem
-   afundar um no outro.
-5. **Clicar numa peça mostra o nome dela**, e o nome bate com a peça em que se clicou.
+T14 esteve em `AGUARDANDO_MATHEUS` esperando o dono conferir 5 itens em `?tela=composicao`. Fechou
+sem esse portão, por três sondas independentes concordando: a passada de 2026-09-11, uma terceira
+medição de framebuffer feita na sessão de 2026-09-12, e o teste permanente de T17, que agora mede a
+cor na tela em toda rodada da suíte.
 
-O item 2 é o mais importante dos cinco.
+O portão existia porque nenhum teste desenhava um pixel, e essa premissa caiu quando o Chrome
+headless entrou na suíte. **O dono continua podendo reprovar ao abrir a tela**, e nesse caso o
+defeito vira teste, que é o caminho certo de qualquer jeito. Os cinco itens, para conferência:
 
-**Passada automática feita em 2026-09-11, sem defeito nos 5 itens.** Descobriu-se que "só o dono
-pode conferir" era verdade sobre o jsdom, não sobre esta máquina: há Chrome instalado, ele roda
-WebGL por software em modo headless, e o Node 24 dirige o protocolo de DevTools sem dependência
-nenhuma. A cor na tela bateu com o hex escolhido por matiz nas três peças (sola 5 contra 6, cabedal
-221 contra 219, cadarço 43 contra 42), clicar numa peça devolveu o id dela, e engrossar a sola
-subiu o resto encaixado. Detalhes na seção da passada em `specs/composicao-em-cena.md`.
+1. O calçado aparece montado, sola embaixo, cabedal em cima, cadarço sobre o cabedal.
+2. **A cor escolhida é a cor que aparece.** É o princípio nº1, literal, e o mais importante dos cinco.
+3. Trocar a cor de uma zona muda só aquela peça.
+4. Engrossar a sola faz cabedal e cadarço subirem junto, encaixados.
+5. Clicar numa peça mostra o nome dela, e o nome bate com a peça clicada.
 
-Isso **não fecha T14**: a GPU e o monitor do dono não são os da passada, e o portão formal é dele.
-Mas a conferência passa a ser confirmação, e não descoberta.
+Duas notas para não parecerem defeito: **arrastar para baixo levanta o ponto de vista**, que é a
+convenção do `OrbitControls` do three; e a cor inicial da demo (sola quase branca, cabedal azul,
+cadarço amarelo) é de `composicaoDeProva()`, não identidade de marca nenhuma.
 
-Duas notas para não parecerem defeito:
+## O que ficou fora, e por quê
 
-- **O arraste continua o de T13**: arrastar para baixo levanta o ponto de vista, que é a convenção
-  do `OrbitControls` do three.
-- **A cor inicial da demo** é a de `composicaoDeProva()`: sola quase branca, cabedal azul, cadarço
-  amarelo. Não é identidade de marca nenhuma, é só um calçado de demonstração.
-
-## A conferência a olho de T13 (encerrada, aprovada em 2026-09-10)
-
-**T13 exigia conferência a olho, e só o dono tem navegador.** É a primeira tarefa desta fase em que
-o princípio nº1 morde: suíte verde não prova que a peça aparece na tela, porque jsdom não tem WebGL
-e nenhum teste desta entrega desenhou um pixel. Os 23 critérios automatizáveis estão todos em sim.
-
-Abrir <http://localhost:5173/?tela=palco3d> e conferir os cinco itens da §7 de `specs/palco-3d.md`:
-
-1. A peça aparece, uma caixa branca com relevo, não uma silhueta chapada nem uma tela preta.
-2. Ela gira arrastando com o mouse, e não vira de cabeça para baixo por mais que se arraste.
-3. Clicar nela mostra o nome dela, e clicar no vazio limpa o nome.
-4. Trocar a peça no seletor troca o que está na tela, e a peça nova continua enquadrada.
-5. Mexer no parâmetro engrossa ou afina a peça, sem ela afundar no chão nem flutuar.
-
-O item 5 é o mais importante: é o único que nenhum teste pode ver de verdade, porque os testes
-conferem a caixa envolvente, e caixa envolvente não distingue uma peça que cresceu para cima de
-uma que cresceu para os dois lados.
-
-Nota sobre o arraste, para não parecer defeito: arrastar para **baixo** levanta o ponto de vista.
-É a convenção do `OrbitControls` do three, e é a que mantém os dois eixos com a mesma lógica de
-"agarrar a peça". Se preferir o contrário, é uma linha em `src/palco3d/orbita.ts` e dois testes.
-
-**Resultado: os cinco itens passaram**, sem defeito encontrado. Nenhuma linha de código mudou
-depois da conferência.
+- **T05, T06 e T09** continuam `[!]`: adiadas por decisão do dono, não por bloqueio técnico.
+- **A exclusão de dados do ADR-009** não existe, por decisão (D09). Exportar e excluir são separados
+  de propósito, e a exportação vinha primeiro.
+- **O acervo de verdade** é trabalho de modelagem. As 5 peças de hoje são geometria grosseira gerada
+  por código, boas para provar a esteira e não para vender.
 
 ## As quatro decisões que destravaram o plano (2026-09-10)
 
@@ -91,9 +68,10 @@ depois da conferência.
 2. **Custo da IA**: adiada, o configurador vem primeiro e custa zero. Registrada em
    `memory/restrictions.md`.
 3. **Zona 3D**: não guardar, a zona vem da composição. Sem tarefa, sem schema.
-4. **Saída do cliente**: saída completa em formato aberto, virou o ADR-009.
+4. **Saída do cliente**: saída completa em formato aberto, virou o ADR-009, e agora roda.
 
 ## Vigia de limite
-Não instalado. O hook de continuidade e o vigia vivem em `.claude/`, e a instalação está
-bloqueada (ver P01 em PENDENCIAS-DO-MATHEUS.md). Sem eles não há retomada automática:
-se a sessão cair, o Matheus retoma lendo este arquivo.
+
+Não instalado. O hook de continuidade e o vigia vivem em `.claude/`, e a instalação está bloqueada
+(ver P01 em PENDENCIAS-DO-MATHEUS.md). Com a execução encerrada isso deixa de importar para esta
+rodada, e volta a importar na próxima.
