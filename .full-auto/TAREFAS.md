@@ -141,7 +141,13 @@ hooks que falam com a rede e que nunca foram olhados.
 A42 ficou de fora do lote e está no backlog com o motivo escrito: é o menor score dos sete achados
 e o lote já leva três itens de qualidade.
 
-- [ ] R5-A46 Navegador sem WebGL deixa de apagar a página inteira | trilha: robustez | depende: nenhum | pronto quando: com `HTMLCanvasElement.prototype.getContext` devolvendo `null` para `webgl*`, as duas telas do palco mostram uma frase dizendo que o 3D não pôde ser iniciado, o rodapé continua clicável e o esboço continua alcançável, conferido no navegador, e existe teste do caminho de falha
+- [x] R5-A46 Navegador sem WebGL deixa de apagar a página inteira | trilha: robustez | depende: nenhum | pronto quando: com `HTMLCanvasElement.prototype.getContext` devolvendo `null` para `webgl*`, as duas telas do palco mostram uma frase dizendo que o 3D não pôde ser iniciado, o rodapé continua clicável e o esboço continua alcançável, conferido no navegador, e existe teste do caminho de falha
+      feito em `2077f0a`. Estado novo `contexto-negado`, separado do `contexto-perdido` que já
+      existia: no perdido o contexto caiu e costuma voltar, no negado nunca nasceu e recarregar
+      não muda nada. O `criarPalco` passou a rodar dentro de `try`. Conferido no navegador com o
+      `getContext` remendado: 0 canvas nas duas telas, a frase própria de cada uma, rodapé com as
+      três saídas e o botão do esboço levando ao esboço com as 9 zonas. Teste em
+      `palcoSemWebgl.test.tsx`, 4 casos em jsdom, os 4 conferidos vermelhos sem o conserto.
 - [ ] R5-A41 Tabela nova sem RLS vira teste vermelho | trilha: qualidade | depende: nenhum | pronto quando: existe varredura de fonte sobre `supabase/migrations/*.sql` que reprova quando uma tabela criada não tem `enable row level security`, ela roda em `npm test` sem banco e sem `.env.local`, e uma tabela de mentira acrescentada ao texto de uma migration faz o teste reprovar
 - [ ] R5-A45 As citações de ADR passam a dizer a verdade, e uma varredura confere | trilha: qualidade | depende: nenhum | pronto quando: nenhum lugar do código afirma "ADR-008 D6" para a não persistência da composição, existe varredura que reprova quando um `ADR-XXX DN` escrito em `src/`, `api/` ou `supabase/` não resolve para decisão existente naquele ADR, ela aceita as duas grafias de numeração que os ADRs usam, e uma citação inventada faz o teste reprovar
 - [ ] R5-A47 Colar a composição de volta na tela | trilha: produto | depende: nenhum | pronto quando: existe onde colar o JSON da composição na tela do calçado montado, um JSON válido monta o calçado descrito, um inválido é recusado por `validarComposicao` com a frase na tela e sem chegar ao palco, e existe teste dos dois caminhos

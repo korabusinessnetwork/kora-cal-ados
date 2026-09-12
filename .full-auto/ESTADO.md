@@ -32,10 +32,14 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   vale guardar: **`.palco` é declarada em DOIS arquivos** (`esboco/esboco.css` e
   `features/zonas/zonas.css`), e `position: sticky` ficou sem efeito duas vezes, em silêncio,
   enquanto o `order` da mesma regra funcionava.
-- **Próximo passo:** abrir a rodada 5, reauditando a partir do que mudou na rodada 4 mais o backlog
-  que sobrou (A12 a A16, A23, A24, A25, A31, A32, A35, todos abaixo do corte hoje). Se a
-  reauditoria não achar nada acima do corte, o modo encerra com `status: CONCLUIDO` e relatório
-  final, em vez de inventar lote.
+- **Rodada 5: ABERTA em 2026-09-12** (`46a590b`), 6 itens, nenhum com risco 4 ou 5. Diferente das
+  quatro anteriores, que auditaram telas: esta foi atrás do que acontece quando a máquina de quem
+  visita não tem o que a tela precisa, das regras do projeto que existem só como frase e não têm
+  guarda nenhuma, e dos hooks de rede do editor logado. **1 de 6 entregue**: R5-A46 (`2077f0a`).
+- **Próximo passo:** R5-A41, a varredura que reprova tabela nova sem RLS. Depois, na ordem:
+  R5-A45, R5-A47, R5-A44, R5-A43. Cada um pelo cinto de segurança: árvore limpa, baseline verde
+  nas duas pontas, um commit por mudança, `git revert` na hora se qualquer linha do `BASELINE.md`
+  piorar.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 
