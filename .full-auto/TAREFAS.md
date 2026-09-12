@@ -196,3 +196,21 @@ e o lote já leva três itens de qualidade.
       falta de WebGL. Três testes, sendo um de contraprova (a tela montou mesmo), e a frase antiga
       de volta no lugar deixa 2 dos 3 vermelhos. Conferido no navegador em `?tela=palco3d`, e o
       botão que a frase cita leva mesmo ao calçado montado.
+
+---
+
+## Refino, rodada 6 (aberta em 2026-09-12)
+
+Lote de 6 itens, saído da reauditoria registrada em `AUDITORIA.md`, seção "Achados da reauditoria da
+rodada 6". Nenhum com risco 4 ou 5, e o mais alto é 2. Um item por eixo com achado acima do corte:
+robustez (A51 e A52), produto (A50), qualidade (A49 e A42), ux (A48).
+
+Ordem de execução pelo score, com o A52 por último porque é o único que mexe em como o `App.tsx`
+carrega as telas, e quero o baseline conferido várias vezes antes dele.
+
+- [ ] R6-A51 A raiz ganha rede de proteção contra exceção de render | trilha: robustez | depende: nenhum | pronto quando: existe um `ErrorBoundary` acima das quatro telas, um componente que lança durante o render deixa a página COM conteúdo (mensagem do que houve mais as saídas para outra tela) em vez de `document.body` vazio, e existe teste que monta um filho que lança e afirma que a saída continua no DOM
+- [ ] R6-A50 A peça clicada mostra os dois lados do endereço | trilha: produto | depende: nenhum | pronto quando: clicar numa peça no calçado montado mostra o id do nó E a categoria daquela peça, com o mesmo nome de categoria que a lista de zonas usa, e existe teste de que os dois vêm da MESMA composição em cena (id inventado não inventa categoria)
+- [ ] R6-A49 A tela da composição ganha teste de comportamento | trilha: qualidade | depende: nenhum | pronto quando: `TelaDaComposicao` monta em jsdom e há teste de que colar um JSON válido troca o que está em cena, colar um JSON recusado mantém o calçado anterior e escreve o motivo, e trocar de peça não carrega o parâmetro da peça anterior
+- [ ] R6-A48 A moldura preta some quando o 3D não vai abrir | trilha: ux | depende: nenhum | pronto quando: no estado `contexto-negado` não existe mais uma caixa preta vazia guardando espaço para o que não vem, a mensagem ocupa esse lugar nas duas telas do palco, e o `contexto-perdido` continua com a moldura de pé (com teste dos dois estados)
+- [ ] R6-A42 README por diretório vira varredura, não lembrete | trilha: qualidade | depende: nenhum | pronto quando: todo diretório com código versionado tem `README.md`, e existe um teste que reprova quando um diretório novo com código nasce sem índice, com contraprova sintética que TEM de reprovar
+- [ ] R6-A52 O cliente de banco sai do chunk que todo mundo baixa | trilha: robustez | depende: nenhum | pronto quando: o chunk principal do `npm run build` não contém mais `@supabase/supabase-js`, as três telas públicas abrem sem baixá-lo, a área protegida continua funcionando, e o número novo do chunk principal está medido no `BASELINE.md`

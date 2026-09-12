@@ -722,7 +722,7 @@ devolve nenhuma outra, então é instância, não classe, e o conserto é uma fr
 
 valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A42 | eixo: qualidade | README por diretório sem guarda (backlog)
+### A42 | eixo: qualidade | README por diretório sem guarda (backlog, entrou na rodada 6)
 
 O ADR-003 manda que **todo diretório novo ganhe um README.md de índice**, e sete diretórios com
 código não têm: `src`, `api/v1`, `api/v1/products`, `api/v1/products/[productId]`,
@@ -763,3 +763,157 @@ valor: 3 | esforço: 2 | risco: 1 | **score: 2**
    menos uma policy, inclusive `tenant_api_keys`, que é a mais nova. O A41 não é uma tabela
    desprotegida, é a ausência de guarda para a próxima, e a diferença importa para não relatar
    risco que não existe.
+
+---
+
+## Achados da reauditoria da rodada 6 (2026-09-12)
+
+A rodada 5 foi atrás do que a máquina de quem visita não tem, das regras sem guarda e dos hooks de
+rede. Esta foi atrás de três outras coisas: **o que sobra na tela quando a falha já foi tratada**,
+**o que a tela promete no próprio texto de ajuda e não entrega**, e **o que todo mundo baixa para
+usar o que não precisa disso**. Mais o backlog que atravessou as rodadas anteriores.
+
+Método de sempre: sondar em vez de supor. Três suspeitas morreram na sonda e estão em "o que eu
+achei que era defeito e não era", no fim desta seção.
+
+### A51 | eixo: robustez | onde: `src/App.tsx` (a raiz, e o projeto inteiro)
+
+**hoje:** não existe `ErrorBoundary` em lugar nenhum de `src/`. `grep -rn "componentDidCatch\|
+getDerivedStateFromError\|ErrorBoundary" src api` devolve só dois comentários, os dois escritos no
+R5-A46 dizendo que a coisa não existe. Qualquer exceção durante o render ou dentro de um efeito
+desmonta a árvore inteira: a pessoa fica com a página EM BRANCO, sem cabeçalho, sem rodapé e sem
+caminho para outra tela.
+
+**evidência, medida e não deduzida:** é a mesma medida do R5-A46, feita no navegador com
+`getContext` devolvendo `null`: `document.body.innerText` ficou **vazio**. O A46 consertou aquele
+caminho específico, o `new WebGLRenderer`, e fez bem, mas consertou UMA porta. A ausência de rede de
+proteção continua exatamente igual para a próxima exceção, e o palco carrega glTF, faz `raycast` e
+fala com o `three`, que é o tipo de código onde a próxima aparece.
+
+**depois:** um `ErrorBoundary` na raiz que mostra o que aconteceu e mantém o rodapé de saídas de pé,
+para a pessoa ir para outra tela em vez de recarregar no escuro. Com teste: componente que lança,
+boundary que renderiza a saída, e a prova de que o resto da página continua no DOM.
+
+**por que não é o A46 de novo:** o A46 é uma guarda de um caminho conhecido, dentro do componente
+que sabe o que fazer com aquela falha específica. Esta é a rede por baixo dos caminhos que ninguém
+listou. As duas são necessárias, e a ordem certa é justamente essa: primeiro a guarda que sabe o
+nome do problema, depois a rede que não sabe.
+
+valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A50 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx:207` (painel "Peça clicada")
+
+**hoje:** o painel diz, no próprio texto de ajuda, "O nome do nó é o id da peça (ADR-007 D4), e a
+zona que a API recolore é a categoria dela. **São os dois lados do mesmo endereço**". E então mostra
+**um lado só**: o id do nó. A categoria, que é o lado que a API usa e o lado que tem controle de cor
+na tela, a pessoa tem de descobrir olhando outra lista, mais abaixo, e casando as duas com o olho.
+
+**evidência:** clicado no cabedal azul no navegador, em `?tela=composicao`. O painel mostrou
+`prova-cabedal-baixo` e nada mais. A palavra `cabedal` existe na tela, na lista "Zonas do calçado",
+a três itens de distância, e não há nada ligando uma coisa à outra.
+
+**depois:** a peça clicada mostra os dois lados, id e categoria, e leva ao controle daquela
+categoria. É o princípio nº1 na sua forma mais direta: quem clicou na peça quer pintar aquela peça,
+e hoje o caminho entre uma coisa e outra é a memória da pessoa.
+
+**por que é produto e não texto:** a ligação entre malha clicada e controle de cor é a tarefa
+central da tela. O texto de ajuda já descreve a funcionalidade certa; o que falta é ela existir.
+
+valor: 4 | esforço: 2 | risco: 1 | **score: 4**
+
+### A49 | eixo: qualidade | onde: `src/palco3d/TelaDaComposicao.tsx` (391 linhas)
+
+**hoje:** é o arquivo mais tocado do projeto nos últimos 30 dias (**15 commits**, contra 9 do
+segundo colocado) e não tem um único teste de comportamento. As funções que ele chama têm teste
+(`composicaoDaTela.test.ts`, `validarComposicao`), a ligação entre elas e a tela não tem nenhum.
+
+**evidência:** `git log --since="30 days ago" --name-only` com contagem por arquivo, e a ausência de
+`TelaDaComposicao.test.tsx` em `git ls-files`. O R5-A47 inteiro, a área de colar composição, foi
+verificado **só à mão**, no navegador, e está escrito assim no commit dele.
+
+**depois:** teste de comportamento montando a tela em jsdom, no molde do `TelaDoPalco3d.test.tsx`
+que o R5-A43 criou: colar JSON válido monta o que foi colado, colar JSON recusado mantém o calçado
+anterior de pé e escreve o motivo, e trocar de peça descarta o parâmetro da anterior (BUG-019).
+
+**por que só agora:** montar esta tela em jsdom era impossível até o R5-A46, porque o
+`WebGLRenderer` lançava e derrubava o teste junto. O A43 provou o caminho na tela irmã.
+
+valor: 4 | esforço: 3 | risco: 1 | **score: 3**
+
+### A48 | eixo: ux | onde: `src/palco3d/palco3d.css` (`.palco3d__moldura`) e as duas telas do palco
+
+**hoje:** quando o 3D não pode ser iniciado (`contexto-negado`), a moldura preta continua na tela,
+vazia, para sempre. Não é o estado de espera: é uma caixa preta que nunca vai receber nada, ocupando
+a coluna principal, com a explicação embaixo dela.
+
+**evidência, medida nas duas telas com `getContext` devolvendo `null`:** a moldura fica com
+**532x320 px** no tamanho de janela do navegador da sessão e **375x340 px** em 375x812, com fundo
+`rgb(20, 20, 27)`, `canvas` nenhum dentro, e a frase do erro começando a 365 px do topo. Nas duas
+telas, palco e composição, o mesmo.
+
+**depois:** no `contexto-negado`, a moldura não guarda mais espaço para o que não vem. A mensagem
+ocupa o lugar dela, e a saída para o esboço fica junto do texto que manda ir para o esboço.
+
+**por que não vale no `contexto-perdido`:** lá a moldura deve ficar, porque o contexto pode voltar e
+a caixa é o lugar onde ele volta. A diferença entre os dois estados é exatamente esta, e é por isso
+que o A46 os separou.
+
+valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A52 | eixo: robustez | onde: `src/App.tsx` (o que entra no chunk principal)
+
+**hoje:** o `@supabase/supabase-js` inteiro, com o cliente de realtime junto, está no **chunk
+principal**, que todo mundo baixa. As três telas públicas, esboço, palco 3D e calçado montado, não
+importam uma linha de `features/`, não falam com o banco e não têm para onde mandar requisição. Quem
+abre um clone recém-baixado em `?tela=esboco` paga por um cliente de banco que aquela tela nunca vai
+usar.
+
+**evidência:** no `dist/assets/index-*.js`, de 457.450 bytes, a palavra `supabase` aparece **72
+vezes** e `realtime` **23**. E `grep -rn "features/" src/esboco/*.tsx src/palco3d/*.tsx` devolve
+**vazio**: as telas públicas não tocam em nada que leve ao cliente.
+
+**depois:** a área protegida entra por `import()` tardio, do mesmo jeito e pelo mesmo motivo que o
+palco já entra, e o cliente de banco sai do chunk que todo mundo baixa. A medida do antes e do
+depois é o próprio tamanho do chunk principal, que já está na tabela do `BASELINE.md`.
+
+**por que é o mesmo raciocínio já decidido:** o `App.tsx` diz, em comentário, por que o three.js não
+vai no chunk principal: "o peso é do palco, e quem paga por ele é quem o abre". O cliente de banco
+está na mesma situação e não recebeu o mesmo tratamento.
+
+valor: 4 | esforço: 2 | risco: 2 | **score: 2**
+
+### A42 | eixo: qualidade | README por diretório, agora com a evidência refeita
+
+Já estava no backlog desde a rodada 5, com o mesmo score. A lista foi refeita nesta auditoria e
+mudou: os diretórios com código e **sem** `README.md` hoje são `src`, `supabase`,
+`supabase/migrations`, `src/features/produtos/hooks`, `src/features/zonas/hooks`,
+`api/v1/products/[productId]` e os dois de `fixtures`. O `supabase/migrations` entrou na lista
+**nesta rodada**, quando o R5-A41 pôs uma varredura lá dentro sem índice nenhum ao lado dela.
+
+A prova de que a regra escapa continua sendo eu mesmo: furei na rodada 4 (`src/lib/copia/`) e de
+novo na 5 (a varredura em `supabase/migrations/`). Regra que o autor da regra fura duas vezes em
+duas rodadas é regra sem guarda, e este projeto já tem duas guardas desse feitio funcionando (A41 e
+A45).
+
+valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+---
+
+### O que eu achei que era defeito e não era (rodada 6)
+
+1. **Foco invisível no teclado.** O projeto tem **uma** regra `:focus` em 5 arquivos CSS, criada no
+   R5-A47 para a área de colar. Parecia que o resto da navegação por teclado estava sem anel de
+   foco. Sondado com `Tab` de verdade, e não com `focus()` por script, que não aciona
+   `:focus-visible`: o anel do navegador aparece, `outline: auto 1px rgb(229, 151, 0)`, e
+   `elemento.matches(':focus-visible')` devolve `true`. Não mexer.
+
+2. **Arrastar o seletor de cor remontando o calçado a cada evento.** O `input type=color` dispara
+   `input` continuamente, e cada disparo passa por `montarDaTela`, que valida e remonta o glTF
+   inteiro. Medido com 20 mudanças de cor em sequência, esperando um quadro entre elas: **11 a 26 ms
+   por mudança**, 358 ms no total, um canvas só no fim. Cabe em dois quadros e não justifica
+   `debounce`, que acrescentaria atraso a uma tela cujo ponto é a cor aparecer na hora.
+
+3. **Nome acessível faltando nos controles das telas públicas.** Varridos os 21 elementos
+   focáveis da tela do calçado montado, calculando o nome por `aria-label`, `<label>` associado,
+   texto e `title`: **nenhum** sem nome. O A35, do canvas, continua sendo o caso real, e continua
+   inteiro no backlog pelo motivo já escrito.

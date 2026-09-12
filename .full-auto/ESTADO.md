@@ -43,12 +43,20 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   relatada em `REFINO-RODADAS.md`, com o que foi feito com ela (o teste é que perguntava a coisa
   errada). Limite de verificação dito por inteiro: a tela do editor logado não foi conferida no
   navegador, porque exige login e eu não preencho credencial.
-- **Próximo passo:** abrir a rodada 6 pela Fase 5, reauditando o que mudou desde a última auditoria
-  mais o backlog que sobrou (**A42**, README por diretório sem guarda, e **A35**, o canvas sem
-  teclado, que já atravessou duas rodadas). Anotados para essa auditoria, ainda não virados em item:
-  `supabase/migrations/` não tem `README.md`, que o ADR-003 pede por diretório, e a moldura preta
-  grande que fica na tela quando o `contexto-negado` nunca resolve. Se a reauditoria não achar nada
-  acima do corte, o desfecho é `status: CONCLUIDO` mais relatório final.
+- **Rodada 6: ABERTA em 2026-09-12**, 6 itens em `TAREFAS.md`, seção "Refino, rodada 6", nenhum com
+  risco acima de 2. A reauditoria foi atrás de três coisas: o que SOBRA na tela depois de a falha já
+  ter sido tratada, o que a tela promete no próprio texto de ajuda e não entrega, e o que todo mundo
+  baixa para usar o que não precisa disso. Mais o backlog que atravessou as rodadas. Três suspeitas
+  morreram na sonda e estão registradas como tal em `AUDITORIA.md`, entre elas o anel de foco, que
+  aparece de verdade num `Tab` de verdade, e o custo de arrastar o seletor de cor, que é de 11 a 26
+  ms por mudança e não justifica `debounce` numa tela cujo ponto é a cor aparecer na hora.
+- **Próximo passo:** executar o lote da rodada 6 pela Fase 3, na ordem escrita em `TAREFAS.md`:
+  **R6-A51** (rede de proteção na raiz), **R6-A50** (a peça clicada mostra id e categoria),
+  **R6-A49** (teste de comportamento da tela da composição), **R6-A48** (a moldura preta vazia do
+  `contexto-negado`), **R6-A42** (README por diretório com varredura) e **R6-A52** (o cliente de
+  banco sai do chunk principal), este por último por ser o único que mexe em como o `App.tsx`
+  carrega as telas. Baseline conferido inteiro depois de cada item, e `git revert` na hora em
+  qualquer linha que piorar.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 
