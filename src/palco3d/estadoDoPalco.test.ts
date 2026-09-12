@@ -72,7 +72,7 @@ describe('a frase de cada estado', () => {
     // Conferido no navegador: `restoreContext()` devolve a cena e a tela volta ao normal sem
     // recarregar nada. Mandar recarregar direto faria a pessoa jogar fora o trabalho dela por um
     // problema que ia se resolver sozinho, e é um trabalho que esta tela não grava em lugar
-    // nenhum (ADR-008 D6), ou seja, recarregar perde a composição inteira.
+    // nenhum, não existe tabela para ela, ou seja, recarregar perde a composição inteira.
     for (const frase of [
       textoDoEstadoDaPeca('contexto-perdido'),
       textoDoEstadoDaComposicao('contexto-perdido', 3),
@@ -94,7 +94,7 @@ describe('a frase de cada estado', () => {
     // Aqui nada caiu: o contexto nunca existiu, porque a máquina não tem GPU utilizável, o driver
     // está na lista de bloqueio ou a aceleração está desligada. Mandar esperar deixa a pessoa
     // olhando uma tela que não vai mudar, e mandar recarregar faz ela perder a composição, que
-    // não é gravada em lugar nenhum (ADR-008 D6), por um problema que recarregar não resolve.
+    // não é gravada em lugar nenhum, por um problema que recarregar não resolve.
     for (const frase of [
       textoDoEstadoDaPeca('contexto-negado'),
       textoDoEstadoDaComposicao('contexto-negado', 3),

@@ -14,6 +14,7 @@
   },
   "include": [
     "api",
+    "docs/08_DECISOES",
     "src",
     "supabase/migrations",
     "supabase/scripts",

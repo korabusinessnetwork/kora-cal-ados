@@ -11,9 +11,11 @@ Primeira passada em 2026-09-12.
 **O que é:** hoje a montagem existe só enquanto a aba está aberta. Uma tabela de composições
 deixaria a marca salvar, nomear e reabrir um calçado montado.
 
-**Por que não faço sozinho:** o ADR-008 D6 decidiu, em letra, que a composição **não é gravada**.
-Criar a tabela é contrariar um ADR, e isso não é refinamento. O refino entrega o meio-termo barato
-(A02, copiar o JSON para o clipboard), que dá saída sem inventar schema.
+**Por que não faço sozinho:** é área nova, com schema novo, RLS nova e tela de "meus calçados", e
+isso é decisão de produto do dono, não refinamento. Nenhum ADR proíbe guardar composição, e nenhum
+manda guardar: simplesmente não existe decisão sobre isso, e inventá-la sozinho seria decidir o
+produto. O refino entrega o meio-termo barato (A02, copiar o JSON para o clipboard), que dá saída
+sem inventar schema.
 
 ## I02 | Apagar e remarcar zona pelo painel
 

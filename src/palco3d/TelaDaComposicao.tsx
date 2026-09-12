@@ -106,8 +106,9 @@ export function TelaDaComposicao() {
             />
           ))}
 
-          {/* A composição não é gravada em banco (ADR-008 D6), então sem isto fechar a aba perde
-              a montagem inteira. O que sai daqui é o MESMO JSON que a API recebe. */}
+          {/* A composição não é gravada em lugar nenhum, não existe tabela para ela, então sem
+              isto fechar a aba perde a montagem inteira. O que sai daqui é o MESMO JSON que a
+              API recebe. */}
           <div className="palco3d__saida">
             <button type="button" className="palco3d__copiar" onClick={copia.copiar}>
               Copiar composição

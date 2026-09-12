@@ -97,7 +97,7 @@ pergunta é feita antes da assinatura, e agora ela tem demonstração em vez de 
 |---|---|
 | **O acervo de peças 3D** | São 5 peças de **geometria grosseira geradas por código**, não modelos de calçado. Servem para provar a esteira, não para vender. O acervo de verdade é trabalho de modelagem e continua adiado por decisão (T12 e `memory/restrictions.md`) |
 | **O prompt em linguagem natural** | Não existe. Foi trocado pelo configurador, que faz o mesmo trabalho sem custo de IA (T09, adiada por decisão sua de 2026-09-10) |
-| **A composição 3D no banco** | Não é gravada. A tela monta e a API recebe; não há tabela, por decisão (ADR-008 D6) |
+| **A composição 3D no banco** | Não é gravada. A tela monta e a API recebe; não há tabela para ela, e nenhum ADR decidiu que devesse haver |
 | **A migration de chaves de API** | `20260908_chave_de_api_por_tenant.sql` está escrita e revisada, **não aplicada em banco nenhum**. Os scripts de chave falham até ela rodar |
 | **O hook de continuidade** | Não instalado. Ver P01 |
 

@@ -44,7 +44,7 @@ EXISTIA e caiu, e costuma voltar sozinho, então a frase manda esperar. `context
 contexto que nunca nasceu, numa máquina sem GPU utilizável, e não vai nascer recarregando, então a
 frase manda ir para o esboço, que desenha o mesmo tênis em SVG. Trocar as duas frases custa caro
 nos dois sentidos: uma deixa a pessoa esperando o que não vem, a outra faz ela recarregar e perder
-a composição, que não é gravada em lugar nenhum (ADR-008 D6).
+a composição, que não é gravada em lugar nenhum, porque não existe tabela para ela.
 
 `PalcoDeModelo3d.tsx` não decide nada, de propósito. Se aparecer aritmética de câmera ou lógica de
 seleção lá dentro, ela escapou para o lugar onde nenhum teste olha. O critério 20 da spec existe

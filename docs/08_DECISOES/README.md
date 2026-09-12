@@ -44,6 +44,22 @@ Numeração é sequencial e nunca reciclada. Espelho deste índice em `memory/de
 4. **Não delete ADRs antigos**: marque como "Supersedido por adr-NNN", arquivo fica no histórico
 5. **Atualize quando decisão muda**: novo ADR que supersede, link bidirecional
 
+## A guarda: citação de ADR que não existe reprova
+
+`citacoesDeAdrExistem.test.ts` é o único arquivo de teste desta pasta, e roda em `npm test`. Ele lê
+os ADRs daqui, junta os números de decisão que cada um realmente tem, e varre `src/`, `api/` e
+`supabase/` atrás de `ADR-XXX DN` que não resolva. Existe porque quatro lugares do palco 3D já
+citaram um `ADR-008 D6` que fala de outra coisa, e o `CLAUDE.md` manda a documentação prevalecer
+sobre o código: citação errada não confunde, ela manda mudar o código na direção errada.
+
+As duas grafias de numeração são aceitas, porque os ADRs usam as duas: cabeçalho `### D1` (do 005
+ao 009, com o 009 escrevendo `### D1.`) e linha de tabela `| 1 |` (o 004, que numera as decisões do
+dono numa tabela). Ao escrever um ADR novo, use uma das duas, senão as citações a ele passam a
+reprovar.
+
+A guarda pega a metade mecânica, o número que não existe. **O número que existe mas fala de outra
+coisa continua sendo leitura**, e foi exatamente essa a forma do defeito que a originou.
+
 ## Ligações
 
 - `adr-000-template.md` — comece aqui, clone para novo ADR

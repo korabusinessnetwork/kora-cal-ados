@@ -87,7 +87,8 @@ export function mudarEscolhaDaTela(
  *
  * Sai separado de `montarDaTela` porque é o mesmo objeto que a API recebe e que o modelo de
  * linguagem vai escrever, e a tela precisa poder ENTREGAR isso a quem está montando: a composição
- * não é gravada em banco (ADR-008 D6), então fechar a aba perdia a montagem inteira.
+ * não é gravada em lugar nenhum, não existe tabela para ela, então fechar a aba perdia a montagem
+ * inteira.
  *
  * Segue a ordem das categorias da FORMA, e não a ordem em que a pessoa mexeu nos controles. Duas
  * montagens iguais têm que produzir o mesmo texto, senão comparar dois JSON dessa tela vira

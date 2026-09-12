@@ -212,7 +212,8 @@
 
 /* --- A saída da composição ---
 
-   A composição não é gravada em banco (ADR-008 D6). Este bloco é a única porta pela qual ela sai
+   A composição não é gravada em lugar nenhum: não existe tabela para ela. Este bloco é a única
+   porta pela qual ela sai
    da tela, então ele não pode parecer enfeite de rodapé: fica separado dos controles por uma
    borda, do mesmo jeito que as categorias se separam entre si. */
 .palco3d__saida {
