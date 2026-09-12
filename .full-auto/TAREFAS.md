@@ -236,6 +236,17 @@ carrega as telas, e quero o baseline conferido várias vezes antes dele.
       são a parte que teste de função pura nenhuma alcança. Fica registrado o erro da primeira
       versão do arquivo, que é o motivo de o `forma_id` agora ser lido do acervo: escrito à mão, e
       errado, ele fazia o teste do caminho de SUCESSO exercitar o da recusa, e passar.
-- [ ] R6-A48 A moldura preta some quando o 3D não vai abrir | trilha: ux | depende: nenhum | pronto quando: no estado `contexto-negado` não existe mais uma caixa preta vazia guardando espaço para o que não vem, a mensagem ocupa esse lugar nas duas telas do palco, e o `contexto-perdido` continua com a moldura de pé (com teste dos dois estados)
+- [x] R6-A48 A moldura preta some quando o 3D não vai abrir | trilha: ux | depende: nenhum | pronto quando: no estado `contexto-negado` não existe mais uma caixa preta vazia guardando espaço para o que não vem, a mensagem ocupa esse lugar nas duas telas do palco, e o `contexto-perdido` continua com a moldura de pé (com teste dos dois estados)
+      feito em `9a1a72d`. Quem decide é o componente do palco, por estado local, e não a tela: a
+      tela sabe qual frase escrever, e só o palco sabe que ali dentro não vai aparecer nada nunca
+      mais. As duas telas ganharam o conserto de uma vez. Medido no navegador: a frase do erro passou
+      de 365 px do topo para 143 px na janela de trabalho, e para 160 px em 375x812. A outra metade,
+      o `contexto-perdido`, foi conferida forçando `WEBGL_lose_context` no navegador: a moldura
+      continua com 532x320 px, porque ali o contexto pode voltar e ela é o lugar onde ele volta.
+      Essa metade NÃO tem teste automático, e não dá para ter: criar um contexto de verdade em jsdom
+      é impossível, que é o mesmo limite que o A46 já tinha. Um teste novo no arquivo do A46, e o
+      teste vizinho perdeu a linha que exigia a moldura de pé depois da falha, que era a afirmação
+      contrária a esta. Dois comentários que diziam "não existe `ErrorBoundary` em lugar nenhum"
+      passaram para o passado no mesmo commit, porque o R6-A51 os tornou falsos.
 - [ ] R6-A42 README por diretório vira varredura, não lembrete | trilha: qualidade | depende: nenhum | pronto quando: todo diretório com código versionado tem `README.md`, e existe um teste que reprova quando um diretório novo com código nasce sem índice, com contraprova sintética que TEM de reprovar
 - [ ] R6-A52 O cliente de banco sai do chunk que todo mundo baixa | trilha: robustez | depende: nenhum | pronto quando: o chunk principal do `npm run build` não contém mais `@supabase/supabase-js`, as três telas públicas abrem sem baixá-lo, a área protegida continua funcionando, e o número novo do chunk principal está medido no `BASELINE.md`

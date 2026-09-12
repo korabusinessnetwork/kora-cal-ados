@@ -49,3 +49,4 @@
 2026-09-12 · R6-A51 · a raiz ganha rede de protecao: excecao de render deixa de apagar a pagina inteira, e o rodape fica fora da rede para a navegacao sobreviver · 40d28c2
 2026-09-12 · R6-A50 · a peca clicada mostra o no E a zona, tirados da montagem em cena, e o botao leva o foco ao seletor de cor daquela categoria · df3e77c
 2026-09-12 · R6-A49 · a TelaDaComposicao, arquivo mais tocado do projeto, ganha 6 testes de comportamento em jsdom · 44b2741
+2026-09-12 · R6-A48 · a moldura preta vazia some no contexto-negado e a mensagem sobe de 365 para 143 px do topo, e continua de pe no contexto-perdido · 9a1a72d
