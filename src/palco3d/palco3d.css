@@ -114,9 +114,33 @@
   .palco3d__painel-inspecao { grid-column: 1 / -1; }
 }
 
-/* Abaixo disso não há largura para duas colunas sem espremer a cena, e aí empilhar é o certo. */
+/* Abaixo disso não há largura para duas colunas sem espremer a cena, e aí empilhar é o certo.
+
+   Empilhar resolve a largura e cria outro problema, que é o mesmo do A01 numa forma pior: numa
+   janela de 375x812 a moldura começava a 1158 px do topo na tela da composição, medido, ou seja,
+   a pessoa escolhia as nove cores e só via o calçado depois de todas. A cena sobe para o primeiro
+   lugar e fica presa no topo enquanto os controles rolam por baixo dela.
+
+   `order` e não reordenação do JSX porque a ordem do DOM aqui continua sendo a ordem certa de
+   leitura: primeiro o que se manipula, depois o resultado. A moldura não recebe foco de teclado
+   (o arraste é de ponteiro, o clique é de ponteiro), então quem navega por Tab não sente a
+   diferença, e quem enxerga ganha a cena no lugar onde ela serve para alguma coisa.
+
+   A moldura encolhe junto porque presa no topo ela passa a cobrar o espaço dela em toda rolagem:
+   nos 62vh de cima ela deixaria uma fresta para os controles, e aí o remédio seria pior. */
 @media (max-width: 860px) {
   .palco3d__colunas { grid-template-columns: 1fr; }
+
+  .palco3d__painel-cena {
+    order: -1;
+    position: sticky;
+    top: 0;
+    /* O painel já tem fundo opaco (`.painel`), então o que rola por baixo não atravessa. O
+       `z-index` é contra o canvas dos irmãos, não contra o fundo. */
+    z-index: 1;
+  }
+
+  .palco3d__painel-cena .palco3d__moldura { height: min(42vh, 340px); }
 }
 
 /* --- A tela da composição: um bloco por categoria da forma ---
