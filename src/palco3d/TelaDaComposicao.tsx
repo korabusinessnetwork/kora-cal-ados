@@ -226,6 +226,11 @@ function ControleDaCategoria({
             className={
               candidata.id === escolha.pecaId ? 'palco3d__peca palco3d__peca--ativa' : 'palco3d__peca'
             }
+            // A escolha existia só na borda colorida, e cor não é anúncio: para um leitor de tela
+            // os botões da categoria eram todos iguais, e não havia como saber qual está valendo
+            // sem sair da lista e conferir o resultado. `aria-pressed` diz "este está apertado"
+            // sem depender de enxergar.
+            aria-pressed={candidata.id === escolha.pecaId}
             onClick={() => aoMudar({ pecaId: candidata.id })}
           >
             <span className="palco3d__peca-rotulo">{candidata.rotulo}</span>
@@ -235,6 +240,10 @@ function ControleDaCategoria({
           <button
             type="button"
             className={escolha.pecaId === null ? 'palco3d__peca palco3d__peca--ativa' : 'palco3d__peca'}
+            // Dispensar a categoria é uma escolha como qualquer outra, e o botão dela entra na
+            // mesma lista, então ele anuncia do mesmo jeito. Sem isto, "nenhuma peça" seria o
+            // único estado da tela que só existe para quem enxerga a borda.
+            aria-pressed={escolha.pecaId === null}
             onClick={() => aoMudar({ pecaId: null })}
           >
             {/* Era `sem {categoria}`, e a tela escrevia "sem cadarco": a `categoria` é chave de

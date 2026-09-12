@@ -74,6 +74,9 @@ export function TelaDoPalco3d() {
                   className={
                     candidata.id === pecaId ? 'palco3d__peca palco3d__peca--ativa' : 'palco3d__peca'
                   }
+                  // A peça em cena existia só na borda colorida, e cor não é anúncio: o mesmo
+                  // conserto, e pelo mesmo motivo, da lista da tela da composição.
+                  aria-pressed={candidata.id === pecaId}
                   onClick={() => trocarPeca(candidata.id)}
                 >
                   <span className="palco3d__peca-rotulo">{candidata.rotulo}</span>
