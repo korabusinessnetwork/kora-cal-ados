@@ -237,7 +237,12 @@ function ControleDaCategoria({
             className={escolha.pecaId === null ? 'palco3d__peca palco3d__peca--ativa' : 'palco3d__peca'}
             onClick={() => aoMudar({ pecaId: null })}
           >
-            <span className="palco3d__peca-rotulo">sem {categoria}</span>
+            {/* Era `sem {categoria}`, e a tela escrevia "sem cadarco": a `categoria` é chave de
+                dado, não palavra de frase, e chegava sem cedilha no meio do português. A forma não
+                declara rótulo legível para categoria (só a PEÇA tem `rotulo`), então o caminho
+                honesto é não costurar a chave na prosa. Qual categoria é esta já está no título do
+                bloco, logo acima, com a marca de "opcional" ao lado. */}
+            <span className="palco3d__peca-rotulo">Nenhuma peça</span>
           </button>
         )}
       </div>
