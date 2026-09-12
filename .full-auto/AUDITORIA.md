@@ -431,3 +431,138 @@ o caminho foi sondado em vez de suposto.
 
 4. **"Duplo clique em gravar pode criar zona duas vezes."** `FormularioDeNovaZona` desabilita os
    três campos e os dois botões enquanto `salvando` é verdadeiro. Já estava resolvido.
+
+## Achados da reauditoria da rodada 4 (2026-09-12)
+
+As três primeiras rodadas varreram o editor logado, o palco 3D e o motor. Esta foi atrás do que
+sobrou sem varredura nenhuma: o **esboço**, que é a tela que um clone recém-baixado abre, a
+**superfície de entrada do serverless**, e a **navegação entre as quatro telas**. O método foi usar
+o sistema com o navegador em 375 px e forçar os estados chatos, mais leitura da borda da API.
+
+Duas suspeitas morreram na sonda e estão registradas no fim da seção.
+
+### A39 | eixo: ux | onde: `src/esboco/` (a folha de estilo do esboço)
+
+- **hoje:** em 375x812, na tela do esboço, o SVG do calçado começa a **998 px** do topo, numa página
+  de 2529 px, enquanto o primeiro controle de zona está a **396 px**, dentro da primeira tela. Quem
+  escolhe uma cor no celular mexe num controle visível e o calçado está 186 px abaixo da dobra. É o
+  mesmo defeito que o A30 consertou nas duas telas do palco, na tela que o A30 não olhou.
+- **depois:** abaixo da quebra estreita, o preview do calçado vem antes da lista de zonas, ou fica
+  preso no topo, como o palco ficou.
+- **evidência:** medido no navegador, `getBoundingClientRect().top + scrollY` do `<svg>` (998) contra
+  o do botão da zona Cabedal (396) e o `scrollHeight` do documento (2529), em 375x812.
+- **por que vale mais que o A30 valeu:** o esboço é a única tela que abre num clone sem `.env.local`
+  e sem conta, é a que o README manda abrir primeiro, e o princípio nº1 é literalmente "marcar uma
+  zona e ver a cor". Aqui não se vê.
+- valor: 5 | esforço: 2 | risco: 2 | **score: 4**
+
+### A37 | eixo: robustez | onde: `api/v1/products/[productId]/variants.ts:219` (`lerCorpoJson`)
+
+- **hoje:** `await pedido.json()` lê e parseia o corpo INTEIRO sem teto de bytes. O teto que existe é
+  o de 90 zonas em `lerCoresPedidas`, e ele só é conferido depois do parse. O comentário do próprio
+  `lerCoresPedidas` enumera as três dimensões do corpo e conclui que as outras duas já estão
+  limitadas pelo motor, o que é verdade, mas as três são conferidas DEPOIS de o corpo inteiro já
+  estar na memória. A dimensão em bytes é a única que ninguém limita, e o teto de zonas existe,
+  segundo o próprio comentário dele, como "mitigação de custo zero contra cliente com laço mal
+  escrito", que é exatamente este ator.
+- **depois:** recusa por `content-length` antes de ler o corpo, e leitura com corte de bytes para o
+  caso de a requisição chegar sem `content-length`. Código `CORPO_INVALIDO`, como as outras recusas
+  de forma, decidido pela tabela de `traduzirParaFalhaDaApi`, nunca escrito no arquivo da rota.
+- **evidência:** medido, não estimado. Um corpo de **7.088.891 bytes** com 300.000 pares foi
+  inteiramente parseado por `Request.json()` em **202 ms**, custando **13,4 MB** de heap, antes de
+  `lerCoresPedidas` poder recusá-lo por passar de 90 zonas.
+- **o que limita o alcance, e está dito de propósito:** o corpo só é lido no passo 5, depois de
+  autenticação e de o produto ser do tenant. Nenhum anônimo chega aqui. O ator real é chave válida
+  com laço errado, ou chave vazada, que é o ator que o teto de zonas já mira.
+- valor: 4 | esforço: 2 | risco: 2 | **score: 2**
+
+### A38 | eixo: produto | onde: `src/esboco/` (o painel "Chamada equivalente")
+
+- **hoje:** o esboço monta na tela a chamada inteira, rota, `Authorization`, `Content-Type` e o JSON
+  das 9 zonas, que é precisamente o que um integrador quer levar para o terminal ou para o ERP, e
+  não existe um único botão de copiar na tela. A tela da composição, que mostra menos, tem
+  "Copiar composição" com estado de falha e tudo.
+- **depois:** copiar o corpo JSON da chamada equivalente, com o mesmo comportamento do botão da
+  composição, inclusive a falha de área de transferência negada.
+- **evidência:** `[...document.querySelectorAll('button')].filter(b => /copi/i.test(b.textContent))`
+  devolve `[]` no esboço e o botão na composição.
+- **como não virar a segunda implementação:** o estado da cópia hoje mora dentro de
+  `TelaDaComposicao.tsx`. Pela regra de dependência de `src/features/README.md`, o que passa a ser
+  usado por duas telas sobe para `src/lib/`. Primeiro commit sobe a regra, segundo usa nas duas.
+- valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+### A40 | eixo: qualidade | onde: `package.json` (`@types/three`)
+
+- **hoje:** `three` roda em **0.186.0** e `@types/three` está preso em **^0.185.4**. O `tsc --noEmit`
+  confere todas as chamadas de three contra a superfície da r185 enquanto a r186 executa. Num
+  projeto cuja verificação inteira é typecheck mais testes, e cujo palco 3D é a parte que nenhum
+  teste unitário alcança, isso é um buraco silencioso: o que a r186 renomeou passa verde no
+  typecheck e falha no navegador.
+- **depois:** `@types/three` em `^0.186.0`, typecheck limpo.
+- **evidência:** `require('./node_modules/three/package.json').version` devolve `0.186.0` e o de
+  `@types/three` devolve `0.185.4`; o `<canvas>` da tela da composição carrega
+  `data-engine="three.js r186"`.
+- **risco real:** nenhum em tempo de execução, tipo não executa. O único risco é o typecheck passar
+  a acusar erro, que é justamente o que o item existe para descobrir, e é visível na hora.
+- valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A36 | eixo: ux | onde: `src/esboco/` (`.editor__atalho`, a paleta de atalhos)
+
+- **hoje:** os oito atalhos de cor são botões de **22x22 px**, colados uns nos outros, e o único
+  nome acessível deles é o `title` com o hex (`#B23A2E`). Dois problemas num só: 22 px está abaixo
+  do mínimo de 24x24 da WCAG 2.2 (2.5.8), e num celular errar o alvo aplica a cor errada na zona
+  marcada; e ler "sustenido B 2 3 A 2 E" em voz alta não identifica cor nenhuma.
+- **depois:** alvo de 24 px para cima e nome acessível que diga o que a cor é, com o hex junto.
+- **evidência:** `getBoundingClientRect()` de cada um dos oito em 375x812 devolve 22x22, e
+  `outerHTML` mostra `title="#1B1B1F"` sem `aria-label` nem texto.
+- valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A34 | eixo: ux | onde: `src/App.tsx:57` (o rodapé do esboço)
+
+- **hoje:** o rodapé do esboço tem **uma** saída, "ir para o editor (pede login)". As outras três
+  telas oferecem as três irmãs cada uma. Ou seja: a tela que um clone abre sem conta oferece como
+  único caminho justamente a que vai pedir credencial, e o palco 3D e o calçado montado, que também
+  rodam sem banco, ficam indescobríveis para quem chegou pelo esboço.
+- **depois:** o rodapé do esboço oferece as três irmãs, como os outros três oferecem.
+- **evidência:** as quatro listas de botões lidas em `src/App.tsx` (linhas 57, 76, 116 e 154) e
+  conferidas no navegador: o esboço renderiza um botão no rodapé, as outras telas renderizam três.
+- valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+## Abaixo do corte na rodada 4
+
+### A35 | eixo: ux | onde: `src/palco3d/PalcoDeModelo3d.tsx` (o `<canvas>`)
+
+- **hoje:** o `<canvas>` do palco não tem `tabindex`, nem `role`, nem `aria-label`. Girar o calçado
+  é só arrasto de mouse, então quem usa teclado não gira, e quem usa leitor de tela não recebe uma
+  palavra sobre a única coisa que a tela mostra.
+- **evidência:** o `outerHTML` do canvas traz `data-engine`, `width`, `height` e `style`, sem um
+  atributo de acessibilidade sequer.
+- **por que fica fora:** girar por teclado é trabalho de verdade, tratador de teclas mais a
+  matemática da órbita, e o nome acessível sozinho, que seria barato, não resolve a metade que
+  importa. Fica no backlog inteiro em vez de entrar pela metade.
+- valor: 3 | esforço: 3 | risco: 2 | **score: -1**
+
+## O que eu achei que era defeito e não era (rodada 4)
+
+1. **A zona de gradiente aceitando cor.** Achei ter achado o avesso do princípio nº1: a zona
+   "Detalhe (gradiente)" mostra "gradiente" em vez de hex, mas deixa escolher uma cor. Sondei
+   escrevendo `#00FF00` nela. O sistema respondeu como devia e melhor do que eu esperava: recusou o
+   pedido inteiro com `ZONA_NAO_RECOLORIVEL`, escreveu na tela que a zona usa `url(#brilho)` e não
+   vira cor chapa, avisou que "a variante sai inteira ou não sai", **manteve o preview da última
+   variante válida** e ofereceu um botão "Desfazer". Zero elementos verdes no SVG. Não é achado, é
+   o princípio nº1 funcionando.
+
+2. **Dependências atrasadas.** `npm outdated` lista nove pacotes com versão nova, entre eles React,
+   Vite e Supabase. `npm audit --omit=dev` devolve **0 vulnerabilidades**. Sem CVE, atualizar por
+   atualizar é risco sem valor medido, e a regra de custo do `CLAUDE.md` não pede isso. A única
+   exceção é o `@types/three`, que não é atraso de versão, é divergência entre o tipo e o que roda,
+   e por isso virou o A40.
+
+3. **O log da requisição.** Fui atrás do que vaza para o log e não achei nada: `logDaRequisicao` não
+   recebe o `Request`, não tem campo onde uma chave caiba, filtra o prefixo por uma regex de oito
+   dígitos hexadecimais e descarta tudo depois do `?` da rota, com o porquê escrito ao lado.
+   Endurecido de propósito.
+
+4. **Contraste.** Varri as duas telas calculando a razão de contraste WCAG de todo elemento com
+   texto contra o fundo herdado dele. Nenhum elemento abaixo do mínimo, nem na composição nem no
+   esboço.

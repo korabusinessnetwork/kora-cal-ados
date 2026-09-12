@@ -109,3 +109,20 @@ Esta rodada tem um item de **produto**, que faltou na rodada 2.
 - [x] R3-A30 O palco aparece antes dos controles na tela estreita | trilha: ux | depende: nenhum | pronto quando: em 375 px a moldura do palco começa acima de 400 px do topo nas duas telas do palco, medido, e em 1440 px a ordem na tela não muda em relação a hoje → FEITO (a98a953). Medido: moldura de 1158 para 177 px do topo na composição e de 657 para 160 no palco, em 375x812. `sticky` junto do `order`, porque só `order` entregaria "vê ao abrir" e não "vê enquanto escolhe". Em 1440 px nada mudou, mesmos top e left das três colunas.
 - [x] R3-A33 O baseline para de piscar vermelho sozinho | trilha: qualidade | depende: nenhum | pronto quando: a leitura de pixel que vem depois de uma mudança na tela espera pela condição em vez de por um número fixo de quadros, em todos os pontos do arquivo onde isso acontece, e o arquivo continua reprovando quando a cor está errada de verdade → FEITO (1788a10). Achado NO MEIO da rodada, não na auditoria de abertura. Duas mutações no caminho real provam que cor errada continua reprovando. NÃO consegui reproduzir a corrida sob demanda, e isso está dito no commit e na AUDITORIA.
 - [x] R3-A28 Contexto WebGL perdido para de mentir | trilha: robustez | depende: nenhum | pronto quando: forçar `WEBGL_lose_context.loseContext()` faz o laço de render parar e a tela dizer que o 3D caiu, em vez de seguir afirmando "Peça na cena", conferido no navegador → FEITO (37b96a6). Ciclo inteiro conferido no navegador nas duas telas: cai, avisa em vermelho, volta e desenha. A mutação que apaga a guarda do laço sobrevive a toda a suíte (jsdom não tem WebGL) e passou a ser pega por varredura de fonte.
+
+# Refino, rodada 4 (2026-09-12)
+
+Lote de 6, nenhum com risco 4 ou 5. A reauditoria está em `AUDITORIA.md`, na seção da rodada 4.
+
+Os quatro eixos estão representados: três de ux, um de robustez, um de produto, um de qualidade.
+
+O que esta rodada tem de diferente das três anteriores: quase tudo aqui está no **esboço**. As
+rodadas 1 a 3 varreram o editor logado, o palco 3D e o motor, e a tela que um clone recém-baixado
+abre ficou sem varredura nenhuma até agora.
+
+- [ ] R4-A39 O calçado aparece antes da lista de zonas na tela estreita | trilha: ux | depende: nenhum | pronto quando: em 375x812 o `<svg>` do esboço começa acima de 400 px do topo, medido no navegador, e em 1440 px a ordem das colunas não muda em relação a hoje
+- [ ] R4-A37 Corpo grande demais é recusado antes de ser lido | trilha: robustez | depende: nenhum | pronto quando: um POST autenticado com corpo acima do teto responde `CORPO_INVALIDO` 400 sem que `Request.json()` chegue a ser chamado, existe teste do caminho com `content-length` e do caminho sem ele, e o teto está num lugar só com o porquê do número escrito ao lado
+- [ ] R4-A40 Os tipos do three passam a ser os da versão que roda | trilha: qualidade | depende: nenhum | pronto quando: `@types/three` está em `^0.186.0`, a versão instalada bate com a de `three`, `tsc --noEmit` fica limpo e o build continua limpo
+- [ ] R4-A36 Os atalhos de cor viram alvo de 24 px com nome que se lê | trilha: ux | depende: nenhum | pronto quando: cada um dos oito atalhos mede 24x24 px ou mais em 375x812, medido, e tem nome acessível que diz a cor por extenso com o hex junto, com teste do nome
+- [ ] R4-A34 O esboço oferece as três irmãs, como as outras telas oferecem | trilha: ux | depende: nenhum | pronto quando: o rodapé do esboço leva ao palco 3D, ao calçado montado e ao editor, e existe teste de que as quatro telas oferecem o mesmo conjunto de saídas
+- [ ] R4-A38 Copiar a chamada equivalente do esboço | trilha: produto | depende: nenhum | pronto quando: o painel da chamada equivalente tem um botão que copia o corpo JSON, o aviso de falha de área de transferência aparece quando a cópia é negada, e a regra da cópia é a MESMA do botão da composição, num módulo só, com teste
