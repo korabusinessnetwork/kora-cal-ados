@@ -16,6 +16,7 @@
 // `PainelDaApi.test.tsx` existe para que isso volte como teste vermelho, e não como
 // descoberta de leitor.
 
+import { AVISO_DE_COPIA_NEGADA, useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
 import type { RelatorioDeNormalizacao } from '../lib/render/normalizarSvg';
 import type { CodigoDeErro, ErroDeVariante } from '../lib/render/erros';
 import { produtoDemo } from './produtoDemo';
@@ -81,13 +82,24 @@ export function PainelDaApi({ cores, relatorio, erro }: Props) {
   // As cores vão no TOPO do corpo, uma chave por `zone_key`. Nada que não seja cor entra
   // aqui: o topo é espaço de nomes do tenant, e um campo nosso colidiria com uma zona de
   // mesmo nome como cor não aplicada — não como erro (endpoints.md, "O corpo do pedido").
+  const corpoDoPedido = JSON.stringify(cores, null, 2);
+
   const requisicao = [
     `POST /api/v1/products/${produtoDemo.id}/variants`,
     `Authorization: Bearer ${CHAVE_DE_EXEMPLO}`,
     'Content-Type: application/json',
     '',
-    JSON.stringify(cores, null, 2),
+    corpoDoPedido,
   ].join('\n');
+
+  // Copia SÓ o corpo, e não o bloco inteiro: as duas linhas de cabeçalho acima dele mudam de
+  // cliente HTTP para cliente HTTP, e `CHAVE_DE_EXEMPLO` é um segredo falso que, colado junto,
+  // daria a impressão de chave pronta. O corpo é a parte que vai igual para qualquer lugar.
+  //
+  // Mesma regra do botão da composição, no mesmo módulo, por decisão de `src/lib/copia/README.md`.
+  // O que muda entre as duas telas é só a frase, porque uma fala de uma montagem e a outra de um
+  // corpo de pedido, e a metade que NÃO muda, a causa da falha, vem de `AVISO_DE_COPIA_NEGADA`.
+  const copia = useCopiaDeTexto(corpoDoPedido);
 
   const respostaDeErro = erro ? RESPOSTA_DE_ERRO_POR_CODIGO[erro.codigo] : null;
 
@@ -124,6 +136,27 @@ export function PainelDaApi({ cores, relatorio, erro }: Props) {
         string (<code>?format=svg</code>), nunca no topo do corpo, que é o espaço de nomes das{' '}
         <code>zone_key</code> do tenant.
       </p>
+
+      {/* O botão fica ACIMA do bloco, e não dentro dele, porque o bloco rola: dentro, ele sairia
+          de vista exatamente quando o corpo ficasse grande, que é quando copiar à mão dói mais. */}
+      <div className="copia-do-corpo">
+        <button type="button" className="copia-do-corpo__botao" onClick={copia.copiar}>
+          Copiar o corpo
+        </button>
+        <span className="copia-do-corpo__aviso" role="status">
+          {copia.estado === 'copiada'
+            ? 'Corpo copiado. É o mesmo JSON que a API recebe.'
+            : 'Só o corpo, pronto para colar no seu cliente HTTP.'}
+        </span>
+      </div>
+
+      {copia.estado === 'falhou' && (
+        // Sem bloco de reserva aqui, ao contrário da composição: o corpo já está na tela, dentro
+        // do bloco logo abaixo. Repeti-lo daria dois textos iguais para a pessoa escolher.
+        <p className="copia-do-corpo__erro" role="alert">
+          {AVISO_DE_COPIA_NEGADA} Selecione o corpo no bloco abaixo e copie à mão.
+        </p>
+      )}
 
       <pre className="codigo codigo--requisicao">{requisicao}</pre>
 

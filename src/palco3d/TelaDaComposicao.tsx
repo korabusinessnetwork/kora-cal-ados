@@ -9,7 +9,7 @@
 // guarda estado e desenha.
 
 import { useCallback, useMemo, useState } from 'react';
-import { useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
+import { AVISO_DE_COPIA_NEGADA, useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
 
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
@@ -120,8 +120,7 @@ export function TelaDaComposicao() {
             {copia.estado === 'falhou' && (
               <>
                 <p className="palco3d__saida-erro" role="alert">
-                  O navegador não deixou copiar (acontece fora de HTTPS ou sem permissão).
-                  Selecione o texto abaixo e copie à mão.
+                  {AVISO_DE_COPIA_NEGADA} Selecione o texto abaixo e copie à mão.
                 </p>
                 <pre className="palco3d__saida-texto">{textoDaComposicao}</pre>
               </>

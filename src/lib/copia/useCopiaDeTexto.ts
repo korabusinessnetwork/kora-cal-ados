@@ -12,9 +12,12 @@
 //    O descarte acontece no RENDER, e não num `useEffect`, pelo mesmo motivo de
 //    `usePreviewDeCor.ts`: com efeito existiria um render mostrando "copiada" sobre o texto novo.
 //
-// 3. QUEM ESCREVE A FRASE É A TELA. O hook devolve o estado, não a mensagem: "Composição copiada"
-//    e "Chamada copiada" são frases diferentes sobre coisas diferentes, e centralizá-las aqui
-//    obrigaria a inventar uma frase genérica que não serve bem a nenhuma das duas.
+// 3. QUEM ESCREVE A FRASE É A TELA, MENOS O DIAGNÓSTICO DA FALHA. O hook devolve o estado, não a
+//    mensagem: "Composição copiada" e "Corpo copiado" são frases diferentes sobre coisas
+//    diferentes, e centralizá-las aqui obrigaria a inventar uma genérica que não serve bem a
+//    nenhuma das duas. A CAUSA da falha, porém, não é sobre o que está sendo copiado, é sobre o
+//    navegador, e é a mesma em qualquer tela: essa metade mora aqui, em `AVISO_DE_COPIA_NEGADA`.
+//    Cada tela acrescenta a instrução, que aí sim depende de onde o texto está na tela dela.
 //
 // Por que virou `src/lib/`: isto nasceu dentro de `TelaDaComposicao.tsx` e o esboço precisou do
 // mesmo botão. Pela regra de dependência de `src/features/README.md`, o que passa a ser usado por
@@ -25,6 +28,17 @@ import { useCallback, useState } from 'react';
 
 /** Estado do botão de copiar. `falhou` é visível de propósito: cópia silenciosa engana. */
 export type EstadoDaCopia = 'pronta' | 'copiada' | 'falhou';
+
+/**
+ * A CAUSA da falha, sem a instrução do que fazer.
+ *
+ * Está aqui, e não em cada tela, porque é a metade que não depende do que está sendo copiado: o
+ * navegador nega pelo mesmo motivo nos dois botões. Duas cópias desta frase divergiriam no
+ * primeiro dia em que alguém melhorasse uma delas. A instrução ("selecione o texto abaixo", "o
+ * corpo no bloco abaixo") fica na tela, porque aí sim depende de onde o texto está.
+ */
+export const AVISO_DE_COPIA_NEGADA =
+  'O navegador não deixou copiar (acontece fora de HTTPS ou sem permissão).';
 
 export interface CopiaDeTexto {
   estado: EstadoDaCopia;

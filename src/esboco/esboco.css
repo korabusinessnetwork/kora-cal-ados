@@ -181,6 +181,19 @@ body {
   white-space: pre-wrap; word-break: break-word; max-height: 300px; overflow: auto;
 }
 .codigo--requisicao { color: var(--cor-acento); }
+
+/* Botão de copiar o corpo do pedido. Fica numa linha com o aviso, e não largura inteira como o da
+   composição, porque ali o bloco é a única porta de saída da montagem e aqui é um atalho para um
+   texto que já está à vista. O aviso ocupa a mesma linha para o "Corpo copiado" nascer ao lado do
+   botão que a pessoa acabou de apertar, e não num canto que ela não está olhando. */
+.copia-do-corpo { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; flex-wrap: wrap; }
+.copia-do-corpo__botao {
+  padding: 6px 10px; background: var(--cor-superficie-alta); border: 1px solid var(--cor-borda);
+  border-radius: 6px; color: var(--cor-texto); font: inherit; font-size: 12px; cursor: pointer;
+}
+.copia-do-corpo__botao:hover { border-color: var(--cor-acento); }
+.copia-do-corpo__aviso { font-size: 11.5px; line-height: 1.5; color: var(--cor-texto-fraco); }
+.copia-do-corpo__erro { margin: 0 0 8px; font-size: 11.5px; line-height: 1.5; color: var(--cor-erro); }
 .codigo--ok { border-left: 2px solid var(--cor-ok); }
 .codigo--erro { border-left: 2px solid var(--cor-erro); }
 .codigo__status { color: var(--cor-texto-fraco); }
