@@ -43,3 +43,4 @@
 2026-09-12 · R5-A46 · maquina sem WebGL deixa de apagar a pagina inteira: a falha de criacao vira o estado contexto-negado em vez de subir ate o React · 2077f0a
 2026-09-12 · R5-A41 · tabela criada sem RLS vira teste vermelho, varredura de fonte sobre as migrations que roda sem banco · 88d273d
 2026-09-12 · R5-A45 · seis citacoes de ADR-008 D6 passam a dizer a verdade, e uma varredura confere que todo ADR-XXX DN do codigo existe · 7738fc9, 5c25cdc
+2026-09-12 · R5-A47 · o JSON da composicao volta para a tela pelo mesmo guarda que a API usa, e recusa nao encosta no calcado que esta na tela · 84279b6

@@ -166,6 +166,14 @@ e o lote já leva três itens de qualidade.
       semântica continua sendo leitura, e isso está dito no arquivo. O `7738fc9` é um buraco achado
       no meio do caminho: o `tsconfig.json` não incluía `supabase/migrations`, então o teste do
       R5-A41 rodava sem ser conferido por `tsc`.
-- [ ] R5-A47 Colar a composição de volta na tela | trilha: produto | depende: nenhum | pronto quando: existe onde colar o JSON da composição na tela do calçado montado, um JSON válido monta o calçado descrito, um inválido é recusado por `validarComposicao` com a frase na tela e sem chegar ao palco, e existe teste dos dois caminhos
+- [x] R5-A47 Colar a composição de volta na tela | trilha: produto | depende: nenhum | pronto quando: existe onde colar o JSON da composição na tela do calçado montado, um JSON válido monta o calçado descrito, um inválido é recusado por `validarComposicao` com a frase na tela e sem chegar ao palco, e existe teste dos dois caminhos
+      feito em `84279b6`. `escolhasDoTextoColado` é o inverso exato de `composicaoDasEscolhas` e
+      mora em `composicaoDaTela.ts`, fora do componente. Passa pelo mesmo `validarComposicao` da
+      API, e a recusa carrega o código do contrato. Uma conferência é da tela e não do validador:
+      forma trocada, porque para o validador uma composição de outra forma é válida e quem está
+      presa a uma forma só é a tela. Essa guarda pegou um erro meu de verdade no navegador: colei
+      um `forma_id` que eu tinha inventado e a tela recusou sem derrubar o calçado. Conferido
+      também que as cores coladas são as cores na tela, e que uma peça inexistente mostra
+      `PECA_NAO_ENCONTRADA` sem encostar na montagem. 7 testes novos.
 - [ ] R5-A44 Os três hooks de rede do editor saem do escuro | trilha: qualidade | depende: nenhum | pronto quando: `useProdutos`, `useAssetBase` e `useZonasDoProduto` recebem o cliente por parâmetro com o valor por omissão de hoje, os pontos de chamada existentes não mudam, e cada um tem teste com componente-sonda provando que a resposta em voo do produto anterior NÃO pinta a tela do produto novo
 - [ ] R5-A43 O palco 3D para de negar o que a composição já faz | trilha: ux | depende: nenhum | pronto quando: a frase do painel "Peça" não afirma mais que montar as cinco peças é a próxima tarefa, aponta para a tela que faz isso, e existe teste de que ela não voltou
