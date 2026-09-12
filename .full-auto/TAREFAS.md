@@ -219,7 +219,16 @@ carrega as telas, e quero o baseline conferido várias vezes antes dele.
       rede desenhando as próprias saídas deixava a mesma lista de três destinos duas vezes na tela,
       uma em links e outra em botões. Daí o `comSaidas={false}` que o `App` usa. 6 testes novos, e a
       mutação (`getDerivedStateFromError` devolvendo `{falha: null}`) deixa 4 deles vermelhos.
-- [ ] R6-A50 A peça clicada mostra os dois lados do endereço | trilha: produto | depende: nenhum | pronto quando: clicar numa peça no calçado montado mostra o id do nó E a categoria daquela peça, com o mesmo nome de categoria que a lista de zonas usa, e existe teste de que os dois vêm da MESMA composição em cena (id inventado não inventa categoria)
+- [x] R6-A50 A peça clicada mostra os dois lados do endereço | trilha: produto | depende: nenhum | pronto quando: clicar numa peça no calçado montado mostra o id do nó E a categoria daquela peça, com o mesmo nome de categoria que a lista de zonas usa, e existe teste de que os dois vêm da MESMA composição em cena (id inventado não inventa categoria)
+      feito em `df3e77c`. A resposta vem de `zonaDaMalha`, função pura sobre as zonas da montagem EM
+      CENA, e não do catálogo: o catálogo sabe a que categoria uma peça PODE servir, e a pergunta da
+      tela é "a peça que eu cliquei, nesta cena, é de que zona". Malha fora de toda zona devolve
+      `null` e a tela escreve isso, em vermelho, em vez de chutar uma categoria. O botão "mexer na
+      cor desta zona" leva o FOCO até o seletor daquela categoria, pelo mesmo id que o campo usa
+      (`idDoCampoDeCor`), porque id escrito à mão em dois lugares diverge um dia e o sintoma seria um
+      botão que não faz nada. 6 testes novos; a mutação (`zonaDaMalha` devolvendo sempre a primeira
+      zona) deixa 3 vermelhos. Conferido no navegador: clicar no cadarço mostrou `prova-cadarco-reto`
+      e `cadarco`, e o botão levou o foco a `composicao-cor-cadarco`, rolando a tela até ele.
 - [ ] R6-A49 A tela da composição ganha teste de comportamento | trilha: qualidade | depende: nenhum | pronto quando: `TelaDaComposicao` monta em jsdom e há teste de que colar um JSON válido troca o que está em cena, colar um JSON recusado mantém o calçado anterior e escreve o motivo, e trocar de peça não carrega o parâmetro da peça anterior
 - [ ] R6-A48 A moldura preta some quando o 3D não vai abrir | trilha: ux | depende: nenhum | pronto quando: no estado `contexto-negado` não existe mais uma caixa preta vazia guardando espaço para o que não vem, a mensagem ocupa esse lugar nas duas telas do palco, e o `contexto-perdido` continua com a moldura de pé (com teste dos dois estados)
 - [ ] R6-A42 README por diretório vira varredura, não lembrete | trilha: qualidade | depende: nenhum | pronto quando: todo diretório com código versionado tem `README.md`, e existe um teste que reprova quando um diretório novo com código nasce sem índice, com contraprova sintética que TEM de reprovar
