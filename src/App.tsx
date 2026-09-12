@@ -12,6 +12,7 @@
 
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { EsbocoDoEditor } from './esboco/EsbocoDoEditor';
+import { RodapeDeTelas } from './RodapeDeTelas';
 import { BarraDaSessao } from './features/sessao/BarraDaSessao';
 import { ProvedorDeSessao } from './features/sessao/ContextoDeSessao';
 import { TelaDeProdutos } from './features/produtos/TelaDeProdutos';
@@ -56,11 +57,7 @@ export function App() {
     return (
       <>
         <EsbocoDoEditor />
-        <p className="rodape-telas">
-          <button type="button" onClick={() => irPara('app')}>
-            ← ir para o editor (pede login)
-          </button>
-        </p>
+        <RodapeDeTelas atual="esboco" irPara={irPara} />
       </>
     );
   }
@@ -75,17 +72,7 @@ export function App() {
         <Suspense fallback={<main className="tela">Carregando o palco 3D…</main>}>
           <TelaDoPalco3d />
         </Suspense>
-        <p className="rodape-telas">
-          <button type="button" onClick={() => irPara('composicao')}>
-            ← ver o calçado montado (as peças juntas)
-          </button>
-          <button type="button" onClick={() => irPara('esboco')}>
-            ver o esboço do motor (2D, sem banco)
-          </button>
-          <button type="button" onClick={() => irPara('app')}>
-            ir para o editor (pede login)
-          </button>
-        </p>
+        <RodapeDeTelas atual="palco3d" irPara={irPara} />
       </>
     );
   }
@@ -100,17 +87,7 @@ export function App() {
         <Suspense fallback={<main className="tela">Carregando o calçado montado…</main>}>
           <TelaDaComposicao />
         </Suspense>
-        <p className="rodape-telas">
-          <button type="button" onClick={() => irPara('palco3d')}>
-            ← ver uma peça por vez (palco 3D)
-          </button>
-          <button type="button" onClick={() => irPara('esboco')}>
-            ver o esboço do motor (2D, sem banco)
-          </button>
-          <button type="button" onClick={() => irPara('app')}>
-            ir para o editor (pede login)
-          </button>
-        </p>
+        <RodapeDeTelas atual="composicao" irPara={irPara} />
       </>
     );
   }
@@ -123,18 +100,10 @@ export function App() {
       <main className="sessao-aviso">
         <h1>Configuração do Supabase ausente</h1>
         <p>{problema}</p>
-        <p className="rodape-telas">
-          {/* Saída, não beco sem saída: o esboço não precisa de nada disso. */}
-          <button type="button" onClick={() => irPara('esboco')}>
-            ver o esboço do motor (funciona sem conta e sem `.env.local`)
-          </button>
-          <button type="button" onClick={() => irPara('palco3d')}>
-            ver o palco 3D (idem)
-          </button>
-          <button type="button" onClick={() => irPara('composicao')}>
-            ver o calçado montado (idem)
-          </button>
-        </p>
+        {/* Saída, não beco sem saída: as três telas sem banco não precisam de nada disto.
+            `atual="app"` porque esta tela é a área protegida falhando, e o que ela deve oferecer
+            é exatamente o que `saidasDe('app')` devolve. */}
+        <RodapeDeTelas atual="app" irPara={irPara} />
       </main>
     );
   }
@@ -152,17 +121,7 @@ export function App() {
           </>
         )}
       </RotaProtegida>
-      <p className="rodape-telas">
-        <button type="button" onClick={() => irPara('esboco')}>
-          ver o esboço do motor (sem banco, sem conta)
-        </button>
-        <button type="button" onClick={() => irPara('palco3d')}>
-          ver o palco 3D (sem banco, sem conta)
-        </button>
-        <button type="button" onClick={() => irPara('composicao')}>
-          ver o calçado montado (sem banco, sem conta)
-        </button>
-      </p>
+      <RodapeDeTelas atual="app" irPara={irPara} />
     </ProvedorDeSessao>
   );
 }
