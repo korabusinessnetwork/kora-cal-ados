@@ -132,14 +132,18 @@ function EditorDeCor({
       <div className="editor__paleta">
         {paletaDeAtalho.map((atalho) => (
           <button
-            key={atalho}
+            key={atalho.hex}
             type="button"
             className="editor__atalho"
-            style={{ background: atalho }}
-            title={atalho}
+            style={{ background: atalho.hex }}
+            // O mesmo texto nos dois: `aria-label` é o nome acessível e `title` é a legenda do
+            // mouse. Antes só havia `title` com o hex cru, que vira nome acessível de último
+            // recurso — ou seja, o leitor de tela soletrava o hex e o mouse não via legenda alguma.
+            aria-label={`${atalho.nome} (${atalho.hex})`}
+            title={`${atalho.nome} (${atalho.hex})`}
             onClick={() => {
-              setTexto(atalho);
-              aoTrocar(atalho);
+              setTexto(atalho.hex);
+              aoTrocar(atalho.hex);
             }}
           />
         ))}

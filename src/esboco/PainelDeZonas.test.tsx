@@ -6,6 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { PainelDeZonas } from './PainelDeZonas';
+import { paletaDeAtalho } from './produtoDemo';
 import type { ZonaDoProduto } from './produtoDemo';
 
 const ZONAS: ZonaDoProduto[] = [
@@ -78,5 +79,24 @@ describe('painel de zonas do esboço', () => {
 
     expect(html).toContain('Cor incompleta');
     expect(html).not.toContain('role="alert"');
+  });
+  it('cada atalho de cor diz que cor é, e não só o hex', () => {
+    // Antes o único texto do botão era `title="#B23A2E"`, que vira nome acessível de último
+    // recurso: o leitor de tela soletrava o hex e o mouse não via legenda nenhuma. O hex fica,
+    // porque é o que a marca tem no manual dela e o que vai no corpo do POST, mas acompanhado.
+    const html = painel({ zonaSelecionada: 'sola' });
+
+    for (const atalho of paletaDeAtalho) {
+      expect(html).toContain(`aria-label="${atalho.nome} (${atalho.hex})"`);
+      expect(html).toContain(`title="${atalho.nome} (${atalho.hex})"`);
+    }
+  });
+
+  it('nenhum atalho fica sem nome, e não há dois com o mesmo', () => {
+    // Dois atalhos com o mesmo nome são dois botões que ninguém consegue distinguir de ouvido.
+    const nomes = paletaDeAtalho.map((atalho) => atalho.nome);
+
+    expect(nomes.every((nome) => nome.length > 0)).toBe(true);
+    expect(new Set(nomes).size).toBe(paletaDeAtalho.length);
   });
 });

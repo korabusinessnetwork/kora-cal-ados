@@ -110,7 +110,10 @@ body {
 }
 .editor__hex--invalido { border-color: var(--cor-erro); color: var(--cor-erro); }
 .editor__paleta { display: flex; gap: 5px; flex-basis: 100%; }
-.editor__atalho { width: 22px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.18); cursor: pointer; padding: 0; }
+/* 24 px, e não 22, porque 24x24 é o alvo mínimo da WCAG 2.2 (2.5.8) e estes oito ficam colados uns
+   nos outros. No celular, errar o alvo aqui não é um clique perdido: aplica outra cor na zona
+   marcada, que é erro silencioso na tela cujo motivo de existir é a cor certa. */
+.editor__atalho { width: 24px; height: 24px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.18); cursor: pointer; padding: 0; }
 
 /* ── Palco: sem filtro, sem overlay, sem sombra sobre a variante ───── */
 .palco {

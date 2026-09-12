@@ -75,8 +75,24 @@ export function coresIniciais(): Record<string, string> {
   );
 }
 
-/** Atalhos de cor do esboço. Cor de zona é dado do cliente, não token de tema. */
-export const paletaDeAtalho = [
-  '#1B1B1F', '#F5F2EC', '#B23A2E', '#1F6F5C',
-  '#2B4C7E', '#E0A526', '#7A4E9C', '#C9C4B8',
+/**
+ * Atalhos de cor do esboço. Cor de zona é dado do cliente, não token de tema.
+ *
+ * O NOME EXISTE PORQUE O HEX NÃO É NOME. Os oito atalhos eram só hex, e o hex era o único texto
+ * que o botão tinha: quem usa leitor de tela ouvia "sustenido B 2 3 A 2 E", que não identifica cor
+ * nenhuma, e quem usa o mouse via um quadrado colorido sem legenda. O hex continua ali, ao lado do
+ * nome, porque ele é o que a marca tem no manual dela e é o que vai no corpo do POST.
+ *
+ * Os nomes são genéricos de propósito. Cor de zona é dado do TENANT, e batizar estes oito com nome
+ * de marca faria o esboço parecer uma paleta oficial do produto, que é justamente o que ele não é.
+ */
+export const paletaDeAtalho: { hex: string; nome: string }[] = [
+  { hex: '#1B1B1F', nome: 'preto' },
+  { hex: '#F5F2EC', nome: 'branco' },
+  { hex: '#B23A2E', nome: 'vermelho' },
+  { hex: '#1F6F5C', nome: 'verde' },
+  { hex: '#2B4C7E', nome: 'azul' },
+  { hex: '#E0A526', nome: 'amarelo' },
+  { hex: '#7A4E9C', nome: 'roxo' },
+  { hex: '#C9C4B8', nome: 'cinza' },
 ];
