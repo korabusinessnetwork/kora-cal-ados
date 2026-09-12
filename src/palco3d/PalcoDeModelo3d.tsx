@@ -45,6 +45,14 @@ export interface PalcoDeModelo3dProps {
   aoSelecionar: (nome: string | null) => void;
   /** Carregando, pronto ou recusado. Estado sempre visível é o princípio nº1. */
   aoMudarEstado: (estado: EstadoDoPalco) => void;
+  /**
+   * O que este palco está mostrando, em uma frase. Vira o nome acessível da moldura.
+   *
+   * Chega por prop e não é escrito aqui porque este arquivo NÃO SABE o que desenha: recebe texto
+   * glTF, e quem sabe se é uma peça solta ou o calçado montado é a tela que o monta. Escrever a
+   * frase aqui seria a primeira decisão de conteúdo num arquivo que não pode decidir nada.
+   */
+  rotulo: string;
 }
 
 /**
@@ -56,7 +64,12 @@ export interface PalcoDeModelo3dProps {
  */
 const PIXELS_ATE_VIRAR_ARRASTE = 4;
 
-export function PalcoDeModelo3d({ textoGltf, aoSelecionar, aoMudarEstado }: PalcoDeModelo3dProps) {
+export function PalcoDeModelo3d({
+  textoGltf,
+  aoSelecionar,
+  aoMudarEstado,
+  rotulo,
+}: PalcoDeModelo3dProps) {
   const moldura = useRef<HTMLDivElement | null>(null);
   const palco = useRef<Palco | null>(null);
 
@@ -90,7 +103,14 @@ export function PalcoDeModelo3d({ textoGltf, aoSelecionar, aoMudarEstado }: Palc
 
   // `touch-action: none` mora no CSS: sem ele o navegador de toque rola a página em vez de
   // entregar o arraste, e o palco fica imóvel no celular sem nenhum erro.
-  return <div className="palco3d__moldura" ref={moldura} />;
+  //
+  // `role="group"` com rótulo, e não `img`: a moldura não é uma figura, é uma área que aceita
+  // arraste e clique. É o mesmo par que `PalcoDeMarcacao` já usa no editor 2D. Sem isto o palco
+  // era um `<div>` anônimo com um `<canvas>` dentro, ou seja, não existia para quem navega pela
+  // árvore de acessibilidade: nem o nome, nem o aviso de que dá para girar e clicar.
+  return (
+    <div className="palco3d__moldura" role="group" aria-label={rotulo} ref={moldura} />
+  );
 }
 
 interface Palco {

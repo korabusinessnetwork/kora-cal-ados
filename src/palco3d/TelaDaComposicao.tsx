@@ -148,6 +148,7 @@ export function TelaDaComposicao() {
             <>
               <PalcoDeModelo3d
                 textoGltf={montagem.modelo}
+                rotulo="Calçado montado em 3D. Arraste para girar, clique para identificar a peça."
                 aoSelecionar={aoSelecionar}
                 aoMudarEstado={aoMudarEstado}
               />
@@ -170,11 +171,15 @@ export function TelaDaComposicao() {
             O nome do nó é o id da peça (ADR-007 D4), e a zona que a API recolore é a categoria
             dela. São os dois lados do mesmo endereço.
           </p>
-          {selecionada === null ? (
-            <p className="palco3d__vazio">Nada selecionado. Clique numa peça do calçado.</p>
-          ) : (
-            <code className="palco3d__nome">{selecionada}</code>
-          )}
+          {/* Mesma região viva da outra tela do palco, e pelo mesmo motivo: o clique é no
+              canvas e a resposta aparece em outro canto. */}
+          <div aria-live="polite" aria-atomic="true">
+            {selecionada === null ? (
+              <p className="palco3d__vazio">Nada selecionado. Clique numa peça do calçado.</p>
+            ) : (
+              <code className="palco3d__nome">{selecionada}</code>
+            )}
+          </div>
 
           <h2 className="painel__titulo painel__titulo--espacado">Zonas do calçado</h2>
           <ul className="palco3d__zonas">

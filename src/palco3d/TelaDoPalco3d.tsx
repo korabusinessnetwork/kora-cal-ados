@@ -121,6 +121,7 @@ export function TelaDoPalco3d() {
         <section className="painel palco3d__painel-cena">
           <PalcoDeModelo3d
             textoGltf={textoGltf}
+            rotulo="Peça em 3D. Arraste para girar, clique para identificar a malha."
             aoSelecionar={aoSelecionar}
             aoMudarEstado={aoMudarEstado}
           />
@@ -135,11 +136,18 @@ export function TelaDoPalco3d() {
             O endereço de uma zona 3D é o nome do nó (ADR-007 D4). É este texto que a composição
             guarda, e é ele que a API vai recolorir.
           </p>
-          {selecionada === null ? (
-            <p className="palco3d__vazio">Nada selecionado. Clique na peça.</p>
-          ) : (
-            <code className="palco3d__nome">{selecionada}</code>
-          )}
+          {/* Região viva: o clique acontece dentro do canvas, e o que ele produziu aparece
+              AQUI, em outro canto da tela. Sem isto, quem não enxerga o resultado clica no 3D e
+              não recebe resposta nenhuma. `polite` porque a pessoa costuma clicar várias vezes
+              seguidas procurando a malha certa, e `atomic` porque o nome do nó só significa alguma
+              coisa junto da frase que diz o que ele é. */}
+          <div aria-live="polite" aria-atomic="true">
+            {selecionada === null ? (
+              <p className="palco3d__vazio">Nada selecionado. Clique na peça.</p>
+            ) : (
+              <code className="palco3d__nome">{selecionada}</code>
+            )}
+          </div>
           <p className="painel__ajuda palco3d__nota">
             Clicar no vazio limpa a seleção, em vez de manter a anterior. Zona errada em silêncio é
             o que o princípio nº1 proíbe.
