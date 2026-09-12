@@ -35,9 +35,9 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
 - **Rodada 5: ABERTA em 2026-09-12** (`46a590b`), 6 itens, nenhum com risco 4 ou 5. Diferente das
   quatro anteriores, que auditaram telas: esta foi atrás do que acontece quando a máquina de quem
   visita não tem o que a tela precisa, das regras do projeto que existem só como frase e não têm
-  guarda nenhuma, e dos hooks de rede do editor logado. **1 de 6 entregue**: R5-A46 (`2077f0a`).
-- **Próximo passo:** R5-A41, a varredura que reprova tabela nova sem RLS. Depois, na ordem:
-  R5-A45, R5-A47, R5-A44, R5-A43. Cada um pelo cinto de segurança: árvore limpa, baseline verde
+  guarda nenhuma, e dos hooks de rede do editor logado. **2 de 6 entregues**: R5-A46 (`2077f0a`) e R5-A41 (`88d273d`).
+- **Próximo passo:** R5-A45, as citações de ADR que precisam dizer a verdade. Depois, na ordem:
+  R5-A47, R5-A44, R5-A43. Cada um pelo cinto de segurança: árvore limpa, baseline verde
   nas duas pontas, um commit por mudança, `git revert` na hora se qualquer linha do `BASELINE.md`
   piorar.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre

@@ -148,7 +148,15 @@ e o lote já leva três itens de qualidade.
       `getContext` remendado: 0 canvas nas duas telas, a frase própria de cada uma, rodapé com as
       três saídas e o botão do esboço levando ao esboço com as 9 zonas. Teste em
       `palcoSemWebgl.test.tsx`, 4 casos em jsdom, os 4 conferidos vermelhos sem o conserto.
-- [ ] R5-A41 Tabela nova sem RLS vira teste vermelho | trilha: qualidade | depende: nenhum | pronto quando: existe varredura de fonte sobre `supabase/migrations/*.sql` que reprova quando uma tabela criada não tem `enable row level security`, ela roda em `npm test` sem banco e sem `.env.local`, e uma tabela de mentira acrescentada ao texto de uma migration faz o teste reprovar
+- [x] R5-A41 Tabela nova sem RLS vira teste vermelho | trilha: qualidade | depende: nenhum | pronto quando: existe varredura de fonte sobre `supabase/migrations/*.sql` que reprova quando uma tabela criada não tem `enable row level security`, ela roda em `npm test` sem banco e sem `.env.local`, e uma tabela de mentira acrescentada ao texto de uma migration faz o teste reprovar
+      feito em `88d273d`. `supabase/migrations/rlsEmTodaTabela.test.ts`, 7 testes. A regra vive em
+      `tabelasSemRls(sql)`, que recebe texto e não lê disco, para o teste poder fazer a mesma
+      pergunta sobre as migrations de verdade e sobre um texto inventado que precisa reprovar.
+      Quatro dos 7 existem para a guarda não virar decoração: a contraprova das 6 tabelas de hoje,
+      comentário não conta como RLS ligada, tabela citada só em comentário não conta como criada, e
+      `public.x` casa com `x`. Conferido no arquivo de verdade: um `create table` acrescentado a
+      `20260908_chave_de_api_por_tenant.sql` deixou 5 testes vermelhos, com o nome da tabela na
+      mensagem.
 - [ ] R5-A45 As citações de ADR passam a dizer a verdade, e uma varredura confere | trilha: qualidade | depende: nenhum | pronto quando: nenhum lugar do código afirma "ADR-008 D6" para a não persistência da composição, existe varredura que reprova quando um `ADR-XXX DN` escrito em `src/`, `api/` ou `supabase/` não resolve para decisão existente naquele ADR, ela aceita as duas grafias de numeração que os ADRs usam, e uma citação inventada faz o teste reprovar
 - [ ] R5-A47 Colar a composição de volta na tela | trilha: produto | depende: nenhum | pronto quando: existe onde colar o JSON da composição na tela do calçado montado, um JSON válido monta o calçado descrito, um inválido é recusado por `validarComposicao` com a frase na tela e sem chegar ao palco, e existe teste dos dois caminhos
 - [ ] R5-A44 Os três hooks de rede do editor saem do escuro | trilha: qualidade | depende: nenhum | pronto quando: `useProdutos`, `useAssetBase` e `useZonasDoProduto` recebem o cliente por parâmetro com o valor por omissão de hoje, os pontos de chamada existentes não mudam, e cada um tem teste com componente-sonda provando que a resposta em voo do produto anterior NÃO pinta a tela do produto novo

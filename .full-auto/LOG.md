@@ -41,3 +41,4 @@
 2026-09-12 · R4-A37 · corpo grande demais e recusado antes de ser lido inteiro, teto de 64 kB em duas conferencias · c8f65f1
 2026-09-12 · R4-A38 · a regra da copia sobe para src/lib, a composicao migra e o esboco ganha o botao que copia o corpo · 9520052, a7caf05, edf3d40
 2026-09-12 · R5-A46 · maquina sem WebGL deixa de apagar a pagina inteira: a falha de criacao vira o estado contexto-negado em vez de subir ate o React · 2077f0a
+2026-09-12 · R5-A41 · tabela criada sem RLS vira teste vermelho, varredura de fonte sobre as migrations que roda sem banco · 88d273d
