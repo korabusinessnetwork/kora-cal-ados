@@ -539,6 +539,23 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
       diz "6,0 mm, faixa 3,0 mm a 12,0 mm". **Limite:** o glTF não foi lido no navegador; ele sai de
       `valoresEmVigor` com o mesmo objeto que a medida mostra, e é essa ligação que fica provada.
       Baseline: 1332 testes, 25 no navegador, `tsc` limpo, build sem aviso, `npm audit` em zero.
-- [ ] R9-A68 Milímetros e passo do controle definidos num lugar só | trilha: qualidade | depende: R9-A67 | pronto quando: `milimetros` e `PASSOS_DO_PARAMETRO` têm uma definição cada em `src/`, importada por `ControlesDeParametro.tsx` e `ParametrosDaPeca.tsx`, a função tem teste próprio, e o HTML das duas telas com o acervo de prova é idêntico antes e depois, por fotografia de teste descartável
+- [x] R9-A68 Milímetros e passo do controle definidos num lugar só | trilha: qualidade | depende: R9-A67 | pronto quando: `milimetros` e `PASSOS_DO_PARAMETRO` têm uma definição cada em `src/`, importada por `ControlesDeParametro.tsx` e `ParametrosDaPeca.tsx`, a função tem teste próprio, e o HTML das duas telas com o acervo de prova é idêntico antes e depois, por fotografia de teste descartável
+      feito em COMMIT. `milimetros`, `PASSOS_DO_PARAMETRO` e o cálculo do passo moram em
+      `src/palco3d/medidaDoParametro.ts`, com o porquê no cabeçalho, e os dois componentes importam
+      dali; as cópias locais saíram. Busca por `function milimetros` e `PASSOS_DO_PARAMETRO = ` em
+      `src/`: uma de cada. Teste próprio com 2 casos, e os testes dos dois componentes ganharam a
+      conferência do passo, que nenhum teste olhava. HTML: um teste descartável fotografou a tela de
+      uma peça, a da composição e os dois componentes com peça de dois parâmetros, antes e depois,
+      e **os dois arquivos são idênticos byte a byte** (`cmp`). Mutações: 5, todas mortas no fim
+      (casa decimal: 8 testes em 4 arquivos; 20 passos: morre no teste próprio; passo sem divisão:
+      morre nos três; passo fixo em cada componente: morre no teste daquele componente). **Duas
+      sobreviviam fora do teste próprio antes das conferências de passo**: um componente que
+      deixasse de usar o passo compartilhado continuava verde. Navegador: tela de uma peça "18,0 mm,
+      faixa 10,0 mm a 40,0 mm" com passo 0.00075, e a composição com as três categorias, mesmos
+      textos e mesmos passos. **Medida que mudou:** o módulo é usado pelas duas telas tardias, e o
+      rolldown o pôs no chunk que as duas já dividem, o do three.js, que foi de 619,51 kB para 619,63
+      kB, abaixo do limite de 640 kB do R8-A61; o chunk da tela de uma peça foi de 4,58 kB para 4,51
+      kB e o da composição de 28,45 kB para 28,38 kB. Baseline: 1334 testes, 25 no navegador, `tsc`
+      limpo, build sem aviso, `npm audit` em zero.
 - [ ] R9-A70 O campo de hex diz o que falta, e diz igual nas duas telas | trilha: ux | depende: nenhum | pronto quando: o esboço deixa de dizer "incompleta" para texto que nunca vira cor, as duas telas escolhem a frase pela mesma função, um hex de 3 ou 6 dígitos sem `#` ganha a frase "falta o # no começo" com o texto já corrigido de exemplo, o campo continua recusando sem `#` (a API recusa), e há testes da frase e do campo nas duas telas
 - [ ] R9-A69 Os testes de tela selecionam uma peça de verdade antes de conferir a limpeza | trilha: qualidade | depende: R9-A67 | pronto quando: os testes de "trocar de peça limpa a peça clicada" das duas telas mostram o nome selecionado antes da troca, a mutação que tira `setSelecionada(null)` de `trocarPeca` reprova um teste em cada tela, e o palco de verdade continua montado nos outros testes

@@ -80,6 +80,8 @@ describe('um controle por parâmetro na tela de uma peça (R8-A63)', () => {
     expect(container.querySelectorAll('input[type="range"]')).toHaveLength(2);
     expect(faixa('largura').min).toBe('0.08');
     expect(faixa('largura').max).toBe('0.12');
+    // O passo vem de `medidaDoParametro.ts`, o mesmo da tela da composição: 40 passos na faixa (R9-A68).
+    expect(Number(faixa('largura').step)).toBeCloseTo(0.001, 12);
     expect([...container.querySelectorAll('h2')].map((titulo) => titulo.textContent)).toEqual([
       'espessura',
       'largura',

@@ -85,6 +85,8 @@ describe('os controles de parâmetro da peça (R7-A58)', () => {
     expect(container.querySelectorAll('input[type="range"]')).toHaveLength(2);
     expect(faixa('espessura')).not.toBe(null);
     expect(faixa('largura')).not.toBe(null);
+    // O passo vem de `medidaDoParametro.ts`, o mesmo da tela de uma peça: 40 passos na faixa (R9-A68).
+    expect(Number(faixa('largura').step)).toBeCloseTo(0.001, 12);
     expect(container.textContent).toContain('faixa 80,0 mm a 120,0 mm');
   });
 

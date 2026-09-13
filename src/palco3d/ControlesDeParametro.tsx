@@ -10,8 +10,7 @@
 // `mudarEscolhaDaTela`, que é pura e tem teste; este componente só avisa QUAL parâmetro mudou.
 
 import type { ParametroDePeca } from '../lib/composicao/tiposDaComposicao';
-
-const PASSOS_DO_PARAMETRO = 40;
+import { milimetros, passoDoParametro } from './medidaDoParametro';
 
 interface ControlesDeParametroProps {
   categoria: string;
@@ -36,7 +35,7 @@ export function ControlesDeParametro({ categoria, parametros, valores, aoMudar }
               className="palco3d__faixa"
               min={parametro.minimo}
               max={parametro.maximo}
-              step={(parametro.maximo - parametro.minimo) / PASSOS_DO_PARAMETRO}
+              step={passoDoParametro(parametro)}
               value={valor}
               aria-label={`${parametro.nome} da zona ${categoria}`}
               onChange={(evento) => aoMudar(parametro.nome, Number(evento.target.value))}
@@ -56,9 +55,4 @@ export function ControlesDeParametro({ categoria, parametros, valores, aoMudar }
       })}
     </>
   );
-}
-
-/** Metros viram milímetros na tela: 0,018 m não se lê, 18 mm sim. */
-function milimetros(metros: number): string {
-  return `${(metros * 1000).toFixed(1).replace('.', ',')} mm`;
 }

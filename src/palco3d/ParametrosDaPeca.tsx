@@ -10,13 +10,14 @@
 // diferente (aqui título, ajuda e medida em linhas próprias; lá um rótulo compacto por zona). Juntar
 // as duas mudaria o HTML de uma delas, e o critério do item é que esta tela, com o acervo de prova,
 // continue com o mesmo HTML.
+//
+// O que as duas dividem sem mudar marcação, a medida em milímetros e o passo do controle, mora em
+// `medidaDoParametro.ts` (R9-A68).
 
 import { Fragment } from 'react';
 
 import type { ParametroDePeca } from '../lib/composicao/tiposDaComposicao';
-
-/** Quantos passos o controle deslizante tem entre o mínimo e o máximo da faixa. */
-const PASSOS_DO_PARAMETRO = 40;
+import { milimetros, passoDoParametro } from './medidaDoParametro';
 
 interface ParametrosDaPecaProps {
   parametros: readonly ParametroDePeca[];
@@ -45,7 +46,7 @@ export function ParametrosDaPeca({ parametros, valores, aoMudar }: ParametrosDaP
               className="palco3d__faixa"
               min={parametro.minimo}
               max={parametro.maximo}
-              step={(parametro.maximo - parametro.minimo) / PASSOS_DO_PARAMETRO}
+              step={passoDoParametro(parametro)}
               value={valor}
               aria-label={parametro.nome}
               onChange={(evento) => aoMudar(parametro.nome, Number(evento.target.value))}
@@ -79,9 +80,4 @@ export function valoresEmVigor(
   valores: Readonly<Record<string, number>>,
 ): Record<string, number> {
   return Object.fromEntries(parametros.map((parametro) => [parametro.nome, valorDoParametro(parametro, valores)]));
-}
-
-/** Metros viram milímetros na tela: 0,018 m não se lê, 18 mm sim. */
-function milimetros(metros: number): string {
-  return `${(metros * 1000).toFixed(1).replace('.', ',')} mm`;
 }
