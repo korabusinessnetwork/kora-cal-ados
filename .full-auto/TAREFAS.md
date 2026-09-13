@@ -489,4 +489,25 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       achar os dois `console.log`. `index.html` só tem travessão em comentário. Navegador: a frase
       do login aparece com vírgula, e zero travessões no texto da tela. Baseline: 1324 testes, 25 no
       navegador, `tsc` e build sem aviso, `npm audit` em zero.
-- [ ] R8-A63 A tela de uma peça desenha um controle por parâmetro | trilha: robustez | depende: nenhum | pronto quando: `TelaDoPalco3d.tsx` não lê mais `parametros[0]`, uma peça de dois parâmetros desenha dois controles, existe teste que reprova a leitura do primeiro, e a tela com o acervo de prova continua com o mesmo HTML
+- [x] R8-A63 A tela de uma peça desenha um controle por parâmetro | trilha: robustez | depende: nenhum | pronto quando: `TelaDoPalco3d.tsx` não lê mais `parametros[0]`, uma peça de dois parâmetros desenha dois controles, existe teste que reprova a leitura do primeiro, e a tela com o acervo de prova continua com o mesmo HTML
+      feito em COMMIT. `TelaDoPalco3d.tsx` não lê mais `parametros[0]`: o bloco do parâmetro virou
+      `ParametrosDaPeca.tsx`, que desenha título, faixa e medida para cada parâmetro declarado (a
+      explicação só no primeiro), e `valoresEmVigor` manda todos para o glTF. Não reaproveitei
+      `ControlesDeParametro` porque a marcação das duas telas é outra, e juntar mudaria o HTML. A
+      tela ganhou a prop opcional `pecas`, que o app não passa, para um teste montá-la com uma peça
+      de dois parâmetros. Testes: 4 do componente e 1 de tela. Mutações: 6, todas mortas no fim.
+      **Uma sobreviveu no meio**: a tela passando `declarados.slice(0, 1)` ao componente deixava os
+      testes do componente verdes; o teste de tela com a prop `pecas` nasceu para ela. HTML com o
+      acervo de prova, por um teste descartável que fotografou 11 estados (abertura, cada peça, e
+      cada peça depois de levar o controle ao máximo): **10 idênticos byte a byte, 1 diferente**. O
+      diferente é o cadarço logo depois de a sola tratorada ir a 50 mm, com o controle levado ao
+      máximo por setter sintético: antes o texto ia a 12,0 mm, depois ficava em 50,0 mm. Esse estado
+      só existe por um defeito anterior a este item (abaixo), e mexer de verdade depois dele deu o
+      mesmo resultado antes e depois (6,0 mm e 12,0 mm, sondado com `git stash`). O critério pedia
+      "o mesmo HTML" e isso vale para 10 de 11, dito às claras. **Achado novo, para a rodada 9**:
+      as duas solas e o cadarço têm um parâmetro chamado `espessura`, com faixas diferentes, e a
+      tela guarda valor por nome. Conferido no navegador: sola tratorada em 50 mm, clique no cadarço,
+      e a tela diz "50,0 mm, faixa 3,0 mm a 12,0 mm" com o controle parado em 12, e o glTF sai com
+      0,05. É o BUG-019 desta tela. Navegador depois do item: as cinco peças com um controle cada, e
+      levar cada um ao mínimo atualiza a medida. Baseline: 1329 testes, 25 no navegador, `tsc` e
+      build sem aviso, `npm audit` em zero.

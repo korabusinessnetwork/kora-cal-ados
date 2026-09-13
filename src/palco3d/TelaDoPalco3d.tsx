@@ -9,30 +9,42 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { catalogoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
-import type { ParametroDePeca } from '../lib/composicao/tiposDaComposicao';
+import type { PecaDoAcervo } from '../lib/composicao/tiposDaComposicao';
 import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
+import { ParametrosDaPeca, valoresEmVigor } from './ParametrosDaPeca';
 
 const CATALOGO = catalogoDeProva();
 const PECAS = CATALOGO.pecas;
 
-/** Quantos passos o controle deslizante tem entre o mínimo e o máximo da faixa. */
-const PASSOS_DO_PARAMETRO = 40;
+interface TelaDoPalco3dProps {
+  /**
+   * As peças da lista. O app nunca passa: vale o acervo de prova. Existe para um teste montar a
+   * tela com uma peça de dois parâmetros, que o acervo de prova não tem, e reprovar a tela que
+   * desenhasse só o primeiro (R8-A63). Os ids têm de ser do acervo de prova, porque o glTF sai dele.
+   */
+  pecas?: readonly PecaDoAcervo[];
+}
 
-export function TelaDoPalco3d() {
-  const [pecaId, setPecaId] = useState<string>(PECAS[0]?.id ?? '');
+export function TelaDoPalco3d({ pecas = PECAS }: TelaDoPalco3dProps = {}) {
+  const [pecaId, setPecaId] = useState<string>(pecas[0]?.id ?? '');
   const [parametros, setParametros] = useState<Record<string, number>>({});
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [estado, setEstado] = useState<EstadoDoPalco>('carregando');
 
-  const peca = PECAS.find(({ id }) => id === pecaId);
-  const parametro = peca?.parametros[0];
-  const valor = valorAtual(parametro, parametros);
+  const peca = pecas.find(({ id }) => id === pecaId);
+  const declarados = peca?.parametros ?? [];
+  // Todos os parâmetros declarados, e não só o primeiro (R8-A63).
+  const chaveDosValores = JSON.stringify(valoresEmVigor(declarados, parametros));
 
-  // O texto glTF é recalculado só quando a peça ou o parâmetro mudam. Sem o memo ele seria
-  // remontado a cada render, e a prop nova faria o palco recarregar a peça sem motivo.
+  // O texto glTF é recalculado só quando a peça ou algum valor mudam. Sem o memo ele seria
+  // remontado a cada render, e a prop nova faria o palco recarregar a peça sem motivo. A chave é o
+  // texto dos valores, e não o objeto, porque o objeto nasce novo a cada render.
   const textoGltf = useMemo(
-    () => (parametro ? gltfDaPecaDeProva(pecaId, { [parametro.nome]: valor }) : gltfDaPecaDeProva(pecaId)),
-    [pecaId, parametro, valor],
+    () =>
+      declarados.length > 0
+        ? gltfDaPecaDeProva(pecaId, JSON.parse(chaveDosValores) as Record<string, number>)
+        : gltfDaPecaDeProva(pecaId),
+    [pecaId, declarados.length, chaveDosValores],
   );
 
   // Os dois callbacks são estáveis porque o palco os guarda em referência. Recriá-los a cada
@@ -73,7 +85,7 @@ export function TelaDoPalco3d() {
             já coloridas, estão no calçado montado, no rodapé desta tela.
           </p>
           <ul className="palco3d__lista">
-            {PECAS.map((candidata) => (
+            {pecas.map((candidata) => (
               <li key={candidata.id}>
                 <button
                   type="button"
@@ -92,36 +104,11 @@ export function TelaDoPalco3d() {
             ))}
           </ul>
 
-          {parametro ? (
-            <>
-              <h2 className="painel__titulo painel__titulo--espacado">{parametro.nome}</h2>
-              <p className="painel__ajuda">
-                O parâmetro é escala do nó, nunca malha nova (ADR-008 D7). Engrossar a peça faz ela
-                crescer para cima, a partir de onde assenta.
-              </p>
-              <input
-                type="range"
-                className="palco3d__faixa"
-                min={parametro.minimo}
-                max={parametro.maximo}
-                step={(parametro.maximo - parametro.minimo) / PASSOS_DO_PARAMETRO}
-                value={valor}
-                aria-label={parametro.nome}
-                onChange={(evento) =>
-                  setParametros((atual) => ({
-                    ...atual,
-                    [parametro.nome]: Number(evento.target.value),
-                  }))
-                }
-              />
-              <p className="palco3d__medida">
-                <strong>{milimetros(valor)}</strong>
-                <span>
-                  faixa {milimetros(parametro.minimo)} a {milimetros(parametro.maximo)}
-                </span>
-              </p>
-            </>
-          ) : null}
+          <ParametrosDaPeca
+            parametros={declarados}
+            valores={parametros}
+            aoMudar={(nome, valor) => setParametros((atual) => ({ ...atual, [nome]: valor }))}
+          />
         </section>
 
         <section className="painel palco3d__painel-cena">
@@ -162,18 +149,6 @@ export function TelaDoPalco3d() {
       </div>
     </main>
   );
-}
-
-/** O valor em vigor: o que o usuário mexeu, ou o padrão que a própria peça declara. */
-function valorAtual(parametro: ParametroDePeca | undefined, parametros: Record<string, number>): number {
-  if (parametro === undefined) return 0;
-
-  return parametros[parametro.nome] ?? parametro.padrao;
-}
-
-/** Metros viram milímetros na tela: 0,018 m não se lê, 18 mm sim. */
-function milimetros(metros: number): string {
-  return `${(metros * 1000).toFixed(1).replace('.', ',')} mm`;
 }
 
 /**

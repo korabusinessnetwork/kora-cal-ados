@@ -62,3 +62,4 @@
 2026-09-12 · R8-A59 · botão de voltar ao calçado de prova com Desfazer e foco levado nos dois sentidos, e o estado das escolhas num hook que devolve a tela a 160 linhas · COMMIT
 2026-09-12 · R8-A60 · os botões do rodapé de telas passam de 18 para 24 px de altura, medidos a 375 px nas quatro telas, com guarda na folha · COMMIT
 2026-09-12 · R8-A62 · 22 textos de tela, erro e terminal sem travessão, e uma varredura por parser que reprova literal e deixa comentário e teste de fora · COMMIT
+2026-09-12 · R8-A63 · a tela de uma peça desenha um controle por parâmetro e manda todos ao glTF, e o valor herdado entre peças de mesmo parâmetro virou achado · COMMIT

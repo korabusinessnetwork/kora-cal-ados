@@ -31,6 +31,7 @@ conferência a olho aqui. Então a divisão não é estética:
 | `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
 | `useEscolhasDaComposicao.ts` | não | O estado das escolhas da tela: restaurar do F5, mudar, colar, voltar ao padrão e desfazer, e o aviso de troca de montagem que larga a peça clicada |
 | `composicaoGuardada.ts` | não | A composição da tela no `localStorage`, para sobreviver ao F5. Lida de volta pelo mesmo guarda da colagem, e a gravação recusada é apagada |
+| `ParametrosDaPeca.tsx` | não | Um controle por parâmetro na tela de uma peça, e os valores em vigor de todos eles para o glTF. Separado da tela pelo mesmo motivo de `ControlesDeParametro.tsx` |
 | `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
 | `TelaDaComposicao.tsx` | não | A tela do calçado montado: peça, cor e parâmetro por categoria da forma |
 | `ControleDaCategoria.tsx` | não | O bloco de uma categoria da tela do calçado montado: botões de peça, cor e parâmetros |

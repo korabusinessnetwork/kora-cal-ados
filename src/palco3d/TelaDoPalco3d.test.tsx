@@ -18,6 +18,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { TelaDoPalco3d } from './TelaDoPalco3d';
+import { catalogoDeProva } from '../lib/acervo/acervoDeProva';
 import { ROTULO_DA_SAIDA } from '../saidasDaTela';
 
 declare global {
@@ -78,5 +79,24 @@ describe('o que a tela do palco diz sobre a montagem (A43)', () => {
     expect(ROTULO_DA_SAIDA.composicao).toContain('calçado montado');
     expect(painelDaPeca().ajuda).toContain('calçado montado');
     expect(painelDaPeca().ajuda).toContain('rodapé');
+  });
+});
+
+describe('a tela de uma peça desenha um controle por parâmetro (R8-A63)', () => {
+  it('uma peça de dois parâmetros ganha dois controles na TELA, e não só no componente', () => {
+    // `ParametrosDaPeca.test.tsx` prova o componente. Este prova a ligação: uma tela que passasse
+    // só `parametros[0]` ao componente continuava verde lá, e reprova aqui. A sola plana do acervo
+    // de prova ganha um segundo parâmetro sintético, porque o glTF sai do acervo pelo id.
+    const sola = catalogoDeProva().pecas.find(({ id }) => id === 'prova-sola-plana');
+    if (sola === undefined) throw new Error('A sola plana saiu do acervo de prova.');
+    const deDois = { ...sola, parametros: [...sola.parametros, { nome: 'largura', minimo: 0.08, maximo: 0.12, padrao: 0.1 }] };
+
+    act(() => {
+      raiz.render(<TelaDoPalco3d pecas={[deDois]} />);
+    });
+
+    expect(
+      [...container.querySelectorAll<HTMLInputElement>('input[type="range"]')].map((faixa) => faixa.getAttribute('aria-label')),
+    ).toEqual(['espessura', 'largura']);
   });
 });
