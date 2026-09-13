@@ -1330,3 +1330,50 @@ valor: 3 | esforço: 2 | risco: 1 | **score: 2**
    ficam, e essa suspeita já morreu na rodada 8.
 3. **O painel de recomeço do A59 teria contraste baixo.** Varridas as quatro telas: nenhuma falha.
 4. **Algum `outline: none` teria entrado.** Nenhum em folha nenhuma.
+
+
+---
+
+## Achados da reauditoria da rodada 10 (2026-09-13)
+
+De onde veio a lista: o que a rodada 9 mudou (a frase do hex nas duas telas, o dublê do palco nos
+testes de tela, a troca de peça), as três telas públicas de novo a 375 px com cada frase nova do hex
+à vista, o console do navegador lido inteiro depois de uma marca, e o backlog.
+
+### A73 | eixo: robustez | onde: `src/esboco/PainelDeZonas.tsx:93` e `src/palco3d/CampoDeCorDaCategoria.tsx:58`
+
+**hoje:** os dois campos de texto aceitam a forma curta (`#F00`), que `validarCor` aceita, e sobem o
+texto como veio. Esse texto vira o `value` do `<input type="color">` ao lado, e a especificação do
+HTML só aceita `#rrggbb` ali: fora disso, o seletor mostra preto. Visto no console deste Chrome:
+`The specified value "#22A" does not conform to the required format`, repetido cinco vezes. Neste
+Chrome o seletor ainda mostrou `#ff0000` para `#f00`, então **o seletor preto não foi visto**, só o
+aviso; num navegador que siga a especificação à risca, a peça fica vermelha e o seletor ao lado
+fica preto, que é dois campos mostrando cores diferentes, o que o princípio nº1 proíbe. No esboço o
+texto curto também aparece como está na lista de zonas (`#2a4` no meio de `#2E2E33` e `#C9C4B8`).
+
+**depois:** as duas telas sobem a cor pela forma que `validarCor` devolve, `#RRGGBB` maiúsculo, e o
+seletor e a lista recebem sempre a forma longa. O texto do campo continua como a pessoa digitou.
+
+**evidência:** o aviso no console, e `.zona__hex` com `#2a4` lido no esboço.
+
+valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### Abaixo do corte, registrados
+
+- **A74 | ux | o editor logado não diz "falta o #".** `errosDeCor` usa a frase de `validarCor`, "não é
+  um hex válido (esperado #RRGGBB)", de propósito, para o texto acompanhar a regra. A frase não
+  engana, só é menos direta que a das telas públicas, e **não foi vista**: eu não entro no editor.
+  valor 2 | esforço 2 | risco 1 | score 0.
+- **A35, A64, A65, A66, A71 e A72** seguem com as notas anteriores.
+
+### O que eu achei que era defeito e não era (rodada 10)
+
+1. **As frases novas do hex transbordariam a 375 px.** Medido no esboço com vazio, `22aa44`,
+   `vermelho` e `#22aa`, e na composição com vazio e `22aa44`: `scrollWidth` igual à largura, 375, e
+   nenhum elemento passando da borda.
+2. **O console teria erro das telas.** O histórico mostrava "Maximum update depth exceeded" e
+   "ControleDaCategoria is not defined". Depois de uma marca, com as três telas abertas e cada peça
+   levada ao máximo: nenhum erro. Os antigos eram da sonda de estresse da rodada 8 e de recarga a
+   quente no meio de uma edição.
+3. **Dependências atrasadas.** `npm outdated` lista os mesmos pacotes a uma minor de distância, com
+   `npm audit` em zero, e isso já foi julgado duas vezes.

@@ -77,10 +77,10 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   uma peça para de carregar valor de parâmetro entre peças, a medida do parâmetro tem um lugar só, o
   campo de hex diz o que falta nas duas telas, e os testes de tela selecionam peça de verdade. Duas
   mutações sobreviveram no meio e morrem agora. Tudo em `REFINO-RODADAS.md`.
-- **Próximo passo:** Fase 5, rodada 10. Reauditar o que a rodada 9 mudou (a frase nova do hex nas
-  duas telas, o dublê do palco nos testes de tela) e o backlog, que hoje está todo abaixo do corte:
-  A35, A64, A65, A66, A71 e A72. Se a reauditoria não achar nada novo acima do corte, o refino
-  termina com `status: CONCLUIDO` e `RELATORIO-FINAL.md`.
+- **Rodada 10: ABERTA em 2026-09-13.** Lote de 1 item em `TAREFAS.md`, R10-A73 (o seletor de cor
+  recebia a forma curta do hex), porque a reauditoria só achou esse acima do corte.
+- **Próximo passo:** executar R10-A73, fechar a rodada, e reauditar. Sem nada novo acima do corte,
+  `status: CONCLUIDO` e `RELATORIO-FINAL.md` do refino.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

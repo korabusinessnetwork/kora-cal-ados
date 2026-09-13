@@ -594,3 +594,15 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
       a moldura, e reprovou com o palco de verdade: a moldura some de propósito nesse estado (A48), e
       a conferência saiu. Sem navegador: o item só mexe em teste. Baseline: 1343 testes, 25 no
       navegador, `tsc` limpo, build sem aviso e com os mesmos tamanhos do A70, `npm audit` em zero.
+
+
+## Refino, rodada 10 (aberta em 2026-09-13)
+
+Lote de **1 item**. A reauditoria, registrada em `AUDITORIA.md`, seção "Achados da reauditoria da
+rodada 10", só achou uma coisa acima do corte, e a regra é não inventar problema para encher a lista.
+Se a reauditoria seguinte não achar nada novo acima do corte, o refino termina.
+
+Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71**, **A72** e **A74** (o editor
+logado não diz "falta o #", evidência só de código).
+
+- [ ] R10-A73 O seletor de cor recebe sempre a forma longa | trilha: robustez | depende: nenhum | pronto quando: digitar `#f00` no campo de texto do esboço e da composição sobe `#FF0000` (o `value` do seletor de cor é `#ff0000` e a lista de zonas do esboço diz `#FF0000`), o texto do campo continua `#f00`, o console não mostra o aviso de formato, e há teste nas duas telas que reprova a forma curta subindo
