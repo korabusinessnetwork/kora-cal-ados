@@ -75,6 +75,15 @@ O texto original fica abaixo, como histórico.
   nenhuma linha é tocada), diferente das outras pendências desta lista. O `if not exists` deixa
   rodar duas vezes sem erro.
 
+## P06 Escolher o fornecedor do modelo de linguagem de verdade para o prompt [prioridade: média, decisão paga]
+
+- **Por quê:** o prompt da tela da composição funciona de ponta a ponta, mas quem responde hoje é o gerador de prova, que não é IA e só reconhece palavras-chave (D12). A tela diz isso com todas as letras. Para o prompt entender frase livre, precisa de um modelo de linguagem de verdade, e todo fornecedor cobra por uso.
+- **Contorno atual:** `src/lib/composicao/modeloDeLinguagemDeProva.ts`, ativo por padrão, custo zero. A tela recebe o modelo por parâmetro (`TelaDaComposicao.tsx`, no `<PainelDePrompt modelo=... descricao=...>`), então trocar é mudar essa linha.
+- **O que você decide:** qual fornecedor, e o teto de gasto por mês.
+- **O que precisa ser construído depois da decisão (eu faço):** uma função serverless na Vercel que recebe o prompt, exige sessão autenticada, limita pedidos por tenant, e chama o fornecedor com a chave guardada em variável de ambiente do servidor, SEM prefixo `VITE_`, porque chave com `VITE_` vai parar no navegador de qualquer visitante. No front, um adaptador que implementa `ModeloDeLinguagem` chamando essa função, e a descrição `{ ehIa: true, nome: '...' }` para o aviso de transparência passar a dizer que é IA.
+- **Onde colar o resultado:** a chave no painel da Vercel, em Settings, Environment Variables, com um nome sem `VITE_` (sugestão: `CHAVE_DO_MODELO_DE_LINGUAGEM`). Nunca no `.env` versionado nem no chat.
+- **Como confirmar que funcionou:** em `?tela=composicao`, a ajuda do painel diz "um modelo de linguagem (IA)", e uma frase sem nenhuma palavra-chave ("um tênis para correr no frio") monta um calçado diferente do padrão. No DevTools, aba Network, nenhuma resposta nem pedido do navegador contém a chave.
+
 ## P03 Normalizar o travessão no repositório inteiro [prioridade: baixa]
 
 - **Por quê:** sua regra é não usar travessão em português. O repositório inteiro usa, porque foi escrito antes de a regra entrar. Aplicá-la só em arquivo novo cria inconsistência num projeto cuja tese é justamente consistência para agentes.

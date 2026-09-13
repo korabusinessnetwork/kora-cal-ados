@@ -244,7 +244,8 @@ function anunciaveis(raiz: ParentNode = container): Element[] {
  * "Composição copiada". Perguntar pela tela inteira misturaria as duas e faria estes testes
  * responderem sobre o painel errado.
  */
-const painelDeColar = () => container.querySelector('.palco3d__entrada')!;
+// O painel de prompt (T09c) reaproveita `palco3d__entrada` e vem antes na tela; o `:not` o deixa de fora.
+const painelDeColar = () => container.querySelector('.palco3d__entrada:not(.palco3d__prompt)')!;
 
 /**
  * Uma composição que o guarda ACEITA.
@@ -460,5 +461,79 @@ describe('o caminho de volta ao calçado de prova (R8-A59)', () => {
     expect(() => botaoDe('Desfazer')).toThrow();
     expect(avisoDoRecomeco()).toBe('');
     expect(zonasNaTela()).toContainEqual({ zona: 'sola', peca: 'prova-sola-tratorada' });
+  });
+});
+
+describe('o prompt compõe o calçado, e a tela diz quem compôs (T09c)', () => {
+  const campoDoPrompt = () => container.querySelector<HTMLTextAreaElement>('#composicao-prompt')!;
+  const avisoGerado = () => container.querySelector('.palco3d__aviso-gerado')?.textContent ?? '';
+
+  /** Gerar espera o modelo, que é assíncrono até no gerador de prova. */
+  async function gerarPeloPrompt(prompt: string) {
+    escrever(campoDoPrompt(), prompt);
+    await act(async () => {
+      botaoDe('Gerar composição').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+  }
+
+  it('a tela abre sem o aviso de composição gerada, porque ninguém gerou nada', () => {
+    expect(campoDoPrompt()).not.toBe(null);
+    expect(avisoGerado()).toBe('');
+  });
+
+  it('gerar troca o calçado e mostra, no painel do palco, quem compôs e que nada foi desenhado', async () => {
+    await gerarPeloPrompt('cano alto vermelho sem cadarço');
+
+    expect(zonasNaTela()).toEqual([
+      { zona: 'sola', peca: 'prova-sola-plana' },
+      { zona: 'cabedal', peca: 'prova-cabedal-cano-alto' },
+    ]);
+    // Perto do calçado: dentro do painel da cena, e não no painel onde o prompt foi escrito.
+    expect(container.querySelector('.palco3d__painel-cena .palco3d__aviso-gerado')).not.toBe(null);
+    expect(avisoGerado()).toContain('gerador de prova, que não é IA');
+    expect(avisoGerado()).toContain('nenhuma peça foi desenhada');
+  });
+
+  it('mexer à mão depois de gerar apaga o aviso, que passaria a falar de outro calçado', async () => {
+    await gerarPeloPrompt('cano alto');
+    expect(avisoGerado()).not.toBe('');
+
+    clicar(botaoDe('Sola tratorada'));
+
+    expect(avisoGerado()).toBe('');
+    expect(container.textContent ?? '').not.toContain('agora é o que o prompt compôs');
+  });
+
+  it('colar depois de gerar também apaga o aviso', async () => {
+    await gerarPeloPrompt('cano alto');
+
+    escrever(
+      areaDeColar(),
+      JSON.stringify({ forma_id: FORMA_ID, pecas: [{ peca_id: 'prova-sola-tratorada' }, { peca_id: 'prova-cabedal-baixo' }] }),
+    );
+    clicar(botaoDe('Montar o que está colado'));
+
+    // Contraprova: a colagem entrou. Uma colagem recusada não troca nada, e o aviso ficaria certo.
+    expect(zonasNaTela()).toContainEqual({ zona: 'sola', peca: 'prova-sola-tratorada' });
+    expect(avisoGerado()).toBe('');
+  });
+
+  it('prompt comprido demais não chega à tela: o campo corta no teto', () => {
+    escrever(campoDoPrompt(), 'a'.repeat(501));
+
+    // jsdom não aplica `maxLength` na escrita programática; o que fica preso aqui é o atributo, e a
+    // recusa acima do teto tem teste no módulo (`gerarComposicaoPorPrompt.test.ts`).
+    expect(campoDoPrompt().maxLength).toBe(500);
+  });
+
+  it('gerar não cria região viva dentro de outra', async () => {
+    await gerarPeloPrompt('azul');
+
+    const aninhadas = anunciaveis().filter(
+      (elemento) => elemento.parentElement?.closest('[aria-live], [role="alert"], [role="status"]') != null,
+    );
+    expect(aninhadas).toEqual([]);
+    // O aviso perto do calçado não é região viva: o desfecho já foi anunciado pelo painel do prompt.
+    expect(container.querySelector('.palco3d__aviso-gerado')?.closest('[aria-live], [role]')).toBe(null);
   });
 });

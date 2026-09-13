@@ -47,11 +47,16 @@ com combustível grosseiro, antes de qualquer investimento em modelagem de verda
 
 Sem fornecedor pago. O gerador de prova ocupa o lugar do modelo de linguagem até o dono escolher um.
 
-- [ ] T18 Termos do prompt no glossário | trilha: docs | depende: nenhum | pronto quando: "prompt", "modelo de linguagem" e "gerador de prova" estão no glossário antes do código, com os sinônimos proibidos
-- [ ] T05 `montarCatalogoParaModelo.ts` | trilha: composicao | depende: T18 | pronto quando: função pura transforma forma + catálogo no texto que o modelo lê, só com as peças daquela forma, com id, categoria, rótulo e faixa de cada parâmetro, e um teste prova que peça de outra forma não aparece
-- [ ] T09a `gerarComposicaoPorPrompt.ts` | trilha: composicao | depende: T05 | pronto quando: prompt vazio ou longo demais é recusado antes de chamar o modelo; a resposta do modelo (inclusive dentro de bloco ```json) passa por `validarComposicao`; id inventado sai como `PECA_NAO_ENCONTRADA`, texto que não é JSON sai como `COMPOSICAO_INVALIDA`, e falha do modelo sai como mensagem legível; tudo com teste e modelo falso injetado
-- [ ] T09b Gerador de prova | trilha: composicao | depende: T09a | pronto quando: sem rede e sem chave, "cano alto vermelho sem cadarço" vira cabedal cano alto vermelho, sem cadarço, e o resultado passa pelo guarda; ele só usa ids do catálogo que recebeu; tem teste
-- [ ] T09c Painel de prompt na tela da composição | trilha: front | depende: T09b | pronto quando: `?tela=composicao` tem campo de prompt e botão; gerar troca o calçado e mostra, perto do calçado, o aviso de transparência que diz quem compôs e o que foi feito (escolher e colorir peças do acervo, não desenhar); o aviso some quando a pessoa mexe à mão; recusa não encosta no calçado; conferido no navegador
+- [x] T18 Termos do prompt no glossário | trilha: docs | depende: nenhum | pronto quando: "prompt", "modelo de linguagem" e "gerador de prova" estão no glossário antes do código, com os sinônimos proibidos
+      verificado: 4 termos no glossário (Prompt, Modelo de linguagem, Catálogo para o modelo, Gerador de prova), sem travessão | commit 3d2a2c7
+- [x] T05 `montarCatalogoParaModelo.ts` | trilha: composicao | depende: T18 | pronto quando: função pura transforma forma + catálogo no texto que o modelo lê, só com as peças daquela forma, com id, categoria, rótulo e faixa de cada parâmetro, e um teste prova que peça de outra forma não aparece
+      verificado: 7 testes, mutações 4/4 mortas, baseline verde | commit 09d0961
+- [x] T09a `gerarComposicaoPorPrompt.ts` | trilha: composicao | depende: T05 | pronto quando: prompt vazio ou longo demais é recusado antes de chamar o modelo; a resposta do modelo (inclusive dentro de bloco ```json) passa por `validarComposicao`; id inventado sai como `PECA_NAO_ENCONTRADA`, texto que não é JSON sai como `COMPOSICAO_INVALIDA`, e falha do modelo sai como mensagem legível; tudo com teste e modelo falso injetado
+      verificado: 10 testes + 3 de `lerRespostaDoModelo`, mutações 8/8 mortas, baseline verde | commit 4a3e737
+- [x] T09b Gerador de prova | trilha: composicao | depende: T09a | pronto quando: sem rede e sem chave, "cano alto vermelho sem cadarço" vira cabedal cano alto vermelho, sem cadarço, e o resultado passa pelo guarda; ele só usa ids do catálogo que recebeu; tem teste
+      verificado: 10 testes, mutações 9/9 mortas (uma sobrevivente ganhou teste), baseline 1376 passando | commit c8afec1
+- [x] T09c Painel de prompt na tela da composição | trilha: front | depende: T09b | pronto quando: `?tela=composicao` tem campo de prompt e botão; gerar troca o calçado e mostra, perto do calçado, o aviso de transparência que diz quem compôs e o que foi feito (escolher e colorir peças do acervo, não desenhar); o aviso some quando a pessoa mexe à mão; recusa não encosta no calçado; conferido no navegador
+      verificado: 19 testes novos (7 do painel, 6 dos textos, 6 da tela), mutações 9/9 mortas, tsc 0, 1395 passando, build ok; no navegador a 629 e a 375 px: gerar troca o calçado, o aviso aparece dentro do painel da cena, some ao trocar a sola à mão, sem rolagem horizontal e console sem erro depois do reload
 
 ## Zona 3D: sem tarefa, por decisão
 

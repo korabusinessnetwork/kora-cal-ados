@@ -44,6 +44,9 @@ const AO_MINIMO = new Set(['fina', 'fino']);
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/;
 
+/** Como a tela apresenta o gerador de prova: sem IA, e dito com o nome que o glossário dá. */
+export const DESCRICAO_DO_GERADOR_DE_PROVA = { ehIa: false, nome: 'o gerador de prova' } as const;
+
 /** O gerador de prova no formato de qualquer modelo de linguagem. */
 export const modeloDeLinguagemDeProva: ModeloDeLinguagem = async ({ catalogo, prompt }) =>
   responderComoGeradorDeProva(catalogo, prompt);

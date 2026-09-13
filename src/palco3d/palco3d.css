@@ -357,3 +357,26 @@
   line-height: 1.5;
 }
 .palco3d__entrada-texto:focus { outline: 2px solid var(--cor-acento); outline-offset: 1px; }
+
+/* --- O prompt (T09c) ---
+
+   Fica no alto do painel da composição, antes dos controles, porque é a porta de entrada do
+   ADR-008. A borda de baixo o separa das categorias: descrever e ajustar à mão são dois jeitos de
+   chegar à mesma composição, e não um bloco só. */
+.palco3d__prompt {
+  margin: 0 0 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+/* Fonte do texto e não monoespaçada: aqui a pessoa escreve uma frase, não cola JSON. */
+.palco3d__prompt-texto { font-family: inherit; font-size: 14px; }
+
+/* O aviso de transparência, perto do calçado. Discreto de propósito, mas sempre legível: é
+   informação que a regra de `restrictions.md` obriga a estar à vista, não rodapé jurídico. */
+.palco3d__aviso-gerado {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cor-texto-fraco);
+}

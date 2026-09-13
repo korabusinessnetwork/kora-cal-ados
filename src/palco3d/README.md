@@ -29,7 +29,7 @@ conferência a olho aqui. Então a divisão não é estética:
 | `CampoDeCorDaCategoria.tsx` | não | A cor de uma categoria, pelo seletor do sistema ou digitada em hex |
 | `ControlesDeParametro.tsx` | não | Um controle deslizante por parâmetro que a peça declara, com a faixa escrita. Separado da tela para um teste montar peça de dois parâmetros, que o acervo de prova não tem |
 | `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
-| `useEscolhasDaComposicao.ts` | não | O estado das escolhas da tela: restaurar do F5, mudar, colar, voltar ao padrão e desfazer, e o aviso de troca de montagem que larga a peça clicada |
+| `useEscolhasDaComposicao.ts` | não | O estado das escolhas da tela: restaurar do F5, mudar, colar, gerar pelo prompt, voltar ao padrão e desfazer, e o aviso de troca de montagem que larga a peça clicada. Guarda também se o calçado em cena é o que o prompt compôs |
 | `composicaoGuardada.ts` | não | A composição da tela no `localStorage`, para sobreviver ao F5. Lida de volta pelo mesmo guarda da colagem, e a gravação recusada é apagada |
 | `ParametrosDaPeca.tsx` | não | Um controle por parâmetro na tela de uma peça, e os valores em vigor de todos eles para o glTF. Separado da tela pelo mesmo motivo de `ControlesDeParametro.tsx` |
 | `medidaDoParametro.ts` | não | A medida em milímetros e o passo do controle, os mesmos nas duas telas que mostram parâmetro |
@@ -39,6 +39,8 @@ conferência a olho aqui. Então a divisão não é estética:
 | `PainelDeRecomeco.tsx` | não | Voltar ao calçado de prova, com Desfazer em vez de confirmação, e o foco levado nos dois sentidos |
 | `PainelDeSaida.tsx` | não | Copiar o JSON da composição, e o texto à vista quando o navegador nega a cópia |
 | `PainelDeColar.tsx` | não | Colar um JSON e montá-lo pelo mesmo guarda da API, com a região viva do desfecho. Colagem recusada não sobe nada para a tela |
+| `PainelDePrompt.tsx` | não | Descrever o calçado e montar o que o modelo de linguagem respondeu, pelo mesmo guarda (T09c). Recebe o modelo e a descrição dele por parâmetro; hoje é o gerador de prova, que não é IA (D12) |
+| `textosDoPrompt.ts` | não | As frases de transparência: quem responde o prompt, e o aviso perto do calçado de que ele foi composto automaticamente com peças do acervo, sem desenhar nada. Dizem "não é IA" quando não é |
 | `PainelDaPecaClicada.tsx` | não | O nó clicado, a zona dele e o atalho para a cor, mais a lista de zonas em cena |
 | `palco3d.css` | | Estilo fora do JSX (regra de white-label do CLAUDE.md) |
 

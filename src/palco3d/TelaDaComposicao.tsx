@@ -12,15 +12,21 @@ import { useCallback, useMemo, useState } from 'react';
 import { useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
 
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
+import {
+  DESCRICAO_DO_GERADOR_DE_PROVA,
+  modeloDeLinguagemDeProva,
+} from '../lib/composicao/modeloDeLinguagemDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
 import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
 import { montarDaTela } from './composicaoDaTela';
 import { ControleDaCategoria } from './ControleDaCategoria';
 import { PainelDaPecaClicada } from './PainelDaPecaClicada';
 import { PainelDeColar } from './PainelDeColar';
+import { PainelDePrompt } from './PainelDePrompt';
 import { PainelDeRecomeco } from './PainelDeRecomeco';
 import { PainelDeSaida } from './PainelDeSaida';
 import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
+import { avisoDaComposicaoGerada } from './textosDoPrompt';
 import { useEscolhasDaComposicao } from './useEscolhasDaComposicao';
 
 const CATALOGO = catalogoDeProva();
@@ -74,9 +80,21 @@ export function TelaDaComposicao() {
         <section className="painel">
           <h2 className="painel__titulo">Composição</h2>
           <p className="painel__ajuda">
-            Uma peça por categoria, e a cor de cada uma. É esta escolha que o modelo de linguagem
-            vai escrever em JSON, e ela passa pelo mesmo guarda nos dois casos.
+            Uma peça por categoria, e a cor de cada uma. Descrever o calçado produz a mesma
+            escolha que os controles abaixo, e ela passa pelo mesmo guarda nos dois casos.
           </p>
+
+          {/* O modelo de linguagem é o gerador de prova até o dono escolher um fornecedor (D12). A
+              chave de um fornecedor é segredo e não pode morar no navegador, então ele vai entrar por
+              uma função de servidor, e é só esta linha que muda. */}
+          <PainelDePrompt
+            forma={FORMA}
+            catalogo={CATALOGO}
+            modelo={modeloDeLinguagemDeProva}
+            descricao={DESCRICAO_DO_GERADOR_DE_PROVA}
+            geradoEmCena={composicao.geradaPorPrompt}
+            aoGerar={composicao.aceitarOGerado}
+          />
 
           {FORMA.categorias.map(({ categoria, obrigatoria }) => (
             <ControleDaCategoria
@@ -119,6 +137,12 @@ export function TelaDaComposicao() {
               >
                 {textoDoEstadoDaComposicao(estado, montagem.zonas.length)}
               </p>
+              {/* Perto do calçado, e não no painel do prompt: a regra de transparência pede o aviso
+                  no lugar em que o calçado aparece. Fora de região viva, porque quem gerou já
+                  ouviu o desfecho pelo painel. */}
+              {composicao.geradaPorPrompt && (
+                <p className="palco3d__aviso-gerado">{avisoDaComposicaoGerada(DESCRICAO_DO_GERADOR_DE_PROVA)}</p>
+              )}
             </>
           )}
         </section>

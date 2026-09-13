@@ -40,6 +40,10 @@ export function useEscolhasDaComposicao(
   // A montagem de antes do "Voltar ao calçado de prova", guardada só até a próxima mudança. Depois
   // de mexer em qualquer coisa, desfazer apagaria o que acabou de ser feito, então ela some.
   const [antesDoRecomeco, setAntesDoRecomeco] = useState<Escolhas | null>(null);
+  // O calçado em cena é o que o prompt compôs (T09c). Qualquer outra porta de troca desliga, porque
+  // depois de mexer à mão o aviso de "composto automaticamente" passaria a falar de outro calçado.
+  // Não sobrevive ao F5 de propósito: a gravação guarda a composição, e não quem a escreveu.
+  const [geradaPorPrompt, setGeradaPorPrompt] = useState(false);
 
   // O mesmo objeto que a API recebe, e que o modelo de linguagem vai escrever. Fica ao lado das
   // escolhas, e não dentro do botão de copiar, porque ele também é o texto que aparece quando copiar
@@ -59,8 +63,13 @@ export function useEscolhasDaComposicao(
     if (texto !== '') guardarComposicao(armazenamentoDoNavegador(), texto);
   }, [texto]);
 
-  function trocar(novas: Escolhas | ((atual: Escolhas) => Escolhas), guardarDesfazer: Escolhas | null) {
+  function trocar(
+    novas: Escolhas | ((atual: Escolhas) => Escolhas),
+    guardarDesfazer: Escolhas | null,
+    doPrompt = false,
+  ) {
     setAntesDoRecomeco(guardarDesfazer);
+    setGeradaPorPrompt(doPrompt);
     setEscolhas(novas);
     // A peça clicada é do calçado que saiu de cena. Mantê-la faria a tela seguir apontando para um
     // nó que talvez nem exista mais na montagem nova.
@@ -72,11 +81,13 @@ export function useEscolhasDaComposicao(
     texto,
     ehPadrao: texto === textoDoPadrao,
     podeDesfazer: antesDoRecomeco !== null,
+    geradaPorPrompt,
     mudar: (categoria: string, mudanca: Partial<EscolhaDaTela>) =>
       // A transição em si mora em `composicaoDaTela`, com teste. Ela já esteve dentro da tela, e
       // foi lá que o BUG-019 nasceu.
       trocar((atual) => mudarEscolhaDaTela(atual, categoria, mudanca), null),
     aceitarOColado: (novas: Escolhas) => trocar(novas, null),
+    aceitarOGerado: (novas: Escolhas) => trocar(novas, null, true),
     voltarAoPadrao: () => trocar(escolhasDaComposicao(padrao), escolhas),
     desfazerORecomeco: () => {
       if (antesDoRecomeco !== null) trocar(antesDoRecomeco, null);

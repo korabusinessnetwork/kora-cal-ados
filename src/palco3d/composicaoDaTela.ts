@@ -209,11 +209,14 @@ export function montarDaTela(
 /**
  * A mensagem que a pessoa lê. O código do erro entra junto quando existe.
  *
+ * Exportada para o painel de prompt (T09c): a recusa da resposta do modelo de linguagem é a mesma
+ * recusa da colagem, e duas funções de mensagem escreveriam o mesmo erro de dois jeitos.
+ *
  * O código aparece porque ele é contrato público de API (`erros.ts`): quem está montando um
  * calçado aqui é a mesma pessoa que vai receber esse código na integração, e ver os dois lados
  * com o mesmo nome é o que impede "o editor disse uma coisa e a API disse outra".
  */
-function mensagemDe(erro: unknown): string {
+export function mensagemDe(erro: unknown): string {
   if (erro instanceof ErroDeVariante) return `${erro.codigo}: ${erro.message}`;
   if (erro instanceof Error) return erro.message;
 
