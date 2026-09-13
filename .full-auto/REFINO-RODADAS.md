@@ -1120,7 +1120,7 @@ coisa.
 
 ### Mutações
 
-22 mutações à mão, todas mortas no fim: A67 3, A68 5, A70 7, A69 5, mais 2 do dublê. **Duas
+20 mutações à mão, todas mortas no fim: A67 3, A68 5, A70 7, A69 5. **Duas
 sobreviveram no meio do caminho, as duas no A69, e eram do próprio item:** trocar o dublê por
 `return null`, sem palco nenhum, deixava as duas suítes de tela verdes, então o critério "o palco de
 verdade continua montado" não tinha teste. Cada tela ganhou uma contraprova que lê a frase do
