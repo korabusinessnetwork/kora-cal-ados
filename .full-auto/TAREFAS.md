@@ -343,7 +343,25 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       a `div` externa reprova a varredura, tirar o `role="status"` do aceite derruba dois testes, e
       não limpar a recusa ao aceitar derruba os mesmos dois. Conferido no navegador nos três
       estados, abertura, recusa e aceite: zero regiões aninhadas em todos.
-- [ ] R7-A56 O botão Voltar do navegador anda entre as telas | trilha: ux | depende: nenhum | pronto quando: navegar pelo rodapé aumenta `history.length`, `history.back()` volta para a tela anterior e não para fora do app, a primeira carga continua usando `replaceState` (normalizar não é navegar), recarregar continua abrindo a tela do `?tela=`, e existe teste do par `pushState` mais `popstate`
+- [x] R7-A56 O botão Voltar do navegador anda entre as telas | trilha: ux | depende: nenhum | pronto quando: navegar pelo rodapé aumenta `history.length`, `history.back()` volta para a tela anterior e não para fora do app, a primeira carga continua usando `replaceState` (normalizar não é navegar), recarregar continua abrindo a tela do `?tela=`, e existe teste do par `pushState` mais `popstate`
+      feito em COMMIT. `irPara` troca `replaceState` por `pushState`, e o `App` ganha um ouvinte de
+      `popstate` que relê `?tela=` da URL. O par é inseparável, e o comentário do `App.tsx` diz por
+      quê: `pushState` sozinho deixaria Voltar mudando o endereço com a tela anterior ainda
+      desenhada, que é pior que o defeito original. O ouvinte lê da URL, e não de um estado guardado
+      na entrada do histórico, porque a URL é a única fonte que também responde por link colado e
+      por F5. **Uma cláusula do critério de pronto estava errada, e está corrigida aqui em vez de
+      apagada:** eu escrevi "a primeira carga continua usando `replaceState`", e a primeira carga
+      nunca usou; o `replaceState` só existia dentro do `irPara`. Nada mudou na primeira carga.
+      Conferido no navegador: rodapé da composição para o esboço e do esboço para o palco levou
+      `history.length` de 28 para 29 e 30; Voltar trouxe o esboço de volta com título e conteúdo
+      juntos, outro Voltar trouxe a composição, e Avançar devolveu o esboço, com um rodapé só em
+      todos os passos. Cinco testes em `App.navegacao.test.tsx`, montando o `App` inteiro em jsdom.
+      Três mutações mortas à mão: voltar ao `replaceState` derruba os cinco, não registrar o
+      ouvinte derruba três, e apagar a limpeza do ouvinte derruba um. **Uma mutação SOBREVIVEU** na
+      primeira versão do teste de limpeza, e ele foi reescrito: ele disparava `popstate` depois de
+      desmontar e conferia que o título não mudava, só que numa árvore desmontada o título não muda
+      com limpeza ou sem ela. Agora o teste afirma a identidade da função removida. O chunk
+      principal subiu de 218,97 kB para **219,12 kB**, 0,15 kB, que é o ouvinte.
 - [ ] R7-A57 A composição sobrevive ao F5 | trilha: produto | depende: R7-A56 | pronto quando: escolher peças, cores e parâmetro e recarregar devolve a MESMA montagem, uma gravação inválida ou de outra forma é recusada pelo mesmo `validarComposicao` que a colagem usa e a tela cai no padrão sem quebrar, `localStorage` indisponível não derruba a tela, e existe teste dos três casos (volta, recusa, ausência)
 - [ ] R7-A58 Todos os parâmetros da peça aparecem, e mexer num não apaga o outro | trilha: robustez | depende: nenhum | pronto quando: uma peça com dois parâmetros desenha dois controles, arrastar um preserva o valor do outro, e existe teste com peça de dois parâmetros no acervo de teste que reprova tanto o `[0]` quanto a substituição do objeto
 - [ ] R7-A54 A tela da composição vira tela mais painéis | trilha: qualidade | depende: R7-A55, R7-A57, R7-A58 | pronto quando: `TelaDaComposicao.tsx` tem menos de 200 linhas, cada painel extraído mora no seu arquivo com o seu `README.md` de diretório em dia, os seis testes de comportamento da tela continuam passando SEM alteração, e o build e o `tsc` continuam limpos

@@ -64,11 +64,36 @@ export function App() {
     document.title = tituloDaTela(tela);
   }, [tela]);
 
+  // O botão Voltar do navegador anda entre as telas.
+  //
+  // Ele não andava, e o motivo era uma palavra: `irPara` usava `replaceState`, que SUBSTITUI a
+  // entrada atual do histórico em vez de empilhar uma nova. Medido antes da mudança:
+  // `history.length` ficava em 28 nas três telas seguidas enquanto o endereço mudava, e apertar
+  // Voltar depois de três navegações saía do app inteiro, para o que estivesse na aba antes.
+  // Voltar é o controle mais usado que existe num navegador, e ele fazia a coisa mais cara
+  // possível.
+  //
+  // O par é `pushState` mais este ouvinte, e um sem o outro é pior que nenhum dos dois: com
+  // `pushState` sozinho, Voltar mudaria o endereço e deixaria a tela anterior desenhada, que é o
+  // estado mentiroso que o princípio nº1 proíbe em outra roupa.
+  useEffect(() => {
+    function aoAndarNoHistorico() {
+      // Lê da URL, e não de um estado guardado na entrada do histórico, porque a URL é a única
+      // fonte que também responde por um link colado à mão e por um F5. Duas fontes para a mesma
+      // pergunta é como elas passam a discordar.
+      setTela(lerTelaDaUrl(window.location.search));
+    }
+
+    window.addEventListener('popstate', aoAndarNoHistorico);
+
+    return () => window.removeEventListener('popstate', aoAndarNoHistorico);
+  }, []);
+
   // Trocar de tela troca o endereço junto. Sem isso um F5 no esboço devolveria a tela
   // de login, e o link não serviria para mandar a alguém "abre isto aqui".
   function irPara(destino: Tela) {
     setTela(destino);
-    window.history.replaceState(null, '', urlDaTela(destino, window.location.pathname));
+    window.history.pushState(null, '', urlDaTela(destino, window.location.pathname));
   }
 
   // O esboço do motor roda sem Supabase: SVG commitado, zero rede, zero sessão. Sai
