@@ -417,7 +417,7 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       no navegador: colagem válida anunciada, zonas trocadas, duas faixas, zero erros. O chunk
       tardio da tela foi de 26,90 kB para 27,22 kB, e o principal ficou em 219,12 kB.
 
-## Refino, rodada 8 (aberta em 2026-09-12)
+## Refino, rodada 8 (aberta e fechada em 2026-09-12)
 
 Lote de 5 itens, saído da reauditoria registrada em `AUDITORIA.md`, seção "Achados da reauditoria da
 rodada 8". Nenhum com risco 4 ou 5, e o mais alto é 1. Um item por eixo com achado acima do corte:
@@ -431,7 +431,7 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
 (`?tela=` com erro de digitação abre o login em silêncio).
 
 - [x] R8-A61 O build sai sem aviso, e a linha do baseline diz a verdade | trilha: qualidade | depende: nenhum | pronto quando: `npm run build` não imprime o aviso de chunk acima de 500 kB, o limite novo fica acima do chunk do three.js e abaixo do que um chunk novo e grande teria, com o porquê escrito no `vite.config.ts`, uma mutação que infla um chunk acima do limite faz o aviso voltar, e o `BASELINE.md` registra às claras que as colunas anteriores tinham o aviso
-      feito em COMMIT. `build.chunkSizeWarningLimit: 640` no `vite.config.ts`, com o porquê ao lado:
+      feito em `3ed3e8e`. `build.chunkSizeWarningLimit: 640` no `vite.config.ts`, com o porquê ao lado:
       o chunk do three.js tem 619,51 kB e é tardio de propósito, e aviso que aparece sempre é aviso
       que ninguém lê. O build sai sem aviso nenhum agora. Mutação: puxar o three.js para o
       `main.tsx` levou o chunk principal a 956,94 kB e o aviso voltou, com o limite novo no texto
@@ -439,7 +439,7 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       colunas anteriores, de "limpo" para "sem erro, com aviso de chunk", com um parágrafo dizendo
       que o erro foi meu, de ler só o fim da saída. Suíte inteira, 1308, e navegador, 25, verdes.
 - [x] R8-A59 Um botão leva a composição de volta ao calçado de prova | trilha: produto | depende: nenhum | pronto quando: a tela da composição tem um botão que troca a montagem pela do calçado de prova, zera a peça clicada, a gravação do R7-A57 passa a ser a do padrão (um F5 depois abre no padrão), o botão fica desabilitado quando a montagem já é o padrão, trocar mostra uma frase em região viva com um botão Desfazer que devolve a montagem anterior (perder o trabalho de uma sessão com um clique sem volta seria o erro que prevenção evita), e existe teste de tela para trocar, desfazer, e trocar, recarregar e continuar no padrão
-      feito em COMMIT. "Voltar ao calçado de prova" em `PainelDeRecomeco.tsx`, desabilitado quando
+      feito em `e8f1ed7`. "Voltar ao calçado de prova" em `PainelDeRecomeco.tsx`, desabilitado quando
       o texto da montagem já é o do padrão, e uma frase em região viva com um botão Desfazer. O foco
       vai para Desfazer ao recomeçar e volta ao botão ao desfazer, porque desabilitar o botão focado
       jogaria o foco no `body`. Mexer em qualquer coisa depois apaga o Desfazer. O estado das
@@ -456,7 +456,7 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       botão desabilitado e sem Desfazer. Baseline: 1316 testes, 25 no navegador, `tsc` e build sem
       aviso, `npm audit` em zero.
 - [x] R8-A60 Os botões do rodapé viram alvo de toque de pelo menos 24 px | trilha: ux | depende: nenhum | pronto quando: medido no navegador a 375 px, cada botão do rodapé tem pelo menos 24 px de altura nas quatro telas, o texto e a ordem não mudam, e o rodapé de links da rede de proteção continua com a mesma aparência
-      feito em COMMIT. `min-height: 24px` na regra `.rodape-telas button` do `sessao.css`, com o
+      feito em `bbafd26`. `min-height: 24px` na regra `.rodape-telas button` do `sessao.css`, com o
       porquê ao lado. Medido no navegador a 375x812, nas quatro telas (login, esboço, palco 3D e
       calçado montado): antes 18 px de altura com centros a 19 px, depois 24 px com centros a 24 px,
       os mesmos três textos na mesma ordem, e nenhuma tela transborda na horizontal. Na largura do
@@ -469,7 +469,7 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       `sessao.css`; hoje nenhuma outra folha cita `.rodape-telas`. Baseline: 1318 testes, 25 no
       navegador, `tsc` e build sem aviso, `npm audit` em zero.
 - [x] R8-A62 Nenhum texto visível usa travessão, e uma varredura cobra isso | trilha: qualidade | depende: nenhum | pronto quando: zero travessão em literal de texto e em texto de JSX de `src/` e `api/`, a varredura reprova um travessão novo num literal e NÃO reprova um travessão em comentário (contraprova sintética), e os testes que conferem essas mensagens continuam passando
-      feito em COMMIT. 22 textos trocados em 16 arquivos: 20 em `.ts`/`.tsx` de produção (a frase
+      feito em `6259ae3`. 22 textos trocados em 16 arquivos: 20 em `.ts`/`.tsx` de produção (a frase
       do login, a ajuda do esboço e do formulário de zona, o aviso de zona sem elemento, e mensagens
       de erro do motor, do guarda da composição, da gravação de zona, do Supabase e da API) e 2
       `console.log` do `api/_local/servidorLocal.mjs`. Vírgula onde a frase segue, ponto onde eram
@@ -490,7 +490,7 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       do login aparece com vírgula, e zero travessões no texto da tela. Baseline: 1324 testes, 25 no
       navegador, `tsc` e build sem aviso, `npm audit` em zero.
 - [x] R8-A63 A tela de uma peça desenha um controle por parâmetro | trilha: robustez | depende: nenhum | pronto quando: `TelaDoPalco3d.tsx` não lê mais `parametros[0]`, uma peça de dois parâmetros desenha dois controles, existe teste que reprova a leitura do primeiro, e a tela com o acervo de prova continua com o mesmo HTML
-      feito em COMMIT. `TelaDoPalco3d.tsx` não lê mais `parametros[0]`: o bloco do parâmetro virou
+      feito em `33d8573`. `TelaDoPalco3d.tsx` não lê mais `parametros[0]`: o bloco do parâmetro virou
       `ParametrosDaPeca.tsx`, que desenha título, faixa e medida para cada parâmetro declarado (a
       explicação só no primeiro), e `valoresEmVigor` manda todos para o glTF. Não reaproveitei
       `ControlesDeParametro` porque a marcação das duas telas é outra, e juntar mudaria o HTML. A

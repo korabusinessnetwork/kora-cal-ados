@@ -919,3 +919,128 @@ coisa errada. Foi reescrito para afirmar a identidade da função removida, e a 
   foi medido e não está afirmado.
 - **O editor logado continua sem conferência no navegador**, pelo mesmo motivo de sempre: eu não
   preencho credencial.
+
+---
+
+## Rodada 8, fechada em 2026-09-12
+
+**Lote:** 5 itens, em `TAREFAS.md`, seção "Refino, rodada 8". Nenhum com risco 4 ou 5, e o mais alto
+foi 1.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R8-A61 o build avisava sempre, e o baseline dizia limpo | qualidade | 3 | entregue |
+| R8-A59 nada levava a composição de volta ao padrão | produto | 5 | entregue |
+| R8-A60 botões do rodapé com 18 px de altura | ux | 3 | entregue |
+| R8-A62 travessão em 21 textos que chegam a alguém | qualidade | 2 | entregue |
+| R8-A63 a tela de uma peça só tinha controle para o primeiro parâmetro | robustez | 2 | entregue |
+
+Abaixo do corte e fora do lote: **A35** (canvas sem teclado), **A64** (nenhuma chamada de rede com
+tempo-limite), **A65** (foco no `body` depois de login recusado) e **A66** (`?tela=` com erro de
+digitação abre o login em silêncio).
+
+**De onde veio a lista:** as duas coisas vistas de passagem na rodada 7, o buraco que o próprio R7-A57
+abriu, as quatro telas a 375 px, a saída do build lida inteira, e o texto da tela lido contra a
+regra de escrita do dono. Quatro suspeitas morreram na sonda e estão em `AUDITORIA.md`.
+
+---
+
+## Rodada 8: o que foi entregue
+
+**5 de 5 entregues, nenhum revertido.**
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R8-A61 limite do aviso de chunk logo acima do three.js | qualidade | `3ed3e8e` | entregue |
+| R8-A59 voltar ao calçado de prova, com Desfazer | produto | `e8f1ed7` | entregue |
+| R8-A60 rodapé com alvo de 24 px | ux | `bbafd26` | entregue |
+| R8-A62 textos sem travessão, e varredura por parser | qualidade | `6259ae3` | entregue, critério corrigido às claras |
+| R8-A63 um controle por parâmetro na tela de uma peça | robustez | `33d8573` | entregue, HTML idêntico em 10 de 11 estados |
+
+### O que mudou de verdade
+
+1. **O build para de avisar, e o baseline para de mentir (A61).** Todo build imprimia o aviso de
+   chunk acima de 500 kB por causa do three.js, que é tardio de propósito, e eu escrevi "limpo" em
+   oito colunas sem ler a saída inteira. O limite foi para 640 kB com o porquê no `vite.config.ts`,
+   e as oito colunas foram corrigidas, não apagadas. A mutação que puxa o three.js para o chunk
+   principal faz um chunk de 956,94 kB e o aviso volta.
+
+2. **A composição tem caminho de volta ao padrão (A59).** Desde o R7-A57 ela sobrevive ao F5, e com
+   isso recarregar deixou de ser o jeito de recomeçar. Agora há "Voltar ao calçado de prova",
+   desabilitado quando a montagem já é o padrão, e um Desfazer no lugar de uma caixa de "tem
+   certeza?". O foco vai para Desfazer e volta ao botão, porque desabilitar o botão focado jogaria o
+   foco no `body`. Conferido no navegador: sola em `#22aa44`, recomeço volta a `#f2f2f2`, Desfazer
+   devolve `#22aa44`, e recomeço seguido de F5 abre no padrão. Para caber, o estado das escolhas saiu
+   da tela para `useEscolhasDaComposicao.ts`, e a tela, que tinha voltado a 225 linhas no meio do
+   item, fecha com 160.
+
+3. **O rodapé vira alvo de toque (A60).** Medido a 375 px nas quatro telas: 18 px de altura com
+   centros a 19 px antes, 24 px com centros a 24 px depois, mesmos textos, mesma ordem.
+
+4. **Nenhum texto que chega a alguém usa travessão (A62).** 22 linhas em 16 arquivos: a frase do login,
+   a ajuda do esboço e do formulário de zona, mensagens de erro do motor, da API e do Supabase, e
+   dois `console.log` do servidor local da API. A guarda, `textoSemTravessao.test.ts`, lê a árvore
+   pelo parser do rolldown, porque o TypeScript 7 do projeto não tem API em JavaScript, e reprova
+   literal, template e texto de JSX, deixando comentário de fora.
+
+5. **A tela de uma peça desenha um controle por parâmetro (A63).** A outra metade do R7-A58. Uma peça
+   de dois parâmetros ganha dois controles e os dois vão para o glTF; o acervo de prova só tem
+   peças de um, e é por isso que ninguém tinha visto.
+
+### As medidas, antes e depois
+
+| Medida | Abertura da rodada 8 | Fechamento |
+|---|---|---|
+| Testes verdes | 1308, 58 pulados | **1329**, 58 pulados |
+| Testes contra o banco real | 58 de 58 | **58 de 58** |
+| Testes em navegador | 25 | **25** |
+| `npm run build` | sem erro, **com aviso de chunk** | **sem erro e sem aviso** |
+| Chunk principal | 219,12 kB (gzip 70,19 kB) | **219,11 kB** (gzip 70,19 kB) |
+| Chunk tardio da tela da composição | 27,22 kB | **28,45 kB** |
+| Chunk tardio da tela de uma peça | 4,27 kB, medido depois do A59 | **4,57 kB** |
+| CSS | 24,77 kB | **25,14 kB** |
+| `npm audit` | 0 | **0** |
+| `TelaDaComposicao.tsx` | 195 linhas | **160 linhas** |
+| Altura dos botões do rodapé a 375 px | 18 px, centros a 19 px | **24 px, centros a 24 px** |
+| Literais com travessão em código de produção | 21 linhas mais 2 no `.mjs` | **0, e com varredura** |
+
+### Mutações
+
+25 mutações à mão, todas mortas no fim: A61 1, A59 8, A60 3, A62 7, A63 6. **Duas sobreviveram no
+meio do caminho:**
+
+- **A59:** tirar o aviso que larga a peça clicada deixava os testes da tela verdes. Em jsdom não há
+  canvas para clicar numa peça, então "Nada selecionado" é verdade com o aviso ou sem ele. Vale o
+  mesmo para um teste antigo do R7-A54, "trocar de peça limpa a peça clicada", que nunca teve seleção
+  para limpar. O teste do hook conta o aviso em cada porta, e a mutação morre.
+- **A63:** a tela passar só o primeiro parâmetro ao componente deixava os testes do componente
+  verdes. A tela ganhou a prop opcional `pecas`, que o app não passa, e um teste de tela com peça de
+  dois parâmetros mata a mutação.
+
+### Dois critérios estavam errados, e foram corrigidos às claras
+
+- **A62:** escrevi "zero travessão em literal de `src/` e `api/`". A primeira varredura achou mais 98
+  em arquivos de teste, quase todos títulos de `describe` e `it`, e um deles é de propósito um SVG
+  com caracteres fora do ASCII. Teste ficou fora da guarda, e isso está escrito no cabeçalho dela. A
+  primeira versão também não lia `.mjs`, e foi estendida quando uma busca achou os dois
+  `console.log`.
+- **A63:** escrevi "a tela com o acervo de prova continua com o mesmo HTML". Um teste descartável
+  fotografou 11 estados: **10 idênticos byte a byte e 1 diferente**. O diferente só existe por causa
+  do defeito abaixo, e mexer de verdade depois dele dá o mesmo resultado antes e depois.
+
+### Visto de passagem, anterior a esta rodada, para a reauditoria
+
+- **Na tela de uma peça, o valor de um parâmetro passa para outra peça com parâmetro de mesmo nome e
+  faixa diferente.** As duas solas e o cadarço têm `espessura`. Conferido no navegador: sola
+  tratorada em 50 mm, clique no cadarço, e a tela diz "50,0 mm, faixa 3,0 mm a 12,0 mm", com o
+  controle parado em 12 e o glTF gerado com 0,05. É o BUG-019 desta tela, e fica fora deste lote
+  porque o critério do A63 não o incluía.
+
+### Limites de verificação, ditos por inteiro
+
+- **A tela da rede de proteção não foi aberta no navegador no A60.** A prova de que o rodapé de links
+  dela não mudou é a regra de CSS, que é outra e continua igual, mais a guarda nova.
+- **A guarda do A60 lê só o `sessao.css`.** Uma regra mais específica em outra folha derrubaria a
+  altura sem reprovar. Hoje nenhuma outra folha cita `.rodape-telas`.
+- **O editor logado continua sem conferência no navegador**, pelo mesmo motivo de sempre: eu não
+  preencho credencial.

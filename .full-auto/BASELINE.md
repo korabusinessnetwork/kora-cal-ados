@@ -32,23 +32,23 @@ E o fluxo principal, à mão, em `npm run dev`:
 
 ## Medidas
 
-| Medida | Abertura do refino | Fechamento da rodada 1 | Fechamento da rodada 2 | Fechamento da rodada 3 | Fechamento da rodada 4 | Fechamento da rodada 5 | Fechamento da rodada 6 | Fechamento da rodada 7 |
-|---|---|---|---|---|---|---|---|---|
-| Testes verdes | **1047** passando, 58 pulados, 70 arquivos | **1072** passando, 58 pulados, 71 arquivos | **1104** passando, 58 pulados, 74 arquivos | **1161** passando, 58 pulados, 80 arquivos | **1198** passando, 58 pulados, 85 arquivos | **1243** passando, 58 pulados, 92 arquivos | **1275** passando, 58 pulados, 97 arquivos | **1308** passando, 58 pulados, 101 arquivos |
-| Testes contra o banco real | 58 de 58 | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** |
-| Testes em navegador | 25 | **25** | **25** | **25** | **25** | **25** | **25** | **25** |
-| `tsc --noEmit` | limpo | limpo | limpo | limpo | limpo | limpo, e agora olhando **dois diretórios a mais** (A45) | limpo | limpo |
-| `npm run build` | sem erro, **com aviso de chunk**, 695 ms | sem erro, **com aviso de chunk**, **419 ms** | sem erro, **com aviso de chunk**, **507 ms** | sem erro, **com aviso de chunk**, **564 ms** | sem erro, **com aviso de chunk**, **512 ms** | sem erro, **com aviso de chunk**, **483 ms** | sem erro, **com aviso de chunk**, **506 ms** | sem erro, **com aviso de chunk**, **439 ms** |
-| `npm audit` | 0 vulnerabilidades | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** |
-| Bundle: chunk principal | 455,03 kB (gzip 131,84 kB) | **455,58 kB** (gzip 132,03 kB) | **456,92 kB** (gzip 132,43 kB) | **457,00 kB** (gzip 132,51 kB) | **457,16 kB** (gzip 132,93 kB) | **457,75 kB** (gzip 133,12 kB) | **218,97 kB** (gzip 70,15 kB) | **219,12 kB** (gzip 70,19 kB) |
-| Bundle: chunk do three.js, sob demanda | 618,87 kB (gzip 156,56 kB) | 618,87 kB (gzip 156,56 kB) | **618,91 kB** (gzip 156,58 kB) | **619,40 kB** (gzip 156,71 kB) | 619,40 kB (gzip 156,71 kB) | **619,48 kB** (gzip 156,73 kB) | **619,51 kB** (gzip 156,76 kB) | 619,51 kB (gzip 156,75 kB) |
-| Bundle: CSS | 20,76 kB (gzip 3,90 kB) | **21,75 kB** (gzip 4,04 kB) | **22,26 kB** (gzip 4,12 kB) | **22,69 kB** (gzip 4,21 kB) | **23,30 kB** (gzip 4,29 kB) | **23,81 kB** (gzip 4,37 kB) | **24,67 kB** (gzip 4,50 kB) | **24,77 kB** (gzip 4,50 kB) |
-| Arquivos `.ts`/`.tsx` em `src` + `api` + `supabase` | 169 | 170 | 174 | **182** | **191** | **197** | **203** | **214** |
-| Linhas de TypeScript nesses arquivos | 25.598 | 26.218 | 26.844 | **27.889** | **28.867** | **30.518** | **31.427** | **32.665** |
-| `any`, `@ts-ignore`, `catch` vazio em `src/` e `api/` | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada |
-| `console.log` fora de teste | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital |
-| Linter configurado | nenhum | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) |
-| CI | nenhum | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) |
+| Medida | Abertura do refino | Fechamento da rodada 1 | Fechamento da rodada 2 | Fechamento da rodada 3 | Fechamento da rodada 4 | Fechamento da rodada 5 | Fechamento da rodada 6 | Fechamento da rodada 7 | Fechamento da rodada 8 |
+|---|---|---|---|---|---|---|---|---|---|
+| Testes verdes | **1047** passando, 58 pulados, 70 arquivos | **1072** passando, 58 pulados, 71 arquivos | **1104** passando, 58 pulados, 74 arquivos | **1161** passando, 58 pulados, 80 arquivos | **1198** passando, 58 pulados, 85 arquivos | **1243** passando, 58 pulados, 92 arquivos | **1275** passando, 58 pulados, 97 arquivos | **1308** passando, 58 pulados, 101 arquivos | **1329** passando, 58 pulados, 105 arquivos |
+| Testes contra o banco real | 58 de 58 | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** |
+| Testes em navegador | 25 | **25** | **25** | **25** | **25** | **25** | **25** | **25** | **25** |
+| `tsc --noEmit` | limpo | limpo | limpo | limpo | limpo | limpo, e agora olhando **dois diretórios a mais** (A45) | limpo | limpo | limpo |
+| `npm run build` | sem erro, **com aviso de chunk**, 695 ms | sem erro, **com aviso de chunk**, **419 ms** | sem erro, **com aviso de chunk**, **507 ms** | sem erro, **com aviso de chunk**, **564 ms** | sem erro, **com aviso de chunk**, **512 ms** | sem erro, **com aviso de chunk**, **483 ms** | sem erro, **com aviso de chunk**, **506 ms** | sem erro, **com aviso de chunk**, **439 ms** | **limpo, sem erro e sem aviso** (A61), **409 ms** |
+| `npm audit` | 0 vulnerabilidades | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** |
+| Bundle: chunk principal | 455,03 kB (gzip 131,84 kB) | **455,58 kB** (gzip 132,03 kB) | **456,92 kB** (gzip 132,43 kB) | **457,00 kB** (gzip 132,51 kB) | **457,16 kB** (gzip 132,93 kB) | **457,75 kB** (gzip 133,12 kB) | **218,97 kB** (gzip 70,15 kB) | **219,12 kB** (gzip 70,19 kB) | **219,11 kB** (gzip 70,19 kB) |
+| Bundle: chunk do three.js, sob demanda | 618,87 kB (gzip 156,56 kB) | 618,87 kB (gzip 156,56 kB) | **618,91 kB** (gzip 156,58 kB) | **619,40 kB** (gzip 156,71 kB) | 619,40 kB (gzip 156,71 kB) | **619,48 kB** (gzip 156,73 kB) | **619,51 kB** (gzip 156,76 kB) | 619,51 kB (gzip 156,75 kB) | 619,51 kB (gzip **156,76 kB**) |
+| Bundle: CSS | 20,76 kB (gzip 3,90 kB) | **21,75 kB** (gzip 4,04 kB) | **22,26 kB** (gzip 4,12 kB) | **22,69 kB** (gzip 4,21 kB) | **23,30 kB** (gzip 4,29 kB) | **23,81 kB** (gzip 4,37 kB) | **24,67 kB** (gzip 4,50 kB) | **24,77 kB** (gzip 4,50 kB) | **25,14 kB** (gzip **4,55 kB**) |
+| Arquivos `.ts`/`.tsx` em `src` + `api` + `supabase` | 169 | 170 | 174 | **182** | **191** | **197** | **203** | **214** | **221** |
+| Linhas de TypeScript nesses arquivos | 25.598 | 26.218 | 26.844 | **27.889** | **28.867** | **30.518** | **31.427** | **32.665** | **33.306** |
+| `any`, `@ts-ignore`, `catch` vazio em `src/` e `api/` | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada | zero de cada |
+| `console.log` fora de teste | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital | 1, proposital |
+| Linter configurado | nenhum | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) | nenhum (A13, no backlog) |
+| CI | nenhum | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) | nenhum (A14, no backlog) |
 
 Sobre os números que pioraram na rodada 1: o chunk principal cresceu **0,55 kB** e o CSS **0,99 kB**,
 que é o custo em bytes dos oito itens da rodada. O tempo de build não é vitória de ninguém, é ruído
@@ -106,6 +106,15 @@ contagem é de `catch` com corpo vazio de verdade. Existem três `catch` cujo co
 comentário dizendo por que a falha é engolida, dois de rodadas anteriores e um do A57
 (`guardarComposicao`), e eles não entram na conta de propósito, porque o que a linha persegue é
 falha engolida sem explicação.
+
+E os da rodada 8: chunk principal **menos 0,01 kB**, que é o travessão de três bytes trocado por
+vírgula nas frases do login e do esboço (A62), CSS **+0,37 kB**, que é o painel de recomeço do A59 e
+os 24 px do rodapé do A60, e chunk do three.js igual em kB. A tela da composição entra por `import()`
+tardio, e o chunk dela foi de 27,22 kB para 28,45 kB com o botão de recomeço, o Desfazer e o hook
+novo. O da tela de uma peça foi de 4,27 kB para 4,57 kB. Os 21 testes novos (1308 para 1329) saem
+de quatro arquivos criados na rodada e dois que ganharam casos. **A linha do build diz "limpo" pela
+primeira vez com a palavra certa**: sem erro e sem aviso, e o parágrafo abaixo conta por que as
+oito colunas anteriores não diziam. Nenhum item foi revertido.
 
 **A linha do `npm run build` estava errada em todas as colunas até a rodada 7, e está corrigida
 aqui em vez de apagada (R8-A61).** Eu escrevi "limpo" em oito colunas, e todo build dessas oito

@@ -58,8 +58,8 @@
 2026-09-12 · R7-A57 · a composicao sobrevive ao F5 pelo localStorage, lida de volta pelo mesmo guarda da colagem, e gravacao invalida cai no padrao · b982977, 3c4a921
 2026-09-12 · R7-A58 · todos os parametros da peca ganham controle e mexer num soma aos outros em vez de substituir · a7c1975, 4d7033f
 2026-09-12 · R7-A54 · a TelaDaComposicao cai de 457 para 195 linhas em tela mais quatro paineis, com os 14 testes da tela intocados e HTML identico antes e depois · 3671802
-2026-09-12 · R8-A61 · o build sai sem aviso, com o limite de chunk logo acima do three.js, e a linha do baseline que dizia limpo foi corrigida · COMMIT
-2026-09-12 · R8-A59 · botão de voltar ao calçado de prova com Desfazer e foco levado nos dois sentidos, e o estado das escolhas num hook que devolve a tela a 160 linhas · COMMIT
-2026-09-12 · R8-A60 · os botões do rodapé de telas passam de 18 para 24 px de altura, medidos a 375 px nas quatro telas, com guarda na folha · COMMIT
-2026-09-12 · R8-A62 · 22 textos de tela, erro e terminal sem travessão, e uma varredura por parser que reprova literal e deixa comentário e teste de fora · COMMIT
-2026-09-12 · R8-A63 · a tela de uma peça desenha um controle por parâmetro e manda todos ao glTF, e o valor herdado entre peças de mesmo parâmetro virou achado · COMMIT
+2026-09-12 · R8-A61 · o build sai sem aviso, com o limite de chunk logo acima do three.js, e a linha do baseline que dizia limpo foi corrigida · 3ed3e8e
+2026-09-12 · R8-A59 · botão de voltar ao calçado de prova com Desfazer e foco levado nos dois sentidos, e o estado das escolhas num hook que devolve a tela a 160 linhas · e8f1ed7
+2026-09-12 · R8-A60 · os botões do rodapé de telas passam de 18 para 24 px de altura, medidos a 375 px nas quatro telas, com guarda na folha · bbafd26
+2026-09-12 · R8-A62 · 22 textos de tela, erro e terminal sem travessão, e uma varredura por parser que reprova literal e deixa comentário e teste de fora · 6259ae3
+2026-09-12 · R8-A63 · a tela de uma peça desenha um controle por parâmetro e manda todos ao glTF, e o valor herdado entre peças de mesmo parâmetro virou achado · 33d8573
