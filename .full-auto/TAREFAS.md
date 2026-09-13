@@ -303,7 +303,25 @@ o endereço e o estado, e é melhor o endereço estar certo antes de o estado co
 Abaixo do corte e fora do lote, pela sétima rodada seguida: **A35**, o canvas sem teclado. O motivo
 continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que aconteceu desde então.
 
-- [ ] R7-A53 `tenant_members.user_id` ganha índice, e a regra ganha varredura | trilha: robustez | depende: nenhum | pronto quando: existe migration nova criando `tenant_members_user_id_idx`, e existe um teste que lê as migrations e reprova se alguma coluna `references` de alguma tabela não tiver um índice que a lidere (o `unique` composto conta só para a coluna da frente)
+- [x] R7-A53 `tenant_members.user_id` ganha índice, e a regra ganha varredura | trilha: robustez | depende: nenhum | pronto quando: existe migration nova criando `tenant_members_user_id_idx`, e existe um teste que lê as migrations e reprova se alguma coluna `references` de alguma tabela não tiver um índice que a lidere (o `unique` composto conta só para a coluna da frente)
+      feito em COMMIT. A varredura achou DOIS casos, não um: além do
+      `tenant_members.user_id` que originou o item, ela encontrou `tenant_api_keys.created_by` na
+      primeira vez que rodou, enquanto eu ainda escrevia os testes, depois de eu ter lido a mesma
+      migration duas vezes sem ver. Os dois ganharam índice na mesma migration, com o porquê de
+      cada um escrito: o primeiro é consulta (`auth_tenant_ids()` filtra só por `user_id`, e ela
+      está em quinze predicados de policy, cobrindo as seis tabelas e o Storage), o segundo é ação
+      referencial (`on delete set null` precisa achar as linhas filhas quando o usuário sai). A
+      regra que a guarda cobra é "índice que LIDERE a coluna", não "índice que a contenha", e essa
+      é a distinção inteira: `unique (tenant_id, user_id)` parece cobrir as duas e cobre uma, a da
+      frente. As duas leituras de texto de SQL saíram para `lerSql.ts`, módulo normal e não arquivo
+      de teste, porque importar um `.test.ts` de outro faz o vitest registrar os `describe` do
+      importado duas vezes. Três mutações mortas à mão: apagar o `create index` do `user_id`
+      reprova nomeando `tenant_members.user_id`, trocar a primeira coluna da lista pela última
+      derruba três testes, e `semComentarios` virando identidade derruba outros três. Oito testes
+      novos, 1275 para 1283. O que a guarda NÃO promete está escrito nela: que o índice esteja
+      sendo USADO, o que exigiria `explain` contra banco de verdade, e este projeto não tem acesso
+      direto a Postgres. **A migration não foi aplicada no banco real**, isso é P05 em
+      `PENDENCIAS-DO-MATHEUS.md`, com o `select` de conferência junto.
 - [ ] R7-A55 A região viva do colar deixa de ser duas | trilha: ux | depende: nenhum | pronto quando: o parágrafo de recusa da colagem não é mais descendente de outro elemento com `aria-live`, o anúncio continua acontecendo, e existe teste que afirma que nenhum `[role=alert]` da tela tem ancestral com `[aria-live]`
 - [ ] R7-A56 O botão Voltar do navegador anda entre as telas | trilha: ux | depende: nenhum | pronto quando: navegar pelo rodapé aumenta `history.length`, `history.back()` volta para a tela anterior e não para fora do app, a primeira carga continua usando `replaceState` (normalizar não é navegar), recarregar continua abrindo a tela do `?tela=`, e existe teste do par `pushState` mais `popstate`
 - [ ] R7-A57 A composição sobrevive ao F5 | trilha: produto | depende: R7-A56 | pronto quando: escolher peças, cores e parâmetro e recarregar devolve a MESMA montagem, uma gravação inválida ou de outra forma é recusada pelo mesmo `validarComposicao` que a colagem usa e a tela cai no padrão sem quebrar, `localStorage` indisponível não derruba a tela, e existe teste dos três casos (volta, recusa, ausência)

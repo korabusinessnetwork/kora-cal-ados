@@ -18,22 +18,9 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-/**
- * O texto sem comentário nenhum.
- *
- * Corta nos dois sentidos, e os dois importam. Um `-- create table pedidos` de exemplo dentro de
- * um comentário viraria tabela inexistente sem RLS, e o teste reclamaria de nada. Pior: um
- * comentário explicando "alter table pedidos enable row level security" faria uma tabela DE
- * VERDADE passar por protegida sem uma linha de SQL ter sido escrita.
- */
-function semComentarios(sql: string): string {
-  return sql.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/--[^\n]*/g, ' ');
-}
-
-/** `public.tenants` e `tenants` são a mesma tabela. O que interessa é o nome depois do ponto. */
-function semEsquema(nome: string): string {
-  return nome.includes('.') ? (nome.split('.').pop() ?? nome) : nome;
-}
+// As duas leituras de texto moram em `lerSql.ts` e não aqui porque a guarda de índice usa
+// exatamente as mesmas, e duas cópias de "cortar comentário de SQL" divergem em silêncio.
+import { semComentarios, semEsquema } from './lerSql';
 
 /**
  * As tabelas criadas neste SQL que não recebem `enable row level security` nele.

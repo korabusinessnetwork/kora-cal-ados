@@ -51,6 +51,25 @@ e `.full-auto/ESTADO.md`.
 - **Como confirmar que funcionou:** `select count(*) from tenants where slug like 'marca-%'` devolve
   0, e `npm run test:banco` continua 58 de 58.
 
+## P05 Aplicar a migration dos dois índices no Supabase real [prioridade: média]
+
+- **Por quê:** `supabase/migrations/20260912_indice_em_chave_estrangeira.sql` está escrita e
+  conferida, mas migration só vale quando roda. Enquanto ela não rodar,
+  `auth_tenant_ids()` continua varrendo `tenant_members` inteira em toda leitura autenticada de
+  toda tabela, que é o custo descrito no A53 em `AUDITORIA.md`.
+- **Passo a passo:** abra o SQL Editor do projeto no painel do Supabase, cole o conteúdo do
+  arquivo e rode. São duas linhas de `create index if not exists`, o resto é comentário.
+- **Como confirmar que funcionou:** no mesmo SQL Editor,
+  `select indexname from pg_indexes where tablename in ('tenant_members','tenant_api_keys');`
+  precisa trazer `tenant_members_user_id_idx` e `tenant_api_keys_created_by_idx` na lista.
+- **Risco de deixar como está:** nenhum de correção, só de custo, e hoje o custo é invisível
+  porque a base é pequena. Ele cresce com o total de usuários de TODOS os tenants somados, não com
+  o tamanho de cada um, então é o tipo de conta que só aparece quando já está cara.
+- **Por que eu não fiz:** aplicar DDL no banco real é mudança em dado real, e isso é decisão sua
+  pelo filtro de escalação. Vale dizer que esta é aditiva e reversível (`drop index` desfaz, e
+  nenhuma linha é tocada), diferente das outras pendências desta lista. O `if not exists` deixa
+  rodar duas vezes sem erro.
+
 ## P03 Normalizar o travessão no repositório inteiro [prioridade: baixa]
 
 - **Por quê:** sua regra é não usar travessão em português. O repositório inteiro usa, porque foi escrito antes de a regra entrar. Aplicá-la só em arquivo novo cria inconsistência num projeto cuja tese é justamente consistência para agentes.

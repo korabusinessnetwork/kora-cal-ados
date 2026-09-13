@@ -24,8 +24,33 @@
 -- tenant_api_keys  (id, tenant_id, prefixo único, hash, label, created_by, created_at,
 --                   last_used_at, revoked_at)   — chave de API do tenant, ADR-006
 --
--- DDL completo: 20260812_schema_inicial.sql e 20260908_chave_de_api_por_tenant.sql
+-- DDL completo: 20260812_schema_inicial.sql, 20260908_chave_de_api_por_tenant.sql e
+-- 20260912_indice_em_chave_estrangeira.sql
 -- (não duplicado aqui para não divergir).
+
+-- ── Índices ─────────────────────────────────────────────────────────────
+-- A regra: toda coluna de chave estrangeira tem um índice que a LIDERE. Não basta aparecer
+-- num índice composto, porque btree composto só serve para busca que comece pela coluna da
+-- frente. Foi assim que `tenant_members.user_id` ficou seis rodadas sem índice, escondido
+-- atrás do `unique (tenant_id, user_id)` que parecia cobrir as duas.
+--
+-- Dois motivos, e os dois valem sozinhos: a consulta (`auth_tenant_ids()` filtra só por
+-- `user_id`, e ela está em quinze predicados de policy) e a ação referencial (todo
+-- `on delete cascade` e `on delete set null` procura as linhas filhas quando o pai sai).
+--
+-- Quem cobra a regra é `migrations/indiceEmChaveEstrangeira.test.ts`, varredura de texto que
+-- roda em `npm test` sem banco nenhum. Ela não afirma que o índice está sendo USADO; isso é
+-- `explain` contra banco de verdade, que este projeto não tem como rodar.
+--
+--   products.tenant_id            products_tenant_id_idx            (20260812)
+--   product_zones.tenant_id       product_zones_tenant_id_idx       (20260812)
+--   product_zones.product_id      product_zones_product_id_idx      (20260812)
+--   variants.tenant_id            variants_tenant_id_idx            (20260812)
+--   variants.product_id           variants_product_id_idx           (20260812)
+--   tenant_api_keys.tenant_id     tenant_api_keys_tenant_id_idx     (20260908)
+--   tenant_members.user_id        tenant_members_user_id_idx        (20260912)
+--   tenant_api_keys.created_by    tenant_api_keys_created_by_idx    (20260912)
+--   tenant_members.tenant_id      coberta pelo unique (tenant_id, user_id)
 
 -- ── Isolamento (estado final das policies) ──────────────────────────────
 -- RLS ativa nas 6 tabelas. Helpers security definer:
