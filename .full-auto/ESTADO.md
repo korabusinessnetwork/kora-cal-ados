@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: CONCLUIDO
+status: AGUARDANDO_MATHEUS
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 ## Modo atual: refino (desde 2026-09-12)
@@ -164,3 +164,17 @@ cadarço amarelo) é de `composicaoDeProva()`, não identidade de marca nenhuma.
 Não instalado. O hook de continuidade e o vigia vivem em `.claude/`, e a instalação está bloqueada
 (ver P01 em PENDENCIAS-DO-MATHEUS.md). Com a execução encerrada isso deixa de importar para esta
 rodada, e volta a importar na próxima.
+
+## Retomada da construção, 2026-09-13
+
+- **Pedido:** `/full-automatico continuar`, depois do refino concluído e do hook instalado (P01).
+- **O que achei:** nenhuma tarefa `[ ]` ou `[~]` na construção. Sobram três `[!]`, todas adiadas por
+  decisão: T09 (prompt vira composição), T05 (catálogo para o modelo de linguagem, depende da T09) e
+  T06 (schema do acervo, espera acervo de verdade e mais de um tenant com peça própria).
+- **Por que parei:** a condição de revisitar a T09 que o dono deu em 2026-09-10 ("quando o
+  configurador estiver rodando sobre o acervo de prova") está cumprida desde a T15. Mas a T09 é o
+  item pago da restrição de custo (chamada de modelo de linguagem, fornecedor não escolhido, não
+  aprovado), e reabrir uma decisão de gasto é do dono. T05 depende dela e T06 não tem gatilho. Não
+  sobrou nada útil para fazer sem essa resposta.
+- **Motivo do status:** AGUARDANDO_MATHEUS, pergunta única: destravar a T09 ou manter adiada.
+- **Para retomar:** registrar a resposta em `DECISOES.md`, voltar para `EXECUTANDO` e seguir.
