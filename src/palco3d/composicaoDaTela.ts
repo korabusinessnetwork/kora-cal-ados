@@ -86,9 +86,9 @@ export function mudarEscolhaDaTela(
  * As escolhas da tela viram a composição do ADR-008: JSON de algumas linhas, e nada além.
  *
  * Sai separado de `montarDaTela` porque é o mesmo objeto que a API recebe e que o modelo de
- * linguagem vai escrever, e a tela precisa poder ENTREGAR isso a quem está montando: a composição
- * não é gravada em lugar nenhum, não existe tabela para ela, então fechar a aba perdia a montagem
- * inteira.
+ * linguagem vai escrever, e a tela precisa poder ENTREGAR isso a quem está montando: não existe
+ * tabela para a composição, e o que fica guardado no navegador (`composicaoGuardada.ts`) não sai
+ * dele. É também este texto que é guardado.
  *
  * Segue a ordem das categorias da FORMA, e não a ordem em que a pessoa mexeu nos controles. Duas
  * montagens iguais têm que produzir o mesmo texto, senão comparar dois JSON dessa tela vira

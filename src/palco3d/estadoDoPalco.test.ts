@@ -70,9 +70,9 @@ describe('a frase de cada estado', () => {
 
   it('não manda recarregar de cara, porque o contexto costuma voltar sozinho', () => {
     // Conferido no navegador: `restoreContext()` devolve a cena e a tela volta ao normal sem
-    // recarregar nada. Mandar recarregar direto faria a pessoa jogar fora o trabalho dela por um
-    // problema que ia se resolver sozinho, e é um trabalho que esta tela não grava em lugar
-    // nenhum, não existe tabela para ela, ou seja, recarregar perde a composição inteira.
+    // recarregar nada. Mandar recarregar direto faria a pessoa largar a tela por um problema que
+    // ia se resolver sozinho. Antes do R7-A57 isso custava a composição inteira; hoje ela volta do
+    // `localStorage`, mas a espera continua sendo a resposta certa.
     for (const frase of [
       textoDoEstadoDaPeca('contexto-perdido'),
       textoDoEstadoDaComposicao('contexto-perdido', 3),
@@ -93,8 +93,8 @@ describe('a frase de cada estado', () => {
     // O negado e o perdido são notícias opostas, e dar a errada custa caro nos dois sentidos.
     // Aqui nada caiu: o contexto nunca existiu, porque a máquina não tem GPU utilizável, o driver
     // está na lista de bloqueio ou a aceleração está desligada. Mandar esperar deixa a pessoa
-    // olhando uma tela que não vai mudar, e mandar recarregar faz ela perder a composição, que
-    // não é gravada em lugar nenhum, por um problema que recarregar não resolve.
+    // olhando uma tela que não vai mudar, e mandar recarregar faz ela tentar de novo uma coisa
+    // que recarregar não resolve.
     for (const frase of [
       textoDoEstadoDaPeca('contexto-negado'),
       textoDoEstadoDaComposicao('contexto-negado', 3),

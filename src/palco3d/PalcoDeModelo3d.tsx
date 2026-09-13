@@ -57,8 +57,8 @@ export type EstadoDoPalco =
    *
    * Estado próprio, e não `contexto-perdido`, por duas razões. A primeira é a frase: "o 3D caiu"
    * e "espere que ele costuma voltar sozinho" são as duas falsas aqui, porque nada caiu e nada
-   * vai voltar, recarregar a página não muda nada e mandar recarregar é mandar a pessoa perder a
-   * composição por um problema que não é da aba. A segunda é o que ela deve fazer: no perdido,
+   * vai voltar, recarregar a página não muda nada e mandar recarregar é mandar a pessoa tentar de
+   * novo uma coisa que não é da aba. A segunda é o que ela deve fazer: no perdido,
    * esperar; no negado, ir para o esboço, que desenha o mesmo tênis em SVG e não precisa de GPU.
    */
   | 'contexto-negado';

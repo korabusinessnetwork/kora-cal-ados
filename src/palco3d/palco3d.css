@@ -238,8 +238,8 @@
 
 /* --- A saída da composição ---
 
-   A composição não é gravada em lugar nenhum: não existe tabela para ela. Este bloco é a única
-   porta pela qual ela sai da tela, então ele não pode parecer enfeite de rodapé: fica separado
+   Não existe tabela para a composição, e a cópia guardada no navegador (R7-A57) não sai dele.
+   Este bloco é a única porta pela qual ela sai da tela, então ele não pode parecer enfeite de rodapé: fica separado
    dos controles por uma borda, do mesmo jeito que as categorias se separam entre si. */
 .palco3d__saida {
   margin-top: 16px;

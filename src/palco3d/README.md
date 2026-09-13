@@ -28,6 +28,7 @@ conferência a olho aqui. Então a divisão não é estética:
 | `PalcoDeModelo3d.tsx` | **sim** | O `<canvas>`, o laço de render, as escutas do ponteiro e a queda do contexto WebGL. Do caminho que FUNCIONA nada é alcançável por teste, e ele está preso por varredura de fonte; o caminho em que o contexto nem nasce tem teste de comportamento em `palcoSemWebgl.test.tsx`, porque jsdom sem WebGL é exatamente a máquina sem GPU |
 | `CampoDeCorDaCategoria.tsx` | não | A cor de uma categoria, pelo seletor do sistema ou digitada em hex |
 | `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
+| `composicaoGuardada.ts` | não | A composição da tela no `localStorage`, para sobreviver ao F5. Lida de volta pelo mesmo guarda da colagem, e a gravação recusada é apagada |
 | `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
 | `TelaDaComposicao.tsx` | não | A tela do calçado montado: peça, cor e parâmetro por categoria da forma |
 | `palco3d.css` | | Estilo fora do JSX (regra de white-label do CLAUDE.md) |
@@ -43,8 +44,9 @@ Os dois estados de contexto são separados de propósito. `contexto-perdido` é 
 EXISTIA e caiu, e costuma voltar sozinho, então a frase manda esperar. `contexto-negado` é o
 contexto que nunca nasceu, numa máquina sem GPU utilizável, e não vai nascer recarregando, então a
 frase manda ir para o esboço, que desenha o mesmo tênis em SVG. Trocar as duas frases custa caro
-nos dois sentidos: uma deixa a pessoa esperando o que não vem, a outra faz ela recarregar e perder
-a composição, que não é gravada em lugar nenhum, porque não existe tabela para ela.
+nos dois sentidos: uma deixa a pessoa esperando o que não vem, a outra faz ela recarregar por uma
+coisa que recarregar não resolve. A composição em si sobrevive ao recarregar desde o R7-A57, porque
+fica guardada no navegador, mas o contexto negado continua negado.
 
 `PalcoDeModelo3d.tsx` não decide nada, de propósito. Se aparecer aritmética de câmera ou lógica de
 seleção lá dentro, ela escapou para o lugar onde nenhum teste olha. O critério 20 da spec existe
