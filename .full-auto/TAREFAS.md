@@ -438,7 +438,23 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       ("larger than 640 kB"). O `BASELINE.md` teve a linha do build corrigida às claras nas oito
       colunas anteriores, de "limpo" para "sem erro, com aviso de chunk", com um parágrafo dizendo
       que o erro foi meu, de ler só o fim da saída. Suíte inteira, 1308, e navegador, 25, verdes.
-- [ ] R8-A59 Um botão leva a composição de volta ao calçado de prova | trilha: produto | depende: nenhum | pronto quando: a tela da composição tem um botão que troca a montagem pela do calçado de prova, zera a peça clicada, a gravação do R7-A57 passa a ser a do padrão (um F5 depois abre no padrão), o botão fica desabilitado quando a montagem já é o padrão, trocar mostra uma frase em região viva com um botão Desfazer que devolve a montagem anterior (perder o trabalho de uma sessão com um clique sem volta seria o erro que prevenção evita), e existe teste de tela para trocar, desfazer, e trocar, recarregar e continuar no padrão
+- [x] R8-A59 Um botão leva a composição de volta ao calçado de prova | trilha: produto | depende: nenhum | pronto quando: a tela da composição tem um botão que troca a montagem pela do calçado de prova, zera a peça clicada, a gravação do R7-A57 passa a ser a do padrão (um F5 depois abre no padrão), o botão fica desabilitado quando a montagem já é o padrão, trocar mostra uma frase em região viva com um botão Desfazer que devolve a montagem anterior (perder o trabalho de uma sessão com um clique sem volta seria o erro que prevenção evita), e existe teste de tela para trocar, desfazer, e trocar, recarregar e continuar no padrão
+      feito em COMMIT. "Voltar ao calçado de prova" em `PainelDeRecomeco.tsx`, desabilitado quando
+      o texto da montagem já é o do padrão, e uma frase em região viva com um botão Desfazer. O foco
+      vai para Desfazer ao recomeçar e volta ao botão ao desfazer, porque desabilitar o botão focado
+      jogaria o foco no `body`. Mexer em qualquer coisa depois apaga o Desfazer. O estado das
+      escolhas saiu da tela para `useEscolhasDaComposicao.ts`: com o recomeço dentro dela, a tela
+      tinha voltado a 225 linhas, acima das 195 do R7-A54, e agora tem 160. Testes: 5 de tela
+      (abre desabilitado, recomeça com foco no Desfazer, desfaz com foco de volta, recomeça e F5
+      continua no padrão, mudar apaga o Desfazer) e 3 do hook. Mutações: 8 à mão, todas mortas no
+      fim. **Uma sobreviveu no meio**: tirar o aviso que larga a peça clicada deixava os testes da
+      tela verdes, porque em jsdom não há canvas para clicar numa peça e "Nada selecionado" é verdade
+      com o aviso ou sem ele. O mesmo vale para o teste do R7-A54 "trocar de peça limpa a peça
+      clicada", que nunca teve seleção para limpar. O teste do hook conta o aviso em cada porta, e a
+      mutação morre agora. Navegador: cor da sola `#22aa44`, recomeço volta a `#f2f2f2` com foco em
+      Desfazer, Desfazer devolve `#22aa44` com foco no botão, e recomeço seguido de F5 abre no padrão,
+      botão desabilitado e sem Desfazer. Baseline: 1316 testes, 25 no navegador, `tsc` e build sem
+      aviso, `npm audit` em zero.
 - [ ] R8-A60 Os botões do rodapé viram alvo de toque de pelo menos 24 px | trilha: ux | depende: nenhum | pronto quando: medido no navegador a 375 px, cada botão do rodapé tem pelo menos 24 px de altura nas quatro telas, o texto e a ordem não mudam, e o rodapé de links da rede de proteção continua com a mesma aparência
 - [ ] R8-A62 Nenhum texto visível usa travessão, e uma varredura cobra isso | trilha: qualidade | depende: nenhum | pronto quando: zero travessão em literal de texto e em texto de JSX de `src/` e `api/`, a varredura reprova um travessão novo num literal e NÃO reprova um travessão em comentário (contraprova sintética), e os testes que conferem essas mensagens continuam passando
 - [ ] R8-A63 A tela de uma peça desenha um controle por parâmetro | trilha: robustez | depende: nenhum | pronto quando: `TelaDoPalco3d.tsx` não lê mais `parametros[0]`, uma peça de dois parâmetros desenha dois controles, existe teste que reprova a leitura do primeiro, e a tela com o acervo de prova continua com o mesmo HTML

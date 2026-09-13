@@ -8,29 +8,20 @@
 // Ela não decide nada sozinha: quem monta é `montarDaTela`, que é puro e tem teste. O componente
 // guarda estado e desenha.
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
 
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
 import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
-import {
-  composicaoDasEscolhas,
-  escolhasDaComposicao,
-  montarDaTela,
-  mudarEscolhaDaTela,
-  type EscolhaDaTela,
-} from './composicaoDaTela';
-import {
-  armazenamentoDoNavegador,
-  guardarComposicao,
-  lerComposicaoGuardada,
-} from './composicaoGuardada';
+import { montarDaTela } from './composicaoDaTela';
 import { ControleDaCategoria } from './ControleDaCategoria';
 import { PainelDaPecaClicada } from './PainelDaPecaClicada';
 import { PainelDeColar } from './PainelDeColar';
+import { PainelDeRecomeco } from './PainelDeRecomeco';
 import { PainelDeSaida } from './PainelDeSaida';
 import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
+import { useEscolhasDaComposicao } from './useEscolhasDaComposicao';
 
 const CATALOGO = catalogoDeProva();
 const FORMA = CATALOGO.formas[0];
@@ -41,16 +32,13 @@ const DO_ACERVO: ProvedorDeGltfDaPeca = (peca, parametros) =>
   gltfDaPecaDeProva(peca.id, parametros);
 
 export function TelaDaComposicao() {
-  // A montagem guardada vem primeiro, e o calçado de prova é o que sobra quando não há o que
-  // restaurar. Ler dentro do inicializador, e não num efeito, é o que evita a tela desenhar o
-  // calçado de prova por um quadro e trocar em seguida: o palco recarregaria o glTF duas vezes.
-  const [escolhas, setEscolhas] = useState(
-    () =>
-      (FORMA ? lerComposicaoGuardada(armazenamentoDoNavegador(), FORMA, CATALOGO) : null) ??
-      escolhasDaComposicao(DEMO),
-  );
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [estado, setEstado] = useState<EstadoDoPalco>('carregando');
+  // Toda troca de montagem larga a peça clicada. Quem decide QUANDO a montagem troca é o hook, e
+  // ele avisa por aqui, no mesmo passo, para a tela nunca desenhar uma seleção do calçado que saiu.
+  const largarSelecao = useCallback(() => setSelecionada(null), []);
+  const composicao = useEscolhasDaComposicao(FORMA, CATALOGO, DEMO, largarSelecao);
+  const { escolhas } = composicao;
 
   // Remonta só quando as escolhas mudam. Sem o memo, cada render entregaria um texto glTF novo ao
   // palco, e ele recarregaria o calçado inteiro a cada movimento do mouse.
@@ -59,43 +47,13 @@ export function TelaDaComposicao() {
     [escolhas],
   );
 
-  // O mesmo objeto que a API recebe, e que o modelo de linguagem vai escrever. Fica ao lado da
-  // montagem, e não dentro do botão, porque ele também é o texto que aparece quando copiar falha.
-  const textoDaComposicao = useMemo(
-    () => (FORMA ? JSON.stringify(composicaoDasEscolhas(FORMA, escolhas), null, 2) : ''),
-    [escolhas],
-  );
-
   // O descarte do aviso ao mudar a composição é do próprio hook, e não um `setCopia('pronta')`
   // dentro de `mudar()` como já foi: com a regra amarrada ao texto, o caminho novo que mudasse a
   // composição sem passar por `mudar()` não teria como esquecer de apagar o aviso.
-  const copia = useCopiaDeTexto(textoDaComposicao);
-
-  // Grava o mesmo texto do botão de copiar, e só quando ele muda. Amarrado ao texto, e não a cada
-  // `setEscolhas`, pelo mesmo motivo do descarte do aviso acima: um caminho novo que mude a
-  // composição não tem como esquecer de gravar.
-  useEffect(() => {
-    if (textoDaComposicao !== '') guardarComposicao(armazenamentoDoNavegador(), textoDaComposicao);
-  }, [textoDaComposicao]);
+  const copia = useCopiaDeTexto(composicao.texto);
 
   const aoSelecionar = useCallback((nome: string | null) => setSelecionada(nome), []);
   const aoMudarEstado = useCallback((novo: EstadoDoPalco) => setEstado(novo), []);
-
-  function aceitarOColado(novas: Map<string, EscolhaDaTela>) {
-    setEscolhas(novas);
-    // Mesma razão do `mudar()`: a seleção é do calçado que saiu de cena.
-    setSelecionada(null);
-  }
-
-  function mudar(categoria: string, mudanca: Partial<EscolhaDaTela>) {
-    // A transição em si mora em `composicaoDaTela`, com teste. Ela já esteve aqui, e foi aqui que
-    // o BUG-019 nasceu: regra dentro do `.tsx` é regra no único arquivo desta pasta que jsdom não
-    // alcança. Este componente decide QUANDO muda, nunca O QUE a mudança faz.
-    setEscolhas((atual) => mudarEscolhaDaTela(atual, categoria, mudanca));
-    // A seleção é do calçado que saiu de cena. Mantê-la faria a tela seguir apontando para um nó
-    // que talvez nem exista mais na montagem nova.
-    setSelecionada(null);
-  }
 
   if (FORMA === undefined) return <main className="tela">O acervo de prova não tem forma.</main>;
 
@@ -127,13 +85,20 @@ export function TelaDaComposicao() {
               obrigatoria={obrigatoria}
               pecas={CATALOGO.pecas.filter((peca) => peca.categoria === categoria)}
               escolha={escolhas.get(categoria) ?? { pecaId: null }}
-              aoMudar={(mudanca) => mudar(categoria, mudanca)}
+              aoMudar={(mudanca) => composicao.mudar(categoria, mudanca)}
             />
           ))}
 
-          <PainelDeSaida copia={copia} texto={textoDaComposicao} />
+          <PainelDeRecomeco
+            ehPadrao={composicao.ehPadrao}
+            podeDesfazer={composicao.podeDesfazer}
+            aoVoltarAoPadrao={composicao.voltarAoPadrao}
+            aoDesfazer={composicao.desfazerORecomeco}
+          />
 
-          <PainelDeColar forma={FORMA} catalogo={CATALOGO} aoAceitar={aceitarOColado} />
+          <PainelDeSaida copia={copia} texto={composicao.texto} />
+
+          <PainelDeColar forma={FORMA} catalogo={CATALOGO} aoAceitar={composicao.aceitarOColado} />
         </section>
 
         <section className="painel palco3d__painel-cena">

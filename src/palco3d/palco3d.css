@@ -259,6 +259,31 @@
 }
 .palco3d__copiar:hover { border-color: var(--cor-acento); }
 
+/* Desabilitado quando a montagem já é o calçado de prova (R8-A59). O `:hover` de cima não pode
+   acender a borda de um botão que não faz nada. */
+.palco3d__copiar:disabled { cursor: default; opacity: 0.55; border-color: var(--cor-borda); }
+
+/* O recomeço fica separado dos controles pela mesma borda da saída: são ações sobre a composição
+   inteira, e não sobre uma categoria. */
+.palco3d__recomeco {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.palco3d__desfazer {
+  margin-top: 6px;
+  min-height: 24px;
+  padding: 2px 8px;
+  background: none;
+  border: none;
+  color: var(--cor-acento);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .palco3d__saida-ajuda {
   margin: 8px 0 0;
   font-size: 12px;

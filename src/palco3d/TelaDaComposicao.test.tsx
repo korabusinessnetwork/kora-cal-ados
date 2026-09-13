@@ -349,3 +349,75 @@ describe('a composição sobrevive ao F5 (R7-A57)', () => {
     }
   });
 });
+
+const CALCADO_DE_PROVA = [
+  { zona: 'sola', peca: 'prova-sola-plana' },
+  { zona: 'cabedal', peca: 'prova-cabedal-baixo' },
+  { zona: 'cadarco', peca: 'prova-cadarco-reto' },
+];
+
+function colarAComposicaoValida() {
+  escrever(areaDeColar(), JSON.stringify(COMPOSICAO_VALIDA));
+  clicar(botaoDe('Montar o que está colado'));
+}
+
+function avisoDoRecomeco(): string {
+  return container.querySelector('.palco3d__recomeco [role="status"]')?.textContent ?? '';
+}
+
+describe('o caminho de volta ao calçado de prova (R8-A59)', () => {
+  it('na abertura o botão existe e está desabilitado, porque recomeçar não mudaria nada', () => {
+    expect(botaoDe('Voltar ao calçado de prova').disabled).toBe(true);
+    expect(avisoDoRecomeco()).toBe('');
+    expect(() => botaoDe('Desfazer')).toThrow();
+  });
+
+  it('volta ao calçado de prova, larga a peça clicada, avisa e leva o foco ao Desfazer', () => {
+    colarAComposicaoValida();
+    const voltar = botaoDe('Voltar ao calçado de prova');
+    expect(voltar.disabled).toBe(false);
+
+    voltar.focus();
+    clicar(voltar);
+
+    expect(zonasNaTela()).toEqual(CALCADO_DE_PROVA);
+    expect(container.querySelector('.palco3d__vazio')?.textContent).toContain('Nada selecionado');
+    expect(avisoDoRecomeco()).toContain('Voltou ao calçado de prova');
+    expect(botaoDe('Voltar ao calçado de prova').disabled).toBe(true);
+    // Sem mover o foco, ele cairia no `body`, porque o botão focado acabou de ser desabilitado.
+    expect(document.activeElement).toBe(botaoDe('Desfazer'));
+  });
+
+  it('Desfazer devolve a montagem de antes e leva o foco de volta ao botão de recomeço', () => {
+    colarAComposicaoValida();
+    const colada = zonasNaTela();
+    clicar(botaoDe('Voltar ao calçado de prova'));
+
+    clicar(botaoDe('Desfazer'));
+
+    expect(zonasNaTela()).toEqual(colada);
+    expect(avisoDoRecomeco()).toBe('');
+    expect(() => botaoDe('Desfazer')).toThrow();
+    expect(document.activeElement).toBe(botaoDe('Voltar ao calçado de prova'));
+  });
+
+  it('um F5 depois de recomeçar abre no calçado de prova, e não na montagem de antes', () => {
+    colarAComposicaoValida();
+    clicar(botaoDe('Voltar ao calçado de prova'));
+
+    recarregar();
+
+    expect(zonasNaTela()).toEqual(CALCADO_DE_PROVA);
+  });
+
+  it('mexer em qualquer coisa depois de recomeçar apaga o Desfazer', () => {
+    colarAComposicaoValida();
+    clicar(botaoDe('Voltar ao calçado de prova'));
+
+    clicar(botaoDe('Sola tratorada'));
+
+    expect(() => botaoDe('Desfazer')).toThrow();
+    expect(avisoDoRecomeco()).toBe('');
+    expect(zonasNaTela()).toContainEqual({ zona: 'sola', peca: 'prova-sola-tratorada' });
+  });
+});

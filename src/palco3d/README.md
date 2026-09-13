@@ -29,10 +29,12 @@ conferência a olho aqui. Então a divisão não é estética:
 | `CampoDeCorDaCategoria.tsx` | não | A cor de uma categoria, pelo seletor do sistema ou digitada em hex |
 | `ControlesDeParametro.tsx` | não | Um controle deslizante por parâmetro que a peça declara, com a faixa escrita. Separado da tela para um teste montar peça de dois parâmetros, que o acervo de prova não tem |
 | `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
+| `useEscolhasDaComposicao.ts` | não | O estado das escolhas da tela: restaurar do F5, mudar, colar, voltar ao padrão e desfazer, e o aviso de troca de montagem que larga a peça clicada |
 | `composicaoGuardada.ts` | não | A composição da tela no `localStorage`, para sobreviver ao F5. Lida de volta pelo mesmo guarda da colagem, e a gravação recusada é apagada |
 | `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
 | `TelaDaComposicao.tsx` | não | A tela do calçado montado: peça, cor e parâmetro por categoria da forma |
 | `ControleDaCategoria.tsx` | não | O bloco de uma categoria da tela do calçado montado: botões de peça, cor e parâmetros |
+| `PainelDeRecomeco.tsx` | não | Voltar ao calçado de prova, com Desfazer em vez de confirmação, e o foco levado nos dois sentidos |
 | `PainelDeSaida.tsx` | não | Copiar o JSON da composição, e o texto à vista quando o navegador nega a cópia |
 | `PainelDeColar.tsx` | não | Colar um JSON e montá-lo pelo mesmo guarda da API, com a região viva do desfecho. Colagem recusada não sobe nada para a tela |
 | `PainelDaPecaClicada.tsx` | não | O nó clicado, a zona dele e o atalho para a cor, mais a lista de zonas em cena |

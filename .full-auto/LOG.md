@@ -59,3 +59,4 @@
 2026-09-12 · R7-A58 · todos os parametros da peca ganham controle e mexer num soma aos outros em vez de substituir · a7c1975, 4d7033f
 2026-09-12 · R7-A54 · a TelaDaComposicao cai de 457 para 195 linhas em tela mais quatro paineis, com os 14 testes da tela intocados e HTML identico antes e depois · 3671802
 2026-09-12 · R8-A61 · o build sai sem aviso, com o limite de chunk logo acima do three.js, e a linha do baseline que dizia limpo foi corrigida · COMMIT
+2026-09-12 · R8-A59 · botão de voltar ao calçado de prova com Desfazer e foco levado nos dois sentidos, e o estado das escolhas num hook que devolve a tela a 160 linhas · COMMIT
