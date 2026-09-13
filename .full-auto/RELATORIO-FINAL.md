@@ -1,3 +1,48 @@
+# Fase E: o prompt vira composição (2026-09-13)
+
+**Branch:** `full-auto/prompt-composicao`, a partir de `refino/kora-calcados`. **Sem merge em `main` e sem deploy.**
+**Origem:** sua resposta "B" à escalação da T09 (D12): construir a esteira inteira com um modelo falso, custo zero.
+
+## Em uma frase
+
+Em `?tela=composicao` agora existe "Descrever o calçado": a frase vira uma composição, passa pelo mesmo guarda da colagem e da API, troca o calçado em cena, e um aviso perto do calçado diz quem compôs e que só foram escolhidas e coloridas peças que já existiam no acervo.
+
+## Como conferir em 1 comando
+
+```bash
+npm run dev
+```
+
+Abra `http://localhost:5173/?tela=composicao`, escreva `sola tratorada branca, cabedal cano alto vermelho sem cadarço` e clique em "Gerar composição".
+
+## O que ficou pronto
+
+| Tarefa | O que | Commit |
+|---|---|---|
+| T18 | Os termos novos no glossário antes do código | `3d2a2c7` |
+| T05 | `montarCatalogoParaModelo.ts`: o acervo de uma forma, em texto, para o modelo ler | `09d0961` |
+| T09a | `gerarComposicaoPorPrompt.ts` e `lerRespostaDoModelo.ts`: prompt recusado antes de gastar chamada, resposta tratada como não confiável e validada pelo guarda, falha do modelo sem vazar a mensagem de dentro | `4a3e737` |
+| T09b | `modeloDeLinguagemDeProva.ts`: o gerador de prova | `c8afec1` |
+| T09c | `PainelDePrompt.tsx` e `textosDoPrompt.ts`, ligados na tela, com o aviso de transparência | `e811d63` |
+
+## Números medidos
+
+- Testes: de 1376 para 1395 passando no fechamento da T09c (58 pulados, os de banco, que rodam à parte e passaram 58 de 58). Navegador 25 de 25.
+- Mutações feitas à mão: T05 4/4, T09a 8/8, T09b 9/9 (uma sobreviveu e ganhou teste), T09c 9/9.
+- Build: 570 ms.
+
+## Mockado, dito de frente
+
+- **O gerador de prova não é IA.** Ele reconhece nome de categoria, palavras do nome da peça, cor por nome ou hex, "sem" antes de categoria opcional, "grossa" e "fina". Frase livre sem palavra-chave monta o calçado padrão. A ajuda do painel e o aviso perto do calçado dizem "não é IA", para a regra de transparência não virar mentira ao contrário.
+- Trocar para um fornecedor de verdade é uma linha na tela mais uma função de servidor. Está na **P06**.
+
+## O que NÃO foi feito, e por quê
+
+- **Fornecedor real e função serverless:** custam dinheiro por uso e a chave precisa morar no servidor, com sessão autenticada e limite por tenant. É a P06.
+- **Guardar quem compôs no F5:** o aviso não sobrevive ao recarregar, de propósito. A gravação guarda a composição, e não a origem dela; depois de recarregar, a tela não afirma nada que não saiba.
+
+---
+
 # Relatório final do refino
 
 **Projeto:** Kora Calçados (codinome)

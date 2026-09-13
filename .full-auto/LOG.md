@@ -68,3 +68,8 @@
 2026-09-13 · R9-A70 · o campo de hex diz o que falta, igual nas duas telas, e hex sem # ganha frase própria · 658a3dd
 2026-09-13 · R9-A69 · os testes das duas telas selecionam uma peça de verdade antes de conferir a limpeza, com o palco real montado · 0c4eb57
 2026-09-13 · R10-A73 · o seletor de cor e a lista do esboço recebem sempre a forma longa do hex · 65a906f
+2026-09-13 · T18 · prompt, modelo de linguagem, catálogo para o modelo e gerador de prova entram no glossário antes do código · 3d2a2c7
+2026-09-13 · T05 · forma e acervo viram o texto que o modelo de linguagem lê, só com as peças daquela forma · 09d0961
+2026-09-13 · T09a · prompt vira composição validada, com o modelo injetado e a resposta passando pelo guarda · 4a3e737
+2026-09-13 · T09b · gerador de prova, sem IA, sem rede e sem custo, cumprindo o contrato de modelo de linguagem · c8afec1
+2026-09-13 · T09c · painel de prompt na tela da composição, com o aviso de transparência perto do calçado · e811d63

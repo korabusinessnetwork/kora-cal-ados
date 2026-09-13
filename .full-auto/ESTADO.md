@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: EXECUTANDO
+status: CONCLUIDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 ## Modo atual: refino (desde 2026-09-12)
@@ -188,4 +188,7 @@ rodada, e volta a importar na próxima.
 
 - **Pedido:** o dono respondeu "B" (D12). Branch `full-auto/prompt-composicao`, a partir de `refino/kora-calcados`.
 - **Tarefas:** T18, T05, T09a, T09b, T09c, na seção "Fase E" de `TAREFAS.md`.
-- **Próximo passo:** T18, termos no glossário.
+- **Concluída em 2026-09-13.** As cinco tarefas estão `[x]`, commits `3d2a2c7`, `09d0961`, `4a3e737`, `c8afec1`, `e811d63`.
+- **Verificação final:** tsc 0; `npm test` 1395 passando e 58 pulados (114 arquivos); build ok em 570 ms; `test:banco` 58 de 58; `test:navegador` 25 de 25; tela conferida no navegador a 629 e 375 px.
+- **Mockado:** quem responde o prompt é o gerador de prova, que não é IA. A tela diz isso. O fornecedor de verdade é a P06.
+- **Próximo passo:** nenhum sem decisão do dono. Merge das branches `refino/kora-calcados` e `full-auto/prompt-composicao`, e a P06.
