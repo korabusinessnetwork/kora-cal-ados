@@ -32,6 +32,10 @@ conferência a olho aqui. Então a divisão não é estética:
 | `composicaoGuardada.ts` | não | A composição da tela no `localStorage`, para sobreviver ao F5. Lida de volta pelo mesmo guarda da colagem, e a gravação recusada é apagada |
 | `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
 | `TelaDaComposicao.tsx` | não | A tela do calçado montado: peça, cor e parâmetro por categoria da forma |
+| `ControleDaCategoria.tsx` | não | O bloco de uma categoria da tela do calçado montado: botões de peça, cor e parâmetros |
+| `PainelDeSaida.tsx` | não | Copiar o JSON da composição, e o texto à vista quando o navegador nega a cópia |
+| `PainelDeColar.tsx` | não | Colar um JSON e montá-lo pelo mesmo guarda da API, com a região viva do desfecho. Colagem recusada não sobe nada para a tela |
+| `PainelDaPecaClicada.tsx` | não | O nó clicado, a zona dele e o atalho para a cor, mais a lista de zonas em cena |
 | `palco3d.css` | | Estilo fora do JSX (regra de white-label do CLAUDE.md) |
 
 O tipo `EstadoDoPalco` e a função `ehFalha` moram em `PalcoDeModelo3d.tsx`, junto de quem os produz.

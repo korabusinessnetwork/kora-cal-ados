@@ -399,4 +399,20 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       cabedal até o máximo mostra 120,0 mm e grava `altura-do-cano: 0.12`. A tela caiu de 497
       para 457 linhas. **Visto de passagem e registrado para a reauditoria:** `TelaDoPalco3d.tsx`
       tem o mesmo `parametros[0]`, fora do escopo escrito deste item.
-- [ ] R7-A54 A tela da composição vira tela mais painéis | trilha: qualidade | depende: R7-A55, R7-A57, R7-A58 | pronto quando: `TelaDaComposicao.tsx` tem menos de 200 linhas, cada painel extraído mora no seu arquivo com o seu `README.md` de diretório em dia, os seis testes de comportamento da tela continuam passando SEM alteração, e o build e o `tsc` continuam limpos
+- [x] R7-A54 A tela da composição vira tela mais painéis | trilha: qualidade | depende: R7-A55, R7-A57, R7-A58 | pronto quando: `TelaDaComposicao.tsx` tem menos de 200 linhas, cada painel extraído mora no seu arquivo com o seu `README.md` de diretório em dia, os seis testes de comportamento da tela continuam passando SEM alteração, e o build e o `tsc` continuam limpos
+      feito em COMMIT. `TelaDaComposicao.tsx` foi de 457 para **195 linhas** (497 no pico, depois do
+      A57), e saíram quatro arquivos: `ControleDaCategoria.tsx` (96), `PainelDeSaida.tsx` (40),
+      `PainelDeColar.tsx` (101) e `PainelDaPecaClicada.tsx` (101), todos listados na tabela do
+      `README.md` da pasta. A tela ficou com o estado que mais de um painel usa (escolhas, seleção,
+      estado do palco) e o painel de colar levou o estado que só ele usa (texto colado e desfecho).
+      A colagem aceita sobe por `aoAceitar`, e a recusada não sobe nada. **Uma cláusula do critério
+      estava desatualizada, e está corrigida aqui em vez de apagada:** eu escrevi "os seis testes
+      de comportamento da tela", e quando o item rodou o arquivo já tinha catorze, porque o A55 e
+      o A57 somaram oito. A garantia valeu para os catorze: `git diff` do `TelaDaComposicao.test.tsx`
+      vazio neste commit, e os catorze passando. Prova a mais, que o critério não pedia: um teste
+      descartável montou a tela antes e depois da divisão, na abertura e depois de uma colagem, e
+      o HTML saiu **idêntico byte a byte** (11178 bytes nos dois, `cmp` sem diferença); o teste
+      foi apagado depois. Duas mutações mortas à mão nos painéis extraídos: não chamar `aoAceitar`
+      derruba quatro testes da tela, e esconder a primeira zona da lista derruba seis. Conferido
+      no navegador: colagem válida anunciada, zonas trocadas, duas faixas, zero erros. O chunk
+      tardio da tela foi de 26,90 kB para 27,22 kB, e o principal ficou em 219,12 kB.

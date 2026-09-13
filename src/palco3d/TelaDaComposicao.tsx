@@ -9,28 +9,27 @@
 // guarda estado e desenha.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AVISO_DE_COPIA_NEGADA, useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
+import { useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
 
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
-import type { PecaDoAcervo } from '../lib/composicao/tiposDaComposicao';
 import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
 import {
   composicaoDasEscolhas,
   escolhasDaComposicao,
-  escolhasDoTextoColado,
   montarDaTela,
   mudarEscolhaDaTela,
-  zonaDaMalha,
   type EscolhaDaTela,
 } from './composicaoDaTela';
-import { CampoDeCorDaCategoria, idDoCampoDeCor } from './CampoDeCorDaCategoria';
-import { ControlesDeParametro } from './ControlesDeParametro';
 import {
   armazenamentoDoNavegador,
   guardarComposicao,
   lerComposicaoGuardada,
 } from './composicaoGuardada';
+import { ControleDaCategoria } from './ControleDaCategoria';
+import { PainelDaPecaClicada } from './PainelDaPecaClicada';
+import { PainelDeColar } from './PainelDeColar';
+import { PainelDeSaida } from './PainelDeSaida';
 import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
 
 const CATALOGO = catalogoDeProva();
@@ -40,15 +39,6 @@ const DEMO = validarComposicao(composicaoDeProva(), CATALOGO);
 /** O acervo de prova é código, então a tela abre sem `.env.local` e sem rede. */
 const DO_ACERVO: ProvedorDeGltfDaPeca = (peca, parametros) =>
   gltfDaPecaDeProva(peca.id, parametros);
-
-/**
- * O desfecho da última colagem, que é o que a região viva do painel anuncia.
- *
- * União marcada, e não um `string | null` de erro, porque os dois desfechos precisam de anúncios
- * com PRIORIDADES diferentes, `alert` para a recusa e `status` para o aceite, e "erro é `null`"
- * não distingue "deu certo" de "ainda não tentou".
- */
-type ResultadoDaColagem = { tipo: 'recusada'; motivo: string } | { tipo: 'aceita' };
 
 export function TelaDaComposicao() {
   // A montagem guardada vem primeiro, e o calçado de prova é o que sobra quando não há o que
@@ -89,34 +79,10 @@ export function TelaDaComposicao() {
   }, [textoDaComposicao]);
 
   const aoSelecionar = useCallback((nome: string | null) => setSelecionada(nome), []);
-
-  // O outro lado do endereço da peça clicada. Sai das zonas da montagem EM CENA, e não do catálogo:
-  // a pergunta não é "a que categoria esta peça serve", é "a peça que eu cliquei, nesta cena, é de
-  // que zona". Malha fora de toda zona devolve `null`, e a tela diz isso em vez de inventar.
-  const zonaClicada = zonaDaMalha(montagem.zonas, selecionada);
   const aoMudarEstado = useCallback((novo: EstadoDoPalco) => setEstado(novo), []);
 
-  // O texto colado e o diagnóstico dele. Separados das `escolhas` porque uma colagem recusada não
-  // pode encostar no calçado que está na tela: a pessoa perderia a montagem boa por ter colado
-  // errado, que é o oposto do que este campo veio fazer.
-  const [colado, setColado] = useState('');
-  // `null` é "ainda não colou nada", que é diferente de "colou e deu certo": sem essa terceira
-  // possibilidade, a região viva nasceria com texto dentro e seria anunciada na abertura da tela,
-  // dizendo o desfecho de uma colagem que ninguém fez.
-  const [resultadoDaColagem, setResultadoDaColagem] = useState<ResultadoDaColagem | null>(null);
-
-  function montarOColado() {
-    if (FORMA === undefined) return;
-
-    const colagem = escolhasDoTextoColado(colado, FORMA, CATALOGO);
-
-    if (colagem.escolhas === null) {
-      setResultadoDaColagem({ tipo: 'recusada', motivo: colagem.erro ?? 'Composição recusada.' });
-      return;
-    }
-
-    setResultadoDaColagem({ tipo: 'aceita' });
-    setEscolhas(colagem.escolhas);
+  function aceitarOColado(novas: Map<string, EscolhaDaTela>) {
+    setEscolhas(novas);
     // Mesma razão do `mudar()`: a seleção é do calçado que saiu de cena.
     setSelecionada(null);
   }
@@ -165,76 +131,9 @@ export function TelaDaComposicao() {
             />
           ))}
 
-          {/* A composição fica só neste navegador (`composicaoGuardada.ts`), não existe tabela
-              para ela, então levá-la a outro lugar é por aqui. O que sai daqui é o MESMO JSON que
-              a API recebe. */}
-          <div className="palco3d__saida">
-            <button type="button" className="palco3d__copiar" onClick={copia.copiar}>
-              Copiar composição
-            </button>
-            <p className="palco3d__saida-ajuda" role="status">
-              {copia.estado === 'copiada'
-                ? 'Composição copiada. É o mesmo JSON que a API recebe.'
-                : 'Leva o JSON desta montagem para onde você quiser, inclusive para a API.'}
-            </p>
-            {copia.estado === 'falhou' && (
-              <>
-                <p className="palco3d__saida-erro" role="alert">
-                  {AVISO_DE_COPIA_NEGADA} Selecione o texto abaixo e copie à mão.
-                </p>
-                <pre className="palco3d__saida-texto">{textoDaComposicao}</pre>
-              </>
-            )}
-          </div>
+          <PainelDeSaida copia={copia} texto={textoDaComposicao} />
 
-          {/* O caminho de volta, colado ao de ida de propósito: copiar sem colar resolvia metade
-              do problema, e as duas metades do mesmo ciclo separadas na tela deixariam a segunda
-              parecendo recurso avançado. */}
-          <div className="palco3d__entrada">
-            <label className="palco3d__entrada-rotulo" htmlFor="composicao-colada">
-              Colar uma composição
-            </label>
-            <textarea
-              id="composicao-colada"
-              className="palco3d__entrada-texto"
-              rows={4}
-              spellCheck={false}
-              placeholder='{"forma_id": "…", "pecas": [ … ]}'
-              value={colado}
-              onChange={(evento) => setColado(evento.target.value)}
-            />
-            <button type="button" className="palco3d__copiar" onClick={montarOColado}>
-              Montar o que está colado
-            </button>
-            {/* Texto fixo, e por isso FORA de qualquer região viva. Ele não muda com nada que a
-                pessoa faça, e anunciá-lo de novo a cada colagem seria ler em voz alta uma frase
-                que continua igual. */}
-            <p className="palco3d__saida-ajuda">
-              Passa pelo mesmo guarda que a API usa. Recusa aqui é recusa lá.
-            </p>
-            {/* UMA região viva, e só uma, para o resultado da colagem.
-                Antes eram duas, uma dentro da outra: uma `div` com `aria-live="polite"` envolvendo
-                um `<p role="alert">`, e `role="alert"` já implica `aria-live="assertive"`. Região
-                viva dentro de região viva não está prevista em lugar nenhum da especificação, e o
-                que cada leitor de tela faz com isso é escolha dele: pode ler duas vezes, pode
-                rebaixar o assertivo, pode ignorar o de fora. Nenhuma das três é o que se quis.
-                O `role` muda com o desfecho, e essa é a decisão que importa: recusa interrompe,
-                porque a pessoa precisa saber AGORA que o calçado na tela não é o que ela colou;
-                aceite espera a vez, porque a mudança boa já aconteceu.
-                O caso aceito precisa existir aqui porque quem não enxerga o palco não recebe
-                notícia nenhuma da montagem nova: ela acontece dentro do canvas, em outro canto da
-                tela. */}
-            {resultadoDaColagem !== null &&
-              (resultadoDaColagem.tipo === 'recusada' ? (
-                <p className="palco3d__saida-erro" role="alert" aria-atomic="true">
-                  {resultadoDaColagem.motivo} O calçado na tela continua sendo o de antes.
-                </p>
-              ) : (
-                <p className="palco3d__saida-ok" role="status" aria-atomic="true">
-                  Composição montada. O calçado na tela agora é o que você colou.
-                </p>
-              ))}
-          </div>
+          <PainelDeColar forma={FORMA} catalogo={CATALOGO} aoAceitar={aceitarOColado} />
         </section>
 
         <section className="painel palco3d__painel-cena">
@@ -259,171 +158,10 @@ export function TelaDaComposicao() {
           )}
         </section>
 
-        <section className="painel palco3d__painel-inspecao">
-          <h2 className="painel__titulo">Peça clicada</h2>
-          <p className="painel__ajuda">
-            O nome do nó é o id da peça (ADR-007 D4), e a zona que a API recolore é a categoria
-            dela. São os dois lados do mesmo endereço.
-          </p>
-          {/* Mesma região viva da outra tela do palco, e pelo mesmo motivo: o clique é no
-              canvas e a resposta aparece em outro canto.
-
-              Os DOIS lados aparecem aqui desde o R6-A50. A frase de ajuda acima já prometia isso e
-              a tela entregava um lado só, o do nó: a categoria, que é o lado que a API recolore e o
-              único que tem controle de cor, ficava para a pessoa achar casando com o olho este id
-              com a lista de zonas mais abaixo. Quem clica numa peça quer pintar aquela peça, e o
-              caminho entre uma coisa e outra era a memória de quem estava olhando. */}
-          <div aria-live="polite" aria-atomic="true">
-            {selecionada === null ? (
-              <p className="palco3d__vazio">Nada selecionado. Clique numa peça do calçado.</p>
-            ) : (
-              <dl className="palco3d__endereco">
-                <dt>nó</dt>
-                <dd>
-                  <code className="palco3d__nome">{selecionada}</code>
-                </dd>
-                <dt>zona</dt>
-                <dd>
-                  {zonaClicada === null ? (
-                    // Falha alto e visível, em vez de uma categoria chutada: a malha clicada não
-                    // está em zona nenhuma desta montagem, então não existe cor para mexer nela.
-                    <span className="palco3d__sem-zona">
-                      esta malha não está em nenhuma zona do calçado em cena
-                    </span>
-                  ) : (
-                    <>
-                      <code className="palco3d__nome">{zonaClicada}</code>
-                      <button
-                        type="button"
-                        className="palco3d__ir-para-cor"
-                        onClick={() => focarACorDa(zonaClicada)}
-                      >
-                        mexer na cor desta zona
-                      </button>
-                    </>
-                  )}
-                </dd>
-              </dl>
-            )}
-          </div>
-
-          <h2 className="painel__titulo painel__titulo--espacado">Zonas do calçado</h2>
-          <ul className="palco3d__zonas">
-            {montagem.zonas.map(({ zone_key, malhas }) => (
-              <li key={zone_key} className="palco3d__zona">
-                <code>{zone_key}</code>
-                <span>{malhas.join(', ')}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <PainelDaPecaClicada selecionada={selecionada} zonas={montagem.zonas} />
       </div>
     </main>
   );
-}
-
-interface ControleDaCategoriaProps {
-  categoria: string;
-  obrigatoria: boolean;
-  pecas: PecaDoAcervo[];
-  escolha: EscolhaDaTela;
-  aoMudar: (mudanca: Partial<EscolhaDaTela>) => void;
-}
-
-/** O bloco de uma categoria: qual peça, em que cor, com que parâmetro. */
-function ControleDaCategoria({
-  categoria,
-  obrigatoria,
-  pecas,
-  escolha,
-  aoMudar,
-}: ControleDaCategoriaProps) {
-  const peca = pecas.find(({ id }) => id === escolha.pecaId);
-
-  return (
-    <div className="palco3d__categoria">
-      <h3 className="palco3d__categoria-titulo">
-        <code>{categoria}</code>
-        {obrigatoria ? null : <span className="palco3d__opcional">opcional</span>}
-      </h3>
-
-      <div className="palco3d__lista">
-        {pecas.map((candidata) => (
-          <button
-            key={candidata.id}
-            type="button"
-            className={
-              candidata.id === escolha.pecaId ? 'palco3d__peca palco3d__peca--ativa' : 'palco3d__peca'
-            }
-            // A escolha existia só na borda colorida, e cor não é anúncio: para um leitor de tela
-            // os botões da categoria eram todos iguais, e não havia como saber qual está valendo
-            // sem sair da lista e conferir o resultado. `aria-pressed` diz "este está apertado"
-            // sem depender de enxergar.
-            aria-pressed={candidata.id === escolha.pecaId}
-            onClick={() => aoMudar({ pecaId: candidata.id })}
-          >
-            <span className="palco3d__peca-rotulo">{candidata.rotulo}</span>
-          </button>
-        ))}
-        {obrigatoria ? null : (
-          <button
-            type="button"
-            className={escolha.pecaId === null ? 'palco3d__peca palco3d__peca--ativa' : 'palco3d__peca'}
-            // Dispensar a categoria é uma escolha como qualquer outra, e o botão dela entra na
-            // mesma lista, então ele anuncia do mesmo jeito. Sem isto, "nenhuma peça" seria o
-            // único estado da tela que só existe para quem enxerga a borda.
-            aria-pressed={escolha.pecaId === null}
-            onClick={() => aoMudar({ pecaId: null })}
-          >
-            {/* Era `sem {categoria}`, e a tela escrevia "sem cadarco": a `categoria` é chave de
-                dado, não palavra de frase, e chegava sem cedilha no meio do português. A forma não
-                declara rótulo legível para categoria (só a PEÇA tem `rotulo`), então o caminho
-                honesto é não costurar a chave na prosa. Qual categoria é esta já está no título do
-                bloco, logo acima, com a marca de "opcional" ao lado. */}
-            <span className="palco3d__peca-rotulo">Nenhuma peça</span>
-          </button>
-        )}
-      </div>
-
-      {peca ? (
-        <div className="palco3d__ajustes">
-          {/* O `<code>` que mostrava o hex saiu: era texto morto ao lado de um seletor que só o
-              conta-gotas alcançava. Agora o mesmo hex é editável, que é o que faz a cor do manual da
-              marca conseguir entrar na tela (R3-A27). */}
-          <CampoDeCorDaCategoria
-            categoria={categoria}
-            cor={escolha.cor ?? '#FFFFFF'}
-            aoTrocar={(cor) => aoMudar({ cor })}
-          />
-
-          <ControlesDeParametro
-            categoria={categoria}
-            parametros={peca.parametros}
-            valores={escolha.parametros}
-            aoMudar={(nome, valor) => aoMudar({ parametros: { [nome]: valor } })}
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/**
- * Leva o foco até o seletor de cor de uma zona.
- *
- * Mexe no DOM direto, que é a exceção nesta base e por isso está numa função com nome: o controle
- * de cor mora em outra coluna da tela, dentro de um componente que não é filho deste painel, e
- * levantar o foco por estado significaria um `ref` atravessando dois componentes para resolver o
- * que um id resolve. O id vem de `idDoCampoDeCor`, o mesmo que o campo usa.
- *
- * É foco, e não só rolagem: quem clicou na peça quer MEXER na cor, e foco é o que serve também a
- * quem navega por teclado. `scrollIntoView` é opcional na chamada porque jsdom não o implementa, e
- * um teste não pode cair por causa de um detalhe de apresentação.
- */
-function focarACorDa(categoria: string): void {
-  const campo = document.getElementById(idDoCampoDeCor(categoria));
-  campo?.scrollIntoView?.({ block: 'nearest' });
-  campo?.focus();
 }
 
 /** O acervo de prova sempre tem forma; isto existe para o tipo, e diz a verdade se acontecer. */
