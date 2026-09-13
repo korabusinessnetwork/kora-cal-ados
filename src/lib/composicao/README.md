@@ -12,6 +12,7 @@ glTF.
 | `validarComposicao.ts` | O guarda do ADR-008 D1: resolve a composição contra o acervo ou recusa | composição (não confiável) + catálogo → composição validada |
 | `empilharComposicao.ts` | De quanto cada peça sobe para assentar sobre a de baixo (T14) | forma + faixa vertical de cada peça → deslocamento por categoria |
 | `montarComposicao.ts` | A orquestração de T14: mede, empilha, desloca, junta e pinta, nessa ordem | composição validada + provedor de glTF → um glTF só, já colorido |
+| `montarCatalogoParaModelo.ts` | O catálogo para o modelo (T05): só as peças da forma, com id, categoria, rótulo e faixa, em JSON | forma + catálogo → texto que o modelo de linguagem lê |
 | `tiposDaComposicao.ts` | O vocabulário do modo gerado em tipos. Nenhum comportamento | — |
 | `fixtures/acervoDeTeste.ts` | Catálogo escrito à mão, com duas formas. O gêmeo de `render/fixtures/gltfDeTeste.ts` | — |
 
