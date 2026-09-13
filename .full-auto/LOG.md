@@ -63,3 +63,4 @@
 2026-09-12 · R8-A60 · os botões do rodapé de telas passam de 18 para 24 px de altura, medidos a 375 px nas quatro telas, com guarda na folha · bbafd26
 2026-09-12 · R8-A62 · 22 textos de tela, erro e terminal sem travessão, e uma varredura por parser que reprova literal e deixa comentário e teste de fora · 6259ae3
 2026-09-12 · R8-A63 · a tela de uma peça desenha um controle por parâmetro e manda todos ao glTF, e o valor herdado entre peças de mesmo parâmetro virou achado · 33d8573
+2026-09-13 · R9-A67 · trocar de peça na tela de uma peça volta os parâmetros ao padrão da peça nova · COMMIT

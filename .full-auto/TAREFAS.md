@@ -527,7 +527,18 @@ componente que o teste de tela do A67 lê, e fica pronto antes de o A69 trocar o
 Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (colagem fala em metros) e
 **A72** (chunk sumido depois de deploy, evidência só de código).
 
-- [ ] R9-A67 Trocar de peça não carrega o valor da peça anterior | trilha: robustez | depende: nenhum | pronto quando: na tela de uma peça, levar a sola tratorada ao máximo e clicar no cadarço mostra o cadarço no padrão dele, dentro da faixa, e o glTF sai com o padrão; clicar na peça que já está em cena não apaga o valor mexido; existe teste de tela que reprova o valor herdado; conferido no navegador
+- [x] R9-A67 Trocar de peça não carrega o valor da peça anterior | trilha: robustez | depende: nenhum | pronto quando: na tela de uma peça, levar a sola tratorada ao máximo e clicar no cadarço mostra o cadarço no padrão dele, dentro da faixa, e o glTF sai com o padrão; clicar na peça que já está em cena não apaga o valor mexido; existe teste de tela que reprova o valor herdado; conferido no navegador
+      feito em COMMIT. `trocarPeca` zera os parâmetros quando a peça muda de verdade, com o porquê ao
+      lado e a mesma regra de `mudarEscolhaDaTela` da tela da composição; clicar na peça que já está
+      em cena não zera. A seleção continua sendo largada em qualquer clique, como antes: não mexi no
+      que não estava no critério. Testes de tela: 3 (cadarço depois da sola a 50 mm abre em 6,0 mm e
+      controle em 0.006; voltar à sola abre no padrão de 30,0 mm; clicar na peça em cena mantém 50,0
+      mm). Os dois primeiros falharam antes do conserto com "expected '50,0 mm'". Mutações: 3, todas
+      mortas (sem zerar: 2 reprovam; zerar sempre: 1; condição invertida: 3). Navegador em
+      `?tela=palco3d`: sola tratorada a 50 mm, clique nela de novo continua 50,0 mm, clique no cadarço
+      diz "6,0 mm, faixa 3,0 mm a 12,0 mm". **Limite:** o glTF não foi lido no navegador; ele sai de
+      `valoresEmVigor` com o mesmo objeto que a medida mostra, e é essa ligação que fica provada.
+      Baseline: 1332 testes, 25 no navegador, `tsc` limpo, build sem aviso, `npm audit` em zero.
 - [ ] R9-A68 Milímetros e passo do controle definidos num lugar só | trilha: qualidade | depende: R9-A67 | pronto quando: `milimetros` e `PASSOS_DO_PARAMETRO` têm uma definição cada em `src/`, importada por `ControlesDeParametro.tsx` e `ParametrosDaPeca.tsx`, a função tem teste próprio, e o HTML das duas telas com o acervo de prova é idêntico antes e depois, por fotografia de teste descartável
 - [ ] R9-A70 O campo de hex diz o que falta, e diz igual nas duas telas | trilha: ux | depende: nenhum | pronto quando: o esboço deixa de dizer "incompleta" para texto que nunca vira cor, as duas telas escolhem a frase pela mesma função, um hex de 3 ou 6 dígitos sem `#` ganha a frase "falta o # no começo" com o texto já corrigido de exemplo, o campo continua recusando sem `#` (a API recusa), e há testes da frase e do campo nas duas telas
 - [ ] R9-A69 Os testes de tela selecionam uma peça de verdade antes de conferir a limpeza | trilha: qualidade | depende: R9-A67 | pronto quando: os testes de "trocar de peça limpa a peça clicada" das duas telas mostram o nome selecionado antes da troca, a mutação que tira `setSelecionada(null)` de `trocarPeca` reprova um teste em cada tela, e o palco de verdade continua montado nos outros testes

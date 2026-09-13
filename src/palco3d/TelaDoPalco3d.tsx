@@ -55,6 +55,12 @@ export function TelaDoPalco3d({ pecas = PECAS }: TelaDoPalco3dProps = {}) {
 
   function trocarPeca(id: string) {
     setPecaId(id);
+    // Os valores são guardados por nome, e peças diferentes repetem nome com faixas diferentes: as
+    // duas solas e o cadarço têm `espessura`. Levar a sola tratorada a 50 mm e clicar no cadarço
+    // fazia a tela dizer 50,0 mm numa faixa de 3 a 12 mm, e o glTF sair com isso (R9-A67). A peça
+    // nova abre no padrão dela, a mesma regra de `mudarEscolhaDaTela` na tela da composição.
+    // Clicar na peça que já está em cena não é troca, e não apaga o que foi mexido.
+    if (id !== pecaId) setParametros({});
     // A seleção é da peça que saiu de cena. Mantê-la faria a tela seguir afirmando que algo
     // está selecionado depois de a peça nem existir mais.
     setSelecionada(null);

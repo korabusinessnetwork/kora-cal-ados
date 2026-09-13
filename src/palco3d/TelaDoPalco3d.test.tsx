@@ -100,3 +100,64 @@ describe('a tela de uma peça desenha um controle por parâmetro (R8-A63)', () =
     ).toEqual(['espessura', 'largura']);
   });
 });
+
+/** O botão da lista com este rótulo. */
+function botaoDaPeca(rotulo: string): HTMLButtonElement {
+  const achado = [...container.querySelectorAll<HTMLButtonElement>('.palco3d__peca')].find((botao) =>
+    botao.textContent?.includes(rotulo),
+  );
+  if (achado === undefined) throw new Error(`Não há peça "${rotulo}" na lista.`);
+
+  return achado;
+}
+
+function clicarNa(rotulo: string) {
+  act(() => {
+    botaoDaPeca(rotulo).click();
+  });
+}
+
+/** Leva o controle de um parâmetro a um valor, como a mão faria. */
+function moverControle(nome: string, valor: string) {
+  const faixa = container.querySelector<HTMLInputElement>(`input[aria-label="${nome}"]`);
+  if (faixa === null) throw new Error(`Não há controle para "${nome}".`);
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+  act(() => {
+    setter?.call(faixa, valor);
+    faixa.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+}
+
+const medida = () => container.querySelector('.palco3d__medida strong')?.textContent;
+
+describe('trocar de peça não carrega o valor da peça anterior (R9-A67)', () => {
+  it('a sola tratorada no máximo não passa os 50 mm para o cadarço, que tem outra faixa', () => {
+    // As duas solas e o cadarço têm um parâmetro chamado `espessura`, com faixas diferentes. A tela
+    // guardava valor por nome, e o cadarço abria dizendo 50,0 mm numa faixa de 3 a 12 mm.
+    clicarNa('Sola tratorada');
+    moverControle('espessura', '0.05');
+    expect(medida()).toBe('50,0 mm');
+
+    clicarNa('Cadarço reto');
+
+    expect(medida()).toBe('6,0 mm');
+    expect(container.querySelector<HTMLInputElement>('input[aria-label="espessura"]')?.value).toBe('0.006');
+  });
+
+  it('voltar para a sola também abre no padrão dela, como na tela da composição', () => {
+    clicarNa('Sola tratorada');
+    moverControle('espessura', '0.05');
+    clicarNa('Sola plana');
+    clicarNa('Sola tratorada');
+
+    expect(medida()).toBe('30,0 mm');
+  });
+
+  it('clicar na peça que já está em cena não apaga o que foi mexido', () => {
+    clicarNa('Sola tratorada');
+    moverControle('espessura', '0.05');
+    clicarNa('Sola tratorada');
+
+    expect(medida()).toBe('50,0 mm');
+  });
+});
