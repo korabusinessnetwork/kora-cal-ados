@@ -38,7 +38,7 @@ E o fluxo principal, à mão, em `npm run dev`:
 | Testes contra o banco real | 58 de 58 | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** | **58 de 58** |
 | Testes em navegador | 25 | **25** | **25** | **25** | **25** | **25** | **25** | **25** |
 | `tsc --noEmit` | limpo | limpo | limpo | limpo | limpo | limpo, e agora olhando **dois diretórios a mais** (A45) | limpo | limpo |
-| `npm run build` | limpo, 695 ms | limpo, **419 ms** | limpo, **507 ms** | limpo, **564 ms** | limpo, **512 ms** | limpo, **483 ms** | limpo, **506 ms** | limpo, **439 ms** |
+| `npm run build` | sem erro, **com aviso de chunk**, 695 ms | sem erro, **com aviso de chunk**, **419 ms** | sem erro, **com aviso de chunk**, **507 ms** | sem erro, **com aviso de chunk**, **564 ms** | sem erro, **com aviso de chunk**, **512 ms** | sem erro, **com aviso de chunk**, **483 ms** | sem erro, **com aviso de chunk**, **506 ms** | sem erro, **com aviso de chunk**, **439 ms** |
 | `npm audit` | 0 vulnerabilidades | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** | **0 vulnerabilidades** |
 | Bundle: chunk principal | 455,03 kB (gzip 131,84 kB) | **455,58 kB** (gzip 132,03 kB) | **456,92 kB** (gzip 132,43 kB) | **457,00 kB** (gzip 132,51 kB) | **457,16 kB** (gzip 132,93 kB) | **457,75 kB** (gzip 133,12 kB) | **218,97 kB** (gzip 70,15 kB) | **219,12 kB** (gzip 70,19 kB) |
 | Bundle: chunk do three.js, sob demanda | 618,87 kB (gzip 156,56 kB) | 618,87 kB (gzip 156,56 kB) | **618,91 kB** (gzip 156,58 kB) | **619,40 kB** (gzip 156,71 kB) | 619,40 kB (gzip 156,71 kB) | **619,48 kB** (gzip 156,73 kB) | **619,51 kB** (gzip 156,76 kB) | 619,51 kB (gzip 156,75 kB) |
@@ -106,6 +106,15 @@ contagem é de `catch` com corpo vazio de verdade. Existem três `catch` cujo co
 comentário dizendo por que a falha é engolida, dois de rodadas anteriores e um do A57
 (`guardarComposicao`), e eles não entram na conta de propósito, porque o que a linha persegue é
 falha engolida sem explicação.
+
+**A linha do `npm run build` estava errada em todas as colunas até a rodada 7, e está corrigida
+aqui em vez de apagada (R8-A61).** Eu escrevi "limpo" em oito colunas, e todo build dessas oito
+imprimiu "(!) Some chunks are larger than 500 kB after minification", por causa do chunk do three.js,
+que tem 619 kB desde a abertura. Eu olhava o fim da saída e não lia o aviso. Os tempos e a ausência
+de erro continuam valendo; o que mudou foi a palavra. Desde o R8-A61 o limite do aviso está em 640 kB
+no `vite.config.ts`, com o porquê escrito lá, e "limpo" passa a significar sem erro E sem aviso.
+Conferido que o limite não esconde nada: puxar o three.js para o chunk principal, como mutação, fez
+o chunk ir a 956,94 kB e o aviso voltar.
 
 **Duas linhas desta tabela passaram a ter guarda na rodada 6**, e é a diferença entre uma medida e
 uma promessa: o chunk principal tem agora `src/telaPublicaNaoCarregaBanco.test.ts`, que reprova

@@ -58,3 +58,4 @@
 2026-09-12 · R7-A57 · a composicao sobrevive ao F5 pelo localStorage, lida de volta pelo mesmo guarda da colagem, e gravacao invalida cai no padrao · b982977, 3c4a921
 2026-09-12 · R7-A58 · todos os parametros da peca ganham controle e mexer num soma aos outros em vez de substituir · a7c1975, 4d7033f
 2026-09-12 · R7-A54 · a TelaDaComposicao cai de 457 para 195 linhas em tela mais quatro paineis, com os 14 testes da tela intocados e HTML identico antes e depois · 3671802
+2026-09-12 · R8-A61 · o build sai sem aviso, com o limite de chunk logo acima do three.js, e a linha do baseline que dizia limpo foi corrigida · COMMIT
