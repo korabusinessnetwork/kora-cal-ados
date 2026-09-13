@@ -21,6 +21,7 @@
 import { useState } from 'react';
 
 import { estadoDoHexDigitado } from '../lib/render/estadoDoHexDigitado';
+import { mensagemDoHexDigitado } from '../lib/render/mensagemDoHexDigitado';
 
 export interface CampoDeCorDaCategoriaProps {
   /** A `zone_key` da categoria. Entra no nome acessível dos dois campos e no id do erro. */
@@ -90,26 +91,9 @@ export function CampoDeCorDaCategoria({ categoria, cor, aoTrocar }: CampoDeCorDa
           foco chega nele. */}
       {!completo && (
         <p className="palco3d__hex-erro" id={idDoErro}>
-          {mensagemDoHex(estado)}
+          {mensagemDoHexDigitado(texto, 'a peça')}
         </p>
       )}
     </div>
   );
-}
-
-/**
- * A frase que explica o que falta. Separada e exportada porque é o texto que a pessoa lê, e texto
- * que a pessoa lê merece teste tanto quanto a regra que o escolhe.
- *
- * As duas frases são diferentes de propósito: "continue digitando" e "isso não vai virar cor" são
- * notícias distintas, e dar a mesma para as duas faz quem digitou `#C0` achar que errou.
- */
-export function mensagemDoHex(estado: ReturnType<typeof estadoDoHexDigitado>): string {
-  if (estado === 'vazio') return 'Sem cor. Digite um hex como #C0392B, ou use o seletor ao lado.';
-
-  if (estado === 'rascunho') {
-    return 'Cor incompleta. O formato é #RGB ou #RRGGBB, e a peça só muda quando ela fecha.';
-  }
-
-  return 'Isso não é um hex. O formato é #RGB ou #RRGGBB, por exemplo #C0392B.';
 }

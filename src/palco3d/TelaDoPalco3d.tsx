@@ -160,7 +160,7 @@ export function TelaDoPalco3d({ pecas = PECAS }: TelaDoPalco3dProps = {}) {
 /**
  * A frase de cada estado do palco.
  *
- * Exportada para ter teste, pelo mesmo motivo de `mensagemDoHex`: é o texto que a pessoa lê para
+ * Exportada para ter teste, pelo mesmo motivo de `mensagemDoHexDigitado`: é o texto que a pessoa lê para
  * saber se o que está na tela é confiável, e texto que a pessoa lê merece teste tanto quanto a
  * regra que o escolhe.
  *

@@ -19,6 +19,7 @@ implementação é o que sustenta "cor no editor = cor na API" (princípio nº1 
 | `lerRegrasCss.ts` | Lê o `<style>` do próprio SVG (o jsdom não monta CSSOM em `image/svg+xml`) | texto CSS → regras com especificidade |
 | `validarCor.ts` | Só aceita hex (ADR-004, q3) | `#f00` → `#FF0000`, ou erro |
 | `estadoDoHexDigitado.ts` | Em que pé está o hex sendo digitado, para a tela saber quando é cedo para reclamar | `#C0` → `rascunho`, `#GGG` → `errado` |
+| `mensagemDoHexDigitado.ts` | A frase que o campo de hex mostra enquanto o texto ainda não é cor, a mesma no esboço e na composição | `22aa44` → "Falta o # no começo. Escreva #22aa44." |
 | `erros.ts` | `ErroDeVariante` + códigos de erro (contrato de API) | — |
 | `dom.ts` | Abstrai de onde vem o DOM. No navegador usa `DOMParser` nativo | — |
 | `domNode.ts` | Registra o jsdom. **Só o Node importa** — é o que mantém jsdom fora do bundle | — |

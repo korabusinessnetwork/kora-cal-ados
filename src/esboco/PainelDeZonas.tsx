@@ -7,6 +7,7 @@ import type { ZonaDoProduto } from './produtoDemo';
 import { paletaDeAtalho } from './produtoDemo';
 import { contarElementos } from '../lib/texto/contarElementos';
 import { estadoDoHexDigitado } from '../lib/render/estadoDoHexDigitado';
+import { mensagemDoHexDigitado } from '../lib/render/mensagemDoHexDigitado';
 
 interface Props {
   zonas: ZonaDoProduto[];
@@ -126,7 +127,7 @@ function EditorDeCor({
           ligado ao campo por `aria-describedby`, que é lido quando o foco chega nele. */}
       {!valido && (
         <p className="editor__erro" id={idDoErro}>
-          Cor incompleta. O formato é #RGB ou #RRGGBB, e o preview só muda quando ela fecha.
+          {mensagemDoHexDigitado(texto, 'o preview')}
         </p>
       )}
       <div className="editor__paleta">

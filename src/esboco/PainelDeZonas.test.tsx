@@ -80,6 +80,29 @@ describe('painel de zonas do esboço', () => {
     expect(html).toContain('Cor incompleta');
     expect(html).not.toContain('role="alert"');
   });
+  it('o que nunca vira cor não é chamado de incompleto (R9-A70)', () => {
+    // Antes o esboço tinha uma frase só, "Cor incompleta", para qualquer recusa. A tela da
+    // composição já separava as duas notícias; agora as duas telas usam a mesma frase.
+    const html = painel({ zonaSelecionada: 'sola', cores: { sola: 'vermelho' } });
+
+    expect(html).toContain('Isso não é um hex.');
+    expect(html).not.toContain('Cor incompleta');
+  });
+
+  it('hex sem # diz que falta o #, com a cor já escrita do jeito certo (R9-A70)', () => {
+    const html = painel({ zonaSelecionada: 'sola', cores: { sola: '22aa44' } });
+
+    expect(html).toContain('aria-invalid="true"');
+    expect(html).toContain('Falta o # no começo. Escreva #22aa44.');
+    expect(html).not.toContain('Cor incompleta');
+  });
+
+  it('o rascunho do esboço fala do preview, e não da peça', () => {
+    expect(painel({ zonaSelecionada: 'sola', cores: { sola: '#AABB' } })).toContain(
+      'e o preview só muda quando ela fecha',
+    );
+  });
+
   it('cada atalho de cor diz que cor é, e não só o hex', () => {
     // Antes o único texto do botão era `title="#B23A2E"`, que vira nome acessível de último
     // recurso: o leitor de tela soletrava o hex e o mouse não via legenda nenhuma. O hex fica,

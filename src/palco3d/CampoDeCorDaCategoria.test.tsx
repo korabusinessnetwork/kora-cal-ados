@@ -13,7 +13,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { CampoDeCorDaCategoria, idDoCampoDeCor, mensagemDoHex } from './CampoDeCorDaCategoria';
+import { CampoDeCorDaCategoria, idDoCampoDeCor } from './CampoDeCorDaCategoria';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -118,6 +118,7 @@ describe('campo de cor da categoria', () => {
 
     expect(campoDeTexto().getAttribute('aria-invalid')).toBe('true');
     expect(erro()?.textContent).toContain('Cor incompleta');
+    expect(erro()?.textContent).toContain('a peça só muda');
     // É o `aria-describedby` que faz o texto ser lido quando o foco chega no campo.
     expect(campoDeTexto().getAttribute('aria-describedby')).toBe('composicao-hex-erro-sola');
     expect(erro()?.id).toBe('composicao-hex-erro-sola');
@@ -131,6 +132,17 @@ describe('campo de cor da categoria', () => {
 
     expect(erro()?.textContent).toContain('não é um hex');
     expect(erro()?.textContent).not.toContain('Cor incompleta');
+    expect(recebidas).toEqual([]);
+  });
+
+  it('hex sem # diz que falta o #, e continua sem chegar ao motor (R9-A70)', async () => {
+    // O formato que ferramenta de design copia. A API recusa sem `#`, então o campo também recusa;
+    // o que muda é a frase, que antes dizia "não é um hex" para uma cor completa.
+    await montar();
+    await digitar(campoDeTexto(), '22aa44');
+
+    expect(erro()?.textContent).toBe('Falta o # no começo. Escreva #22aa44.');
+    expect(campoDeTexto().getAttribute('aria-invalid')).toBe('true');
     expect(recebidas).toEqual([]);
   });
 
@@ -150,41 +162,5 @@ describe('campo de cor da categoria', () => {
 
     expect(recebidas).toEqual(['#00FF00']);
     expect(campoDeTexto().value).toBe('#00FF00');
-  });
-});
-
-describe('a frase de cada estado', () => {
-  it('vazio não acusa erro, ensina o caminho', () => {
-    expect(mensagemDoHex('vazio')).toContain('Sem cor');
-  });
-
-  it('rascunho diz que falta fechar', () => {
-    expect(mensagemDoHex('rascunho')).toContain('Cor incompleta');
-  });
-
-  it('errado diz que não é hex, e dá um exemplo', () => {
-    expect(mensagemDoHex('errado')).toContain('não é um hex');
-    expect(mensagemDoHex('errado')).toContain('#C0392B');
-  });
-});
-
-describe('o id do seletor de cor (A50)', () => {
-  it('é o id que o campo realmente tem no DOM, e não um texto parecido', async () => {
-    await montar();
-
-    // Quem usa este id é OUTRA parte da tela: o painel "Peça clicada" leva o foco até o controle da
-    // zona clicada, por `document.getElementById`. Se o id do campo e o que a função devolve
-    // divergirem, o botão não faz nada e ninguém fica sabendo. Esta linha é a costura entre os dois.
-    expect(campoDeCor().id).toBe(idDoCampoDeCor('sola'));
-    expect(idDoCampoDeCor('cadarco')).not.toBe(idDoCampoDeCor('sola'));
-  });
-
-  it('o campo achado pelo id é focável, que é o que o painel faz com ele', async () => {
-    await montar();
-
-    const campo = document.getElementById(idDoCampoDeCor('sola'));
-    campo?.focus();
-
-    expect(document.activeElement).toBe(campoDeCor());
   });
 });

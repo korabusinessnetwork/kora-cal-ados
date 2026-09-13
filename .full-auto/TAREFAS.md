@@ -557,5 +557,25 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
       kB, abaixo do limite de 640 kB do R8-A61; o chunk da tela de uma peça foi de 4,58 kB para 4,51
       kB e o da composição de 28,45 kB para 28,38 kB. Baseline: 1334 testes, 25 no navegador, `tsc`
       limpo, build sem aviso, `npm audit` em zero.
-- [ ] R9-A70 O campo de hex diz o que falta, e diz igual nas duas telas | trilha: ux | depende: nenhum | pronto quando: o esboço deixa de dizer "incompleta" para texto que nunca vira cor, as duas telas escolhem a frase pela mesma função, um hex de 3 ou 6 dígitos sem `#` ganha a frase "falta o # no começo" com o texto já corrigido de exemplo, o campo continua recusando sem `#` (a API recusa), e há testes da frase e do campo nas duas telas
+- [x] R9-A70 O campo de hex diz o que falta, e diz igual nas duas telas | trilha: ux | depende: nenhum | pronto quando: o esboço deixa de dizer "incompleta" para texto que nunca vira cor, as duas telas escolhem a frase pela mesma função, um hex de 3 ou 6 dígitos sem `#` ganha a frase "falta o # no começo" com o texto já corrigido de exemplo, o campo continua recusando sem `#` (a API recusa), e há testes da frase e do campo nas duas telas
+      feito em COMMIT. A frase saiu de `CampoDeCorDaCategoria.tsx` para
+      `src/lib/render/mensagemDoHexDigitado.ts`, ao lado da regra que ela explica, e as duas telas a
+      usam, cada uma dizendo o que só muda quando a cor fecha ("a peça" ou "o preview"). O esboço
+      deixa de ter a frase fixa. Texto só de dígitos hex sem `#` ganha "Falta o # no começo. Escreva
+      #22aa44." quando a cor com `#` estaria completa, e "Falta o # no começo. O formato é #RGB ou
+      #RRGGBB." quando seria só começo. O campo continua recusando sem `#`, e o porquê está no
+      cabeçalho. As frases que já existiam para rascunho, vazio e errado na composição ficaram iguais,
+      letra por letra. Testes: 7 da função, 1 de campo na composição e 3 no esboço, e os 3 testes de
+      frase que moravam no teste do campo foram para o teste da função. Mutações: 7, todas mortas
+      (sem o ramo do `#`: 4 reprovam em 3 arquivos; condição invertida: 4; cor escrita sem `trim`: 1;
+      regex de 3 a 6: 1; composição falando do preview: 1; esboço com a frase antiga: 2; esboço
+      falando da peça: 1). A conferência de "a peça só muda" no teste do campo foi escrita antes de
+      rodar as mutações, então não sei se aquela mutação teria sobrevivido sem ela. Navegador, nas
+      duas telas: `22aa44` diz "Falta o # no começo. Escreva #22aa44."; `vermelho` diz "Isso não é um
+      hex"; `#22aa` diz "Cor incompleta" com "a peça" numa e "o preview" na outra; `#22AA44` e `#22a`
+      sem frase e `aria-invalid="false"`; campo vazio no esboço diz "Sem cor", onde antes dizia "Cor
+      incompleta". **Medida que mudou:** o esboço está no chunk principal e agora importa a função, e
+      o chunk principal foi de 219,11 kB para 219,52 kB (gzip 70,19 para 70,35 kB); o da composição
+      foi de 28,38 kB para 28,12 kB. Baseline: 1340 testes, 25 no navegador, `tsc` limpo, build sem
+      aviso, `npm audit` em zero.
 - [ ] R9-A69 Os testes de tela selecionam uma peça de verdade antes de conferir a limpeza | trilha: qualidade | depende: R9-A67 | pronto quando: os testes de "trocar de peça limpa a peça clicada" das duas telas mostram o nome selecionado antes da troca, a mutação que tira `setSelecionada(null)` de `trocarPeca` reprova um teste em cada tela, e o palco de verdade continua montado nos outros testes

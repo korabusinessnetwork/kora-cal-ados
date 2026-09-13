@@ -65,3 +65,4 @@
 2026-09-12 · R8-A63 · a tela de uma peça desenha um controle por parâmetro e manda todos ao glTF, e o valor herdado entre peças de mesmo parâmetro virou achado · 33d8573
 2026-09-13 · R9-A67 · trocar de peça na tela de uma peça volta os parâmetros ao padrão da peça nova · COMMIT
 2026-09-13 · R9-A68 · milímetros e passo do controle de parâmetro definidos num lugar só, com HTML idêntico · COMMIT
+2026-09-13 · R9-A70 · o campo de hex diz o que falta, igual nas duas telas, e hex sem # ganha frase própria · COMMIT
