@@ -8,7 +8,7 @@
 // Ela não decide nada sozinha: quem monta é `montarDaTela`, que é puro e tem teste. O componente
 // guarda estado e desenha.
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AVISO_DE_COPIA_NEGADA, useCopiaDeTexto } from '../lib/copia/useCopiaDeTexto';
 
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
@@ -25,6 +25,11 @@ import {
   type EscolhaDaTela,
 } from './composicaoDaTela';
 import { CampoDeCorDaCategoria, idDoCampoDeCor } from './CampoDeCorDaCategoria';
+import {
+  armazenamentoDoNavegador,
+  guardarComposicao,
+  lerComposicaoGuardada,
+} from './composicaoGuardada';
 import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
 
 const CATALOGO = catalogoDeProva();
@@ -47,7 +52,14 @@ const PASSOS_DO_PARAMETRO = 40;
 type ResultadoDaColagem = { tipo: 'recusada'; motivo: string } | { tipo: 'aceita' };
 
 export function TelaDaComposicao() {
-  const [escolhas, setEscolhas] = useState(() => escolhasDaComposicao(DEMO));
+  // A montagem guardada vem primeiro, e o calçado de prova é o que sobra quando não há o que
+  // restaurar. Ler dentro do inicializador, e não num efeito, é o que evita a tela desenhar o
+  // calçado de prova por um quadro e trocar em seguida: o palco recarregaria o glTF duas vezes.
+  const [escolhas, setEscolhas] = useState(
+    () =>
+      (FORMA ? lerComposicaoGuardada(armazenamentoDoNavegador(), FORMA, CATALOGO) : null) ??
+      escolhasDaComposicao(DEMO),
+  );
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [estado, setEstado] = useState<EstadoDoPalco>('carregando');
 
@@ -69,6 +81,13 @@ export function TelaDaComposicao() {
   // dentro de `mudar()` como já foi: com a regra amarrada ao texto, o caminho novo que mudasse a
   // composição sem passar por `mudar()` não teria como esquecer de apagar o aviso.
   const copia = useCopiaDeTexto(textoDaComposicao);
+
+  // Grava o mesmo texto do botão de copiar, e só quando ele muda. Amarrado ao texto, e não a cada
+  // `setEscolhas`, pelo mesmo motivo do descarte do aviso acima: um caminho novo que mude a
+  // composição não tem como esquecer de gravar.
+  useEffect(() => {
+    if (textoDaComposicao !== '') guardarComposicao(armazenamentoDoNavegador(), textoDaComposicao);
+  }, [textoDaComposicao]);
 
   const aoSelecionar = useCallback((nome: string | null) => setSelecionada(nome), []);
 
@@ -147,9 +166,9 @@ export function TelaDaComposicao() {
             />
           ))}
 
-          {/* A composição não é gravada em lugar nenhum, não existe tabela para ela, então sem
-              isto fechar a aba perde a montagem inteira. O que sai daqui é o MESMO JSON que a
-              API recebe. */}
+          {/* A composição fica só neste navegador (`composicaoGuardada.ts`), não existe tabela
+              para ela, então levá-la a outro lugar é por aqui. O que sai daqui é o MESMO JSON que
+              a API recebe. */}
           <div className="palco3d__saida">
             <button type="button" className="palco3d__copiar" onClick={copia.copiar}>
               Copiar composição

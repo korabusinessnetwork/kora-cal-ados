@@ -362,6 +362,26 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       desmontar e conferia que o título não mudava, só que numa árvore desmontada o título não muda
       com limpeza ou sem ela. Agora o teste afirma a identidade da função removida. O chunk
       principal subiu de 218,97 kB para **219,12 kB**, 0,15 kB, que é o ouvinte.
-- [ ] R7-A57 A composição sobrevive ao F5 | trilha: produto | depende: R7-A56 | pronto quando: escolher peças, cores e parâmetro e recarregar devolve a MESMA montagem, uma gravação inválida ou de outra forma é recusada pelo mesmo `validarComposicao` que a colagem usa e a tela cai no padrão sem quebrar, `localStorage` indisponível não derruba a tela, e existe teste dos três casos (volta, recusa, ausência)
+- [x] R7-A57 A composição sobrevive ao F5 | trilha: produto | depende: R7-A56 | pronto quando: escolher peças, cores e parâmetro e recarregar devolve a MESMA montagem, uma gravação inválida ou de outra forma é recusada pelo mesmo `validarComposicao` que a colagem usa e a tela cai no padrão sem quebrar, `localStorage` indisponível não derruba a tela, e existe teste dos três casos (volta, recusa, ausência)
+      feito em COMMIT. Arquivo novo, `composicaoGuardada.ts`, que grava no `localStorage` o MESMO
+      JSON do botão de copiar e lê de volta por `escolhasDoTextoColado`, o caminho da colagem, que
+      confere a forma e passa pelo `validarComposicao`. A tela lê no inicializador do `useState`, e
+      não num efeito, para não desenhar o calçado de prova por um quadro e recarregar o glTF duas
+      vezes; e grava num efeito amarrado ao texto da composição, não a cada `setEscolhas`. Gravação
+      recusada é apagada. Armazenamento que não existe ou que lança, ao ler a propriedade, ao ler
+      ou ao gravar, devolve o padrão e não derruba nada. Sete testes da função com armazenamento
+      falso e três da tela em jsdom (volta depois de remontar, gravação de outra forma cai no
+      padrão, `localStorage` que lança). O `beforeEach` do teste da tela agora limpa o
+      `localStorage`, senão cada teste abriria com o calçado do anterior. Cinco mutações mortas à
+      mão: não restaurar, não gravar, não apagar a recusa, tirar o `try` da leitura do
+      `window.localStorage` e tirar o `try` da gravação. Conferido no navegador: cabedal pintado de
+      `#22aa44`, F5 devolveu `#22aa44` (antes da mudança devolvia `#1f4fa8`); gravação com
+      `forma_id` inválido, F5 abriu no `#1f4fa8` com as três zonas e a gravação ruim foi trocada
+      pela do padrão. Custo medido: 197 gravações em 9,5 ms, **0,048 ms por gravação**. O chunk
+      principal ficou em 219,12 kB, porque a tela entra por `import()` tardio. **Achado de
+      passagem, anterior a este item e registrado para a reauditoria:** 200 eventos de cor
+      disparados no MESMO tique fazem o React lançar "Maximum update depth exceeded" três vezes,
+      e isso acontece igual com a mudança guardada (`git stash`), então não é deste item. Com um
+      evento por quadro, como um arrasto de verdade, 120 eventos deram zero erros.
 - [ ] R7-A58 Todos os parâmetros da peça aparecem, e mexer num não apaga o outro | trilha: robustez | depende: nenhum | pronto quando: uma peça com dois parâmetros desenha dois controles, arrastar um preserva o valor do outro, e existe teste com peça de dois parâmetros no acervo de teste que reprova tanto o `[0]` quanto a substituição do objeto
 - [ ] R7-A54 A tela da composição vira tela mais painéis | trilha: qualidade | depende: R7-A55, R7-A57, R7-A58 | pronto quando: `TelaDaComposicao.tsx` tem menos de 200 linhas, cada painel extraído mora no seu arquivo com o seu `README.md` de diretório em dia, os seis testes de comportamento da tela continuam passando SEM alteração, e o build e o `tsc` continuam limpos

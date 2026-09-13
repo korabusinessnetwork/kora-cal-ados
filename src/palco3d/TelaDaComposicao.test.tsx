@@ -19,6 +19,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TelaDaComposicao } from './TelaDaComposicao';
 import { catalogoDeProva } from '../lib/acervo/acervoDeProva';
+import { CHAVE_DA_COMPOSICAO } from './composicaoGuardada';
 
 /** A forma que a tela monta, lida do acervo e não escrita à mão: id errado aqui vira teste que
     prova o caminho da recusa achando que prova o do sucesso, e foi o que aconteceu na primeira
@@ -36,6 +37,10 @@ let gritos: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  // A tela grava a composição no `localStorage` desde o R7-A57, e o do jsdom sobrevive entre os
+  // testes do arquivo. Sem limpar, cada teste abriria com o calçado que o anterior deixou, e a
+  // contraprova "abre com o calçado de prova" passaria ou falharia conforme a ordem.
+  window.localStorage.clear();
   container = document.createElement('div');
   document.body.appendChild(container);
   raiz = createRoot(container);
@@ -283,5 +288,64 @@ describe('o anúncio do resultado da colagem (A55)', () => {
 
     expect(painelDeColar().querySelector('[role="alert"]')).toBe(null);
     expect(anunciaveis(painelDeColar())).toHaveLength(1);
+  });
+});
+
+/** Desmonta e monta a tela de novo, que é o que um F5 faz com o estado do React. */
+function recarregar() {
+  act(() => {
+    raiz.unmount();
+    raiz = createRoot(container);
+    raiz.render(<TelaDaComposicao />);
+  });
+}
+
+describe('a composição sobrevive ao F5 (R7-A57)', () => {
+  it('a montagem colada continua em cena depois de recarregar', () => {
+    escrever(areaDeColar(), JSON.stringify(COMPOSICAO_VALIDA));
+    clicar(botaoDe('Montar o que está colado'));
+    const antes = zonasNaTela();
+    expect(antes).toContainEqual({ zona: 'sola', peca: 'prova-sola-tratorada' });
+
+    recarregar();
+
+    expect(zonasNaTela()).toEqual(antes);
+  });
+
+  it('gravação de outra forma é recusada, e a tela abre no calçado de prova', () => {
+    window.localStorage.setItem(
+      CHAVE_DA_COMPOSICAO,
+      JSON.stringify({ ...COMPOSICAO_VALIDA, forma_id: 'forma-que-nao-existe' }),
+    );
+
+    recarregar();
+
+    expect(zonasNaTela()).toEqual([
+      { zona: 'sola', peca: 'prova-sola-plana' },
+      { zona: 'cabedal', peca: 'prova-cabedal-baixo' },
+      { zona: 'cadarco', peca: 'prova-cadarco-reto' },
+    ]);
+  });
+
+  it('localStorage que lança não derruba a tela', () => {
+    // Dados de site bloqueados: ler a própria propriedade `localStorage` lança no navegador.
+    const descritor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get() {
+        throw new DOMException('bloqueado', 'SecurityError');
+      },
+    });
+
+    try {
+      recarregar();
+      expect(zonasNaTela()).toHaveLength(3);
+      // E mudar a composição, que é quando a tela tenta gravar, também não derruba.
+      escrever(areaDeColar(), JSON.stringify(COMPOSICAO_VALIDA));
+      clicar(botaoDe('Montar o que está colado'));
+      expect(zonasNaTela()).toContainEqual({ zona: 'sola', peca: 'prova-sola-tratorada' });
+    } finally {
+      if (descritor) Object.defineProperty(window, 'localStorage', descritor);
+    }
   });
 });
