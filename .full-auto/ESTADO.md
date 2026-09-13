@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: EXECUTANDO
+status: CONCLUIDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 ## Modo atual: refino (desde 2026-09-12)
@@ -80,8 +80,11 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
 - **Rodada 10: FECHADA em 2026-09-13**, 1 de 1 entregue, nenhum revertido. Baseline verde nas duas
   pontas: 1346 testes, 58 no banco, 25 no navegador, `tsc` limpo, build sem aviso, `npm audit` em
   zero. O hex curto sobe na forma longa, que o seletor de cor aceita.
-- **Próximo passo:** reauditoria final (rodada 11). Sem nada novo acima do corte, `status:
-  CONCLUIDO` e `RELATORIO-FINAL.md` do refino.
+- **Rodada 11 (reauditoria final), 2026-09-13:** nenhum achado novo acima do corte. **Refino
+  CONCLUIDO.** Verificação final a partir de `npm ci`: `tsc` limpo, build sem aviso, 1346 testes, 58
+  no banco, 25 no navegador, `npm audit` em zero, e a tela da composição aberta no navegador com o
+  calçado de 3 zonas. Relatório em `RELATORIO-FINAL.md`, na parte de cima.
+- **Para retomar:** `/full-automatico-refino continuar`, partindo do backlog listado no relatório.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

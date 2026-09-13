@@ -1,3 +1,142 @@
+# Relatório final do refino
+
+**Projeto:** Kora Calçados (codinome)
+**Período do refino:** 2026-09-12 a 2026-09-13
+**Branch:** `refino/kora-calcados`, a partir de `08e4d1d`. **Sem merge em `main` e sem deploy**: os
+dois são decisão sua.
+**Motivo do fim:** a reauditoria da rodada 11 não achou nada novo acima do corte, e o que resta no
+backlog está todo abaixo dele.
+
+O relatório da construção, que veio antes do refino, continua inteiro abaixo deste.
+
+## 1. Em uma frase
+
+Dez rodadas, **56 itens entregues e nenhum revertido**, com o baseline verde na abertura e no
+fechamento de cada rodada: o configurador e o esboço ficaram mais difíceis de enganar (cor, parâmetro,
+seleção, colagem, recomeço), mais legíveis para quem usa teclado, leitor de tela e celular, e os
+testes passaram a provar o que diziam provar.
+
+## 2. Como conferir em 1 comando
+
+```bash
+npm ci && npm run typecheck && npm run build && npm test
+```
+
+Na última verificação, a partir de instalação limpa: `tsc` limpo, build sem erro e sem aviso,
+1346 testes passando e 58 pulados. Os 58 pulados são os do banco real, que rodam à parte com
+`npm run test:banco` (58 de 58) e pedem `.env.local`. Os de navegador rodam com
+`npm run test:navegador` (25 de 25). Depois, `npm run dev` e <http://localhost:5173/?tela=composicao>,
+que abriu com o calçado montado de 3 zonas.
+
+## 3. As rodadas
+
+| Rodada | Itens | Revertidos | Destaque |
+|---|---|---|---|
+| 1 | 8 | 0 | cena 3D ao lado dos controles, asset-base vazio vira falha nomeada |
+| 2 | 8 | 0 | confirmação ao gravar zona, contagem de marcados em região viva |
+| 3 | 6 | 0 | digitar o hex no configurador, com a regra do hex num lugar só |
+| 4 | 6 | 0 | o calçado antes da lista de zonas a 375 px, um rodapé de saídas para as quatro telas |
+| 5 | 6 | 0 | WebGL negado vira estado em vez de página em branco, varredura de RLS nas migrations |
+| 6 | 6 | 0 | rede de proteção na raiz, a peça clicada mostra nó e zona |
+| 7 | 6 | 0 | índices de chave estrangeira (migration pendente, P05), a composição sobrevive ao F5 |
+| 8 | 5 | 0 | voltar ao calçado de prova com Desfazer, build sem aviso, textos sem travessão |
+| 9 | 4 | 0 | trocar de peça não carrega valor da anterior, frase do hex igual nas duas telas |
+| 10 | 1 | 0 | hex curto sobe na forma longa, que o seletor de cor aceita |
+
+O detalhe de cada item, com commit, mutações e limites de verificação, está em `REFINO-RODADAS.md`,
+e cada linha de `TAREFAS.md` tem a nota de como foi conferida.
+
+## 4. O que melhorou, com números medidos
+
+| Medida | Abertura do refino | Fim do refino |
+|---|---|---|
+| Testes verdes | 1047, 58 pulados, 70 arquivos | **1346**, 58 pulados, 108 arquivos |
+| Testes contra o banco real | 58 de 58 | 58 de 58 |
+| Testes em navegador | 25 | 25 |
+| `npm run build` | sem erro, **com aviso de chunk** | **sem erro e sem aviso** |
+| Chunk principal | 455,03 kB (gzip 131,84 kB) | **219,52 kB** (gzip 70,35 kB) |
+| Chunk do three.js, sob demanda | 618,87 kB | 619,63 kB |
+| CSS | 20,76 kB | 25,14 kB |
+| `npm audit` | 0 | 0 |
+| Arquivos `.ts`/`.tsx` | 169 | 226 |
+| Linhas de TypeScript | 25.598 | 33.686 |
+| `any`, `@ts-ignore`, `catch` vazio | zero | zero |
+
+O CSS cresceu 4,38 kB e o three.js 0,76 kB: é o peso do que passou a existir (estados de erro,
+regiões vivas, alvos de toque, painéis novos), dito aqui para não parecer ganho. O chunk principal
+caiu à metade porque a área protegida passou a entrar por `import()` tardio (rodada 6). O tempo de build variou
+entre 388 ms e 695 ms nas medições, na mesma máquina fazendo outras coisas, e não é número de ganho.
+
+## 5. O que foi revertido
+
+Nada. Nenhum item de nenhuma rodada precisou de `git revert`.
+
+## 6. O que está atrás de flag ou mockado
+
+Nada atrás de flag: nenhum item alterou fluxo principal de um jeito que pedisse chave de
+configuração. Mockado só em teste: o dublê do palco 3D nos testes das duas telas (rodada 9), que
+desenha o palco de verdade por dentro e existe só para entregar a seleção que o jsdom não consegue
+clicar.
+
+## 7. O que eu disse errado e corrigi às claras
+
+- **Rodadas 1 a 7:** a linha do build dizia "limpo" com o aviso de chunk lá, porque eu lia só o fim
+  da saída. Corrigido no R8-A61, nas oito colunas, sem apagar.
+- **R8-A62 e R8-A63:** critérios escritos largos demais, corrigidos na nota de cada um.
+- **R9-A69:** a primeira contraprova exigia uma moldura que some de propósito sem WebGL.
+
+## 8. Limites que continuam valendo
+
+- **O editor logado nunca foi conferido no navegador pelo refino**, porque eu não preencho
+  credencial. O que mudou nele foi conferido por teste.
+- **O seletor preto do R10-A73 não foi visto**: este Chrome mostra a cor com a forma curta e só
+  avisa no console.
+- **Nenhuma sessão rodou com o hook de continuidade**, que continua sendo a pendência P01.
+
+## 9. Backlog restante, por score (todos abaixo do corte de 2)
+
+| Item | Eixo | Score | O que é |
+|---|---|---|---|
+| A14 | qualidade | 1 | não existe CI; ligar o Actions e cadastrar segredos é seu (I05) |
+| A65 | ux | 1 | o foco cai no `body` depois de um login recusado |
+| A66 | ux | 1 | `?tela=` com erro de digitação abre o login sem dizer nada |
+| A71 | ux | 1 | a colagem recusada fala de parâmetro em metros, a tela em milímetros |
+| A13 | qualidade | 0 | não existe linter |
+| A74 | ux | 0 | o editor logado não diz "falta o #" (evidência só de código) |
+| A35 | ux | -1 | o canvas 3D não gira por teclado |
+| A64 | robustez | -1 | nenhuma chamada de rede tem tempo-limite (evidência só de código) |
+| A75 | ux | -1 | a roda de cor do esboço sobe minúsculo |
+| A72 | robustez | -2 | chunk tardio sumido depois de deploy mostra a mensagem crua (não visto) |
+
+## 10. O que você precisa decidir
+
+**Pendências** (`PENDENCIAS-DO-MATHEUS.md`), na ordem:
+
+1. **P01**, alta: instalar o hook de continuidade.
+2. **P02**, alta: revogar a chave de API da passada dirigida.
+3. **P04**, média: apagar 8 tenants de teste órfãos no Supabase real.
+4. **P05**, média: aplicar a migration dos dois índices no Supabase real.
+5. **P03**, baixa: normalizar o travessão no repositório inteiro. O código de produção já está sem
+   travessão desde o R8-A62, e o que sobra é documentação e teste.
+
+E o merge da branch `refino/kora-calcados` em `main`, que é seu.
+
+**Ideias de produto** (`IDEIAS-DE-PRODUTO.md`), que não executei porque são decisão de produto:
+
+- **I01**, guardar a composição do configurador numa tabela, com nome e reabertura.
+- **I02**, apagar e remarcar zona pelo painel.
+- **I03**, busca e filtro na lista de modelos, quando houver tenant com dezenas.
+- **I04**, seletor visual de cor no editor de zonas.
+- **I05**, ligar integração contínua.
+- **I06**, o editor real mostrar a chamada de API equivalente, como o esboço mostra.
+
+## 11. Como retomar
+
+`/full-automatico-refino continuar`. A reauditoria parte do backlog acima e do que tiver mudado no
+código desde `refino/kora-calcados`.
+
+---
+
 # Relatório final do Full Automático
 
 **Projeto:** Kora Calçados (codinome)

@@ -1377,3 +1377,31 @@ valor: 3 | esforço: 1 | risco: 1 | **score: 3**
    quente no meio de uma edição.
 3. **Dependências atrasadas.** `npm outdated` lista os mesmos pacotes a uma minor de distância, com
    `npm audit` em zero, e isso já foi julgado duas vezes.
+
+
+---
+
+## Reauditoria da rodada 11, a final (2026-09-13)
+
+De onde veio a lista: o que a rodada 10 mudou (a cor que os dois campos de texto sobem), os outros
+caminhos por onde uma cor chega ao seletor, a ordem de tabulação da tela da composição, duplo clique
+no recomeço e no Desfazer, e o backlog.
+
+**Nenhum achado novo acima do corte.** O refino termina aqui, pela regra da skill.
+
+### Abaixo do corte, registrados
+
+- **A75 | ux | a roda de cor do esboço sobe minúsculo, e a lista de zonas mistura as caixas.** Levar
+  a roda a `#abcdef` deixa a lista com `#abcdef` no meio de `#2E2E33` e `#C9C4B8`. É só a caixa: a
+  cor é a mesma, e a API devolve maiúsculo de qualquer jeito. valor 1 | esforço 1 | risco 1 | score -1.
+
+### O que eu achei que era defeito e não era (rodada 11)
+
+1. **A forma curta chegaria ao seletor por outro caminho.** A composição colada e a guardada no
+   navegador entram por `escolhasDaComposicao`, que recebe a composição já validada, e o validador
+   devolve a forma longa. O único caminho curto era a digitação, que a rodada 10 fechou.
+2. **A tela da composição teria ordem de tabulação fora da ordem visual.** Nenhum `tabindex`
+   positivo, e nenhum controle focável cai mais de 200 px acima do anterior.
+3. **Duplo clique no recomeço e no Desfazer deixaria a montagem num estado do meio.** Dois cliques
+   em cada, seguidos: a sola volta à cor de antes do recomeço, o Desfazer some e o botão de recomeço
+   fica habilitado, que é o mesmo resultado de um clique em cada.
