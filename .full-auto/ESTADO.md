@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: AGUARDANDO_MATHEUS
+status: CONCLUIDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 ## Modo atual: refino (desde 2026-09-12)
@@ -178,3 +178,7 @@ rodada, e volta a importar na próxima.
   sobrou nada útil para fazer sem essa resposta.
 - **Motivo do status:** AGUARDANDO_MATHEUS, pergunta única: destravar a T09 ou manter adiada.
 - **Para retomar:** registrar a resposta em `DECISOES.md`, voltar para `EXECUTANDO` e seguir.
+- **Resposta, 2026-09-13:** `continuar` sem escolha. Segui com a opção A (D11): T09, T05 e T06 continuam
+  adiadas e a construção volta a `CONCLUIDO`. Verificação no fechamento: `tsc` limpo, build sem aviso,
+  1346 testes passando e 58 pulados.
+- **Para reabrir a T09:** responder B e rodar `/full-automatico continuar`.
