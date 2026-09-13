@@ -1145,3 +1145,54 @@ ganharam a conferência do passo, que nenhum teste olhava.
 - **A69:** só mexe em teste, e por isso não teve conferência no navegador.
 - **O editor logado continua sem conferência no navegador**, pelo mesmo motivo de sempre: eu não
   preencho credencial.
+
+---
+
+## Rodada 10, fechada em 2026-09-13
+
+**Lote:** 1 item, em `TAREFAS.md`, seção "Refino, rodada 10". A reauditoria só achou um acima do
+corte, e está dito lá.
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R10-A73 o seletor de cor recebe sempre a forma longa do hex | robustez | `65a906f` | entregue |
+
+Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71**, **A72** e **A74**.
+
+### O que mudou de verdade
+
+**Hex curto sobe na forma longa (A73).** Digitar `#f00` subia `#f00` como veio, e esse texto virava o
+`value` do `<input type="color">` ao lado, que pela especificação só aceita `#rrggbb`. O console
+deste Chrome avisava (`The specified value "#22A" does not conform to the required format`). Agora as
+duas telas sobem o que `validarCor` devolve, a mesma função que a API usa. Conferido no navegador:
+`#0f0` no esboço, campo `#0f0`, seletor `#00ff00`, lista `#00FF00`; `#00f` na composição, seletor
+`#0000ff`; nenhum aviso de formato depois de uma marca no console.
+
+### As medidas, antes e depois
+
+| Medida | Abertura da rodada 10 | Fechamento |
+|---|---|---|
+| Testes verdes | 1343, 58 pulados | **1346**, 58 pulados |
+| Testes contra o banco real | 58 de 58 | **58 de 58** |
+| Testes em navegador | 25 | **25** |
+| `npm run build` | sem erro e sem aviso | **sem erro e sem aviso** |
+| Chunk principal | 219,52 kB | **219,52 kB** |
+| Chunk tardio da tela da composição | 28,12 kB | **28,10 kB** |
+| `npm audit` | 0 | **0** |
+| Avisos de formato do seletor de cor no console, digitando hex curto | 5 vistos | **0** |
+
+### Mutações
+
+3 mutações à mão, todas mortas. Nenhuma sobreviveu. Um teste que eu tinha escrito saiu antes do
+commit porque provava só o que ele mesmo passava ao componente.
+
+### Um teste mudou de expectativa, dito às claras
+
+- `CampoDeCorDaCategoria.test.tsx` esperava `#1A2` subindo como veio. Passou a esperar `#11AA22`,
+  porque é esse o comportamento que o item muda.
+
+### Limites de verificação
+
+- **O seletor preto não foi visto.** Este Chrome mostra a cor mesmo com a forma curta e só avisa no
+  console. A prova é o aviso, a especificação do HTML e os testes em jsdom.
+- **O editor logado continua sem conferência no navegador**: eu não preencho credencial.

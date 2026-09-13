@@ -67,4 +67,4 @@
 2026-09-13 · R9-A68 · milímetros e passo do controle de parâmetro definidos num lugar só, com HTML idêntico · 508c33f
 2026-09-13 · R9-A70 · o campo de hex diz o que falta, igual nas duas telas, e hex sem # ganha frase própria · 658a3dd
 2026-09-13 · R9-A69 · os testes das duas telas selecionam uma peça de verdade antes de conferir a limpeza, com o palco real montado · 0c4eb57
-2026-09-13 · R10-A73 · o seletor de cor e a lista do esboço recebem sempre a forma longa do hex · COMMIT
+2026-09-13 · R10-A73 · o seletor de cor e a lista do esboço recebem sempre a forma longa do hex · 65a906f
