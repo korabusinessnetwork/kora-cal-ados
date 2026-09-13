@@ -1241,3 +1241,92 @@ valor: 3 | esforço: 2 | risco: 1 | **score: 2**
    materiais. Não medido na GPU, porque o navegador desta máquina nega o contexto WebGL.
 4. **Alguma das quatro telas transbordaria na horizontal a 375 px.** Nenhuma: `scrollWidth` igual à
    largura da janela nas quatro.
+
+
+---
+
+## Achados da reauditoria da rodada 9 (2026-09-13)
+
+De onde veio a lista: o defeito que o R8-A63 achou e deixou de fora, a peça clicada que nenhum
+teste de tela consegue selecionar (vista no R8-A59), os arquivos que a rodada 8 criou lidos contra os
+que já existiam, as quatro telas a 375 px de novo, a colagem da composição forçada com entrada
+hostil, e os dois campos de hex forçados com o que ferramenta de design copia.
+
+### A67 | eixo: robustez | onde: `src/palco3d/TelaDoPalco3d.tsx:30` e `:56` (`trocarPeca`)
+
+**hoje:** a tela guarda o valor dos parâmetros por NOME, e `trocarPeca` não o zera. As duas solas e o
+cadarço têm um parâmetro `espessura`, com faixas diferentes. Conferido no navegador: sola tratorada
+em 50 mm, clique no cadarço reto, e a tela diz "50,0 mm, faixa 3,0 mm a 12,0 mm", com o controle
+parado em 12 e o glTF gerado com 0,05. É o BUG-019 desta tela: a tela da composição já resolveu o
+mesmo caso em `mudarEscolhaDaTela`, que apaga os parâmetros quando a peça muda.
+
+**depois:** trocar de peça volta os parâmetros ao padrão da peça nova, como na composição; clicar na
+peça que já está em cena não apaga nada; teste de tela que reprova o valor herdado.
+
+**evidência:** navegador, na rodada 8 (R8-A63), e leitura de `trocarPeca`.
+
+valor: 4 | esforço: 1 | risco: 1 | **score: 5**
+
+### A68 | eixo: qualidade | onde: `src/palco3d/ParametrosDaPeca.tsx:19,85` e `ControlesDeParametro.tsx:14,62`
+
+**hoje:** `milimetros` e `PASSOS_DO_PARAMETRO` estão escritos duas vezes, e o R8-A63 é que fez a
+segunda cópia. As duas telas mostram o mesmo dado, e a regra "um conceito, um lugar" do ADR-003
+existe justamente para que mudar a unidade ou o passo numa tela não deixe a outra para trás.
+
+**depois:** uma definição só, importada pelos dois componentes, com o HTML das duas telas igual.
+
+**evidência:** busca por `milimetros` e `PASSOS_DO_PARAMETRO` em `src/`: duas definições de cada.
+
+valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A70 | eixo: ux | onde: `src/esboco/PainelDeZonas.tsx:127` e `src/palco3d/CampoDeCorDaCategoria.tsx:107`
+
+**hoje:** o campo de hex do esboço diz "Cor incompleta" para QUALQUER texto recusado, e o da
+composição já separa "incompleta" de "isso não é um hex" (`mensagemDoHex`). Conferido no navegador,
+no esboço: `22aa44`, que é o formato que o Figma copia, fica recusado com "Cor incompleta. O formato
+é #RGB ou #RRGGBB". A cor está completa, falta o `#`, e nenhuma das duas telas diz isso.
+
+**depois:** as duas telas usam a mesma escolha de frase, e texto que só precisa do `#` na frente
+ganha uma frase própria dizendo exatamente isso. Aceitar sem `#` ficou de fora de propósito: a API
+recusa, e o editor aceitar o que a API recusa é o que o princípio nº1 proíbe.
+
+**evidência:** navegador a 375 px no esboço (`aria-invalid="true"` com a frase acima), e leitura dos
+dois arquivos.
+
+valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+### A69 | eixo: qualidade | onde: `src/palco3d/TelaDaComposicao.test.tsx:188`
+
+**hoje:** o teste "trocar de peça limpa a peça clicada" nunca tem peça clicada: em jsdom não há canvas,
+então "Nada selecionado" é verdade com a limpeza ou sem ela. Visto no R8-A59, onde a mutação que
+tirava a limpeza sobreviveu aos testes de tela e só morreu no teste do hook. A tela de uma peça tem a
+mesma limpeza em `trocarPeca` e nenhum teste dela.
+
+**depois:** os testes de tela trocam o palco por um dublê que entrega o `aoSelecionar`, selecionam
+de verdade, e só então trocam de peça; a mutação que tira a limpeza morre nas duas telas.
+
+**evidência:** a mutação sobrevivente registrada no R8-A59.
+
+valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+### Abaixo do corte, registrados
+
+- **A71 | ux | a colagem recusada fala de parâmetro em metros, e a tela em milímetros.** Colar uma
+  espessura fora da faixa dá "fora da faixa aceita (0.01 a 0.04)", enquanto o controle ao lado diz
+  "10,0 mm a 40,0 mm". A mensagem é do validador que a API também usa, e quem cola JSON está lendo
+  metros no próprio JSON. valor 2 | esforço 1 | risco 1 | score 1.
+- **A72 | robustez | chunk tardio que some depois de um deploy mostra a mensagem crua.** Com o
+  `import()` das telas do 3D, uma aba aberta antes de um deploy pede um arquivo que já não existe, e
+  `RedeDeProtecao` mostra o texto do erro do navegador. **Não visto**: nada está publicado. Evidência
+  só de código. valor 2 | esforço 2 | risco 2 | score -2.
+- **A35, A64, A65 e A66** seguem com as notas da rodada 8.
+
+### O que eu achei que era defeito e não era (rodada 9)
+
+1. **Colar entrada hostil travaria ou quebraria a tela da composição.** JSON de 940 kB, 2 MB de
+   texto que não é JSON (22 ms), `1e308`, parâmetro desconhecido e lista de peças vazia: todos
+   recusados com frase clara, sem travar.
+2. **Algum botão novo da rodada 8 ficaria abaixo de 24 px a 375 px.** Só as faixas de parâmetro
+   ficam, e essa suspeita já morreu na rodada 8.
+3. **O painel de recomeço do A59 teria contraste baixo.** Varridas as quatro telas: nenhuma falha.
+4. **Algum `outline: none` teria entrado.** Nenhum em folha nenhuma.

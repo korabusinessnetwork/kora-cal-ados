@@ -71,10 +71,10 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   nenhum texto que chega a alguém usa travessão, e a tela de uma peça desenha um controle por
   parâmetro. Duas mutações sobreviveram no meio e morrem agora, dois critérios foram corrigidos às
   claras, e um defeito novo apareceu no A63. Tudo em `REFINO-RODADAS.md`.
-- **Próximo passo:** Fase 5, rodada 9. A reauditoria parte do achado novo do R8-A63, que já tem
-  evidência de navegador: na tela de uma peça, o valor de `espessura` passa da sola para o cadarço
-  com faixa diferente, e a tela mostra 50,0 mm numa faixa de 3 a 12 mm. Entra também a peça clicada
-  que nenhum teste de tela consegue selecionar (vista no A59), e o backlog: A35, A64, A65 e A66.
+- **Rodada 9: ABERTA em 2026-09-13.** Lote de 4 itens em `TAREFAS.md`, abaixo do orçamento porque a
+  reauditoria só achou quatro acima do corte, e está dito lá.
+- **Próximo passo:** executar R9-A67 (valor de parâmetro herdado entre peças na tela de uma peça),
+  depois A68, A70 e A69, cada um com baseline completo e mutações.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

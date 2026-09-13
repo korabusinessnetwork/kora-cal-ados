@@ -511,3 +511,23 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       0,05. É o BUG-019 desta tela. Navegador depois do item: as cinco peças com um controle cada, e
       levar cada um ao mínimo atualiza a medida. Baseline: 1329 testes, 25 no navegador, `tsc` e
       build sem aviso, `npm audit` em zero.
+
+
+## Refino, rodada 9 (aberta em 2026-09-13)
+
+Lote de **4 itens**, abaixo dos 5 do orçamento, e é de propósito: a reauditoria, registrada em
+`AUDITORIA.md`, seção "Achados da reauditoria da rodada 9", só achou quatro coisas acima do corte, e
+a regra é não inventar problema para encher a lista. Nenhum com risco 4 ou 5. Um item por eixo com
+achado acima do corte: robustez (A67), qualidade (A68 e A69), ux (A70). Produto não tem achado acima
+do corte nesta rodada.
+
+Ordem pelo score. O A68 vai antes do A70 e do A69 também por dependência de arquivo: ele mexe no
+componente que o teste de tela do A67 lê, e fica pronto antes de o A69 trocar o palco por um dublê.
+
+Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (colagem fala em metros) e
+**A72** (chunk sumido depois de deploy, evidência só de código).
+
+- [ ] R9-A67 Trocar de peça não carrega o valor da peça anterior | trilha: robustez | depende: nenhum | pronto quando: na tela de uma peça, levar a sola tratorada ao máximo e clicar no cadarço mostra o cadarço no padrão dele, dentro da faixa, e o glTF sai com o padrão; clicar na peça que já está em cena não apaga o valor mexido; existe teste de tela que reprova o valor herdado; conferido no navegador
+- [ ] R9-A68 Milímetros e passo do controle definidos num lugar só | trilha: qualidade | depende: R9-A67 | pronto quando: `milimetros` e `PASSOS_DO_PARAMETRO` têm uma definição cada em `src/`, importada por `ControlesDeParametro.tsx` e `ParametrosDaPeca.tsx`, a função tem teste próprio, e o HTML das duas telas com o acervo de prova é idêntico antes e depois, por fotografia de teste descartável
+- [ ] R9-A70 O campo de hex diz o que falta, e diz igual nas duas telas | trilha: ux | depende: nenhum | pronto quando: o esboço deixa de dizer "incompleta" para texto que nunca vira cor, as duas telas escolhem a frase pela mesma função, um hex de 3 ou 6 dígitos sem `#` ganha a frase "falta o # no começo" com o texto já corrigido de exemplo, o campo continua recusando sem `#` (a API recusa), e há testes da frase e do campo nas duas telas
+- [ ] R9-A69 Os testes de tela selecionam uma peça de verdade antes de conferir a limpeza | trilha: qualidade | depende: R9-A67 | pronto quando: os testes de "trocar de peça limpa a peça clicada" das duas telas mostram o nome selecionado antes da troca, a mutação que tira `setSelecionada(null)` de `trocarPeca` reprova um teste em cada tela, e o palco de verdade continua montado nos outros testes
