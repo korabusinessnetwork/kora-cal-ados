@@ -21,6 +21,33 @@ import { TelaDaComposicao } from './TelaDaComposicao';
 import { catalogoDeProva } from '../lib/acervo/acervoDeProva';
 import { CHAVE_DA_COMPOSICAO } from './composicaoGuardada';
 
+// O palco de verdade continua montado, e sem WebGL cai em `contexto-negado` como sempre. O dublê só
+// guarda o `aoSelecionar` que a tela entrega, porque em jsdom não há canvas para clicar numa peça, e
+// sem isso "Nada selecionado" seria verdade com a limpeza da seleção ou sem ela: a mutação que tirava
+// a limpeza sobreviveu aos testes de tela no R8-A59 (R9-A69).
+const palco = vi.hoisted(() => ({ aoSelecionar: null as ((nome: string | null) => void) | null }));
+
+vi.mock('./PalcoDeModelo3d', async (importOriginal) => {
+  const real = await importOriginal<typeof import('./PalcoDeModelo3d')>();
+
+  function PalcoQueGuardaASelecao(props: Parameters<typeof real.PalcoDeModelo3d>[0]) {
+    palco.aoSelecionar = props.aoSelecionar;
+
+    return <real.PalcoDeModelo3d {...props} />;
+  }
+
+  return { ...real, PalcoDeModelo3d: PalcoQueGuardaASelecao };
+});
+
+/** O que o clique numa malha do canvas faria: a tela recebe o nome do nó. */
+function selecionarNoPalco(nome: string) {
+  if (palco.aoSelecionar === null) throw new Error('A tela não entregou `aoSelecionar` ao palco.');
+  const aoSelecionar = palco.aoSelecionar;
+  act(() => {
+    aoSelecionar(nome);
+  });
+}
+
 /** A forma que a tela monta, lida do acervo e não escrita à mão: id errado aqui vira teste que
     prova o caminho da recusa achando que prova o do sucesso, e foi o que aconteceu na primeira
     versão deste arquivo. */
@@ -185,7 +212,19 @@ describe('a tela do calçado montado (A49)', () => {
     expect(zonasNaTela()).toContainEqual({ zona: 'cabedal', peca: 'prova-cabedal-cano-alto' });
   });
 
+  it('o dublê não troca o palco: o de verdade está montado e respondeu sem WebGL', () => {
+    // Contraprova do dublê. Se ele deixasse de desenhar o palco real, os testes de tela passariam a
+    // provar uma tela sem cena, e ninguém veria. A frase do `contexto-negado` só aparece porque o
+    // palco de verdade tentou criar o contexto e avisou a tela; sem ele, a tela ficaria em
+    // "carregando". A moldura não serve de prova: ela some de propósito nesse estado (A48).
+    expect(container.querySelector('.palco3d__estado')?.textContent).toContain('WebGL');
+  });
+
   it('trocar de peça limpa a peça clicada, que era de um calçado que saiu de cena', () => {
+    selecionarNoPalco('prova-sola-plana');
+    // Contraprova: sem ela, a afirmação de baixo seria verdade numa tela que nunca selecionou nada.
+    expect(container.querySelector('.palco3d__endereco')?.textContent).toContain('prova-sola-plana');
+
     clicar(botaoDe('Sola tratorada'));
 
     expect(container.querySelector('.palco3d__vazio')?.textContent).toContain('Nada selecionado');
@@ -374,6 +413,8 @@ describe('o caminho de volta ao calçado de prova (R8-A59)', () => {
 
   it('volta ao calçado de prova, larga a peça clicada, avisa e leva o foco ao Desfazer', () => {
     colarAComposicaoValida();
+    selecionarNoPalco('prova-sola-tratorada');
+    expect(container.querySelector('.palco3d__endereco')?.textContent).toContain('prova-sola-tratorada');
     const voltar = botaoDe('Voltar ao calçado de prova');
     expect(voltar.disabled).toBe(false);
 

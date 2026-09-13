@@ -578,4 +578,19 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
       o chunk principal foi de 219,11 kB para 219,52 kB (gzip 70,19 para 70,35 kB); o da composição
       foi de 28,38 kB para 28,12 kB. Baseline: 1340 testes, 25 no navegador, `tsc` limpo, build sem
       aviso, `npm audit` em zero.
-- [ ] R9-A69 Os testes de tela selecionam uma peça de verdade antes de conferir a limpeza | trilha: qualidade | depende: R9-A67 | pronto quando: os testes de "trocar de peça limpa a peça clicada" das duas telas mostram o nome selecionado antes da troca, a mutação que tira `setSelecionada(null)` de `trocarPeca` reprova um teste em cada tela, e o palco de verdade continua montado nos outros testes
+- [x] R9-A69 Os testes de tela selecionam uma peça de verdade antes de conferir a limpeza | trilha: qualidade | depende: R9-A67 | pronto quando: os testes de "trocar de peça limpa a peça clicada" das duas telas mostram o nome selecionado antes da troca, a mutação que tira `setSelecionada(null)` de `trocarPeca` reprova um teste em cada tela, e o palco de verdade continua montado nos outros testes
+      feito em COMMIT. Os dois testes de tela trocam `PalcoDeModelo3d` por um dublê que guarda o
+      `aoSelecionar` que a tela entrega e desenha o palco de verdade por dentro, então sem WebGL ele
+      continua caindo em `contexto-negado` como antes. Com isso os testes selecionam de verdade: na
+      composição, "trocar de peça limpa a peça clicada" mostra `prova-sola-plana` no endereço antes
+      da troca, e o teste do R8-A59 que dizia "larga a peça clicada" também passa a ter peça clicada
+      para largar; na tela de uma peça, que não tinha teste nenhum da limpeza, entra um. Mutações: 5,
+      todas mortas no fim (tela de uma peça sem largar a seleção: 1 reprova; composição sem largar: 2
+      reprovam, a troca de peça e o recomeço; dublê que não guarda: 4). **Duas sobreviveram no
+      meio, e são do próprio item**: o dublê trocado por `return null`, sem palco nenhum, deixava as
+      duas suítes verdes, e o critério "o palco de verdade continua montado" não tinha teste. Cada
+      tela ganhou uma contraprova que lê a frase do `contexto-negado`, que só aparece se o palco real
+      avisou a tela, e as duas mutações morrem. A primeira versão dessa contraprova também procurava
+      a moldura, e reprovou com o palco de verdade: a moldura some de propósito nesse estado (A48), e
+      a conferência saiu. Sem navegador: o item só mexe em teste. Baseline: 1343 testes, 25 no
+      navegador, `tsc` limpo, build sem aviso e com os mesmos tamanhos do A70, `npm audit` em zero.

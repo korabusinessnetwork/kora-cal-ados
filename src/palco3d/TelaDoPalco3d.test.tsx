@@ -15,11 +15,38 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TelaDoPalco3d } from './TelaDoPalco3d';
 import { catalogoDeProva } from '../lib/acervo/acervoDeProva';
 import { ROTULO_DA_SAIDA } from '../saidasDaTela';
+
+// O palco de verdade continua montado, e sem WebGL cai em `contexto-negado` como sempre. O dublê só
+// guarda o `aoSelecionar` que a tela entrega, porque em jsdom não há canvas para clicar numa peça, e
+// sem isso "Nada selecionado" seria verdade com a limpeza da seleção ou sem ela: a mutação que tirava
+// a limpeza sobreviveu aos testes de tela no R8-A59 (R9-A69).
+const palco = vi.hoisted(() => ({ aoSelecionar: null as ((nome: string | null) => void) | null }));
+
+vi.mock('./PalcoDeModelo3d', async (importOriginal) => {
+  const real = await importOriginal<typeof import('./PalcoDeModelo3d')>();
+
+  function PalcoQueGuardaASelecao(props: Parameters<typeof real.PalcoDeModelo3d>[0]) {
+    palco.aoSelecionar = props.aoSelecionar;
+
+    return <real.PalcoDeModelo3d {...props} />;
+  }
+
+  return { ...real, PalcoDeModelo3d: PalcoQueGuardaASelecao };
+});
+
+/** O que o clique numa malha do canvas faria: a tela recebe o nome do nó. */
+function selecionarNoPalco(nome: string) {
+  if (palco.aoSelecionar === null) throw new Error('A tela não entregou `aoSelecionar` ao palco.');
+  const aoSelecionar = palco.aoSelecionar;
+  act(() => {
+    aoSelecionar(nome);
+  });
+}
 
 declare global {
   // eslint-disable-next-line no-var
@@ -159,5 +186,28 @@ describe('trocar de peça não carrega o valor da peça anterior (R9-A67)', () =
     clicarNa('Sola tratorada');
 
     expect(medida()).toBe('50,0 mm');
+  });
+});
+
+describe('trocar de peça larga a malha clicada (R9-A69)', () => {
+  const nomeNaTela = () => container.querySelector('.palco3d__nome')?.textContent ?? null;
+
+  it('o dublê não troca o palco: o de verdade está montado e respondeu sem WebGL', () => {
+    // Contraprova do dublê. Se ele deixasse de desenhar o palco real, os testes de tela passariam a
+    // provar uma tela sem cena, e ninguém veria. A frase do `contexto-negado` só aparece porque o
+    // palco de verdade tentou criar o contexto e avisou a tela; sem ele, a tela ficaria em
+    // "carregando". A moldura não serve de prova: ela some de propósito nesse estado (A48).
+    expect(container.querySelector('.palco3d__estado')?.textContent).toContain('WebGL');
+  });
+
+  it('a malha clicada some quando outra peça entra em cena', () => {
+    selecionarNoPalco('prova-sola-plana');
+    // Contraprova: a tela mostra a seleção antes da troca, senão o teste não prova nada.
+    expect(nomeNaTela()).toBe('prova-sola-plana');
+
+    clicarNa('Cadarço reto');
+
+    expect(nomeNaTela()).toBe(null);
+    expect(container.querySelector('.palco3d__vazio')?.textContent).toContain('Nada selecionado');
   });
 });

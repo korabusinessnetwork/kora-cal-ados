@@ -66,3 +66,4 @@
 2026-09-13 · R9-A67 · trocar de peça na tela de uma peça volta os parâmetros ao padrão da peça nova · COMMIT
 2026-09-13 · R9-A68 · milímetros e passo do controle de parâmetro definidos num lugar só, com HTML idêntico · COMMIT
 2026-09-13 · R9-A70 · o campo de hex diz o que falta, igual nas duas telas, e hex sem # ganha frase própria · COMMIT
+2026-09-13 · R9-A69 · os testes das duas telas selecionam uma peça de verdade antes de conferir a limpeza, com o palco real montado · COMMIT
