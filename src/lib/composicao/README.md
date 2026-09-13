@@ -15,6 +15,7 @@ glTF.
 | `montarCatalogoParaModelo.ts` | O catálogo para o modelo (T05): só as peças da forma, com id, categoria, rótulo e faixa, em JSON | forma + catálogo → texto que o modelo de linguagem lê |
 | `gerarComposicaoPorPrompt.ts` | Prompt vira composição (T09): confere o prompt, chama o modelo de linguagem injetado e passa a resposta pelo guarda. Define `ModeloDeLinguagem` | prompt + forma + catálogo + modelo → composição validada |
 | `lerRespostaDoModelo.ts` | Tira o JSON do texto que o modelo respondeu, sem conferir a composição | texto → `unknown` |
+| `modeloDeLinguagemDeProva.ts` | O gerador de prova (D12): modelo de linguagem falso, sem IA e sem rede, que entende palavras-chave e só escolhe peças do catálogo que recebeu | pedido ao modelo → texto de composição |
 | `tiposDaComposicao.ts` | O vocabulário do modo gerado em tipos. Nenhum comportamento | — |
 | `fixtures/acervoDeTeste.ts` | Catálogo escrito à mão, com duas formas. O gêmeo de `render/fixtures/gltfDeTeste.ts` | — |
 
