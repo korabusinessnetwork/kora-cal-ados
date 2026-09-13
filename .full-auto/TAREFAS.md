@@ -264,4 +264,26 @@ carrega as telas, e quero o baseline conferido várias vezes antes dele.
       testes. A guarda mora ao lado dos ADRs, como a de citações, porque fica junto da autoridade
       que lê. O que ela NÃO promete, e está escrito nela: que o índice esteja bom, atualizado ou
       verdadeiro. Isso continua sendo leitura humana.
-- [ ] R6-A52 O cliente de banco sai do chunk que todo mundo baixa | trilha: robustez | depende: nenhum | pronto quando: o chunk principal do `npm run build` não contém mais `@supabase/supabase-js`, as três telas públicas abrem sem baixá-lo, a área protegida continua funcionando, e o número novo do chunk principal está medido no `BASELINE.md`
+- [x] R6-A52 O cliente de banco sai do chunk que todo mundo baixa | trilha: robustez | depende: nenhum | pronto quando: o chunk principal do `npm run build` não contém mais `@supabase/supabase-js`, as três telas públicas abrem sem baixá-lo, a área protegida continua funcionando, e o número novo do chunk principal está medido no `BASELINE.md`
+      feito em `55a91ca` e `cff0fe3`. O chunk principal caiu de 457,75 kB para 218,97 kB, e de
+      133,12 kB para 70,15 kB em gzip: a palavra `supabase` aparecia 72 vezes nele e agora aparece
+      zero, porque foi inteira para `AreaProtegida-*.js`, 239,74 kB, que só quem faz login baixa.
+      Foi a primeira coluna do `BASELINE.md` em que esse número caiu, depois de cinco rodadas
+      empurrando ele para cima em 2,72 kB somados. A conferência do `.env.local` mudou de casa junto,
+      e não por arrumação: ela é a primeira coisa que a área protegida faz, e deixá-la no `App.tsx`
+      obrigaria o chunk principal a continuar importando `lib/supabase/`. A ordem que importava
+      continua de pé, a configuração só é conferida depois de saber qual tela vai abrir. O componente
+      novo mora na RAIZ de `features/` porque dentro de `sessao/` precisaria importar de `produtos/`,
+      e essa seta é proibida pela regra de dependência de lá. Conferido no navegador, as quatro
+      telas: esboço, palco 3D e calçado montado abrem com ZERO requisição de módulo do Supabase, e a
+      área protegida mostra a tela de login com um rodapé só (ela desenhava o próprio antes, e agora
+      usa o do `App.tsx`, como as outras três). Duas guardas novas: uma lê os imports ESTÁTICOS do
+      `App.tsx` e reprova se algum trouxer `features/`, `lib/supabase/` ou `@supabase/`, deixando o
+      `import()` dinâmico passar, que é o jeito certo; a outra monta em jsdom a tela de "falta
+      `.env.local`", que era a metade impossível de conferir no navegador sem apagar o arquivo e
+      reiniciar o servidor. Mutação que prova o elo: devolver um `import` comum de
+      `features/sessao/BarraDaSessao` ao `App.tsx` reprova a varredura E devolve as 72 ocorrências
+      ao chunk principal, que sobe para 432,21 kB. Uma mutação SOBREVIVEU na primeira versão do teste
+      da tela de configuração ausente, e está relatada em `REFINO-RODADAS.md`: o teste perguntava a
+      coisa errada e foi corrigido. O editor logado em si continua sem conferência no navegador,
+      porque exige credencial e eu não preencho credencial.

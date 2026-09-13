@@ -668,3 +668,130 @@ de teste). Nenhuma virou mais urgente nesta rodada.
 A tela do editor logado, que é onde os três hooks do A44 rodam de verdade, **não foi conferida no
 navegador**: ela exige login, e eu não preencho credencial. O que sustenta o A44 são os 16 testes
 novos, as quatro mutações e o baseline inteiro verde, não olho em tela.
+
+---
+
+## Rodada 6, fechada em 2026-09-12
+
+**Lote:** 6 itens, em `TAREFAS.md`, seção "Refino, rodada 6". Nenhum com risco 4 ou 5, e o mais alto
+foi 2.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R6-A51 a raiz ganha rede de proteção contra exceção de render | robustez | 4 | entregue |
+| R6-A50 a peça clicada mostra os dois lados do endereço | produto | 4 | entregue |
+| R6-A49 a tela da composição ganha teste de comportamento | qualidade | 3 | entregue |
+| R6-A48 a moldura preta some quando o 3D não vai abrir | ux | 3 | entregue |
+| R6-A42 README por diretório vira varredura, não lembrete | qualidade | 2 | entregue |
+| R6-A52 o cliente de banco sai do chunk que todo mundo baixa | robustez | 2 | entregue |
+
+Abaixo do corte e fora do lote: **A35**, o canvas sem teclado, que atravessa a sexta rodada pelo
+motivo já escrito.
+
+**De onde veio a lista:** três perguntas. O que SOBRA na tela depois de a falha já ter sido tratada,
+o que a tela promete no próprio texto de ajuda e não entrega, e o que todo mundo baixa para usar o
+que não precisa disso. Mais o backlog que atravessou as rodadas. Três suspeitas morreram na sonda e
+estão em `AUDITORIA.md`, entre elas o anel de foco, que aparece de verdade num `Tab` de verdade, e o
+custo de arrastar o seletor de cor, que é de 11 a 26 ms por mudança e não justifica `debounce` numa
+tela cujo ponto é a cor aparecer na hora.
+
+---
+
+## Rodada 6: o que foi entregue
+
+**6 de 6 entregues, nenhum revertido.**
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R6-A51 a rede de proteção da raiz | robustez | `40d28c2`, `e1a16a8` | entregue |
+| R6-A50 o nó e a zona juntos, com atalho para a cor | produto | `df3e77c`, `53bc89a` | entregue |
+| R6-A49 seis testes de comportamento na tela da composição | qualidade | `44b2741`, `5b78dc1` | entregue |
+| R6-A48 a moldura vazia some no `contexto-negado` | ux | `9a1a72d`, `ec2f1fd` | entregue |
+| R6-A42 nove READMEs e a varredura que os cobra | qualidade | `cc80ca4`, `ac2d3ae` | entregue |
+| R6-A52 o cliente de banco fora do chunk principal | robustez | `55a91ca`, `cff0fe3` | entregue |
+
+### O que mudou de verdade
+
+1. **Exceção de render deixa de apagar a página inteira (A51).** Não existia `ErrorBoundary` em
+   lugar nenhum de `src/`: qualquer exceção durante o render desmontava a árvore, e
+   `document.body.innerText` ficava vazio, sem cabeçalho, sem rodapé e sem caminho para outra tela.
+   O R5-A46 tinha fechado UMA porta, a criação do contexto WebGL, dentro do componente que sabia o
+   que fazer com aquela falha. Esta é a rede por baixo das portas que ninguém listou. As duas são
+   necessárias, e os comentários dos dois arquivos dizem isso para nenhuma ser removida como
+   redundante.
+
+2. **A peça clicada mostra os dois lados do endereço (A50).** O painel dizia, no próprio texto de
+   ajuda, "são os dois lados do mesmo endereço", e mostrava um lado só: o id do nó. A categoria, que
+   é o lado que a API recolore e o lado que tem controle de cor na tela, a pessoa descobria casando
+   duas listas com o olho. Agora vêm as duas, tiradas da MESMA montagem em cena, e um botão leva o
+   foco direto ao seletor de cor daquela categoria.
+
+3. **A tela mais tocada do projeto ganhou teste (A49).** `TelaDaComposicao.tsx` tinha 15 commits em
+   30 dias, contra 9 do segundo colocado, e nenhum teste de comportamento. Montá-la em jsdom era
+   impossível até o R5-A46, porque o `WebGLRenderer` lançava e derrubava o teste junto. São seis
+   testes, e o que eles prendem é a ligação entre as regras puras, que já tinham teste cada uma, e a
+   tela.
+
+4. **A caixa preta vazia saiu da frente (A48).** No `contexto-negado` a moldura ficava na tela para
+   sempre, 532x320 px de nada, com a explicação embaixo dela. A frase do erro subiu de 365 px do
+   topo para 143 px, e para 160 px em 375x812. O `contexto-perdido` continua com a moldura de pé,
+   conferido forçando `WEBGL_lose_context` no navegador, porque ali o contexto pode voltar e a caixa
+   é o lugar onde ele volta.
+
+5. **Nove diretórios sem índice, e a regra passou a ter guarda (A42).** A raiz do projeto era um
+   deles: um clone recém-baixado não tinha uma linha dizendo o que o projeto é nem como rodar.
+   Escrever a raiz foi decisão, não completude: com ela escrita, a varredura não precisa de lista de
+   exceção nenhuma. Terceira guarda desse feitio, depois da RLS e das citações de ADR, e pelo mesmo
+   motivo das outras duas: quem furou a regra duas vezes em duas rodadas fui eu, que a escrevi.
+
+6. **O chunk principal caiu pela metade (A52).** De **457,75 kB para 218,97 kB**, de 133,12 kB para
+   **70,15 kB** em gzip. O `@supabase/supabase-js`, com o cliente de realtime junto, estava no chunk
+   que todo mundo baixa, e as três telas públicas não falam com o banco nem têm para onde mandar
+   requisição. Agora a área protegida entra por `import()` tardio, do mesmo jeito e pelo mesmo
+   motivo que o palco já entrava. Conferido no navegador: as três telas públicas abrem com ZERO
+   requisição de módulo do Supabase.
+
+### As medidas, antes e depois
+
+| Medida | Abertura da rodada 6 | Fechamento |
+|---|---|---|
+| Testes verdes | 1243, 58 pulados | **1275**, 58 pulados |
+| Testes contra o banco real | 58 de 58 | **58 de 58** |
+| Testes em navegador | 25 | **25** |
+| Chunk principal | 457,75 kB (gzip 133,12 kB) | **218,97 kB** (gzip 70,15 kB) |
+| CSS | 23,81 kB | **24,67 kB** |
+| Chunk do three.js | 619,48 kB | **619,51 kB** |
+| `npm audit` | 0 | **0** |
+| Diretórios com código e sem `README.md` | 9 | **0, e com varredura** |
+
+### Uma mutação sobreviveu, e o que foi feito com ela
+
+No teste da tela de "falta `.env.local`", trocar `{problema}` por uma frase fixa no JSX passava nos
+três testes. O motivo: os dois nomes de variável aparecem SEMPRE na mensagem, porque a instrução
+final diz o que escrever no arquivo, e o teste só procurava os nomes soltos no texto. O que muda com
+o ambiente é a LISTA do começo, e era ela que precisava ser afirmada. O conserto foi no teste, que
+perguntava a coisa errada, e a mutação morre agora. Está registrado dentro do próprio arquivo.
+
+### O achado da rodada, o que vale guardar
+
+**Duas listas idênticas uma embaixo da outra, e nenhum teste viu.** A rede de proteção do A51
+desenhava as saídas para as outras telas, o que é certo quando ela é a única coisa de pé. Dentro do
+`App`, porém, o rodapé fica FORA da rede e sobrevive à falha, então a mesma lista de três destinos
+aparecia duas vezes seguidas, uma em links e outra em botões. Todos os testes passavam, porque cada
+um perguntava por uma lista e achava uma. Foi visto no navegador, e só lá. O conserto virou a prop
+`comSaidas`, e o sexto teste do arquivo existe para isso não voltar.
+
+### Limites de verificação, ditos por inteiro
+
+- **O editor logado continua sem conferência no navegador.** Ele exige login, e eu não preencho
+  credencial. O que foi conferido da área protegida é a tela de login renderizando com um rodapé só,
+  e a tela de configuração ausente, esta em jsdom.
+- **A metade `contexto-perdido` do A48 não tem teste automático.** Criar um contexto WebGL de
+  verdade em jsdom é impossível, que é o mesmo limite que o A46 já tinha. Foi conferida à mão, no
+  navegador, forçando `WEBGL_lose_context`.
+- **A varredura de README não promete que o índice esteja bom**, só que exista. Índice ruim continua
+  sendo leitura humana, e está escrito assim dentro do teste.
+- **A guarda do chunk não promete que o chunk esteja pequeno**, só que o `App.tsx` não volte a
+  importar `features/` de forma estática. O elo entre uma coisa e outra foi medido: devolver um
+  `import` comum de `features/sessao/BarraDaSessao` ao `App.tsx` reprova a varredura E devolve as 72
+  ocorrências de `supabase` ao chunk principal, que sobe para 432,21 kB.

@@ -43,21 +43,22 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   relatada em `REFINO-RODADAS.md`, com o que foi feito com ela (o teste é que perguntava a coisa
   errada). Limite de verificação dito por inteiro: a tela do editor logado não foi conferida no
   navegador, porque exige login e eu não preencho credencial.
-- **Rodada 6: ABERTA em 2026-09-12**, 6 itens em `TAREFAS.md`, seção "Refino, rodada 6", nenhum com
-  risco acima de 2. A reauditoria foi atrás de três coisas: o que SOBRA na tela depois de a falha já
-  ter sido tratada, o que a tela promete no próprio texto de ajuda e não entrega, e o que todo mundo
-  baixa para usar o que não precisa disso. Mais o backlog que atravessou as rodadas. Três suspeitas
-  morreram na sonda e estão registradas como tal em `AUDITORIA.md`, entre elas o anel de foco, que
-  aparece de verdade num `Tab` de verdade, e o custo de arrastar o seletor de cor, que é de 11 a 26
-  ms por mudança e não justifica `debounce` numa tela cujo ponto é a cor aparecer na hora.
-- **Rodada 6, andamento:** **5 de 6**. R6-A51 em `40d28c2`, R6-A50 em `df3e77c`, R6-A49 em
-  `44b2741`, R6-A48 em `9a1a72d` e R6-A42 em `cc80ca4` mais `ac2d3ae`, baseline verde depois de cada
-  um (1267 testes, 25 no navegador, `tsc` e build limpos, `npm audit` em zero).
-- **Próximo passo:** o último item do lote, **R6-A52** (o cliente de banco sai do chunk principal),
-  deixado por último por ser o único que mexe em como o `App.tsx` carrega as telas. Depois dele,
-  Fase 4: baseline inteiro, sétima coluna no `BASELINE.md`, a rodada escrita em `REFINO-RODADAS.md`
-  e a mensagem curta para o dono. Baseline conferido inteiro depois do item, e `git revert` na hora
-  em qualquer linha que piorar.
+- **Rodada 6: FECHADA em 2026-09-12**, 6 de 6 entregues, nenhum revertido. Foi atrás de três coisas:
+  o que SOBRA na tela depois de a falha já ter sido tratada, o que a tela promete no próprio texto de
+  ajuda e não entrega, e o que todo mundo baixa para usar o que não precisa disso. Baseline verde nas
+  duas pontas: 1275 testes, 58 no banco, 25 no navegador, `tsc` e build limpos, `npm audit` em zero.
+  **A medida da rodada:** o chunk principal caiu de 457,75 kB para 218,97 kB, a primeira vez em seis
+  rodadas que ele encolhe, porque o cliente de banco saiu de lá. O achado que vale guardar: a rede de
+  proteção do A51 desenhava as saídas e o rodapé também, deixando a MESMA lista de três destinos duas
+  vezes na tela, e todos os testes passavam porque cada um perguntava por uma lista e achava uma. Só
+  o navegador viu. Uma mutação sobreviveu e está relatada em `REFINO-RODADAS.md`, com o conserto (foi
+  no teste, que perguntava a coisa errada). Três suspeitas morreram na sonda e estão registradas
+  como tal em `AUDITORIA.md`, entre elas o anel de foco, que aparece de verdade num `Tab` de
+  verdade, e o custo de arrastar o seletor de cor, que é de 11 a 26 ms por mudança e não justifica
+  `debounce` numa tela cujo ponto é a cor aparecer na hora.
+- **Próximo passo:** Fase 5, a reauditoria da rodada 7. O backlog acima do corte está em
+  `AUDITORIA.md`; o que sobrou abaixo dele hoje é o A35, o canvas sem teclado. A mensagem da rodada 5
+  e a da rodada 6 ainda não foram entregues ao dono.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 
