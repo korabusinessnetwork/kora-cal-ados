@@ -287,3 +287,25 @@ carrega as telas, e quero o baseline conferido várias vezes antes dele.
       da tela de configuração ausente, e está relatada em `REFINO-RODADAS.md`: o teste perguntava a
       coisa errada e foi corrigido. O editor logado em si continua sem conferência no navegador,
       porque exige credencial e eu não preencho credencial.
+
+## Refino, rodada 7 (aberta em 2026-09-12)
+
+Lote de 6 itens, saído da reauditoria registrada em `AUDITORIA.md`, seção "Achados da reauditoria da
+rodada 7". Nenhum com risco 4 ou 5, e o mais alto é 2. Um item por eixo com achado acima do corte:
+robustez (A53 e A58), qualidade (A54), ux (A55 e A56), produto (A57).
+
+Ordem de execução pelo score, com duas exceções deliberadas. O A54, que parte a tela da composição
+em pedaços, vai por ÚLTIMO, porque o A55, o A57 e o A58 mexem todos dentro dela e fazer o corte
+antes deles transformaria três itens pequenos em três resoluções de conflito. E o A56, que mexe no
+histórico do navegador, vai antes do A57, porque os dois falam do mesmo assunto pelos dois lados,
+o endereço e o estado, e é melhor o endereço estar certo antes de o estado começar a ser gravado.
+
+Abaixo do corte e fora do lote, pela sétima rodada seguida: **A35**, o canvas sem teclado. O motivo
+continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que aconteceu desde então.
+
+- [ ] R7-A53 `tenant_members.user_id` ganha índice, e a regra ganha varredura | trilha: robustez | depende: nenhum | pronto quando: existe migration nova criando `tenant_members_user_id_idx`, e existe um teste que lê as migrations e reprova se alguma coluna `references` de alguma tabela não tiver um índice que a lidere (o `unique` composto conta só para a coluna da frente)
+- [ ] R7-A55 A região viva do colar deixa de ser duas | trilha: ux | depende: nenhum | pronto quando: o parágrafo de recusa da colagem não é mais descendente de outro elemento com `aria-live`, o anúncio continua acontecendo, e existe teste que afirma que nenhum `[role=alert]` da tela tem ancestral com `[aria-live]`
+- [ ] R7-A56 O botão Voltar do navegador anda entre as telas | trilha: ux | depende: nenhum | pronto quando: navegar pelo rodapé aumenta `history.length`, `history.back()` volta para a tela anterior e não para fora do app, a primeira carga continua usando `replaceState` (normalizar não é navegar), recarregar continua abrindo a tela do `?tela=`, e existe teste do par `pushState` mais `popstate`
+- [ ] R7-A57 A composição sobrevive ao F5 | trilha: produto | depende: R7-A56 | pronto quando: escolher peças, cores e parâmetro e recarregar devolve a MESMA montagem, uma gravação inválida ou de outra forma é recusada pelo mesmo `validarComposicao` que a colagem usa e a tela cai no padrão sem quebrar, `localStorage` indisponível não derruba a tela, e existe teste dos três casos (volta, recusa, ausência)
+- [ ] R7-A58 Todos os parâmetros da peça aparecem, e mexer num não apaga o outro | trilha: robustez | depende: nenhum | pronto quando: uma peça com dois parâmetros desenha dois controles, arrastar um preserva o valor do outro, e existe teste com peça de dois parâmetros no acervo de teste que reprova tanto o `[0]` quanto a substituição do objeto
+- [ ] R7-A54 A tela da composição vira tela mais painéis | trilha: qualidade | depende: R7-A55, R7-A57, R7-A58 | pronto quando: `TelaDaComposicao.tsx` tem menos de 200 linhas, cada painel extraído mora no seu arquivo com o seu `README.md` de diretório em dia, os seis testes de comportamento da tela continuam passando SEM alteração, e o build e o `tsc` continuam limpos

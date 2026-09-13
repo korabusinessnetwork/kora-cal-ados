@@ -917,3 +917,214 @@ valor: 3 | esforço: 2 | risco: 1 | **score: 2**
    focáveis da tela do calçado montado, calculando o nome por `aria-label`, `<label>` associado,
    texto e `title`: **nenhum** sem nome. O A35, do canvas, continua sendo o caso real, e continua
    inteiro no backlog pelo motivo já escrito.
+
+---
+
+## Achados da reauditoria da rodada 7 (2026-09-12)
+
+A rodada 6 foi atrás do que sobra na tela, do que a ajuda promete e do que todo mundo baixa. Esta
+foi atrás de outras três coisas: **o que o navegador oferece de graça e o app joga fora**, **o que
+some quando a pessoa aperta F5**, e **o que o banco faz em toda consulta de todo mundo**. Mais o
+backlog que atravessou as seis rodadas anteriores.
+
+Método de sempre: sondar em vez de supor. **Sete suspeitas morreram na sonda** nesta rodada, e
+estão em "o que eu achei que era defeito e não era (rodada 7)", no fim desta seção. Foi a rodada
+com a maior proporção de suspeita morta até agora, o que é notícia boa: quer dizer que as seis
+anteriores fecharam as portas fáceis.
+
+### A53 | eixo: robustez | onde: `supabase/migrations/20260812_schema_inicial.sql:17` (`tenant_members`)
+
+**hoje:** `tenant_members` não tem índice em `user_id`. Tem `unique (tenant_id, user_id)`, que é um
+btree com `tenant_id` NA FRENTE, e por isso não serve para uma busca que filtra só por `user_id`.
+E a busca que filtra só por `user_id` é a mais quente do sistema inteiro:
+
+```sql
+create or replace function auth_tenant_ids()
+...
+  select tenant_id from tenant_members where user_id = auth.uid()
+```
+
+**evidência, lida no DDL e não deduzida:** `grep "create index" supabase/migrations/*.sql` devolve
+seis índices, e `tenant_members` não aparece em nenhum. Todas as outras cinco tabelas ganharam
+índice explícito por `tenant_id`, e `product_zones` e `variants` ganharam um segundo por
+`product_id`. A única coluna de chave estrangeira do schema sem índice que a lidere é justamente
+`tenant_members.user_id`. E `auth_tenant_ids()` aparece **quinze vezes nos predicados das políticas em vigor**, em
+`20260812_correcao_rls_e_storage.sql`, que é a migration que vale hoje: as políticas das seis
+tabelas mais as três do Storage. Toda leitura autenticada de qualquer tabela passa por ela.
+
+**depois:** migration nova com `create index if not exists tenant_members_user_id_idx on
+tenant_members(user_id)`, e uma varredura que cobre a regra, no molde de `rlsEmTodaTabela.test.ts`:
+toda coluna `references` de toda tabela precisa de um índice que a lidere. A varredura vale mais que
+o índice, porque é ela que impede a sétima tabela de repetir o caso.
+
+**o que eu NÃO medi, dito por inteiro:** não rodei `explain` nesse plano. O cliente do Supabase fala
+por PostgREST e não executa SQL arbitrário, e não há acesso direto a Postgres neste projeto. O que
+está afirmado acima é estrutura de índice e texto de função, que eu li, não tempo de consulta, que
+eu não medi. O item continua valendo porque o custo é estrutural: `auth_tenant_ids()` é `stable` e
+vira um InitPlan por consulta, então é **uma varredura inteira de `tenant_members` por consulta de
+qualquer tabela**, e `tenant_members` cresce com o total de usuários de TODOS os tenants somados,
+não com o tamanho do tenant de quem está consultando. Isso é o oposto do que um sistema
+multi-tenant quer.
+
+valor: 4 | esforço: 1 | risco: 1 | **score: 5**
+
+### A54 | eixo: qualidade | onde: `src/palco3d/TelaDaComposicao.tsx` (447 linhas)
+
+**hoje:** é o arquivo de código mais tocado do projeto, **16 commits em 30 dias**, contra 9 do
+segundo colocado, e tem 447 linhas. O `CLAUDE.md` diz, na seção escrita para agentes de IA:
+"Preferir 5 arquivos de ~80 linhas a 1 de 400, um agente precisa carregar o arquivo inteiro no
+contexto pra editar com segurança; arquivo grande força leitura parcial e aumenta risco de edição
+às cegas". É a constituição do projeto, e o arquivo que mais viola ela é o que mais é editado.
+
+**evidência:** `git log --since="30 days ago" --name-only` com contagem, e `wc -l`. Ele cresceu 56
+linhas só na rodada 6, entre o A49 e o A50, e o segundo maior componente,
+`PalcoDeModelo3d.tsx`, tem 437.
+
+**depois:** extrair os painéis autocontidos, o da peça clicada, o de colar composição e o das zonas,
+cada um no seu arquivo, sem mudar comportamento nenhum. A tela fica sendo o que ela deveria ser: o
+lugar onde o estado mora e os painéis se encontram.
+
+**por que agora e não antes:** refatorar no escuro é proibido pela própria regra de ouro deste modo,
+e até a rodada 6 esta tela não tinha um único teste de comportamento. O R6-A49 escreveu seis. A
+ordem foi essa de propósito, e é por isso que este item só nasce agora.
+
+valor: 4 | esforço: 3 | risco: 1 | **score: 3**
+
+### A55 | eixo: ux | onde: `src/palco3d/TelaDaComposicao.tsx:177` (a região viva do colar)
+
+**hoje:** existe uma `<div aria-live="polite" aria-atomic="true">` e, DENTRO dela, quando a colagem
+é recusada, um `<p role="alert">`. `role="alert"` implica `aria-live="assertive"`. São duas regiões
+vivas aninhadas, com prioridades diferentes, na mesma subárvore.
+
+**evidência, lida no DOM do navegador e não no código:** consultando
+`document.querySelectorAll('[aria-live],[role=alert],[role=status]')` na tela do calçado montado
+depois de uma colagem recusada, o mesmo parágrafo aparece **duas vezes** na lista, uma como
+`div[aria-live=polite]` e outra como `p[role=alert]`, e a segunda é filha da primeira.
+
+**depois:** uma região viva só. O aninhamento não está previsto em lugar nenhum da especificação e
+o que cada leitor de tela faz com ele é escolha do leitor de tela, não do autor: pode anunciar duas
+vezes, pode rebaixar o `assertive` para `polite`, pode ignorar o de fora.
+
+**por que este e não os outros dois:** este projeto decide prioridade de anúncio caso a caso, e
+escreve o porquê no comentário, em pelo menos cinco lugares (`PainelDeZonas.tsx:123`,
+`CampoDeCorDaCategoria.tsx:87`, `FormularioDeNovaZona.tsx:66`, `RotaProtegida.tsx:52`,
+`TelaDoPalco3d.tsx:145`). É trabalho bem feito. O que aconteceu aqui foi duas dessas decisões
+caírem na mesma subárvore sem uma saber da outra: o comentário da `div` explica por que ela existe,
+o `role="alert"` do `<p>` não é comentado, e nenhum dos dois menciona o outro. É um defeito de
+costura, não de critério.
+
+valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A56 | eixo: ux | onde: `src/App.tsx` (`irPara`) e as quatro telas
+
+**hoje:** o botão Voltar do navegador não anda entre as telas. `irPara` troca a URL com
+`history.replaceState`, que SUBSTITUI a entrada atual em vez de empilhar uma nova. Quem entra pelo
+esboço, vai para o palco e depois para o calçado montado, e então aperta Voltar, não volta para o
+palco: sai do app inteiro, para o que quer que estivesse aberto na aba antes.
+
+**evidência, medida agora no navegador:** `history.length` ficou em **28** nas três telas seguidas,
+composição, esboço e palco 3D, enquanto `location.href` mudou de `?tela=composicao` para
+`?tela=esboco` e depois para `?tela=palco3d`. Três navegações, zero entradas novas no histórico.
+
+**depois:** `pushState` na navegação entre telas, mais um ouvinte de `popstate` que lê `?tela=` e
+devolve o estado. O `replaceState` continua sendo o certo num caso só, o da primeira carga, quando
+a URL está sendo normalizada e não navegada, e essa diferença precisa ficar escrita no código.
+
+**por que vale a pena:** Voltar é o controle mais usado que existe num navegador, e ele hoje faz a
+coisa mais cara possível, que é jogar a pessoa para fora do app. E o endereço já é bom: `?tela=` é
+compartilhável e recarregável desde a primeira rodada. Falta ele ser navegável.
+
+valor: 4 | esforço: 2 | risco: 2 | **score: 2**
+
+### A57 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx` (o estado da montagem)
+
+**hoje:** F5 na tela do calçado montado apaga a montagem inteira. Peças escolhidas, cores e valores
+de parâmetro voltam ao padrão da forma.
+
+**evidência, medida no navegador:** pintei o cabedal de `#22aa44`, recarreguei, e
+`composicao-cor-cabedal` voltou para `#1f4fa8`, o padrão.
+`Object.keys(localStorage).filter(k => k.startsWith('kora'))` devolve `[]`: não há nada gravado, em
+lugar nenhum. O próprio comentário do arquivo já admite o buraco, com estas palavras: "A composição
+não é gravada em lugar nenhum, sem isto fechar a aba perde a montagem inteira".
+
+**depois:** gravar a composição em `localStorage` a cada mudança e restaurá-la ao montar, passando a
+restauração pelo MESMO `validarComposicao` que a colagem já usa. Assim uma gravação velha, de uma
+forma que mudou ou de uma peça que saiu do acervo, é recusada pelo guarda que já existe e a tela
+cai no padrão, em vez de montar um calçado meio errado.
+
+**por que não é o "Colar uma composição" que já existe:** existe, funciona bem, e é o contorno
+manual disso. Mas ele exige que a pessoa tenha copiado ANTES de perder, e ninguém copia antes de
+perder. Prevenção de erro vale mais que mensagem de erro, e aqui não há nem mensagem.
+
+valor: 4 | esforço: 2 | risco: 2 | **score: 2**
+
+### A58 | eixo: robustez | onde: `src/palco3d/TelaDaComposicao.tsx:293` e `:366`
+
+**hoje:** duas coisas, e as duas saem da mesma linha. A tela lê `peca?.parametros[0]`, **só o
+primeiro** parâmetro da peça, e desenha um controle só. E, ao mexer nele, manda
+`aoMudar({ parametros: { [parametro.nome]: valor } })`, um objeto NOVO com uma chave só, que
+SUBSTITUI o anterior inteiro.
+
+**evidência:** as duas linhas, e o tipo. `PecaDoAcervo.parametros` é `ParametroDePeca[]`, um array,
+e `validarComposicao` percorre ele inteiro (`for (const parametro of peca.parametros)`, linha 220),
+valida cada um contra a sua faixa e resolve os ausentes pelo `padrao`. O motor aceita N parâmetros
+por peça desde sempre, a tela mostra um.
+
+**hoje isto não é sintoma, é porta aberta, e está dito assim de propósito:** nenhuma peça do acervo
+de prova tem dois parâmetros, então ninguém viu nada quebrar. No dia em que uma tiver, duas coisas
+acontecem em silêncio: o segundo parâmetro não aparece na tela, e arrastar o primeiro apaga o valor
+do segundo, que volta ao `padrao` sem aviso. Nada falha alto. É exatamente o que o princípio nº1
+proíbe, na forma dele que não é sobre cor.
+
+**depois:** desenhar um controle por parâmetro, e mesclar em vez de substituir
+(`{ ...escolha.parametros, [nome]: valor }`). Com teste de peça de dois parâmetros no acervo de
+teste, que é onde a porta se fecha de verdade.
+
+valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+---
+
+## O que eu achei que era defeito e não era (rodada 7)
+
+Sete suspeitas, sondadas e mortas. Ficam escritas para ninguém gastar a oitava rodada nelas de novo.
+
+1. **Trocar de peça muitas vezes seguidas quebraria a cena.** A montagem remonta um glTF inteiro a
+   cada troca. Executadas **12 trocas em 4 ms**, sem esperar quadro entre elas, alternando sola
+   plana e sola tratorada seis vezes: nenhum erro, o canvas continua de pé e as três zonas
+   continuam corretas (`prova-sola-plana`, `prova-cabedal-baixo`, `prova-cadarco-reto`).
+
+2. **O título da aba seria o mesmo nas quatro telas.** Não é. O `index.html` tem um título só, que é
+   o que aparece antes de o React montar, e daí em diante quem escreve é `App.tsx:64`,
+   `document.title = tituloDaTela(tela)`. Medido: `Calçado montado · Kora Calçados` e
+   `Palco 3D · Kora Calçados`. E o comentário do `index.html` já explica que foi decisão, tomada
+   porque duas abas lado a lado ficavam indistinguíveis.
+
+3. **`validarCor.ts` não tem arquivo de teste próprio.** Não tem mesmo, e não precisa. Ele é
+   coberto de três lados, de propósito, com o porquê escrito: `coresDoPreview.test.ts:14` prova a
+   expansão da forma curta (`#f00` para `#FF0000`), `validarComposicao.test.ts:199` prova que a
+   expansão acontece "num lugar só, por validarCor", e `corSrgbLinear.test.ts:101` prova o outro
+   lado do contrato, que `hexParaLinear` RECUSA a forma curta, "quem expande é validarCor, e um
+   lugar só". Três testes que se citam. Teste de arquivo somaria linha, não pergunta.
+
+4. **A colagem de composição aceitaria lixo.** Sondados os dois casos no navegador. Texto que não é
+   JSON: "O texto colado não é JSON. Copie o bloco inteiro, das chaves de abrir às de fechar. O
+   calçado na tela continua sendo o de antes." JSON válido de outra forma: "Esta composição é da
+   forma "forma-tenis", e esta tela monta a forma "prova-tenis-01". Montá-la aqui daria um calçado
+   sem as peças que não existem nesta forma." As duas dizem o que fazer E dizem que a tela não
+   mudou, que é a metade que quase todo mundo esquece.
+
+5. **Os parâmetros da peça seriam só leitura.** Não são. Existe `input[type=range]` com `min`,
+   `max`, `step` calculado e `aria-label` por categoria. A leitura de texto da página não mostra
+   controle deslizante, e foi ela que me enganou. O que sobrou dessa sonda foi o A58, que é outra
+   coisa: o controle existe, mas só para o primeiro parâmetro.
+
+6. **A API aceitaria corpo de qualquer tamanho.** Não aceita. `lerCorpoDoPedido.ts` confere o
+   `content-length` E conta bytes durante a leitura, com o motivo de serem duas conferências
+   escrito no arquivo, e `lerCoresPedidas.ts` tem teto separado por NÚMERO de zonas, também com o
+   porquê de ser uma dimensão e não a outra. O comentário cita a medida que originou o limite:
+   um corpo de 7.088.891 bytes com 300.000 pares.
+
+7. **Faltaria região viva ou `role` em algum aviso das telas públicas.** Varridos todos os
+   `[aria-live]`, `[role=alert]` e `[role=status]` da tela do calçado montado: quatro, todos no
+   lugar certo. No código são **vinte e um atributos em treze arquivos** de `src/`, e os que decidem
+   prioridade trazem o critério escrito no comentário ao lado. A única coisa que sobrou foi o aninhamento, que virou o A55.
