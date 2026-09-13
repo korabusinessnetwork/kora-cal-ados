@@ -16,17 +16,18 @@
 // Supabase é conferida DEPOIS de saber qual tela vai abrir, não antes. Conferir antes
 // derrubava o app inteiro por falta de `.env.local` — inclusive o esboço, que não faz
 // uma requisição sequer. Cobrar credencial de quem não vai usar credencial nenhuma é
-// justamente a "prevenção de erro" do princípio nº1 aplicada ao contrário.
+// justamente a "prevenção de erro" do princípio nº1 aplicada ao contrário. A conferência hoje
+// mora em `features/AreaProtegida.tsx`, e a ordem continua sendo essa: ela só acontece quando a
+// tela escolhida é a protegida, porque é o `import()` dela que traz `lib/supabase/` junto.
+//
+// As três telas públicas saem ANTES da área protegida também por isso: cada uma delas é um
+// `return` que não menciona `features/`, e é essa ausência que mantém o cliente de banco fora do
+// chunk que todo mundo baixa.
 
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { EsbocoDoEditor } from './esboco/EsbocoDoEditor';
 import { RedeDeProtecao } from './RedeDeProtecao';
 import { RodapeDeTelas } from './RodapeDeTelas';
-import { BarraDaSessao } from './features/sessao/BarraDaSessao';
-import { ProvedorDeSessao } from './features/sessao/ContextoDeSessao';
-import { TelaDeProdutos } from './features/produtos/TelaDeProdutos';
-import { RotaProtegida } from './features/sessao/RotaProtegida';
-import { ConfiguracaoAusente, lerConfiguracaoDoSupabase } from './lib/supabase/configuracaoDoSupabase';
 import type { Tela } from './telaInicial';
 import { lerTelaDaUrl, tituloDaTela, urlDaTela } from './telaInicial';
 
@@ -41,6 +42,17 @@ const TelaDoPalco3d = lazy(async () => ({
 // Mesma razão, e o mesmo three.js: as duas telas do palco compartilham o chunk tardio.
 const TelaDaComposicao = lazy(async () => ({
   default: (await import('./palco3d/TelaDaComposicao')).TelaDaComposicao,
+}));
+
+// E a área protegida entra tardia pelo mesmo motivo, do outro lado: ela traz o
+// `@supabase/supabase-js` junto, com o cliente de realtime dentro, e nenhuma das três telas
+// públicas tem para onde mandar requisição. Enquanto este import era comum, quem abria
+// `?tela=esboco` num clone recém-baixado baixava um cliente de banco que aquela tela nunca usaria.
+// A conferência do `.env.local` foi junto, e está explicada em `features/AreaProtegida.tsx`: ela é
+// a primeira coisa que a área faz, e deixá-la aqui obrigaria o chunk principal a continuar
+// importando `lib/supabase/`.
+const AreaProtegida = lazy(async () => ({
+  default: (await import('./features/AreaProtegida')).AreaProtegida,
 }));
 
 export function App() {
@@ -107,48 +119,18 @@ export function App() {
     );
   }
 
-  // Sem `.env.local` a área protegida não sobe. Falhar aqui, com o que fazer escrito na
-  // tela, é melhor que uma tela de login que recusa toda senha sem explicar por quê.
-  const problema = conferirConfiguracao();
-  if (problema) {
-    return (
-      <main className="sessao-aviso">
-        <h1>Configuração do Supabase ausente</h1>
-        <p>{problema}</p>
-        {/* Saída, não beco sem saída: as três telas sem banco não precisam de nada disto.
-            `atual="app"` porque esta tela é a área protegida falhando, e o que ela deve oferecer
-            é exatamente o que `saidasDe('app')` devolve. */}
-        <RodapeDeTelas atual="app" irPara={irPara} />
-      </main>
-    );
-  }
-
+  // A área protegida, incluindo a tela de "falta `.env.local`". O rodapé fica fora dela como nas
+  // outras três: saída, não beco sem saída. Antes ele era desenhado DENTRO do aviso de
+  // configuração, e agora é o mesmo rodapé nos dois casos, que é o que a pessoa já viu nas telas
+  // públicas.
   return (
-    <ProvedorDeSessao>
+    <>
       <RedeDeProtecao key={tela} atual="app" comSaidas={false}>
-        <RotaProtegida>
-          {(tenant) => (
-            <>
-              <BarraDaSessao />
-              {/* `key` no tenant: trocar de marca REMONTA a tela. Sem isso o estado da
-                  anterior (produto aberto, SVG baixado) sobreviveria à troca e mostraria o
-                  modelo de um concorrente sob o nome da marca nova. */}
-              <TelaDeProdutos key={tenant.id} tenantId={tenant.id} />
-            </>
-          )}
-        </RotaProtegida>
+        <Suspense fallback={<main className="tela">Carregando o editor…</main>}>
+          <AreaProtegida />
+        </Suspense>
       </RedeDeProtecao>
       <RodapeDeTelas atual="app" irPara={irPara} />
-    </ProvedorDeSessao>
+    </>
   );
-}
-
-function conferirConfiguracao(): string | null {
-  try {
-    lerConfiguracaoDoSupabase();
-    return null;
-  } catch (falha) {
-    if (falha instanceof ConfiguracaoAusente || falha instanceof Error) return falha.message;
-    return 'Erro desconhecido ao ler a configuração.';
-  }
 }

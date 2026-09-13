@@ -32,5 +32,8 @@ Código que precisa de service_role (provisionamento, testes de isolamento) vive
 
 ## Configuração ausente derruba o app de propósito
 
-Sem `.env.local`, `App.tsx` desenha uma tela dizendo o que fazer. A alternativa — subir
-com URL vazia — daria uma tela de login que recusa toda senha sem explicar por quê.
+Sem `.env.local`, `../../features/AreaProtegida.tsx` desenha uma tela dizendo o que fazer. A
+alternativa, subir com URL vazia, daria uma tela de login que recusa toda senha sem explicar por
+quê. A conferência mora lá, e não no `App.tsx`, porque é o `import()` tardio da área protegida que
+mantém o cliente de banco fora do chunk que todo mundo baixa: conferir no `App.tsx` obrigaria o
+chunk principal a importar este diretório.

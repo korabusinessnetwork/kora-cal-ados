@@ -113,14 +113,14 @@ sequenceDiagram
 
 | # | Passo | Arquivo que executa | O que ele valida / garante |
 |---|---|---|---|
-| 1 | O app sobe e confere a configuração | `src/App.tsx` → `src/lib/supabase/configuracaoDoSupabase.ts` | Sem `.env.local` preenchido a tela diz o que falta, em vez de uma tela de login que recusa toda senha |
+| 1 | O app sobe e confere a configuração | `src/features/AreaProtegida.tsx` → `src/lib/supabase/configuracaoDoSupabase.ts` | Sem `.env.local` preenchido a tela diz o que falta, em vez de uma tela de login que recusa toda senha |
 | 2 | Login | `src/features/sessao/TelaDeLogin.tsx` → `ContextoDeSessao.tsx` | O botão só habilita com e-mail e senha preenchidos; falha vira uma frase genérica, que não revela quem tem conta |
 | 3 | Sessão montada | `src/features/sessao/ContextoDeSessao.tsx` | Sucesso chega pelo `onAuthStateChange` — caminho único, que também cobre logout em outra aba e expiração |
 | 4 | Tenants do usuário | `src/features/sessao/carregarTenantsDoUsuario.ts` | Campos explícitos (`papel`, `tenants!inner(id, nome, slug, tema)`), filtro por `user_id` além da RLS, ordem alfabética estável |
 | 5 | Escolha do tenant | `src/features/sessao/SeletorDeTenant.tsx`, `RotaProtegida.tsx`, `tenantLembrado.ts` | Um tenant entra direto; dois ou mais exigem escolha. O tenant lembrado no `localStorage` é **preferência**, não permissão: o contexto só aceita id que veio da lista do banco |
 | 6 | Portão | `src/features/sessao/RotaProtegida.tsx` | Nada protegido renderiza sem usuário **e** tenant ativo; o `children` é função, então não há caminho com `tenantAtivo` nulo |
 | 7 | Lista de modelos | `src/features/produtos/hooks/useProdutos.ts` → `listarProdutos.ts` | Campos explícitos, `.eq('tenant_id', …)` e `.order('created_at')` — sem `order` o Postgres não promete ordem e a lista embaralha entre cargas |
-| 8 | Abrir o modelo | `src/features/produtos/TelaDeProdutos.tsx` | Trocar de tenant remonta a tela inteira (`key={tenant.id}` em `src/App.tsx`): o SVG de uma marca nunca sobrevive à troca para outra |
+| 8 | Abrir o modelo | `src/features/produtos/TelaDeProdutos.tsx` | Trocar de tenant remonta a tela inteira (`key={tenant.id}` em `src/features/AreaProtegida.tsx`): o SVG de uma marca nunca sobrevive à troca para outra |
 | 9 | Baixar o asset-base canônico | `src/features/produtos/hooks/useAssetBase.ts` → `baixarAssetBase.ts` | URL assinada de **300 s** a partir do `base_asset_path` **gravado**, nunca remontado; o retorno é **texto**, porque o editor precisa do SVG no DOM para poder clicar nele |
 | 10 | Moldura e selo | `src/features/produtos/VisualizacaoDoProduto.tsx` + `TelaDeProdutos.tsx` | O selo "N elementos marcáveis" conta pela **mesma** regra do motor (`PINTAVEIS` + `expandirPintaveis`), não por `[id]` — número que não bate com o que dá para marcar é pior que número nenhum |
 | 11 | Carregar as zonas gravadas | `src/features/zonas/hooks/useZonasDoProduto.ts` → `listarZonasDoProduto.ts` | Campos explícitos, `.order('created_at')`; erro **sobe** em vez de virar lista vazia, porque "nenhuma zona" sobre um produto mapeado faria o time remarcar tudo por cima |

@@ -5,6 +5,7 @@ só ela usa. O que é compartilhado por mais de uma feature sobe para `src/lib/`
 
 | Pasta | O que resolve |
 |---|---|
+| `AreaProtegida.tsx` | Não é pasta: é o ponto onde as três se juntam, atrás do login. Fica na raiz porque dentro de `sessao/` precisaria importar de `produtos/`, e essa seta é proibida abaixo. É ele que o `App.tsx` carrega por `import()` tardio, e é isso que mantém o `@supabase/supabase-js` fora do chunk principal |
 | `sessao/` | Quem entrou e em qual marca (tenant ativo). Nada protegido renderiza sem as duas coisas |
 | `produtos/` | Listar os modelos do tenant e abrir um deles, baixando o asset-base canônico do Storage |
 | `zonas/` | Marcar zona no calçado aberto e gravar em `product_zones` — o palco, o formulário e as regras que recusam mapeamento inválido |

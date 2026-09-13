@@ -8,7 +8,7 @@ ninguém revisa.
 | Arquivo | O que faz |
 |---|---|
 | `main.tsx` | Ponto de entrada. Monta o `App` e importa TODO o CSS, uma vez, para nenhum componente importar estilo (regra de white-label do `CLAUDE.md`) |
-| `App.tsx` | Decide qual tela está aberta, cuida do título da aba e do endereço, e envolve cada tela numa `RedeDeProtecao` |
+| `App.tsx` | Decide qual tela está aberta, cuida do título da aba e do endereço, e envolve cada tela numa `RedeDeProtecao`. Não importa `features/` de forma estática, e há varredura que reprova se voltar a importar |
 | `RedeDeProtecao.tsx` | O `ErrorBoundary` do projeto. Exceção de render deixa de apagar a página inteira |
 | `RodapeDeTelas.tsx` | O rodapé de navegação entre as telas. Componente burro: quem decide o que ele mostra é `saidasDaTela.ts` |
 | `saidasDaTela.ts` | Para onde cada tela leva e com que palavras. Puro, com teste |
@@ -20,7 +20,8 @@ ninguém revisa.
 - [`palco3d/`](palco3d/) `?tela=palco3d` e `?tela=composicao`, uma peça por vez e o calçado
   montado. **Sem banco, sem conta**: as peças vêm de [`lib/acervo/`](lib/acervo/), que é código.
 - [`features/`](features/) o editor de zonas logado, atrás de `RotaProtegida`. É a única área que
-  fala com o Supabase, e a única que exige `.env.local`.
+  fala com o Supabase, e a única que exige `.env.local`. Entra por `import()` tardio, em
+  `features/AreaProtegida.tsx`: o cliente de banco pesa, e quem paga por ele é quem faz login.
 
 Essa divisão é o que faz um clone recém-baixado abrir em `?tela=esboco` sem conta nenhuma, e está
 escrita assim de propósito: cobrar credencial de quem não vai usar credencial é a "prevenção de
