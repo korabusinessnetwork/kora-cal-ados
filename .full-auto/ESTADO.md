@@ -64,10 +64,13 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   para 195 linhas, com HTML idêntico antes e depois. Dois critérios estavam errados e foram
   corrigidos às claras, e uma mutação sobreviveu no meio do caminho e morre agora. Tudo isso está em
   `REFINO-RODADAS.md`.
-- **Próximo passo:** Fase 5, rodada 8. A reauditoria parte de duas coisas vistas de passagem na
-  rodada 7, que precisam de sonda antes de virar achado: o "Maximum update depth exceeded" com 200
-  eventos de cor no mesmo tique, e o `parametros[0]` que sobrou em `TelaDoPalco3d.tsx`. Entra também
-  o backlog, A35 e o que estiver abaixo do corte. A mensagem da rodada 7 já foi entregue ao dono.
+- **Rodada 8: ABERTA em 2026-09-12.** Reauditoria feita, 5 achados acima do corte, 3 abaixo e **4
+  suspeitas mortas na sonda**, todos em `AUDITORIA.md`, seção "Achados da reauditoria da rodada 8".
+  O lote está em `TAREFAS.md`, seção "Refino, rodada 8". Um dos achados é meu: o `BASELINE.md`
+  dizia "build limpo" desde a abertura, e o build sempre imprimiu o aviso de chunk acima de 500 kB.
+  Outro nasceu da rodada 7: com a composição sobrevivendo ao F5, nada leva de volta ao padrão.
+- **Próximo passo:** Fase 3, executar o lote da rodada 8 na ordem do `TAREFAS.md`: A61, A59, A60,
+  A62 e A63. A mensagem da rodada 7 já foi entregue ao dono.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

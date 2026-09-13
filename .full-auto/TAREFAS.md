@@ -416,3 +416,22 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       derruba quatro testes da tela, e esconder a primeira zona da lista derruba seis. Conferido
       no navegador: colagem válida anunciada, zonas trocadas, duas faixas, zero erros. O chunk
       tardio da tela foi de 26,90 kB para 27,22 kB, e o principal ficou em 219,12 kB.
+
+## Refino, rodada 8 (aberta em 2026-09-12)
+
+Lote de 5 itens, saído da reauditoria registrada em `AUDITORIA.md`, seção "Achados da reauditoria da
+rodada 8". Nenhum com risco 4 ou 5, e o mais alto é 1. Um item por eixo com achado acima do corte:
+produto (A59), ux (A60), qualidade (A61 e A62), robustez (A63).
+
+Ordem pelo score. O A61 vai antes dos outros de propósito, apesar de empatar com o A60: é ele que
+deixa a saída do build sem aviso, e é essa saída que o baseline de cada item seguinte confere.
+
+Abaixo do corte e fora do lote: **A35** (canvas sem teclado), **A64** (nenhuma chamada de rede com
+tempo-limite, evidência só de código), **A65** (foco no `body` depois de login recusado) e **A66**
+(`?tela=` com erro de digitação abre o login em silêncio).
+
+- [ ] R8-A61 O build sai sem aviso, e a linha do baseline diz a verdade | trilha: qualidade | depende: nenhum | pronto quando: `npm run build` não imprime o aviso de chunk acima de 500 kB, o limite novo fica acima do chunk do three.js e abaixo do que um chunk novo e grande teria, com o porquê escrito no `vite.config.ts`, uma mutação que infla um chunk acima do limite faz o aviso voltar, e o `BASELINE.md` registra às claras que as colunas anteriores tinham o aviso
+- [ ] R8-A59 Um botão leva a composição de volta ao calçado de prova | trilha: produto | depende: nenhum | pronto quando: a tela da composição tem um botão que troca a montagem pela do calçado de prova, zera a peça clicada, a gravação do R7-A57 passa a ser a do padrão (um F5 depois abre no padrão), o botão fica desabilitado quando a montagem já é o padrão, trocar mostra uma frase em região viva com um botão Desfazer que devolve a montagem anterior (perder o trabalho de uma sessão com um clique sem volta seria o erro que prevenção evita), e existe teste de tela para trocar, desfazer, e trocar, recarregar e continuar no padrão
+- [ ] R8-A60 Os botões do rodapé viram alvo de toque de pelo menos 24 px | trilha: ux | depende: nenhum | pronto quando: medido no navegador a 375 px, cada botão do rodapé tem pelo menos 24 px de altura nas quatro telas, o texto e a ordem não mudam, e o rodapé de links da rede de proteção continua com a mesma aparência
+- [ ] R8-A62 Nenhum texto visível usa travessão, e uma varredura cobra isso | trilha: qualidade | depende: nenhum | pronto quando: zero travessão em literal de texto e em texto de JSX de `src/` e `api/`, a varredura reprova um travessão novo num literal e NÃO reprova um travessão em comentário (contraprova sintética), e os testes que conferem essas mensagens continuam passando
+- [ ] R8-A63 A tela de uma peça desenha um controle por parâmetro | trilha: robustez | depende: nenhum | pronto quando: `TelaDoPalco3d.tsx` não lê mais `parametros[0]`, uma peça de dois parâmetros desenha dois controles, existe teste que reprova a leitura do primeiro, e a tela com o acervo de prova continua com o mesmo HTML

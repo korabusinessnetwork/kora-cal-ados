@@ -1128,3 +1128,116 @@ Sete suspeitas, sondadas e mortas. Ficam escritas para ninguém gastar a oitava 
    `[aria-live]`, `[role=alert]` e `[role=status]` da tela do calçado montado: quatro, todos no
    lugar certo. No código são **vinte e um atributos em treze arquivos** de `src/`, e os que decidem
    prioridade trazem o critério escrito no comentário ao lado. A única coisa que sobrou foi o aninhamento, que virou o A55.
+
+---
+
+## Achados da reauditoria da rodada 8 (2026-09-12)
+
+De onde veio a lista: as duas coisas vistas de passagem na rodada 7, o que a própria rodada 7 criou
+sem perceber, as quatro telas abertas a 375 px medindo alvo de toque e transbordo, a saída do build
+lida linha por linha, e o texto que aparece para quem usa, lido contra a regra de escrita do dono.
+
+### A59 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx` (depois do R7-A57)
+
+**hoje:** desde o R7-A57 a composição sobrevive ao F5, e nada na tela leva de volta ao calçado de
+prova. O R7-A57 criou este buraco: antes, recarregar ERA o jeito de recomeçar. Conferido por busca
+em `src/palco3d`: nenhum controle com "recomeçar", "restaurar", "desfazer" ou "limpar". O único
+caminho hoje é apagar os dados do site no navegador, ou colar um JSON do calçado de prova que a
+pessoa não tem.
+
+**depois:** um botão "Voltar ao calçado de prova" no painel da composição, que troca as escolhas
+pelas do padrão, zera a seleção e, por consequência do efeito do R7-A57, grava o padrão.
+
+**evidência:** busca acima, e o próprio teste do R7-A57 que prova que o F5 devolve a montagem.
+
+valor: 4 | esforço: 1 | risco: 1 | **score: 5**
+
+### A60 | eixo: ux | onde: `src/features/sessao/sessao.css:137` (`.rodape-telas button`)
+
+**hoje:** os botões do rodapé medem **18 px de altura** nas quatro telas, com `padding: 1px 6px` e
+fonte de 12 px. A 375 px eles quebram em coluna, e medido no navegador os três ficam em
+y = 2110, 2129 e 2148: centros a **19 px** um do outro. A exceção de espaçamento do critério 2.5.8
+da WCAG 2.2 pede círculos de 24 px que não se cruzem, e com 19 px eles se cruzam. No celular, o dedo
+que mira "ver o palco 3D" pega o esboço.
+
+**depois:** alvo de pelo menos 24 px de altura no rodapé, sem mudar o texto nem a ordem.
+
+**evidência:** medida no navegador a 375x812, nas quatro telas.
+
+valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A61 | eixo: qualidade | onde: `vite.config.ts` e `BASELINE.md` (linha do build)
+
+**hoje:** todo `npm run build` imprime "(!) Some chunks are larger than 500 kB after minification",
+por causa do chunk do three.js (619,51 kB), que é tardio de propósito e já está medido na tabela.
+E o `BASELINE.md` escreve "limpo" na linha do build desde a abertura do refino. **Não era limpo**:
+o aviso estava lá em todas as colunas, e eu não li a saída inteira. O dano não é o aviso, é o que
+ele esconde: se um chunk NOVO passar de 500 kB, a mensagem é a mesma de sempre, e ninguém olha
+mensagem que aparece sempre. É o mesmo raciocínio que o `index.html` já registra para o favicon.
+
+**depois:** o limite do aviso fica logo acima do chunk do three.js, com o porquê no
+`vite.config.ts`, e o build sai sem aviso; um chunk que cresça acima dele volta a avisar. A linha do
+baseline é corrigida às claras, dizendo que as colunas anteriores tinham o aviso.
+
+**evidência:** saída do `npm run build` no fechamento da rodada 7.
+
+valor: 3 | esforço: 1 | risco: 1 | **score: 3**
+
+### A62 | eixo: qualidade | onde: 23 textos em `src/` e `api/` (JSX e mensagens de erro)
+
+**hoje:** a regra de escrita do dono proíbe travessão em texto em português, e 23 linhas de código
+que NÃO são comentário têm travessão. Entre elas a frase da tela de login ("O acesso é por marca —
+você só enxerga..."), a ajuda do painel de zonas do esboço, três mensagens do formulário de zona e
+mensagens de erro da API e do motor, que chegam a quem integra. Nenhuma guarda impede um novo.
+
+**depois:** os textos visíveis e as mensagens trocam o travessão por vírgula ou ponto, e uma
+varredura reprova travessão em literal de texto e em texto de JSX de `src/` e `api/`, deixando
+comentário de fora, porque comentário não é lido por quem usa.
+
+**evidência:** `grep` de "—" fora de linhas de comentário, 23 ocorrências.
+
+valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+### A63 | eixo: robustez | onde: `src/palco3d/TelaDoPalco3d.tsx:28`
+
+**hoje:** a tela de uma peça tem o mesmo `peca?.parametros[0]` que o R7-A58 consertou na tela da
+composição: numa peça com dois parâmetros, o segundo não tem controle e fica travado no padrão, sem
+nada dizendo que existe. A outra metade do defeito do A58 não está aqui: esta tela já soma
+(`{ ...atual, [nome]: valor }`). Visto de passagem no R7-A58 e deixado fora do escopo escrito.
+
+**depois:** um controle por parâmetro declarado, com teste que reprova a leitura do primeiro.
+
+**evidência:** leitura do arquivo, e o acervo de prova só tem peça de um parâmetro, que é o motivo
+de nenhum teste ter reprovado.
+
+valor: 3 | esforço: 2 | risco: 1 | **score: 2**
+
+### Abaixo do corte, registrados
+
+- **A64 | robustez | nenhuma chamada de rede tem tempo-limite**, nem a API nem os hooks do editor.
+  Busca por `signal`, `timeout`, `Abort` e `maxDuration` em `api/`, `src/lib/supabase` e
+  `src/features`: nenhuma ocorrência que limite espera. O efeito que eu esperaria (a Vercel
+  cortando a função e devolvendo página dela, fora do envelope da API; o editor carregando para
+  sempre) **não foi visto**, porque nada está publicado e eu não entro no editor. Evidência só de
+  código, então fica com risco alto na nota. valor 3 | esforço 3 | risco 2 | score -1.
+- **A65 | ux | o foco cai no `body` depois de um login recusado.** Os campos e o botão ficam
+  `disabled` durante o envio, e conferido no navegador: desabilitar o elemento focado leva o foco
+  ao `body`. O custo é pequeno, porque o próximo `Tab` cai no e-mail. valor 2 | esforço 1 | risco 1
+  | score 1.
+- **A66 | ux | `?tela=` com erro de digitação abre o login sem dizer nada.** `lerTelaDaUrl` cai em
+  `app` para qualquer valor desconhecido. O login tem o rodapé com as três telas públicas, então há
+  saída. valor 2 | esforço 1 | risco 1 | score 1.
+
+### O que eu achei que era defeito e não era (rodada 8)
+
+1. **"Maximum update depth exceeded" na tela da composição.** Sondado: o erro só aparece com 50 ou
+   mais eventos de cor no MESMO tique (10 e 30 deram zero, 60 deu um), que é o limite de
+   atualizações aninhadas do React. Com 200 eventos em tarefas separadas, mesmo a 0 ms, zero erros.
+   Entrada de verdade, arrasto, teclado ou colagem, não produz 50 eventos numa tarefa só.
+2. **As faixas de parâmetro, com 16 px de altura, seriam alvo pequeno.** Estão a 234 px uma da outra,
+   e a exceção de espaçamento do 2.5.8 cobre.
+3. **Trocar a cor a cada quadro vazaria memória da GPU**, já que cada troca recarrega o glTF.
+   `PalcoDeModelo3d.tsx` percorre o objeto que sai de cena e chama `dispose` em geometria e
+   materiais. Não medido na GPU, porque o navegador desta máquina nega o contexto WebGL.
+4. **Alguma das quatro telas transbordaria na horizontal a 375 px.** Nenhuma: `scrollWidth` igual à
+   largura da janela nas quatro.
