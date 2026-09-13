@@ -4,7 +4,7 @@ O que vive aqui: a **composição** (ADR-008 D2), que é o que define um calçad
 peças do acervo, em que cor, com que parâmetros. É JSON de algumas linhas, nunca um arquivo 3D.
 
 O que **não** vive aqui: geometria, three.js, palco, acesso ao Supabase, HTTP, UI, e a chamada
-ao modelo de linguagem. Este módulo é puro: recebe dado, devolve dado, e não sabe o que é um
+de rede a um modelo de linguagem (o modelo entra por parâmetro, ver `gerarComposicaoPorPrompt.ts`). Este módulo é puro: recebe dado, devolve dado, e não sabe o que é um
 glTF.
 
 | Arquivo | Papel | Entrada → saída |
@@ -13,6 +13,8 @@ glTF.
 | `empilharComposicao.ts` | De quanto cada peça sobe para assentar sobre a de baixo (T14) | forma + faixa vertical de cada peça → deslocamento por categoria |
 | `montarComposicao.ts` | A orquestração de T14: mede, empilha, desloca, junta e pinta, nessa ordem | composição validada + provedor de glTF → um glTF só, já colorido |
 | `montarCatalogoParaModelo.ts` | O catálogo para o modelo (T05): só as peças da forma, com id, categoria, rótulo e faixa, em JSON | forma + catálogo → texto que o modelo de linguagem lê |
+| `gerarComposicaoPorPrompt.ts` | Prompt vira composição (T09): confere o prompt, chama o modelo de linguagem injetado e passa a resposta pelo guarda. Define `ModeloDeLinguagem` | prompt + forma + catálogo + modelo → composição validada |
+| `lerRespostaDoModelo.ts` | Tira o JSON do texto que o modelo respondeu, sem conferir a composição | texto → `unknown` |
 | `tiposDaComposicao.ts` | O vocabulário do modo gerado em tipos. Nenhum comportamento | — |
 | `fixtures/acervoDeTeste.ts` | Catálogo escrito à mão, com duas formas. O gêmeo de `render/fixtures/gltfDeTeste.ts` | — |
 
