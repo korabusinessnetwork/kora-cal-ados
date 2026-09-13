@@ -207,6 +207,33 @@ describe('mudarEscolhaDaTela', () => {
     });
   });
 
+  it('mexer num parâmetro preserva os outros parâmetros da mesma peça (R7-A58)', () => {
+    // O acervo de prova só tem peça de um parâmetro, então os dois nomes daqui são sintéticos: a
+    // pergunta é sobre a transição, que não consulta o catálogo. Com substituição no lugar de
+    // soma, a segunda mudança devolveria só `largura`, e a espessura escolhida sumiria.
+    const comEspessura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'sola', {
+      parametros: { espessura: 0.02 },
+    });
+    const comLargura = mudarEscolhaDaTela(comEspessura, 'sola', { parametros: { largura: 0.09 } });
+    const espessuraDeNovo = mudarEscolhaDaTela(comLargura, 'sola', { parametros: { espessura: 0.03 } });
+
+    expect(comLargura.get('sola')?.parametros).toEqual({ espessura: 0.02, largura: 0.09 });
+    expect(espessuraDeNovo.get('sola')?.parametros).toEqual({ espessura: 0.03, largura: 0.09 });
+  });
+
+  it('trocar de peça junto com um parâmetro ainda descarta os da peça anterior', () => {
+    // A soma não pode furar o BUG-019: se a mudança troca a peça, o que vale é só o que veio nela.
+    const comAltura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
+      parametros: { 'altura-do-cano': 0.07 },
+    });
+    const trocada = mudarEscolhaDaTela(comAltura, 'cabedal', {
+      pecaId: 'prova-cabedal-cano-alto',
+      parametros: { outro: 1 },
+    });
+
+    expect(trocada.get('cabedal')?.parametros).toBeUndefined();
+  });
+
   it('reescolher a mesma peça não é troca, e não apaga o ajuste', () => {
     // Clicar de novo no botão que já está ligado é gesto comum. Zerar a altura ali seria perda de
     // trabalho sem nenhuma mudança na tela para explicá-la.

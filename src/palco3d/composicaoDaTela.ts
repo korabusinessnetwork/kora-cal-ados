@@ -77,7 +77,15 @@ export function mudarEscolhaDaTela(
   const trocouDePeca = mudanca.pecaId !== undefined && mudanca.pecaId !== antes.pecaId;
   const depois = { ...antes, ...mudanca };
 
-  if (trocouDePeca) delete depois.parametros;
+  if (trocouDePeca) {
+    delete depois.parametros;
+  } else if (mudanca.parametros !== undefined) {
+    // Mexer num parâmetro SOMA ao que já estava, e não substitui. O espalhamento de cima trocaria
+    // o objeto inteiro pelo da mudança, que traz uma chave só, a do controle arrastado: numa peça
+    // de dois parâmetros, arrastar a espessura apagaria a largura já escolhida, e a peça voltaria
+    // ao padrão dela sem ninguém ter tocado ali (R7-A58).
+    depois.parametros = { ...antes.parametros, ...mudanca.parametros };
+  }
 
   return new Map(escolhas).set(categoria, depois);
 }
