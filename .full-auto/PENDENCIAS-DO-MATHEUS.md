@@ -6,7 +6,12 @@ Coisas que só você pode fazer. Ordem: da mais importante para a menos importan
 o rodapé, e o registro completo em `memory/restrictions.md`, `docs/08_DECISOES/adr-009-saida-do-cliente.md`
 e `.full-auto/ESTADO.md`.
 
-## P01 Instalar o hook de continuidade do Full Automático [prioridade: alta]
+## P01 Instalar o hook de continuidade do Full Automático [RESOLVIDA em 2026-09-13]
+
+- **Resolvida:** instalado a pedido seu com `instalar-hook.js . --com-protecoes`, a partir da cópia da skill que já estava no plugin. Um ajuste que o pacote não previa: o projeto é `"type": "module"`, e os scripts do hook usam `require`, então o Node recusava rodar. `.claude/hooks/package.json` com `"type": "commonjs"` resolve só para essa pasta, sem mexer nos scripts. Conferido: com `status: CONCLUIDO` o Stop hook libera, e numa cópia de rascunho com `EXECUTANDO` e uma tarefa `[ ]` ele bloqueia. Passa a valer depois de reiniciar a sessão.
+
+O texto original fica abaixo, como histórico.
+
 
 - **Por quê:** sem ele a execução não é de fato automática. O Stop hook é o que impede a sessão de encerrar enquanto houver tarefa pendente, e o vigia de limite é o que retoma sozinho quando o limite de uso volta. Sem os dois, cada retomada depende de você digitar.
 - **Contorno atual:** a pasta de estado `.full-auto/` existe e é atualizada a cada tarefa. Se a sessão cair, a próxima lê `ESTADO.md` e continua do "próximo passo". O que se perde é a retomada sem você.
