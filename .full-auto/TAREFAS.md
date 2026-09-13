@@ -455,6 +455,18 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       Desfazer, Desfazer devolve `#22aa44` com foco no botão, e recomeço seguido de F5 abre no padrão,
       botão desabilitado e sem Desfazer. Baseline: 1316 testes, 25 no navegador, `tsc` e build sem
       aviso, `npm audit` em zero.
-- [ ] R8-A60 Os botões do rodapé viram alvo de toque de pelo menos 24 px | trilha: ux | depende: nenhum | pronto quando: medido no navegador a 375 px, cada botão do rodapé tem pelo menos 24 px de altura nas quatro telas, o texto e a ordem não mudam, e o rodapé de links da rede de proteção continua com a mesma aparência
+- [x] R8-A60 Os botões do rodapé viram alvo de toque de pelo menos 24 px | trilha: ux | depende: nenhum | pronto quando: medido no navegador a 375 px, cada botão do rodapé tem pelo menos 24 px de altura nas quatro telas, o texto e a ordem não mudam, e o rodapé de links da rede de proteção continua com a mesma aparência
+      feito em COMMIT. `min-height: 24px` na regra `.rodape-telas button` do `sessao.css`, com o
+      porquê ao lado. Medido no navegador a 375x812, nas quatro telas (login, esboço, palco 3D e
+      calçado montado): antes 18 px de altura com centros a 19 px, depois 24 px com centros a 24 px,
+      os mesmos três textos na mesma ordem, e nenhuma tela transborda na horizontal. Na largura do
+      painel (629 px) os botões seguem em linha, com 24 px. O rodapé de links da rede de proteção
+      não foi tocado: a regra `.rodape-telas a` é outra e continua igual, e a tela da rede **não foi
+      aberta no navegador** para conferir a olho, a prova é a regra. Guarda nova,
+      `rodapeAlvoDeToque.test.ts`, lê a folha sem comentários. Mutações: tirar o `min-height`, baixar
+      para 18 px e pôr altura na regra dos links, as três mortas. Limite dito: uma regra MAIS
+      específica em outra folha, que derrubasse a altura, passaria pela guarda, porque ela lê só o
+      `sessao.css`; hoje nenhuma outra folha cita `.rodape-telas`. Baseline: 1318 testes, 25 no
+      navegador, `tsc` e build sem aviso, `npm audit` em zero.
 - [ ] R8-A62 Nenhum texto visível usa travessão, e uma varredura cobra isso | trilha: qualidade | depende: nenhum | pronto quando: zero travessão em literal de texto e em texto de JSX de `src/` e `api/`, a varredura reprova um travessão novo num literal e NÃO reprova um travessão em comentário (contraprova sintética), e os testes que conferem essas mensagens continuam passando
 - [ ] R8-A63 A tela de uma peça desenha um controle por parâmetro | trilha: robustez | depende: nenhum | pronto quando: `TelaDoPalco3d.tsx` não lê mais `parametros[0]`, uma peça de dois parâmetros desenha dois controles, existe teste que reprova a leitura do primeiro, e a tela com o acervo de prova continua com o mesmo HTML

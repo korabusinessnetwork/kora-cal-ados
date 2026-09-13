@@ -134,7 +134,11 @@
 .barra-sessao__botao:hover { background: var(--cor-superficie-alta); }
 
 .rodape-telas { margin: 0; padding: 16px 28px 28px; text-align: center; }
+/* 24 px de altura é o alvo mínimo do critério 2.5.8 da WCAG 2.2. Antes eram 18 px, e a 375 px os
+   três botões quebram em coluna com centros a 19 px um do outro: o dedo que mira um pega o vizinho
+   (R8-A60). A altura cresce, e não a fonte nem o texto, para o rodapé seguir discreto. */
 .rodape-telas button {
+  min-height: 24px;
   background: none; border: none; color: var(--cor-texto-fraco);
   font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer;
 }
