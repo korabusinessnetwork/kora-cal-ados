@@ -605,4 +605,19 @@ Se a reauditoria seguinte não achar nada novo acima do corte, o refino termina.
 Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71**, **A72** e **A74** (o editor
 logado não diz "falta o #", evidência só de código).
 
-- [ ] R10-A73 O seletor de cor recebe sempre a forma longa | trilha: robustez | depende: nenhum | pronto quando: digitar `#f00` no campo de texto do esboço e da composição sobe `#FF0000` (o `value` do seletor de cor é `#ff0000` e a lista de zonas do esboço diz `#FF0000`), o texto do campo continua `#f00`, o console não mostra o aviso de formato, e há teste nas duas telas que reprova a forma curta subindo
+- [x] R10-A73 O seletor de cor recebe sempre a forma longa | trilha: robustez | depende: nenhum | pronto quando: digitar `#f00` no campo de texto do esboço e da composição sobe `#FF0000` (o `value` do seletor de cor é `#ff0000` e a lista de zonas do esboço diz `#FF0000`), o texto do campo continua `#f00`, o console não mostra o aviso de formato, e há teste nas duas telas que reprova a forma curta subindo
+      feito em COMMIT. Os dois campos de texto sobem `validarCor(valor, zona)` quando o texto fecha, que
+      é a forma longa em maiúsculo, com o porquê ao lado; o texto do campo continua como a pessoa
+      digitou. Na composição a forma longa já chegava a `validarComposicao` e à API, então a mudança
+      ali só alcança o seletor e o que fica guardado no navegador; no esboço alcança também a lista de
+      zonas. O teste antigo que esperava `#1A2` subindo como veio passou a esperar `#11AA22`, dito às
+      claras: era o comportamento que o item muda. Testes: 1 novo no campo da composição e 2 num
+      arquivo novo do esboço, que monta o painel em jsdom e digita, porque o teste existente lê só um
+      render. Um teste que escrevi e tirei antes do commit: montar o campo com `#FF0000` e ler o seletor
+      provava só o que o próprio teste passava. Mutações: 3, todas mortas (composição subindo o texto
+      curto: 2 reprovam; esboço subindo o texto curto: 2; esboço subindo o curto em maiúsculo: 2).
+      Navegador: `#0f0` no esboço deixa o campo em `#0f0`, o seletor em `#00ff00` e a lista em
+      `#00FF00`; `#00f` na composição deixa o seletor em `#0000ff` e grava `#0000FF`; nenhum aviso de
+      formato no console depois de uma marca. **Limite:** o seletor preto de um navegador que siga a
+      especificação à risca não foi visto, porque este Chrome mostra a cor mesmo com a forma curta.
+      Baseline: 1346 testes, 25 no navegador, `tsc` limpo, build sem aviso, `npm audit` em zero.

@@ -8,6 +8,7 @@ import { paletaDeAtalho } from './produtoDemo';
 import { contarElementos } from '../lib/texto/contarElementos';
 import { estadoDoHexDigitado } from '../lib/render/estadoDoHexDigitado';
 import { mensagemDoHexDigitado } from '../lib/render/mensagemDoHexDigitado';
+import { validarCor } from '../lib/render/validarCor';
 
 interface Props {
   zonas: ZonaDoProduto[];
@@ -90,7 +91,9 @@ function EditorDeCor({
   // cara do usuário enquanto ele ainda digita.
   function digitar(valor: string) {
     setTexto(valor);
-    if (estadoDoHexDigitado(valor) === 'completo') aoTrocar(valor.trim());
+    // A forma longa, e não o texto como veio: `#F00` é cor, mas o seletor ao lado só aceita
+    // `#rrggbb` e mostraria preto (R10-A73).
+    if (estadoDoHexDigitado(valor) === 'completo') aoTrocar(validarCor(valor, zoneKey));
   }
 
   const valido = estadoDoHexDigitado(texto) === 'completo';

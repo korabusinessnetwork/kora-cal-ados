@@ -22,6 +22,7 @@ import { useState } from 'react';
 
 import { estadoDoHexDigitado } from '../lib/render/estadoDoHexDigitado';
 import { mensagemDoHexDigitado } from '../lib/render/mensagemDoHexDigitado';
+import { validarCor } from '../lib/render/validarCor';
 
 export interface CampoDeCorDaCategoriaProps {
   /** A `zone_key` da categoria. Entra no nome acessível dos dois campos e no id do erro. */
@@ -55,7 +56,10 @@ export function CampoDeCorDaCategoria({ categoria, cor, aoTrocar }: CampoDeCorDa
 
   function digitar(valor: string) {
     setTexto(valor);
-    if (estadoDoHexDigitado(valor) === 'completo') aoTrocar(valor.trim().toUpperCase());
+    // Sobe a forma que `validarCor` devolve, `#RRGGBB`, e não o texto como veio. A forma curta
+    // (`#F00`) é cor, mas vira o `value` do seletor ao lado, e o `<input type="color">` só aceita
+    // `#rrggbb`: fora disso ele mostra preto, com a peça vermelha do lado (R10-A73).
+    if (estadoDoHexDigitado(valor) === 'completo') aoTrocar(validarCor(valor, categoria));
   }
 
   function escolherNoSeletor(valor: string) {

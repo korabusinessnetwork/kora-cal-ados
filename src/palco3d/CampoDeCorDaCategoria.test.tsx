@@ -99,8 +99,19 @@ describe('campo de cor da categoria', () => {
       await digitar(campoDeTexto(), parcial);
     }
 
-    // `#1A2` é a forma curta, que É uma cor: o motor recebe ela e mais nenhuma das outras cinco.
-    expect(recebidas).toEqual(['#1A2']);
+    // `#1A2` é a forma curta, que É uma cor: o motor recebe ela, já na forma longa (R10-A73), e mais
+    // nenhuma das outras cinco.
+    expect(recebidas).toEqual(['#11AA22']);
+  });
+
+  it('a forma curta sobe na forma longa, e o seletor ao lado mostra a mesma cor (R10-A73)', async () => {
+    // O `<input type="color">` só aceita `#rrggbb`. Com `#f00` no `value` ele cai em preto, e a
+    // peça fica vermelha com o seletor preto do lado. O texto do campo continua como foi digitado.
+    await montar();
+    await digitar(campoDeTexto(), '#f00');
+
+    expect(recebidas).toEqual(['#FF0000']);
+    expect(campoDeTexto().value).toBe('#f00');
   });
 
   it('hex completo chega ao motor em maiúsculo', async () => {
