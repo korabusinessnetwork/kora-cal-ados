@@ -68,3 +68,11 @@ Uma entrada por decisão. Ele revisa no final e pode reverter qualquer uma.
 - **Decisão:** seguir com a opção A, que era a recomendação, e fechar a construção. **Confirmada pelo dono em 2026-09-13**, que respondeu "A".
 - **Por quê:** A é a decisão que o próprio dono tomou em 2026-09-10 e não muda nada. B começaria o item pago da restrição de custo, e não cabe a mim começar esse caminho sem uma resposta. O configurador já é produto sem IA, e o que falta de verdade é o acervo definitivo e as pendências P02 a P05.
 - **Como reverter:** responder B. Aí a T09 volta para `[ ]` com fornecedor falso ativo por padrão, a T05 vem junto, e o aviso de transparência de IA de `memory/restrictions.md` entra na mesma tarefa.
+
+
+## D12 A T09 foi destravada pelo dono (opção B), com fornecedor falso e sem gasto
+- **Contexto:** em 2026-09-13, depois de confirmar A, o dono respondeu "B". Isto substitui a D11.
+- **Decisão:** construir o caminho prompt → composição inteiro, com a interface `ModeloDeLinguagem` real e um **gerador de prova** sem IA ativo por padrão, que entende palavras-chave e só escolhe peças do catálogo que recebeu. Trabalho numa branch nova, `full-auto/prompt-composicao`, a partir de `refino/kora-calcados`, porque a `main` ainda não tem o refino.
+- **O que NÃO entra:** o fornecedor de verdade e o endpoint de servidor que o chamaria. A chave de um modelo de linguagem é segredo e nunca pode ir para o navegador (nem com prefixo `VITE_`), então o fornecedor real exige uma função serverless com autenticação e limite de chamadas, e escolher o fornecedor é gasto. Fica como pendência do dono, com a interface pronta para receber.
+- **Por quê:** é o contorno que a skill manda ("adapter com a interface real + implementação mock ativa por padrão"), e o custo continua zero. O gerador de prova diz na tela que não é IA: a regra de transparência de `memory/restrictions.md` proíbe a tela afirmar que uma IA fez o que um gerador de palavras-chave fez.
+- **Como reverter:** apagar a branch `full-auto/prompt-composicao`. Nada fora dela muda.

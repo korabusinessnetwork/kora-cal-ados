@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: CONCLUIDO
+status: EXECUTANDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 ## Modo atual: refino (desde 2026-09-12)
@@ -183,3 +183,9 @@ rodada, e volta a importar na próxima.
   1346 testes passando e 58 pulados.
 - **Confirmação, 2026-09-13:** o dono respondeu "A". Nada muda, a construção segue `CONCLUIDO`.
 - **Para reabrir a T09:** responder B e rodar `/full-automatico continuar`.
+
+## Fase E, o prompt (desde 2026-09-13)
+
+- **Pedido:** o dono respondeu "B" (D12). Branch `full-auto/prompt-composicao`, a partir de `refino/kora-calcados`.
+- **Tarefas:** T18, T05, T09a, T09b, T09c, na seção "Fase E" de `TAREFAS.md`.
+- **Próximo passo:** T18, termos no glossário.
