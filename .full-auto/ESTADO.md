@@ -181,4 +181,5 @@ rodada, e volta a importar na próxima.
 - **Resposta, 2026-09-13:** `continuar` sem escolha. Segui com a opção A (D11): T09, T05 e T06 continuam
   adiadas e a construção volta a `CONCLUIDO`. Verificação no fechamento: `tsc` limpo, build sem aviso,
   1346 testes passando e 58 pulados.
+- **Confirmação, 2026-09-13:** o dono respondeu "A". Nada muda, a construção segue `CONCLUIDO`.
 - **Para reabrir a T09:** responder B e rodar `/full-automatico continuar`.

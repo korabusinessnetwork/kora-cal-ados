@@ -65,6 +65,6 @@ Uma entrada por decisão. Ele revisa no final e pode reverter qualquer uma.
 
 ## D11 A T09 continua adiada, e a construção fecha com três `[!]`
 - **Contexto:** em 2026-09-13 a retomada da construção achou só T09, T05 e T06 em `[!]`. A condição de revisitar a T09 ("quando o configurador estiver rodando sobre o acervo de prova") está cumprida desde a T15, e isso foi levado ao dono como escalação (opção A, manter adiada; opção B, construir com fornecedor falso). O dono rodou `/full-automatico continuar` de novo sem escolher.
-- **Decisão:** seguir com a opção A, que era a recomendação, e fechar a construção.
+- **Decisão:** seguir com a opção A, que era a recomendação, e fechar a construção. **Confirmada pelo dono em 2026-09-13**, que respondeu "A".
 - **Por quê:** A é a decisão que o próprio dono tomou em 2026-09-10 e não muda nada. B começaria o item pago da restrição de custo, e não cabe a mim começar esse caminho sem uma resposta. O configurador já é produto sem IA, e o que falta de verdade é o acervo definitivo e as pendências P02 a P05.
 - **Como reverter:** responder B. Aí a T09 volta para `[ ]` com fornecedor falso ativo por padrão, a T05 vem junto, e o aviso de transparência de IA de `memory/restrictions.md` entra na mesma tarefa.
