@@ -1044,3 +1044,104 @@ meio do caminho:**
   altura sem reprovar. Hoje nenhuma outra folha cita `.rodape-telas`.
 - **O editor logado continua sem conferência no navegador**, pelo mesmo motivo de sempre: eu não
   preencho credencial.
+
+---
+
+## Rodada 9, fechada em 2026-09-13
+
+**Lote:** 4 itens, em `TAREFAS.md`, seção "Refino, rodada 9". Abaixo dos 5 do orçamento, e é de
+propósito: a reauditoria só achou quatro coisas acima do corte. Nenhum com risco 4 ou 5.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R9-A67 trocar de peça carregava o valor da peça anterior | robustez | 5 | entregue |
+| R9-A68 medida e passo do parâmetro escritos duas vezes | qualidade | 3 | entregue |
+| R9-A70 o campo de hex do esboço chamava tudo de "incompleta" | ux | 2 | entregue |
+| R9-A69 testes de tela que conferiam limpeza sem seleção | qualidade | 2 | entregue |
+
+Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (a colagem recusada fala
+de parâmetro em metros) e **A72** (chunk sumido depois de deploy, evidência só de código). Produto não
+teve achado acima do corte.
+
+---
+
+## Rodada 9: o que foi entregue
+
+**4 de 4 entregues, nenhum revertido.**
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R9-A67 a peça nova abre no padrão dela | robustez | `23d3f91` | entregue |
+| R9-A68 `medidaDoParametro.ts` | qualidade | `508c33f` | entregue, HTML idêntico byte a byte |
+| R9-A70 a frase do hex, igual nas duas telas | ux | `658a3dd` | entregue |
+| R9-A69 testes de tela com seleção de verdade | qualidade | `0c4eb57` | entregue |
+
+### O que mudou de verdade
+
+1. **Trocar de peça não carrega mais o valor da anterior (A67).** O defeito que o R8-A63 achou.
+   Conferido no navegador: sola tratorada em 50 mm, clique no cadarço, e a tela diz "6,0 mm, faixa
+   3,0 mm a 12,0 mm", onde antes dizia 50,0 mm. Clicar na peça que já está em cena não apaga nada. É
+   a mesma regra que a tela da composição já tinha desde o BUG-019.
+
+2. **A medida do parâmetro tem um lugar só (A68).** As duas telas escreviam milímetros e passo do
+   controle cada uma com a sua cópia, e a segunda cópia foi feita por mim no R8-A63. Uma foto do HTML
+   das duas telas e dos dois componentes, antes e depois, deu arquivos idênticos byte a byte.
+
+3. **O campo de hex diz o que falta (A70).** O esboço chamava de "Cor incompleta" qualquer recusa,
+   inclusive `vermelho`. Agora as duas telas usam a mesma frase, e `22aa44`, que é o formato que
+   ferramenta de design copia, recebe "Falta o # no começo. Escreva #22aa44." O campo continua
+   recusando sem `#`, porque a API recusa. Conferido no navegador nas duas telas.
+
+4. **Os testes de tela selecionam uma peça antes de conferir que a troca a larga (A69).** Em jsdom
+   não há canvas, e o teste antigo passava com a limpeza ou sem ela. Um dublê guarda o `aoSelecionar`
+   e desenha o palco de verdade por dentro.
+
+### As medidas, antes e depois
+
+| Medida | Abertura da rodada 9 | Fechamento |
+|---|---|---|
+| Testes verdes | 1329, 58 pulados | **1343**, 58 pulados |
+| Testes contra o banco real | 58 de 58 | **58 de 58** |
+| Testes em navegador | 25 | **25** |
+| `npm run build` | sem erro e sem aviso | **sem erro e sem aviso** |
+| Chunk principal | 219,11 kB (gzip 70,19 kB) | **219,52 kB** (gzip 70,35 kB) |
+| Chunk do three.js | 619,51 kB | **619,63 kB** |
+| Chunk tardio da tela de uma peça | 4,57 kB | **4,51 kB** |
+| Chunk tardio da tela da composição | 28,45 kB | **28,12 kB** |
+| CSS | 25,14 kB | **25,14 kB** |
+| `npm audit` | 0 | **0** |
+| Definições de `milimetros` em `src/` | 2 | **1** |
+| Frases de hex recusado no esboço | 1, para qualquer recusa | **4, a mesma escolha da composição** |
+
+O chunk principal cresceu 0,41 kB porque o esboço mora nele e passou a importar a frase do hex. O do
+three.js cresceu 0,12 kB porque o rolldown pôs ali o módulo da medida, que as duas telas tardias
+dividem. Nenhum dos dois é ganho: é o preço de ter um lugar só, dito aqui para não parecer outra
+coisa.
+
+### Mutações
+
+22 mutações à mão, todas mortas no fim: A67 3, A68 5, A70 7, A69 5, mais 2 do dublê. **Duas
+sobreviveram no meio do caminho, as duas no A69, e eram do próprio item:** trocar o dublê por
+`return null`, sem palco nenhum, deixava as duas suítes de tela verdes, então o critério "o palco de
+verdade continua montado" não tinha teste. Cada tela ganhou uma contraprova que lê a frase do
+`contexto-negado`, que só aparece se o palco real avisou a tela.
+
+Duas outras, no A68, só morriam no teste da função nova e em nenhum teste dos componentes: um
+componente que calculasse o passo por conta própria continuava verde. Os testes dos dois componentes
+ganharam a conferência do passo, que nenhum teste olhava.
+
+### Um critério estava errado, e foi corrigido às claras
+
+- **A69:** a primeira contraprova também exigia a moldura do palco na tela, e reprovou com o palco de
+  verdade. A moldura some de propósito quando o contexto é negado (A48), que é justamente o estado
+  do jsdom. A conferência saiu, e o comentário do teste diz por quê.
+
+### Limites de verificação, ditos por inteiro
+
+- **A67:** o glTF não foi lido no navegador. Ele sai de `valoresEmVigor` com o mesmo objeto que a
+  medida mostra, e é essa ligação que o teste e o navegador provam.
+- **A70:** a conferência de "a peça só muda" no teste do campo foi escrita antes de eu rodar as
+  mutações, então não sei se a mutação que troca "a peça" por "o preview" teria sobrevivido sem ela.
+- **A69:** só mexe em teste, e por isso não teve conferência no navegador.
+- **O editor logado continua sem conferência no navegador**, pelo mesmo motivo de sempre: eu não
+  preencho credencial.

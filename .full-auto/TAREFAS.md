@@ -513,7 +513,7 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       build sem aviso, `npm audit` em zero.
 
 
-## Refino, rodada 9 (aberta em 2026-09-13)
+## Refino, rodada 9 (aberta e fechada em 2026-09-13)
 
 Lote de **4 itens**, abaixo dos 5 do orçamento, e é de propósito: a reauditoria, registrada em
 `AUDITORIA.md`, seção "Achados da reauditoria da rodada 9", só achou quatro coisas acima do corte, e
@@ -528,7 +528,7 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
 **A72** (chunk sumido depois de deploy, evidência só de código).
 
 - [x] R9-A67 Trocar de peça não carrega o valor da peça anterior | trilha: robustez | depende: nenhum | pronto quando: na tela de uma peça, levar a sola tratorada ao máximo e clicar no cadarço mostra o cadarço no padrão dele, dentro da faixa, e o glTF sai com o padrão; clicar na peça que já está em cena não apaga o valor mexido; existe teste de tela que reprova o valor herdado; conferido no navegador
-      feito em COMMIT. `trocarPeca` zera os parâmetros quando a peça muda de verdade, com o porquê ao
+      feito em `23d3f91`. `trocarPeca` zera os parâmetros quando a peça muda de verdade, com o porquê ao
       lado e a mesma regra de `mudarEscolhaDaTela` da tela da composição; clicar na peça que já está
       em cena não zera. A seleção continua sendo largada em qualquer clique, como antes: não mexi no
       que não estava no critério. Testes de tela: 3 (cadarço depois da sola a 50 mm abre em 6,0 mm e
@@ -540,7 +540,7 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
       `valoresEmVigor` com o mesmo objeto que a medida mostra, e é essa ligação que fica provada.
       Baseline: 1332 testes, 25 no navegador, `tsc` limpo, build sem aviso, `npm audit` em zero.
 - [x] R9-A68 Milímetros e passo do controle definidos num lugar só | trilha: qualidade | depende: R9-A67 | pronto quando: `milimetros` e `PASSOS_DO_PARAMETRO` têm uma definição cada em `src/`, importada por `ControlesDeParametro.tsx` e `ParametrosDaPeca.tsx`, a função tem teste próprio, e o HTML das duas telas com o acervo de prova é idêntico antes e depois, por fotografia de teste descartável
-      feito em COMMIT. `milimetros`, `PASSOS_DO_PARAMETRO` e o cálculo do passo moram em
+      feito em `508c33f`. `milimetros`, `PASSOS_DO_PARAMETRO` e o cálculo do passo moram em
       `src/palco3d/medidaDoParametro.ts`, com o porquê no cabeçalho, e os dois componentes importam
       dali; as cópias locais saíram. Busca por `function milimetros` e `PASSOS_DO_PARAMETRO = ` em
       `src/`: uma de cada. Teste próprio com 2 casos, e os testes dos dois componentes ganharam a
@@ -558,7 +558,7 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
       kB e o da composição de 28,45 kB para 28,38 kB. Baseline: 1334 testes, 25 no navegador, `tsc`
       limpo, build sem aviso, `npm audit` em zero.
 - [x] R9-A70 O campo de hex diz o que falta, e diz igual nas duas telas | trilha: ux | depende: nenhum | pronto quando: o esboço deixa de dizer "incompleta" para texto que nunca vira cor, as duas telas escolhem a frase pela mesma função, um hex de 3 ou 6 dígitos sem `#` ganha a frase "falta o # no começo" com o texto já corrigido de exemplo, o campo continua recusando sem `#` (a API recusa), e há testes da frase e do campo nas duas telas
-      feito em COMMIT. A frase saiu de `CampoDeCorDaCategoria.tsx` para
+      feito em `658a3dd`. A frase saiu de `CampoDeCorDaCategoria.tsx` para
       `src/lib/render/mensagemDoHexDigitado.ts`, ao lado da regra que ela explica, e as duas telas a
       usam, cada uma dizendo o que só muda quando a cor fecha ("a peça" ou "o preview"). O esboço
       deixa de ter a frase fixa. Texto só de dígitos hex sem `#` ganha "Falta o # no começo. Escreva
@@ -579,7 +579,7 @@ Abaixo do corte e fora do lote: **A35**, **A64**, **A65**, **A66**, **A71** (col
       foi de 28,38 kB para 28,12 kB. Baseline: 1340 testes, 25 no navegador, `tsc` limpo, build sem
       aviso, `npm audit` em zero.
 - [x] R9-A69 Os testes de tela selecionam uma peça de verdade antes de conferir a limpeza | trilha: qualidade | depende: R9-A67 | pronto quando: os testes de "trocar de peça limpa a peça clicada" das duas telas mostram o nome selecionado antes da troca, a mutação que tira `setSelecionada(null)` de `trocarPeca` reprova um teste em cada tela, e o palco de verdade continua montado nos outros testes
-      feito em COMMIT. Os dois testes de tela trocam `PalcoDeModelo3d` por um dublê que guarda o
+      feito em `0c4eb57`. Os dois testes de tela trocam `PalcoDeModelo3d` por um dublê que guarda o
       `aoSelecionar` que a tela entrega e desenha o palco de verdade por dentro, então sem WebGL ele
       continua caindo em `contexto-negado` como antes. Com isso os testes selecionam de verdade: na
       composição, "trocar de peça limpa a peça clicada" mostra `prova-sola-plana` no endereço antes

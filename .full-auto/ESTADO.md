@@ -71,10 +71,16 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   nenhum texto que chega a alguém usa travessão, e a tela de uma peça desenha um controle por
   parâmetro. Duas mutações sobreviveram no meio e morrem agora, dois critérios foram corrigidos às
   claras, e um defeito novo apareceu no A63. Tudo em `REFINO-RODADAS.md`.
-- **Rodada 9: ABERTA em 2026-09-13.** Lote de 4 itens em `TAREFAS.md`, abaixo do orçamento porque a
-  reauditoria só achou quatro acima do corte, e está dito lá.
-- **Próximo passo:** executar R9-A67 (valor de parâmetro herdado entre peças na tela de uma peça),
-  depois A68, A70 e A69, cada um com baseline completo e mutações.
+- **Rodada 9: FECHADA em 2026-09-13**, 4 de 4 entregues, nenhum revertido, lote abaixo do orçamento
+  porque a reauditoria só achou quatro itens acima do corte. Baseline verde nas duas pontas: 1343
+  testes, 58 no banco, 25 no navegador, `tsc` limpo, build sem aviso, `npm audit` em zero. A tela de
+  uma peça para de carregar valor de parâmetro entre peças, a medida do parâmetro tem um lugar só, o
+  campo de hex diz o que falta nas duas telas, e os testes de tela selecionam peça de verdade. Duas
+  mutações sobreviveram no meio e morrem agora. Tudo em `REFINO-RODADAS.md`.
+- **Próximo passo:** Fase 5, rodada 10. Reauditar o que a rodada 9 mudou (a frase nova do hex nas
+  duas telas, o dublê do palco nos testes de tela) e o backlog, que hoje está todo abaixo do corte:
+  A35, A64, A65, A66, A71 e A72. Se a reauditoria não achar nada novo acima do corte, o refino
+  termina com `status: CONCLUIDO` e `RELATORIO-FINAL.md`.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 
