@@ -24,7 +24,7 @@ definirAdaptadorDeDom({
     const dom = origem.get(documento);
 
     if (!dom) {
-      throw new Error('Documento não foi criado por este adaptador — não dá para serializar.');
+      throw new Error('Documento não foi criado por este adaptador, então não dá para serializar.');
     }
 
     return dom.serialize();

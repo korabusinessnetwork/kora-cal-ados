@@ -108,7 +108,7 @@ function recusarOQueNaoDaParaNormalizar(documento: DocumentoGltf): void {
   }
 
   if (!Array.isArray(documento.nodes) || documento.nodes.length === 0) {
-    throw new ErroDeVariante('MODELO_3D_INVALIDO', 'O glTF não tem nós ("nodes") — não há malha para endereçar.');
+    throw new ErroDeVariante('MODELO_3D_INVALIDO', 'O glTF não tem nós ("nodes"), então não há malha para endereçar.');
   }
 
   // Extensão exigida é o exportador dizendo "sem entender isto, o arquivo renderiza errado".
@@ -173,7 +173,7 @@ function acharEnderecaveis(documento: DocumentoGltf, nos: NoDoGltf[]): Set<numbe
   if (enderecaveis.size === 0) {
     throw new ErroDeVariante(
       'MODELO_3D_INVALIDO',
-      'Nenhum nó do glTF tem malha — não há nada endereçável para virar zona.',
+      'Nenhum nó do glTF tem malha, então não há nada endereçável para virar zona.',
     );
   }
 

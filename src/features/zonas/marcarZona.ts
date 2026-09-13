@@ -129,7 +129,7 @@ function recusarSobreposicao(
     if (compartilhados.length > 0) {
       throw new ErroDeVariante(
         'ZONAS_SOBREPOSTAS',
-        `A zona "${chave}" dividiria ${compartilhados.length} elemento(s) com a zona "${outra.zone_key}". Cada elemento pertence a uma zona só — tire esses elementos de "${outra.zone_key}" antes.`,
+        `A zona "${chave}" dividiria ${compartilhados.length} elemento(s) com a zona "${outra.zone_key}". Cada elemento pertence a uma zona só. Tire esses elementos de "${outra.zone_key}" antes.`,
       );
     }
   }

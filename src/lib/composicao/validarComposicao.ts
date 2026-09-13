@@ -156,7 +156,7 @@ function resolverEscolha(
   if (peca === undefined) {
     throw new ErroDeVariante(
       'PECA_NAO_ENCONTRADA',
-      `A peça "${pecaId}" não existe no acervo visível. Escolha uma peça do catálogo — o catálogo é a lista completa do que pode ser usado.`,
+      `A peça "${pecaId}" não existe no acervo visível. Escolha uma peça do catálogo, que é a lista completa do que pode ser usado.`,
     );
   }
 

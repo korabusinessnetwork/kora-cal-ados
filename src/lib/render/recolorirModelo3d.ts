@@ -189,7 +189,7 @@ function recusarSobreposicao(trabalho: TrabalhoDeZona[]): void {
       if (comuns.length > 0) {
         throw new ErroDeVariante(
           'ZONAS_SOBREPOSTAS',
-          `As zonas "${esquerda.zoneKey}" e "${direita.zoneKey}" dividem ${comuns.length} material(is) do modelo 3D. Qual cor vale seria decidido pela ordem do pedido — corrija o mapeamento das zonas.`,
+          `As zonas "${esquerda.zoneKey}" e "${direita.zoneKey}" dividem ${comuns.length} material(is) do modelo 3D. Qual cor vale seria decidido pela ordem do pedido. Corrija o mapeamento das zonas.`,
         );
       }
     }

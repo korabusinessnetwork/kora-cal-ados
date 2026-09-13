@@ -132,7 +132,7 @@ export function PainelDaApi({ cores, relatorio, erro }: Props) {
       <h2 className="painel__titulo">Chamada equivalente</h2>
       <p className="painel__ajuda">
         Mesmo motor dos dois lados: o corpo do <code>200</code> é, byte a byte, o SVG que o
-        preview ao lado mostra — não uma aproximação dele. Campo que não é cor vai na query
+        preview ao lado mostra, e não uma aproximação dele. Campo que não é cor vai na query
         string (<code>?format=svg</code>), nunca no topo do corpo, que é o espaço de nomes das{' '}
         <code>zone_key</code> do tenant.
       </p>

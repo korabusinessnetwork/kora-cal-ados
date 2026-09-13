@@ -122,7 +122,7 @@ function ItemDeZona({ zona, emFoco, aoFocar, aoMudarCor }: PropsDoItemDeZona): R
       {zona.elementos === 0 && (
         <p className="painel-zonas__erro" role="alert">
           O seletor desta zona não encontra nenhum elemento no calçado. Gerar variante com ela vai
-          falhar — remarque a zona.
+          falhar. Remarque a zona.
         </p>
       )}
 

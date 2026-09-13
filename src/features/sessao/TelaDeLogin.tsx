@@ -30,7 +30,7 @@ export function TelaDeLogin({ estado, erro, aoEntrar }: PropsDaTelaDeLogin) {
       <form className="login__cartao" onSubmit={handleSubmit}>
         <h1 className="login__titulo">Editor de zonas</h1>
         <p className="login__ajuda">
-          Entre com a conta do seu time. O acesso é por marca — você só enxerga os produtos
+          Entre com a conta do seu time. O acesso é por marca, e você só enxerga os produtos
           do tenant a que pertence.
         </p>
 

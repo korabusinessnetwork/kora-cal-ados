@@ -68,7 +68,7 @@ export async function baixarAssetBaseComServiceRole(
   // "não é um SVG parseável".
   if (conteudo.trim() === '') {
     throw new Error(
-      `O asset-base \`${baseAssetPath}\` está vazio no bucket \`${BUCKET}\` — a escrita do ` +
+      `O asset-base \`${baseAssetPath}\` está vazio no bucket \`${BUCKET}\`, porque a escrita do ` +
         `arquivo ficou pela metade. Reprovisione o produto.`,
     );
   }

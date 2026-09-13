@@ -53,7 +53,7 @@ export function lerConfiguracaoDoSupabase(
   if (papelDaChave(anonKey) === 'service_role') {
     throw new Error(
       'VITE_SUPABASE_ANON_KEY contém uma chave service_role. Ela ignora RLS e NÃO pode ' +
-        'ir para o navegador — qualquer visitante leria os dados de todos os tenants. ' +
+        'ir para o navegador, porque qualquer visitante leria os dados de todos os tenants. ' +
         'Use a chave anon/publishable.',
     );
   }

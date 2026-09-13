@@ -29,7 +29,7 @@ export function ComparativoDeNormalizacao({ cores, svgCanonico }: Props) {
       <LadoDoComparativo
         svg={semNormalizar}
         titulo="Sem normalizar"
-        nota="o CSS do arquivo vence o motor — BUG-001"
+        nota="o CSS do arquivo vence o motor, BUG-001"
       />
       <LadoDoComparativo
         svg={canonico}
@@ -57,7 +57,7 @@ function LadoDoComparativo({
       {svg ? (
         <img className="comparativo__img" src={paraDataUrl(svg)} alt="" />
       ) : (
-        <div className="comparativo__vazio">pedido recusado — nenhuma variante</div>
+        <div className="comparativo__vazio">pedido recusado, nenhuma variante</div>
       )}
       <figcaption>
         <strong>{titulo}</strong>

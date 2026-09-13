@@ -113,7 +113,7 @@ async function atualizarZona(
 
 function zonaSumiu(zoneKey: string): Error {
   return new Error(
-    `A zona "${zoneKey}" não existe mais neste produto — recarregue a página para ver a versão atual.`,
+    `A zona "${zoneKey}" não existe mais neste produto, recarregue a página para ver a versão atual.`,
   );
 }
 
@@ -132,7 +132,7 @@ function codigoDe(error: unknown): string | undefined {
 function traduzir(error: unknown, zoneKey: string): Error {
   if (codigoDe(error) === UNIQUE_VIOLADA) {
     return new Error(
-      `A zona "${zoneKey}" já foi marcada — recarregue a página para ver a marcação atual antes de editar.`,
+      `A zona "${zoneKey}" já foi marcada, recarregue a página para ver a marcação atual antes de editar.`,
     );
   }
 

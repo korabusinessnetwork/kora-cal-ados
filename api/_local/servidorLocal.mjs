@@ -310,7 +310,7 @@ servidorHttp.listen(porta, async () => {
   console.log(`[api-local] porta configuravel por ${VARIAVEL_DA_PORTA} (padrao ${PORTA_PADRAO})`);
 
   if (rotas.length === 0) {
-    console.log('[api-local] nenhuma rota encontrada em api/v1/** — o handler ainda nao esta');
+    console.log('[api-local] nenhuma rota encontrada em api/v1/**, o handler ainda nao esta');
     console.log('[api-local] no disco. O servidor segue de pe e responde 404 ate ele existir.');
   } else {
     console.log('[api-local] rotas derivadas de api/v1/**:');
@@ -323,7 +323,7 @@ servidorHttp.listen(porta, async () => {
         // Nao filtramos arquivo de teste: a Vercel tambem nao filtra, e esconder a rota aqui
         // esconderia que ela viraria endpoint publicado no deploy.
         console.log('[api-local]   AVISO: isto e arquivo de teste co-locado. Ele vira rota aqui');
-        console.log('[api-local]   porque viraria funcao publicada na Vercel — o `_` e o unico');
+        console.log('[api-local]   porque viraria funcao publicada na Vercel, e o `_` e o unico');
         console.log('[api-local]   jeito de um arquivo em api/ nao virar endpoint.');
       }
     }

@@ -29,7 +29,7 @@ export function PainelDeZonas({
   return (
     <section className="painel">
       <h2 className="painel__titulo">Zonas</h2>
-      <p className="painel__ajuda">Clique numa zona — na lista ou no calçado — para trocar a cor.</p>
+      <p className="painel__ajuda">Clique numa zona, na lista ou no calçado, para trocar a cor.</p>
 
       <ul className="zonas">
         {zonas.map((zona) => {

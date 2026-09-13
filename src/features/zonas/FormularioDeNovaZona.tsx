@@ -97,7 +97,7 @@ export function FormularioDeNovaZona(props: PropsDoFormularioDeNovaZona): ReactE
           onChange={(evento) => props.aoMudarRotulo(evento.target.value)}
         />
         <p className="zona-form__ajuda" id="zona-form-rotulo-ajuda">
-          Nome legível, só para o time — não vai para a API.
+          Nome legível, só para o time. Não vai para a API.
         </p>
       </div>
 
@@ -123,7 +123,7 @@ export function FormularioDeNovaZona(props: PropsDoFormularioDeNovaZona): ReactE
         {/* Sugestão visível, nunca conserto automático: quem confirma a chave é o time. */}
         {sugestao !== '' && sugestao !== zoneKey.trim() && (
           <p className="zona-form__ajuda">
-            Sugestão a partir do nome: <code>{sugestao}</code>. Digite-a se concordar — o editor
+            Sugestão a partir do nome: <code>{sugestao}</code>. Digite-a se concordar. O editor
             não troca a chave sozinho.
           </p>
         )}
@@ -163,7 +163,7 @@ export function FormularioDeNovaZona(props: PropsDoFormularioDeNovaZona): ReactE
       {/* Botão cinza sem explicação vira chamado de suporte: o motivo fica escrito. */}
       {semElemento && (
         <p className="zona-form__ajuda">
-          Para salvar, marque pelo menos um elemento no calçado — clique no desenho as partes que
+          Para salvar, marque pelo menos um elemento no calçado, clicando no desenho as partes que
           formam esta zona.
         </p>
       )}

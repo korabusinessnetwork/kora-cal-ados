@@ -468,5 +468,25 @@ tempo-limite, evidência só de código), **A65** (foco no `body` depois de logi
       específica em outra folha, que derrubasse a altura, passaria pela guarda, porque ela lê só o
       `sessao.css`; hoje nenhuma outra folha cita `.rodape-telas`. Baseline: 1318 testes, 25 no
       navegador, `tsc` e build sem aviso, `npm audit` em zero.
-- [ ] R8-A62 Nenhum texto visível usa travessão, e uma varredura cobra isso | trilha: qualidade | depende: nenhum | pronto quando: zero travessão em literal de texto e em texto de JSX de `src/` e `api/`, a varredura reprova um travessão novo num literal e NÃO reprova um travessão em comentário (contraprova sintética), e os testes que conferem essas mensagens continuam passando
+- [x] R8-A62 Nenhum texto visível usa travessão, e uma varredura cobra isso | trilha: qualidade | depende: nenhum | pronto quando: zero travessão em literal de texto e em texto de JSX de `src/` e `api/`, a varredura reprova um travessão novo num literal e NÃO reprova um travessão em comentário (contraprova sintética), e os testes que conferem essas mensagens continuam passando
+      feito em COMMIT. 22 textos trocados em 16 arquivos: 20 em `.ts`/`.tsx` de produção (a frase
+      do login, a ajuda do esboço e do formulário de zona, o aviso de zona sem elemento, e mensagens
+      de erro do motor, do guarda da composição, da gravação de zona, do Supabase e da API) e 2
+      `console.log` do `api/_local/servidorLocal.mjs`. Vírgula onde a frase segue, ponto onde eram
+      duas frases. As duas mensagens de `gravarZonaNoBanco.ts` ficaram com vírgula e não com ponto
+      porque o teste confere "recarregue a página" em minúscula, e os testes não foram tocados.
+      Guarda nova, `src/textoSemTravessao.test.ts`: lê a árvore pelo parser do rolldown (o
+      TypeScript 7 do projeto não tem API em JavaScript) e reprova travessão em literal, template e
+      texto de JSX de `src/` e `api/`, `.mjs` incluído. Contraprova sintética: reprova literal,
+      template e JSX quebrando linha, e NÃO reprova comentário de linha, de bloco, de fim de linha
+      nem dentro de JSX, nem hífen ou meia-risca. Mutações: 7, todas mortas (travessão de volta no
+      login, na API e no `.mjs`, ignorar JSX, ignorar template, trocar o parser por busca por linha,
+      incluir arquivos de teste). **Critério corrigido às claras**: escrevi "zero travessão em
+      literal de `src/` e `api/`", e a primeira varredura achou mais 98 em arquivos de teste, quase
+      todos títulos de `describe` e `it`. Ficaram de fora e a guarda não olha teste: título só
+      aparece para quem roda o teste, e um dos literais é de propósito um SVG com caracteres fora do
+      ASCII. A primeira versão da guarda também não lia `.mjs`, e foi estendida depois de uma busca
+      achar os dois `console.log`. `index.html` só tem travessão em comentário. Navegador: a frase
+      do login aparece com vírgula, e zero travessões no texto da tela. Baseline: 1324 testes, 25 no
+      navegador, `tsc` e build sem aviso, `npm audit` em zero.
 - [ ] R8-A63 A tela de uma peça desenha um controle por parâmetro | trilha: robustez | depende: nenhum | pronto quando: `TelaDoPalco3d.tsx` não lê mais `parametros[0]`, uma peça de dois parâmetros desenha dois controles, existe teste que reprova a leitura do primeiro, e a tela com o acervo de prova continua com o mesmo HTML
