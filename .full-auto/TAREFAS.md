@@ -322,7 +322,27 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       sendo USADO, o que exigiria `explain` contra banco de verdade, e este projeto não tem acesso
       direto a Postgres. **A migration não foi aplicada no banco real**, isso é P05 em
       `PENDENCIAS-DO-MATHEUS.md`, com o `select` de conferência junto.
-- [ ] R7-A55 A região viva do colar deixa de ser duas | trilha: ux | depende: nenhum | pronto quando: o parágrafo de recusa da colagem não é mais descendente de outro elemento com `aria-live`, o anúncio continua acontecendo, e existe teste que afirma que nenhum `[role=alert]` da tela tem ancestral com `[aria-live]`
+- [x] R7-A55 A região viva do colar deixa de ser duas | trilha: ux | depende: nenhum | pronto quando: o parágrafo de recusa da colagem não é mais descendente de outro elemento com `aria-live`, o anúncio continua acontecendo, e existe teste que afirma que nenhum `[role=alert]` da tela tem ancestral com `[aria-live]`
+      feito em COMMIT. Eram duas regiões vivas, uma dentro da outra: uma `div` com
+      `aria-live="polite"` envolvendo um `<p role="alert">`, e `role="alert"` já implica
+      `aria-live="assertive"`. Aninhamento assim não está previsto na especificação, e o que cada
+      leitor de tela faz com ele é escolha dele. O conserto não foi só apagar a `div`: ela existia
+      para anunciar a TROCA entre a ajuda e o erro, então apagá-la sozinha tiraria o único anúncio
+      que o caso de sucesso tinha, que era a ajuda sendo relida depois de uma recusa. Ficou assim:
+      o texto fixo saiu de qualquer região viva, porque ele nunca muda; e o desfecho da colagem
+      virou uma região viva só, com o `role` mudando com o desfecho, `alert` para a recusa, que
+      precisa interromper porque o calçado na tela NÃO é o que a pessoa colou, e `status` para o
+      aceite, que pode esperar a vez porque a mudança boa já aconteceu. O caso do aceite não
+      existia antes: a montagem nova acontece dentro do canvas, e quem não enxerga o palco não
+      recebia notícia nenhuma de que deu certo. O estado virou união marcada
+      (`{ tipo: 'recusada' | 'aceita' }`) e não `string | null`, porque "erro é nulo" não distingue
+      "deu certo" de "ainda não tentou", e essa terceira possibilidade é o que impede a região de
+      nascer com texto dentro e ser lida na abertura da tela. Cinco testes novos, um deles varrendo
+      a tela INTEIRA atrás de região viva dentro de região viva, escrito assim de propósito para
+      cobrir também os painéis que ainda vão nascer no R7-A54. Três mutações mortas à mão: devolver
+      a `div` externa reprova a varredura, tirar o `role="status"` do aceite derruba dois testes, e
+      não limpar a recusa ao aceitar derruba os mesmos dois. Conferido no navegador nos três
+      estados, abertura, recusa e aceite: zero regiões aninhadas em todos.
 - [ ] R7-A56 O botão Voltar do navegador anda entre as telas | trilha: ux | depende: nenhum | pronto quando: navegar pelo rodapé aumenta `history.length`, `history.back()` volta para a tela anterior e não para fora do app, a primeira carga continua usando `replaceState` (normalizar não é navegar), recarregar continua abrindo a tela do `?tela=`, e existe teste do par `pushState` mais `popstate`
 - [ ] R7-A57 A composição sobrevive ao F5 | trilha: produto | depende: R7-A56 | pronto quando: escolher peças, cores e parâmetro e recarregar devolve a MESMA montagem, uma gravação inválida ou de outra forma é recusada pelo mesmo `validarComposicao` que a colagem usa e a tela cai no padrão sem quebrar, `localStorage` indisponível não derruba a tela, e existe teste dos três casos (volta, recusa, ausência)
 - [ ] R7-A58 Todos os parâmetros da peça aparecem, e mexer num não apaga o outro | trilha: robustez | depende: nenhum | pronto quando: uma peça com dois parâmetros desenha dois controles, arrastar um preserva o valor do outro, e existe teste com peça de dois parâmetros no acervo de teste que reprova tanto o `[0]` quanto a substituição do objeto

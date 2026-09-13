@@ -187,3 +187,101 @@ describe('a tela do calçado montado (A49)', () => {
     expect(container.querySelector('.palco3d__endereco')).toBe(null);
   });
 });
+
+/** Todo elemento anunciável: os que têm `role` de região viva ou `aria-live` próprio. */
+function anunciaveis(raiz: ParentNode = container): Element[] {
+  return [...raiz.querySelectorAll('[aria-live], [role="alert"], [role="status"]')];
+}
+
+/**
+ * Só o painel de colar.
+ *
+ * A tela tem outra região viva legítima, a do botão de copiar, que alterna entre a ajuda e
+ * "Composição copiada". Perguntar pela tela inteira misturaria as duas e faria estes testes
+ * responderem sobre o painel errado.
+ */
+const painelDeColar = () => container.querySelector('.palco3d__entrada')!;
+
+/**
+ * Uma composição que o guarda ACEITA.
+ *
+ * O cabedal está aqui porque a forma o declara obrigatório: uma composição só com a sola é
+ * recusada, e um teste do caminho do aceite escrito assim provaria o caminho da recusa achando
+ * que prova o outro. Foi o que aconteceu na primeira versão deste bloco.
+ */
+const COMPOSICAO_VALIDA = {
+  forma_id: FORMA_ID,
+  pecas: [
+    { peca_id: 'prova-sola-tratorada', cor: '#101010' },
+    { peca_id: 'prova-cabedal-cano-alto', cor: '#20A020' },
+  ],
+};
+
+describe('o anúncio do resultado da colagem (A55)', () => {
+  it('nenhuma região viva mora dentro de outra, na tela inteira', () => {
+    // A afirmação que vale o item, e ela é sobre a tela INTEIRA de propósito: `role="alert"`
+    // implica `aria-live="assertive"`, então um `alert` dentro de uma `div` polite são duas
+    // regiões vivas aninhadas, o que a especificação não prevê e cada leitor de tela resolve do
+    // seu jeito, podendo ler duas vezes, rebaixar o assertivo ou ignorar o de fora. Varredura da
+    // árvore montada, e não do painel, para pegar também os painéis que ainda vão nascer quando
+    // esta tela for partida em pedaços (R7-A54).
+    escrever(areaDeColar(), 'isto não é json');
+    clicar(botaoDe('Montar o que está colado'));
+
+    const aninhadas = anunciaveis().filter(
+      (elemento) =>
+        elemento.parentElement?.closest('[aria-live], [role="alert"], [role="status"]') != null,
+    );
+
+    expect(aninhadas.map((elemento) => elemento.outerHTML.slice(0, 90))).toEqual([]);
+  });
+
+  it('o painel de colar abre sem anunciar desfecho nenhum', () => {
+    // Contraprova dos dois testes seguintes: uma região viva que já nasce com texto dentro é lida
+    // na abertura da tela, e a pessoa ouve o resultado de uma colagem que ninguém fez. É por isso
+    // que "ainda não colou" é um estado próprio, e não "erro igual a `null`".
+    expect(anunciaveis(painelDeColar())).toEqual([]);
+    // E o texto fixo continua na tela, fora de qualquer região viva, onde ele sempre esteve.
+    expect(painelDeColar().textContent ?? '').toContain('Passa pelo mesmo guarda que a API usa');
+  });
+
+  it('colagem recusada anuncia com prioridade de interrupção', () => {
+    escrever(areaDeColar(), '{ isto não é json');
+    clicar(botaoDe('Montar o que está colado'));
+
+    const aviso = painelDeColar().querySelector('[role="alert"]');
+    expect(aviso?.textContent).toContain('não é JSON');
+    // A outra metade da frase, e a que mais importa: a tela NÃO mudou. Sem ela, quem não enxerga
+    // o palco não tem como saber se o calçado em cena é o velho ou o que acabou de ser recusado.
+    expect(aviso?.textContent).toContain('continua sendo o de antes');
+    expect(painelDeColar().querySelector('[role="status"]')).toBe(null);
+  });
+
+  it('colagem aceita anuncia sem interromper, porque a mudança já aconteceu', () => {
+    // O caso que NÃO existia antes deste item: a montagem nova acontece dentro do canvas, em outro
+    // canto da tela, e quem não enxerga o palco não recebia notícia nenhuma de que deu certo.
+    escrever(areaDeColar(), JSON.stringify(COMPOSICAO_VALIDA));
+    clicar(botaoDe('Montar o que está colado'));
+
+    expect(painelDeColar().querySelector('[role="status"]')?.textContent).toContain(
+      'Composição montada',
+    );
+    expect(painelDeColar().querySelector('[role="alert"]')).toBe(null);
+    // E o anúncio não é da boca para fora: o calçado em cena é mesmo o que foi colado.
+    expect(zonasNaTela()).toContainEqual({ zona: 'sola', peca: 'prova-sola-tratorada' });
+  });
+
+  it('acertar depois de errar troca o anúncio, e não empilha os dois', () => {
+    // Dois desfechos visíveis ao mesmo tempo diriam coisas contrárias sobre o mesmo calçado, e a
+    // ordem de leitura decidiria em qual a pessoa acredita.
+    escrever(areaDeColar(), 'lixo');
+    clicar(botaoDe('Montar o que está colado'));
+    expect(painelDeColar().querySelector('[role="alert"]')).not.toBe(null);
+
+    escrever(areaDeColar(), JSON.stringify(COMPOSICAO_VALIDA));
+    clicar(botaoDe('Montar o que está colado'));
+
+    expect(painelDeColar().querySelector('[role="alert"]')).toBe(null);
+    expect(anunciaveis(painelDeColar())).toHaveLength(1);
+  });
+});

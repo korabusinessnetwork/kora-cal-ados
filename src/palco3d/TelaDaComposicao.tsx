@@ -37,6 +37,15 @@ const DO_ACERVO: ProvedorDeGltfDaPeca = (peca, parametros) =>
 
 const PASSOS_DO_PARAMETRO = 40;
 
+/**
+ * O desfecho da última colagem, que é o que a região viva do painel anuncia.
+ *
+ * União marcada, e não um `string | null` de erro, porque os dois desfechos precisam de anúncios
+ * com PRIORIDADES diferentes, `alert` para a recusa e `status` para o aceite, e "erro é `null`"
+ * não distingue "deu certo" de "ainda não tentou".
+ */
+type ResultadoDaColagem = { tipo: 'recusada'; motivo: string } | { tipo: 'aceita' };
+
 export function TelaDaComposicao() {
   const [escolhas, setEscolhas] = useState(() => escolhasDaComposicao(DEMO));
   const [selecionada, setSelecionada] = useState<string | null>(null);
@@ -73,15 +82,22 @@ export function TelaDaComposicao() {
   // pode encostar no calçado que está na tela: a pessoa perderia a montagem boa por ter colado
   // errado, que é o oposto do que este campo veio fazer.
   const [colado, setColado] = useState('');
-  const [erroDaColagem, setErroDaColagem] = useState<string | null>(null);
+  // `null` é "ainda não colou nada", que é diferente de "colou e deu certo": sem essa terceira
+  // possibilidade, a região viva nasceria com texto dentro e seria anunciada na abertura da tela,
+  // dizendo o desfecho de uma colagem que ninguém fez.
+  const [resultadoDaColagem, setResultadoDaColagem] = useState<ResultadoDaColagem | null>(null);
 
   function montarOColado() {
     if (FORMA === undefined) return;
 
     const colagem = escolhasDoTextoColado(colado, FORMA, CATALOGO);
-    setErroDaColagem(colagem.erro);
-    if (colagem.escolhas === null) return;
 
+    if (colagem.escolhas === null) {
+      setResultadoDaColagem({ tipo: 'recusada', motivo: colagem.erro ?? 'Composição recusada.' });
+      return;
+    }
+
+    setResultadoDaColagem({ tipo: 'aceita' });
     setEscolhas(colagem.escolhas);
     // Mesma razão do `mudar()`: a seleção é do calçado que saiu de cena.
     setSelecionada(null);
@@ -172,19 +188,34 @@ export function TelaDaComposicao() {
             <button type="button" className="palco3d__copiar" onClick={montarOColado}>
               Montar o que está colado
             </button>
-            {/* Região viva: quem colou está olhando a caixa de texto, e o que a colagem produziu
-                aparece ou aqui ou no palco, em outro canto da tela. */}
-            <div aria-live="polite" aria-atomic="true">
-              {erroDaColagem === null ? (
-                <p className="palco3d__saida-ajuda">
-                  Passa pelo mesmo guarda que a API usa. Recusa aqui é recusa lá.
+            {/* Texto fixo, e por isso FORA de qualquer região viva. Ele não muda com nada que a
+                pessoa faça, e anunciá-lo de novo a cada colagem seria ler em voz alta uma frase
+                que continua igual. */}
+            <p className="palco3d__saida-ajuda">
+              Passa pelo mesmo guarda que a API usa. Recusa aqui é recusa lá.
+            </p>
+            {/* UMA região viva, e só uma, para o resultado da colagem.
+                Antes eram duas, uma dentro da outra: uma `div` com `aria-live="polite"` envolvendo
+                um `<p role="alert">`, e `role="alert"` já implica `aria-live="assertive"`. Região
+                viva dentro de região viva não está prevista em lugar nenhum da especificação, e o
+                que cada leitor de tela faz com isso é escolha dele: pode ler duas vezes, pode
+                rebaixar o assertivo, pode ignorar o de fora. Nenhuma das três é o que se quis.
+                O `role` muda com o desfecho, e essa é a decisão que importa: recusa interrompe,
+                porque a pessoa precisa saber AGORA que o calçado na tela não é o que ela colou;
+                aceite espera a vez, porque a mudança boa já aconteceu.
+                O caso aceito precisa existir aqui porque quem não enxerga o palco não recebe
+                notícia nenhuma da montagem nova: ela acontece dentro do canvas, em outro canto da
+                tela. */}
+            {resultadoDaColagem !== null &&
+              (resultadoDaColagem.tipo === 'recusada' ? (
+                <p className="palco3d__saida-erro" role="alert" aria-atomic="true">
+                  {resultadoDaColagem.motivo} O calçado na tela continua sendo o de antes.
                 </p>
               ) : (
-                <p className="palco3d__saida-erro" role="alert">
-                  {erroDaColagem} O calçado na tela continua sendo o de antes.
+                <p className="palco3d__saida-ok" role="status" aria-atomic="true">
+                  Composição montada. O calçado na tela agora é o que você colou.
                 </p>
-              )}
-            </div>
+              ))}
           </div>
         </section>
 

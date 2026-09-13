@@ -273,6 +273,16 @@
   color: var(--cor-erro);
 }
 
+/* O aceite da colagem. Cor de texto normal e não de sucesso: a prova de que deu certo é o calçado
+   novo em cena, e uma faixa verde ao lado dela seria comemorar duas vezes. Quem precisa desta
+   frase é quem não enxerga o palco, e para essa pessoa o que importa é o `role="status"`. */
+.palco3d__saida-ok {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cor-texto-fraco);
+}
+
 /* Rolagem própria: a composição cresce com o número de categorias, e uma lista longa aqui
    empurraria a cena para fora da tela, que é exatamente o defeito que A01 acabou de consertar. */
 .palco3d__saida-texto {
