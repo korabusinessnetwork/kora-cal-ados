@@ -304,7 +304,7 @@ Abaixo do corte e fora do lote, pela sétima rodada seguida: **A35**, o canvas s
 continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que aconteceu desde então.
 
 - [x] R7-A53 `tenant_members.user_id` ganha índice, e a regra ganha varredura | trilha: robustez | depende: nenhum | pronto quando: existe migration nova criando `tenant_members_user_id_idx`, e existe um teste que lê as migrations e reprova se alguma coluna `references` de alguma tabela não tiver um índice que a lidere (o `unique` composto conta só para a coluna da frente)
-      feito em COMMIT. A varredura achou DOIS casos, não um: além do
+      feito em `e11f072`. A varredura achou DOIS casos, não um: além do
       `tenant_members.user_id` que originou o item, ela encontrou `tenant_api_keys.created_by` na
       primeira vez que rodou, enquanto eu ainda escrevia os testes, depois de eu ter lido a mesma
       migration duas vezes sem ver. Os dois ganharam índice na mesma migration, com o porquê de
@@ -323,7 +323,7 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       direto a Postgres. **A migration não foi aplicada no banco real**, isso é P05 em
       `PENDENCIAS-DO-MATHEUS.md`, com o `select` de conferência junto.
 - [x] R7-A55 A região viva do colar deixa de ser duas | trilha: ux | depende: nenhum | pronto quando: o parágrafo de recusa da colagem não é mais descendente de outro elemento com `aria-live`, o anúncio continua acontecendo, e existe teste que afirma que nenhum `[role=alert]` da tela tem ancestral com `[aria-live]`
-      feito em COMMIT. Eram duas regiões vivas, uma dentro da outra: uma `div` com
+      feito em `282626b`. Eram duas regiões vivas, uma dentro da outra: uma `div` com
       `aria-live="polite"` envolvendo um `<p role="alert">`, e `role="alert"` já implica
       `aria-live="assertive"`. Aninhamento assim não está previsto na especificação, e o que cada
       leitor de tela faz com ele é escolha dele. O conserto não foi só apagar a `div`: ela existia
@@ -344,7 +344,7 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       não limpar a recusa ao aceitar derruba os mesmos dois. Conferido no navegador nos três
       estados, abertura, recusa e aceite: zero regiões aninhadas em todos.
 - [x] R7-A56 O botão Voltar do navegador anda entre as telas | trilha: ux | depende: nenhum | pronto quando: navegar pelo rodapé aumenta `history.length`, `history.back()` volta para a tela anterior e não para fora do app, a primeira carga continua usando `replaceState` (normalizar não é navegar), recarregar continua abrindo a tela do `?tela=`, e existe teste do par `pushState` mais `popstate`
-      feito em COMMIT. `irPara` troca `replaceState` por `pushState`, e o `App` ganha um ouvinte de
+      feito em `ccae056`. `irPara` troca `replaceState` por `pushState`, e o `App` ganha um ouvinte de
       `popstate` que relê `?tela=` da URL. O par é inseparável, e o comentário do `App.tsx` diz por
       quê: `pushState` sozinho deixaria Voltar mudando o endereço com a tela anterior ainda
       desenhada, que é pior que o defeito original. O ouvinte lê da URL, e não de um estado guardado
@@ -363,7 +363,7 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       com limpeza ou sem ela. Agora o teste afirma a identidade da função removida. O chunk
       principal subiu de 218,97 kB para **219,12 kB**, 0,15 kB, que é o ouvinte.
 - [x] R7-A57 A composição sobrevive ao F5 | trilha: produto | depende: R7-A56 | pronto quando: escolher peças, cores e parâmetro e recarregar devolve a MESMA montagem, uma gravação inválida ou de outra forma é recusada pelo mesmo `validarComposicao` que a colagem usa e a tela cai no padrão sem quebrar, `localStorage` indisponível não derruba a tela, e existe teste dos três casos (volta, recusa, ausência)
-      feito em COMMIT. Arquivo novo, `composicaoGuardada.ts`, que grava no `localStorage` o MESMO
+      feito em `b982977` e `3c4a921`. Arquivo novo, `composicaoGuardada.ts`, que grava no `localStorage` o MESMO
       JSON do botão de copiar e lê de volta por `escolhasDoTextoColado`, o caminho da colagem, que
       confere a forma e passa pelo `validarComposicao`. A tela lê no inicializador do `useState`, e
       não num efeito, para não desenhar o calçado de prova por um quadro e recarregar o glTF duas
@@ -384,7 +384,7 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       e isso acontece igual com a mudança guardada (`git stash`), então não é deste item. Com um
       evento por quadro, como um arrasto de verdade, 120 eventos deram zero erros.
 - [x] R7-A58 Todos os parâmetros da peça aparecem, e mexer num não apaga o outro | trilha: robustez | depende: nenhum | pronto quando: uma peça com dois parâmetros desenha dois controles, arrastar um preserva o valor do outro, e existe teste com peça de dois parâmetros no acervo de teste que reprova tanto o `[0]` quanto a substituição do objeto
-      feito em COMMIT. Dois defeitos na mesma linha, dois commits. O primeiro está na transição
+      feito em `a7c1975` e `4d7033f`. Dois defeitos na mesma linha, dois commits. O primeiro está na transição
       pura: `mudarEscolhaDaTela` espalhava a mudança por cima da escolha, e `parametros` vinha com
       uma chave só, a do controle arrastado, substituindo o objeto inteiro. Agora soma, a não ser
       que a peça tenha trocado, que continua descartando tudo (BUG-019). O segundo está na tela:
@@ -400,7 +400,7 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       para 457 linhas. **Visto de passagem e registrado para a reauditoria:** `TelaDoPalco3d.tsx`
       tem o mesmo `parametros[0]`, fora do escopo escrito deste item.
 - [x] R7-A54 A tela da composição vira tela mais painéis | trilha: qualidade | depende: R7-A55, R7-A57, R7-A58 | pronto quando: `TelaDaComposicao.tsx` tem menos de 200 linhas, cada painel extraído mora no seu arquivo com o seu `README.md` de diretório em dia, os seis testes de comportamento da tela continuam passando SEM alteração, e o build e o `tsc` continuam limpos
-      feito em COMMIT. `TelaDaComposicao.tsx` foi de 457 para **195 linhas** (497 no pico, depois do
+      feito em `3671802`. `TelaDaComposicao.tsx` foi de 457 para **195 linhas** (497 no pico, depois do
       A57), e saíram quatro arquivos: `ControleDaCategoria.tsx` (96), `PainelDeSaida.tsx` (40),
       `PainelDeColar.tsx` (101) e `PainelDaPecaClicada.tsx` (101), todos listados na tabela do
       `README.md` da pasta. A tela ficou com o estado que mais de um painel usa (escolhas, seleção,

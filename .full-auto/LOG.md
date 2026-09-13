@@ -52,6 +52,9 @@
 2026-09-12 · R6-A48 · a moldura preta vazia some no contexto-negado e a mensagem sobe de 365 para 143 px do topo, e continua de pe no contexto-perdido · 9a1a72d
 2026-09-12 · R6-A42 · os nove diretorios sem indice ganham README, a raiz inclusive, e diretorio com codigo e sem README passa a reprovar em npm test · cc80ca4, ac2d3ae
 2026-09-12 · R6-A52 · a area protegida entra por import() tardio e o chunk principal cai de 457,75 kB para 218,97 kB, com varredura que reprova se o App.tsx voltar a importar features/ · 55a91ca, cff0fe3
-2026-09-12 · R7-A57 · a composicao sobrevive ao F5 pelo localStorage, lida de volta pelo mesmo guarda da colagem, e gravacao invalida cai no padrao · COMMIT
-2026-09-12 · R7-A58 · todos os parametros da peca ganham controle e mexer num soma aos outros em vez de substituir · COMMIT
-2026-09-12 · R7-A54 · a TelaDaComposicao cai de 457 para 195 linhas em tela mais quatro paineis, com os 14 testes da tela intocados e HTML identico antes e depois · COMMIT
+2026-09-12 · R7-A53 · tenant_members.user_id e tenant_api_keys.created_by ganham indice proprio, com varredura que reprova chave estrangeira sem indice que a lidere · e11f072
+2026-09-12 · R7-A55 · o painel de colar deixa de ter regiao viva dentro de regiao viva, e o aceite passa a ser anunciado · 282626b
+2026-09-12 · R7-A56 · o botao Voltar do navegador anda entre as telas, pushState mais ouvinte de popstate · ccae056
+2026-09-12 · R7-A57 · a composicao sobrevive ao F5 pelo localStorage, lida de volta pelo mesmo guarda da colagem, e gravacao invalida cai no padrao · b982977, 3c4a921
+2026-09-12 · R7-A58 · todos os parametros da peca ganham controle e mexer num soma aos outros em vez de substituir · a7c1975, 4d7033f
+2026-09-12 · R7-A54 · a TelaDaComposicao cai de 457 para 195 linhas em tela mais quatro paineis, com os 14 testes da tela intocados e HTML identico antes e depois · 3671802

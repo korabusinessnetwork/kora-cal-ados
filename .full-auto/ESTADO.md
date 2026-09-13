@@ -56,15 +56,18 @@ A construção terminou e está relatada em `RELATORIO-FINAL.md`. O que roda ago
   como tal em `AUDITORIA.md`, entre elas o anel de foco, que aparece de verdade num `Tab` de
   verdade, e o custo de arrastar o seletor de cor, que é de 11 a 26 ms por mudança e não justifica
   `debounce` numa tela cujo ponto é a cor aparecer na hora.
-- **Rodada 7: ABERTA em 2026-09-12.** Reauditoria feita, 6 achados acima do corte e **7 suspeitas
-  mortas na sonda**, todos em `AUDITORIA.md`, seção "Achados da reauditoria da rodada 7". O lote
-  está em `TAREFAS.md`, seção "Refino, rodada 7". Foi atrás de três coisas: o que o navegador
-  oferece de graça e o app joga fora, o que some quando a pessoa aperta F5, e o que o banco faz em
-  toda consulta de todo mundo. Baseline conferido verde na abertura: 1275 testes, 91 arquivos.
-- **Próximo passo:** Fase 3, executar o lote da rodada 7, na ordem escrita no `TAREFAS.md`:
-  A53, A55, A56, A57, A58 e o A54 por último, porque é ele que parte a tela da composição em
-  pedaços e os outros três mexem dentro dela. A mensagem da rodada 5 e a da rodada 6 já foram
-  entregues ao dono.
+- **Rodada 7: FECHADA em 2026-09-12**, 6 de 6 entregues, nenhum revertido. Foi atrás de três coisas:
+  o que o navegador oferece de graça e o app jogava fora (Voltar, F5), o índice que as políticas de
+  RLS usam em toda consulta, e a tela mais tocada do projeto. Baseline verde nas duas pontas: 1308
+  testes, 58 no banco, 25 no navegador, `tsc` e build limpos, `npm audit` em zero. A migration de
+  índices do A53 **não foi aplicada no banco real** e virou P05. `TelaDaComposicao.tsx` caiu de 457
+  para 195 linhas, com HTML idêntico antes e depois. Dois critérios estavam errados e foram
+  corrigidos às claras, e uma mutação sobreviveu no meio do caminho e morre agora. Tudo isso está em
+  `REFINO-RODADAS.md`.
+- **Próximo passo:** Fase 5, rodada 8. A reauditoria parte de duas coisas vistas de passagem na
+  rodada 7, que precisam de sonda antes de virar achado: o "Maximum update depth exceeded" com 200
+  eventos de cor no mesmo tique, e o `parametros[0]` que sobrou em `TelaDoPalco3d.tsx`. Entra também
+  o backlog, A35 e o que estiver abaixo do corte. A mensagem da rodada 7 já foi entregue ao dono.
 - **Hook de continuidade:** continua NÃO instalado, por P01. Sem ele a sessão pode encerrar entre
   itens, e a retomada é `/full-automatico-refino continuar`, partindo deste arquivo.
 

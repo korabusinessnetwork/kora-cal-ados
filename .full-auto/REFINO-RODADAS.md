@@ -795,3 +795,127 @@ um perguntava por uma lista e achava uma. Foi visto no navegador, e só lá. O c
   importar `features/` de forma estática. O elo entre uma coisa e outra foi medido: devolver um
   `import` comum de `features/sessao/BarraDaSessao` ao `App.tsx` reprova a varredura E devolve as 72
   ocorrências de `supabase` ao chunk principal, que sobe para 432,21 kB.
+
+---
+
+## Rodada 7, fechada em 2026-09-12
+
+**Lote:** 6 itens, em `TAREFAS.md`, seção "Refino, rodada 7". Nenhum com risco 4 ou 5, e o mais alto
+foi 2.
+
+| Item | Eixo | Score | Situação |
+|---|---|---|---|
+| R7-A53 chave estrangeira sem índice que a lidere | robustez | 5 | entregue |
+| R7-A55 região viva dentro de região viva no painel de colar | ux | 3 | entregue |
+| R7-A56 o botão Voltar do navegador não andava entre as telas | ux | 2 | entregue |
+| R7-A57 o F5 perdia a composição | produto | 2 | entregue |
+| R7-A58 só o primeiro parâmetro da peça tinha controle | robustez | 2 | entregue |
+| R7-A54 a tela da composição com 447 linhas | qualidade | 3 | entregue |
+
+Abaixo do corte e fora do lote: **A35**, o canvas sem teclado, pela sétima rodada.
+
+**De onde veio a lista:** três perguntas. O que o navegador oferece de graça e o app joga fora
+(Voltar, F5), o que o banco faz em toda consulta de todo mundo (o `auth_tenant_ids()` das políticas),
+e o que a tela mais tocada do projeto esconde de quem não enxerga o canvas. Sete suspeitas morreram
+na sonda e estão em `AUDITORIA.md`.
+
+---
+
+## Rodada 7: o que foi entregue
+
+**6 de 6 entregues, nenhum revertido.**
+
+| Item | Trilha | Commit | Resultado |
+|---|---|---|---|
+| R7-A53 dois índices e a varredura de chave estrangeira | robustez | `e11f072` | entregue, migration **não aplicada** no banco real (P05) |
+| R7-A55 uma região viva só, com `role` pelo desfecho | ux | `282626b` | entregue |
+| R7-A56 `pushState` mais ouvinte de `popstate` | ux | `ccae056` | entregue |
+| R7-A57 a composição guardada no navegador | produto | `b982977`, `3c4a921` | entregue |
+| R7-A58 um controle por parâmetro, e mudança que soma | robustez | `a7c1975`, `4d7033f` | entregue |
+| R7-A54 tela mais quatro painéis | qualidade | `3671802` | entregue |
+
+### O que mudou de verdade
+
+1. **As políticas de RLS deixam de depender de um índice que não servia (A53).** `auth_tenant_ids()`
+   aparece em 15 predicados das políticas ativas e consulta `tenant_members` por `user_id`. O único
+   índice que tocava essa coluna era composto com `tenant_id` na frente, e composto não serve para
+   busca pela segunda coluna. A varredura nova, `indiceEmChaveEstrangeira.test.ts`, lê as migrations
+   e reprova chave estrangeira sem índice que a lidere. Na primeira execução ela achou um caso que eu
+   não tinha visto: `tenant_api_keys.created_by`, com `on delete set null`, que faria cada remoção de
+   usuário varrer a tabela de chaves. Os dois ganharam índice na mesma migration. **A migration não
+   foi aplicada no Supabase real**, porque DDL no banco de verdade é decisão do dono, e está em
+   `PENDENCIAS-DO-MATHEUS.md` como P05, com a consulta que confirma.
+
+2. **Leitor de tela para de receber duas regiões vivas aninhadas (A55).** O painel de colar tinha um
+   `role="alert"` dentro de uma `div` com `aria-live="polite"`. Agora é uma região só, `alert` na
+   recusa e `status` no aceite. O aceite antes não era anunciado de jeito nenhum: a montagem nova
+   acontece dentro do canvas, onde quem não enxerga não recebe notícia.
+
+3. **Voltar anda entre as telas (A56).** `irPara` usava `replaceState`. Medido antes:
+   `history.length` parado em 28 em três navegações seguidas, e Voltar saía do app. Agora empilha, e
+   um ouvinte de `popstate` relê a tela da URL. Conferido no navegador: 28, 29, 30, e Voltar e
+   Avançar trazem título e conteúdo juntos.
+
+4. **O F5 não perde mais a composição (A57).** Antes: cabedal pintado de `#22aa44`, F5, `#1f4fa8`.
+   Depois: `#22aa44`. O que fica no `localStorage` é o mesmo JSON do botão de copiar, e ele volta
+   pelo mesmo guarda da colagem. Gravação velha que o acervo não aceita mais é recusada e apagada, e
+   a tela abre no padrão, inteiro e correto. Armazenamento bloqueado não derruba nada. Custo medido:
+   **0,048 ms por gravação**.
+
+5. **O segundo parâmetro de uma peça passa a existir na tela (A58).** Eram dois defeitos na mesma
+   linha: a tela lia `parametros[0]`, e mexer num parâmetro mandava um objeto com uma chave só, que
+   substituía o anterior. Nenhum dos dois aparecia porque o acervo de prova só tem peça de um
+   parâmetro; o primeiro acervo real com peça de dois é que teria descoberto. O teste usa uma peça
+   sintética de dois.
+
+6. **A tela da composição cai de 457 para 195 linhas (A54).** Quatro painéis em arquivos próprios.
+   Os catorze testes da tela ficaram intocados, e um teste descartável mostrou o HTML da tela
+   **idêntico byte a byte** antes e depois, na abertura e depois de uma colagem.
+
+### As medidas, antes e depois
+
+| Medida | Abertura da rodada 7 | Fechamento |
+|---|---|---|
+| Testes verdes | 1275, 58 pulados | **1308**, 58 pulados |
+| Testes contra o banco real | 58 de 58 | **58 de 58** |
+| Testes em navegador | 25 | **25** |
+| Chunk principal | 218,97 kB (gzip 70,15 kB) | **219,12 kB** (gzip 70,19 kB) |
+| Chunk tardio da tela da composição | não medido na abertura | **27,22 kB** (26,90 kB depois do A58) |
+| CSS | 24,67 kB | **24,77 kB** |
+| Chunk do three.js | 619,51 kB | 619,51 kB |
+| `npm audit` | 0 | **0** |
+| `TelaDaComposicao.tsx` | 447 linhas | **195 linhas** |
+| Chaves estrangeiras sem índice que as lidere, nas migrations | 2 | **0, e com varredura** |
+
+### Mutações
+
+Todas as mutações à mão morreram no fim, 21 no total. **Uma sobreviveu no meio do caminho**, no A56:
+o teste da limpeza do ouvinte disparava `popstate` depois de desmontar e conferia que o título não
+mudava, só que numa árvore desmontada o título não muda com limpeza ou sem ela. O teste perguntava a
+coisa errada. Foi reescrito para afirmar a identidade da função removida, e a mutação morre agora.
+
+### Dois critérios estavam errados, e foram corrigidos às claras
+
+- **A56:** eu escrevi "a primeira carga continua usando `replaceState`", e a primeira carga nunca
+  usou. A cláusula está corrigida na nota do item, e não apagada.
+- **A54:** eu escrevi "os seis testes de comportamento da tela", e quando o item rodou já eram
+  catorze, porque A55 e A57 somaram oito. A garantia valeu para os catorze.
+
+### Vistos de passagem, anteriores a esta rodada, para a reauditoria
+
+- **200 eventos de cor no MESMO tique** fazem o React lançar "Maximum update depth exceeded" três
+  vezes na tela da composição. Acontece igual com o A57 guardado em `git stash`, então não é deste
+  lote. Com um evento por quadro, que é o que um arrasto de verdade produz, 120 eventos deram zero
+  erros. Precisa de sonda antes de virar achado, porque pode ser só o limite de um cenário que não
+  existe.
+- **`TelaDoPalco3d.tsx` tem o mesmo `parametros[0]`** que o A58 consertou na outra tela. Ficou fora
+  porque não estava no escopo escrito do item.
+
+### Limites de verificação, ditos por inteiro
+
+- **O A53 não tem `explain` do plano de consulta.** Daqui não há acesso direto ao Postgres, só pelo
+  cliente do Supabase, e a migration nem foi aplicada no banco real. O que está provado é que o
+  índice existe nas migrations e que a varredura reprova sem ele. O ganho em tempo de consulta não
+  foi medido e não está afirmado.
+- **O editor logado continua sem conferência no navegador**, pelo mesmo motivo de sempre: eu não
+  preencho credencial.
