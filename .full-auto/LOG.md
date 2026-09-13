@@ -53,3 +53,4 @@
 2026-09-12 · R6-A42 · os nove diretorios sem indice ganham README, a raiz inclusive, e diretorio com codigo e sem README passa a reprovar em npm test · cc80ca4, ac2d3ae
 2026-09-12 · R6-A52 · a area protegida entra por import() tardio e o chunk principal cai de 457,75 kB para 218,97 kB, com varredura que reprova se o App.tsx voltar a importar features/ · 55a91ca, cff0fe3
 2026-09-12 · R7-A57 · a composicao sobrevive ao F5 pelo localStorage, lida de volta pelo mesmo guarda da colagem, e gravacao invalida cai no padrao · COMMIT
+2026-09-12 · R7-A58 · todos os parametros da peca ganham controle e mexer num soma aos outros em vez de substituir · COMMIT

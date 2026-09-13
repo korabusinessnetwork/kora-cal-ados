@@ -13,7 +13,7 @@ import { AVISO_DE_COPIA_NEGADA, useCopiaDeTexto } from '../lib/copia/useCopiaDeT
 
 import { catalogoDeProva, composicaoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
-import type { ParametroDePeca, PecaDoAcervo } from '../lib/composicao/tiposDaComposicao';
+import type { PecaDoAcervo } from '../lib/composicao/tiposDaComposicao';
 import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
 import {
   composicaoDasEscolhas,
@@ -25,6 +25,7 @@ import {
   type EscolhaDaTela,
 } from './composicaoDaTela';
 import { CampoDeCorDaCategoria, idDoCampoDeCor } from './CampoDeCorDaCategoria';
+import { ControlesDeParametro } from './ControlesDeParametro';
 import {
   armazenamentoDoNavegador,
   guardarComposicao,
@@ -39,8 +40,6 @@ const DEMO = validarComposicao(composicaoDeProva(), CATALOGO);
 /** O acervo de prova é código, então a tela abre sem `.env.local` e sem rede. */
 const DO_ACERVO: ProvedorDeGltfDaPeca = (peca, parametros) =>
   gltfDaPecaDeProva(peca.id, parametros);
-
-const PASSOS_DO_PARAMETRO = 40;
 
 /**
  * O desfecho da última colagem, que é o que a região viva do painel anuncia.
@@ -340,8 +339,6 @@ function ControleDaCategoria({
   aoMudar,
 }: ControleDaCategoriaProps) {
   const peca = pecas.find(({ id }) => id === escolha.pecaId);
-  const parametro = peca?.parametros[0];
-  const valor = valorAtual(parametro, escolha.parametros);
 
   return (
     <div className="palco3d__categoria">
@@ -399,35 +396,12 @@ function ControleDaCategoria({
             aoTrocar={(cor) => aoMudar({ cor })}
           />
 
-          {parametro ? (
-            <label className="palco3d__parametro">
-              <span>
-                {parametro.nome}: <strong>{milimetros(valor)}</strong>
-              </span>
-              <input
-                type="range"
-                className="palco3d__faixa"
-                min={parametro.minimo}
-                max={parametro.maximo}
-                step={(parametro.maximo - parametro.minimo) / PASSOS_DO_PARAMETRO}
-                value={valor}
-                aria-label={`${parametro.nome} da zona ${categoria}`}
-                onChange={(evento) =>
-                  aoMudar({ parametros: { [parametro.nome]: Number(evento.target.value) } })
-                }
-              />
-              {/* A faixa escrita, e não só o trilho do controle. Sem ela o número muda enquanto a
-                  pessoa arrasta e não há como saber se 18,0 mm é o começo, o meio ou o fim do que a
-                  peça aceita: o trilho mostra a POSIÇÃO, nunca os extremos. Quem confere "a espessura
-                  que escolhi é a espessura que vai sair" precisa dos dois números à vista, que é o
-                  princípio nº1 valendo para parâmetro do mesmo jeito que vale para cor.
-                  Mesmo texto e mesma ordem da tela `?tela=palco3d`: é o mesmo dado, e duas telas do
-                  palco escrevendo a mesma medida de jeitos diferentes é o começo de elas divergirem. */}
-              <span className="palco3d__limites">
-                faixa {milimetros(parametro.minimo)} a {milimetros(parametro.maximo)}
-              </span>
-            </label>
-          ) : null}
+          <ControlesDeParametro
+            categoria={categoria}
+            parametros={peca.parametros}
+            valores={escolha.parametros}
+            aoMudar={(nome, valor) => aoMudar({ parametros: { [nome]: valor } })}
+          />
         </div>
       ) : null}
     </div>
@@ -454,20 +428,6 @@ function focarACorDa(categoria: string): void {
 
 /** O acervo de prova sempre tem forma; isto existe para o tipo, e diz a verdade se acontecer. */
 const SEM_FORMA = { modelo: null, zonas: [], erro: 'O acervo de prova não tem forma.' } as const;
-
-function valorAtual(
-  parametro: ParametroDePeca | undefined,
-  parametros: Record<string, number> | undefined,
-): number {
-  if (parametro === undefined) return 0;
-
-  return parametros?.[parametro.nome] ?? parametro.padrao;
-}
-
-/** Metros viram milímetros na tela: 0,018 m não se lê, 18 mm sim. */
-function milimetros(metros: number): string {
-  return `${(metros * 1000).toFixed(1).replace('.', ',')} mm`;
-}
 
 /**
  * A frase de cada estado do palco, nesta tela.

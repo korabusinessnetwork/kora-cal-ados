@@ -383,5 +383,20 @@ continua o mesmo já escrito em `AUDITORIA.md`, e ele não mudou com nada que ac
       disparados no MESMO tique fazem o React lançar "Maximum update depth exceeded" três vezes,
       e isso acontece igual com a mudança guardada (`git stash`), então não é deste item. Com um
       evento por quadro, como um arrasto de verdade, 120 eventos deram zero erros.
-- [ ] R7-A58 Todos os parâmetros da peça aparecem, e mexer num não apaga o outro | trilha: robustez | depende: nenhum | pronto quando: uma peça com dois parâmetros desenha dois controles, arrastar um preserva o valor do outro, e existe teste com peça de dois parâmetros no acervo de teste que reprova tanto o `[0]` quanto a substituição do objeto
+- [x] R7-A58 Todos os parâmetros da peça aparecem, e mexer num não apaga o outro | trilha: robustez | depende: nenhum | pronto quando: uma peça com dois parâmetros desenha dois controles, arrastar um preserva o valor do outro, e existe teste com peça de dois parâmetros no acervo de teste que reprova tanto o `[0]` quanto a substituição do objeto
+      feito em COMMIT. Dois defeitos na mesma linha, dois commits. O primeiro está na transição
+      pura: `mudarEscolhaDaTela` espalhava a mudança por cima da escolha, e `parametros` vinha com
+      uma chave só, a do controle arrastado, substituindo o objeto inteiro. Agora soma, a não ser
+      que a peça tenha trocado, que continua descartando tudo (BUG-019). O segundo está na tela:
+      `peca?.parametros[0]` virou `ControlesDeParametro.tsx`, que desenha um controle por
+      parâmetro declarado. O componente saiu da tela porque a tela não recebe catálogo, e o acervo
+      de prova só tem peça de um parâmetro, então só separado um teste consegue montar peça de dois.
+      Dois testes da transição e três do componente, com a peça sintética de dois parâmetros e a
+      mudança passando por `mudarEscolhaDaTela` do mesmo jeito que a tela passa. Mutações mortas à
+      mão: voltar à substituição derruba um da transição e um do componente, desenhar só o
+      primeiro parâmetro derruba os três do componente, e anular a regra da troca de peça derruba
+      seis. Conferido no navegador: três faixas, uma por peça como antes, arrastar o cano do
+      cabedal até o máximo mostra 120,0 mm e grava `altura-do-cano: 0.12`. A tela caiu de 497
+      para 457 linhas. **Visto de passagem e registrado para a reauditoria:** `TelaDoPalco3d.tsx`
+      tem o mesmo `parametros[0]`, fora do escopo escrito deste item.
 - [ ] R7-A54 A tela da composição vira tela mais painéis | trilha: qualidade | depende: R7-A55, R7-A57, R7-A58 | pronto quando: `TelaDaComposicao.tsx` tem menos de 200 linhas, cada painel extraído mora no seu arquivo com o seu `README.md` de diretório em dia, os seis testes de comportamento da tela continuam passando SEM alteração, e o build e o `tsc` continuam limpos

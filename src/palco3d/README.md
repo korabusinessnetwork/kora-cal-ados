@@ -27,6 +27,7 @@ conferência a olho aqui. Então a divisão não é estética:
 | `nomeDaMalhaNoPonto.ts` | não | O ponteiro vira nome de nó, ou `null`. É o ADR-007 D4 como função |
 | `PalcoDeModelo3d.tsx` | **sim** | O `<canvas>`, o laço de render, as escutas do ponteiro e a queda do contexto WebGL. Do caminho que FUNCIONA nada é alcançável por teste, e ele está preso por varredura de fonte; o caminho em que o contexto nem nasce tem teste de comportamento em `palcoSemWebgl.test.tsx`, porque jsdom sem WebGL é exatamente a máquina sem GPU |
 | `CampoDeCorDaCategoria.tsx` | não | A cor de uma categoria, pelo seletor do sistema ou digitada em hex |
+| `ControlesDeParametro.tsx` | não | Um controle deslizante por parâmetro que a peça declara, com a faixa escrita. Separado da tela para um teste montar peça de dois parâmetros, que o acervo de prova não tem |
 | `composicaoDaTela.ts` | não | O estado da tela da composição vira calçado montado, ou vira mensagem legível |
 | `composicaoGuardada.ts` | não | A composição da tela no `localStorage`, para sobreviver ao F5. Lida de volta pelo mesmo guarda da colagem, e a gravação recusada é apagada |
 | `TelaDoPalco3d.tsx` | não | A tela de uma peça: escolher peça, mexer no parâmetro, ver o nome do que foi clicado |
