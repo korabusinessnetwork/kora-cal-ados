@@ -121,11 +121,24 @@ export function bancoFalso(tabelas: Record<string, Linha[]>, usuariosPorToken: R
           return Promise.resolve({ error: null });
         },
         upsert(linha: Linha) {
+          // Como o Postgres: o `not null` vale para a linha a inserir mesmo quando há conflito.
+          if (tabela === 'tenant_modelos_de_linguagem' && (linha.chave_cifrada === undefined || linha.chave_cifrada === null)) {
+            return Promise.resolve({ error: { message: 'null value in column "chave_cifrada" violates not-null constraint' } });
+          }
           const lista = (tabelas[tabela] ??= []);
           const existente = lista.find((atual) => atual.tenant_id === linha.tenant_id);
           if (existente) Object.assign(existente, linha);
           else lista.push({ ...linha });
           return Promise.resolve({ error: null });
+        },
+        update(campos: Linha) {
+          return {
+            eq(coluna: string, valor: unknown) {
+              const existente = (tabelas[tabela] ?? []).find((linha) => linha[coluna] === valor);
+              if (existente) Object.assign(existente, campos);
+              return Promise.resolve({ error: null });
+            },
+          };
         },
         delete() {
           return {

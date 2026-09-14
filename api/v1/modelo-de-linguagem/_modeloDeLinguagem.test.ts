@@ -146,6 +146,21 @@ describe('configuracao, ler e gravar', () => {
     expect(String(tabelas.tenant_modelos_de_linguagem?.[0]?.chave_cifrada)).not.toContain(CHAVE_DO_FORNECEDOR);
   });
 
+  it('trocar só o modelo, sem colar a chave de novo, grava e mantém a chave (o erro de 2026-09-14)', async () => {
+    const gravada = configuracaoGravada();
+    const { cliente, tabelas } = cenario({ tenant_modelos_de_linguagem: [gravada] });
+    const cifradaAntes = gravada.chave_cifrada;
+
+    const resposta = await configuracao.fetch(
+      pedido('configuracao', { metodo: 'PUT', corpo: { fornecedor: 'groq', modelo: 'openai/gpt-oss-120b', chave: null } }),
+      cliente,
+    );
+
+    expect(resposta.status).toBe(200);
+    expect((await corpoDe(resposta)).data?.configuracao).toMatchObject({ modelo: 'openai/gpt-oss-120b' });
+    expect(tabelas.tenant_modelos_de_linguagem?.[0]?.chave_cifrada).toBe(cifradaAntes);
+  });
+
   it('corpo inválido é recusado com os motivos juntos, e não grava nada', async () => {
     const { cliente, tabelas } = cenario();
 

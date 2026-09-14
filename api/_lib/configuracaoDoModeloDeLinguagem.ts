@@ -136,11 +136,16 @@ export async function gravarConfiguracao(
     final_da_chave: final,
     updated_by: usuarioId,
     updated_at: new Date().toISOString(),
-    // A chave cifrada só entra no `upsert` quando existe uma nova, para não apagar a gravada.
-    ...(chaveCifrada === null ? {} : { chave_cifrada: chaveCifrada }),
   };
 
-  const { error } = await cliente.from(TABELA_DA_CONFIGURACAO).upsert(linha, { onConflict: 'tenant_id' });
+  // Sem chave nova é `update`, e não `upsert` sem a coluna. O `upsert` é um INSERT ... ON CONFLICT,
+  // e o Postgres confere o `not null` da linha a inserir ANTES de achar o conflito: sem
+  // `chave_cifrada` ele recusa, mesmo com a linha já existindo. Foi o erro interno de 2026-09-14 ao
+  // trocar só o modelo na tela.
+  const { error } =
+    chaveCifrada === null
+      ? await cliente.from(TABELA_DA_CONFIGURACAO).update(linha).eq('tenant_id', tenantId)
+      : await cliente.from(TABELA_DA_CONFIGURACAO).upsert({ ...linha, chave_cifrada: chaveCifrada }, { onConflict: 'tenant_id' });
   if (error) throw new Error(`Falha ao gravar a configuração do modelo de linguagem: ${error.message}`);
 
   const gravada = await carregarConfiguracaoVisivel(cliente, tenantId);
