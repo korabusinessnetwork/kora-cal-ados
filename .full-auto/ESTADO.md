@@ -200,4 +200,6 @@ rodada, e volta a importar na próxima.
 - **Branch:** `full-auto/fornecedores-de-ia`, a partir de `full-auto/prompt-composicao`.
 - **Frente paralela:** o dono pediu uma sessão paralela para o 3D. Ela roda numa worktree própria, na branch `full-auto/acervo-3d`, dona de `src/lib/acervo/` e da geometria. Esta sessão integra quando ela terminar.
 - **Decisão:** D13.
-- **Próximo passo:** F01.
+- **Feito até 2026-09-14 14:50:** F01 a F07 `[x]`. Do F08 e do F09, adiantado o que não depende do banco real: `supabase/tests/modeloDeLinguagem.test.ts` (`1258bac`), `CHAVE_DE_CIFRA_DOS_FORNECEDORES` no `.env.example` e gerada no `.env.local`, contrato em `docs/07_APIS/modelo-de-linguagem.md` e índices (`7c770fb`), mensagens do servidor apontando para a seção certa (`d23f5f2`). Último baseline completo (em `cec842b`): 1552 testes, `tsc` e build limpos, three.js fora do chunk da área protegida.
+- **Esperando o dono:** confirmação para aplicar `supabase/migrations/20260914_modelo_de_linguagem_por_tenant.sql` no Supabase real (P07). Sem ela o F08 não fecha: o teste de banco pula e a tela não tem tabela para ler.
+- **Próximo passo depois do sim:** `npx supabase db query --linked -f supabase/migrations/20260914_modelo_de_linguagem_por_tenant.sql`, `npm run test:banco`, baseline completo, conferência no navegador com o dono logado, F09 (relatório, merge da frente 3D, merge em `main`, push com confirmação).

@@ -87,7 +87,14 @@ O texto original fica abaixo, como histórico.
   nenhuma linha é tocada), diferente das outras pendências desta lista. O `if not exists` deixa
   rodar duas vezes sem erro.
 
-## P06 Escolher o fornecedor do modelo de linguagem de verdade para o prompt [prioridade: média, decisão paga]
+## P07 Confirmar a migration do fornecedor de modelo de linguagem, e depois a Vercel [prioridade: alta]
+
+- **Por quê:** a tela "Fornecedor de modelo de linguagem" e o "Compor calçado" leem duas tabelas novas (`tenant_modelos_de_linguagem`, `uso_do_modelo_de_linguagem`) que ainda não existem no Supabase real. A migration só cria tabelas e índices e tira privilégio de `anon` e `authenticated` nelas; não mexe em nenhuma tabela existente.
+- **O que você faz agora:** responder "pode aplicar a migration do modelo de linguagem" no chat. Eu aplico com `npx supabase db query --linked -f supabase/migrations/20260914_modelo_de_linguagem_por_tenant.sql` e rodo `npm run test:banco`.
+- **O que você faz no deploy (depois):** no painel da Vercel, Settings, Environment Variables, criar `CHAVE_DE_CIFRA_DOS_FORNECEDORES` (sem `VITE_`) com um valor novo gerado por `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"`. Não reaproveite a do `.env.local`. Trocar esse valor depois obriga cada owner a colar a chave do fornecedor de novo.
+- **Como confirmar que funcionou:** logado como owner, em "Fornecedor de modelo de linguagem", escolher Groq, colar uma chave grátis, Salvar, "Testar conexão" diz que deu certo, e o painel de gasto mostra a chamada de teste.
+
+## P06 Escolher o fornecedor do modelo de linguagem de verdade para o prompt [RESOLVIDA em 2026-09-14 pela D13: cada marca escolhe o dela, com os grátis na lista]
 
 - **Por quê:** o prompt da tela da composição funciona de ponta a ponta, mas quem responde hoje é o gerador de prova, que não é IA e só reconhece palavras-chave (D12). A tela diz isso com todas as letras. Para o prompt entender frase livre, precisa de um modelo de linguagem de verdade, e todo fornecedor cobra por uso.
 - **Contorno atual:** `src/lib/composicao/modeloDeLinguagemDeProva.ts`, ativo por padrão, custo zero. A tela recebe o modelo por parâmetro (`TelaDaComposicao.tsx`, no `<PainelDePrompt modelo=... descricao=...>`), então trocar é mudar essa linha.
