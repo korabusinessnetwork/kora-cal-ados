@@ -29,7 +29,7 @@ export class FalhaDaApiDoModelo extends Error {
   }
 }
 
-export type RotaDoModeloDeLinguagem = 'configuracao' | 'testar' | 'gerar' | 'uso';
+export type RotaDoModeloDeLinguagem = 'configuracao' | 'testar' | 'gerar' | 'uso' | 'em-uso';
 
 export interface OpcoesDaChamada {
   metodo?: 'GET' | 'POST' | 'PUT' | 'DELETE';

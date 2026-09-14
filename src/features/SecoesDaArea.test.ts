@@ -10,4 +10,9 @@ describe('secoesDoPapel', () => {
   it('membro não recebe a entrada do fornecedor de modelo de linguagem', () => {
     expect(secoesDoPapel('membro').map((secao) => secao.id)).not.toContain('fornecedor');
   });
+
+  it('"Compor calçado" é de todo papel: quem compõe é o time', () => {
+    expect(secoesDoPapel('membro').map((secao) => secao.id)).toContain('compor');
+    expect(secoesDoPapel('owner').map((secao) => secao.id)).toContain('compor');
+  });
 });

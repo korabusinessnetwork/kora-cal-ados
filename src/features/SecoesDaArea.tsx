@@ -9,7 +9,7 @@
 
 import type { TenantDoUsuario } from './sessao/carregarTenantsDoUsuario';
 
-export type SecaoDaArea = 'produtos' | 'fornecedor';
+export type SecaoDaArea = 'produtos' | 'compor' | 'fornecedor';
 
 interface DescricaoDaSecao {
   id: SecaoDaArea;
@@ -17,7 +17,10 @@ interface DescricaoDaSecao {
 }
 
 export function secoesDoPapel(papel: TenantDoUsuario['papel']): DescricaoDaSecao[] {
-  const secoes: DescricaoDaSecao[] = [{ id: 'produtos', rotulo: 'Modelos' }];
+  const secoes: DescricaoDaSecao[] = [
+    { id: 'produtos', rotulo: 'Modelos' },
+    { id: 'compor', rotulo: 'Compor calçado' },
+  ];
   if (papel === 'owner') secoes.push({ id: 'fornecedor', rotulo: 'Fornecedor de modelo de linguagem' });
   return secoes;
 }

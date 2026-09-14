@@ -6,6 +6,7 @@ import {
   INSTRUCAO_AO_MODELO,
   ModeloNaoRespondeu,
   PromptRecusado,
+  RecusaDoModelo,
   TAMANHO_MAXIMO_DO_PROMPT,
   gerarComposicaoPorPrompt,
   type ModeloDeLinguagem,
@@ -130,5 +131,18 @@ describe('gerarComposicaoPorPrompt, a resposta passa pelo guarda', () => {
 
     expect(erro).toBeInstanceOf(ModeloNaoRespondeu);
     expect((erro as Error).message).not.toContain('sk-segredo');
+  });
+
+  it('recusa escrita pelo nosso servidor chega à tela com a frase dela', async () => {
+    // "Tente de novo em alguns segundos" é conselho errado para teto mensal atingido: o pedido
+    // seguinte vai ser recusado igual até o mês virar.
+    const modelo = vi.fn<ModeloDeLinguagem>(async () => {
+      throw new RecusaDoModelo('O teto mensal da marca foi atingido.', 'TETO_MENSAL_ATINGIDO');
+    });
+
+    const erro = await recusa(gerarComposicaoPorPrompt('x', TENIS, CATALOGO, modelo));
+
+    expect(erro).toBeInstanceOf(RecusaDoModelo);
+    expect((erro as Error).message).toBe('O teto mensal da marca foi atingido.');
   });
 });

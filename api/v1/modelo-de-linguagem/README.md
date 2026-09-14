@@ -12,6 +12,7 @@ chave de API (ADR-006). Por isso a autenticação é outra: `_lib/autenticarSess
 |---|---|---|
 | [`configuracao.ts`](configuracao.ts) | `GET`, `PUT`, `DELETE ?tenant=<uuid>` | owner |
 | [`testar.ts`](testar.ts) | `POST ?tenant=<uuid>`, testa a configuração GRAVADA | owner |
+| [`em-uso.ts`](em-uso.ts) | `GET ?tenant=<uuid>`, só fornecedor, nome e modelo (sem teto, preço ou final da chave) | membro e owner |
 | [`gerar.ts`](gerar.ts) | `POST ?tenant=<uuid>`, corpo `{ forma_id, prompt }` | membro e owner |
 | [`uso.ts`](uso.ts) | `GET ?tenant=<uuid>&mes=AAAA-MM`, o painel de gasto | owner |
 | [`_modeloDeLinguagem.test.ts`](_modeloDeLinguagem.test.ts) | teste dos quatro handlers, sem rede e sem banco | |

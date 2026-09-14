@@ -18,6 +18,7 @@ import { cifrarChaveDoFornecedor } from '../../_lib/cifraDaChaveDoFornecedor';
 import { LIMITE_POR_MINUTO } from '../../_lib/limitesDoModeloDeLinguagem';
 import { bancoFalso, type Linha } from './_bancoFalso';
 import configuracao from './configuracao';
+import emUso from './em-uso';
 import gerar from './gerar';
 import testar from './testar';
 import uso from './uso';
@@ -537,5 +538,41 @@ describe('uso, o painel de gasto', () => {
     const { cliente } = cenario({ uso_do_modelo_de_linguagem: [chamada()] });
 
     expect((await uso.fetch(pedido('uso', { token: 'token-membro' }), cliente)).status).toBe(403);
+  });
+});
+
+describe('em-uso, quem responde o prompt', () => {
+  it('membro sabe qual fornecedor e modelo respondem, e nada além disso', async () => {
+    const { cliente } = cenario({
+      tenant_modelos_de_linguagem: [configuracaoGravada(TENANT, { teto_mensal_usd: 50, preco_entrada_por_milhao: 3 })],
+    });
+
+    const resposta = await emUso.fetch(pedido('em-uso', { token: 'token-membro' }), cliente);
+    const texto = await resposta.text();
+
+    expect(resposta.status).toBe(200);
+    // Igualdade exata, e não `toMatchObject`: o ponto é que NENHUM outro campo do owner venha junto.
+    expect(JSON.parse(texto).data).toEqual({
+      fornecedor_em_uso: { fornecedor: 'groq', nome_do_fornecedor: 'Groq', modelo: 'llama-3.3-70b-versatile' },
+    });
+    expect(texto).not.toContain('9876');
+    expect(texto).not.toContain('teto');
+  });
+
+  it('sem configuração devolve null, que a tela lê como gerador de prova', async () => {
+    const { cliente } = cenario();
+
+    const { data } = await corpoDe(await emUso.fetch(pedido('em-uso', { token: 'token-membro' }), cliente));
+
+    expect(data).toEqual({ fornecedor_em_uso: null });
+  });
+
+  it('quem não é da marca não descobre o fornecedor dela', async () => {
+    const { cliente } = cenario({ tenant_modelos_de_linguagem: [configuracaoGravada()] });
+
+    const resposta = await emUso.fetch(pedido('em-uso', { token: 'token-concorrente' }), cliente);
+
+    expect(resposta.status).toBe(403);
+    expect(await resposta.text()).not.toContain('groq');
   });
 });

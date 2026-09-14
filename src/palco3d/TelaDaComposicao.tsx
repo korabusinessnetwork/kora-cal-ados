@@ -17,7 +17,9 @@ import {
   modeloDeLinguagemDeProva,
 } from '../lib/composicao/modeloDeLinguagemDeProva';
 import { validarComposicao } from '../lib/composicao/validarComposicao';
+import type { ModeloDeLinguagem } from '../lib/composicao/gerarComposicaoPorPrompt';
 import type { ProvedorDeGltfDaPeca } from '../lib/composicao/montarComposicao';
+import type { Forma } from '../lib/composicao/tiposDaComposicao';
 import { montarDaTela } from './composicaoDaTela';
 import { ControleDaCategoria } from './ControleDaCategoria';
 import { PainelDaPecaClicada } from './PainelDaPecaClicada';
@@ -26,7 +28,7 @@ import { PainelDePrompt } from './PainelDePrompt';
 import { PainelDeRecomeco } from './PainelDeRecomeco';
 import { PainelDeSaida } from './PainelDeSaida';
 import { ehFalha, PalcoDeModelo3d, type EstadoDoPalco } from './PalcoDeModelo3d';
-import { avisoDaComposicaoGerada } from './textosDoPrompt';
+import { avisoDaComposicaoGerada, type DescricaoDoModelo } from './textosDoPrompt';
 import { useEscolhasDaComposicao } from './useEscolhasDaComposicao';
 
 const CATALOGO = catalogoDeProva();
@@ -37,7 +39,25 @@ const DEMO = validarComposicao(composicaoDeProva(), CATALOGO);
 const DO_ACERVO: ProvedorDeGltfDaPeca = (peca, parametros) =>
   gltfDaPecaDeProva(peca.id, parametros);
 
-export function TelaDaComposicao() {
+/**
+ * Quem responde o prompt nesta tela, e como ele se apresenta.
+ *
+ * `criar` recebe a forma porque o fornecedor da marca (D13) é chamado pelo servidor com o id da forma,
+ * e não com o catálogo montado aqui: é o servidor que monta instrução e catálogo, para a rota não
+ * virar um modelo de linguagem de uso geral pago pela marca.
+ */
+export interface ModeloDaTela {
+  criar: (forma: Forma) => ModeloDeLinguagem;
+  descricao: DescricaoDoModelo;
+}
+
+/** O padrão: o gerador de prova, sem IA, sem rede e sem custo (D12). É o que a tela pública usa. */
+export const MODELO_DE_PROVA_DA_TELA: ModeloDaTela = {
+  criar: () => modeloDeLinguagemDeProva,
+  descricao: DESCRICAO_DO_GERADOR_DE_PROVA,
+};
+
+export function TelaDaComposicao({ modeloDaTela = MODELO_DE_PROVA_DA_TELA }: { modeloDaTela?: ModeloDaTela } = {}) {
   const [selecionada, setSelecionada] = useState<string | null>(null);
   const [estado, setEstado] = useState<EstadoDoPalco>('carregando');
   // Toda troca de montagem larga a peça clicada. Quem decide QUANDO a montagem troca é o hook, e
@@ -58,10 +78,14 @@ export function TelaDaComposicao() {
   // composição sem passar por `mudar()` não teria como esquecer de apagar o aviso.
   const copia = useCopiaDeTexto(composicao.texto);
 
+  // Um modelo por forma e por quem responde: recriar a cada render trocaria a identidade da função
+  // que o painel de prompt recebe, sem ganho nenhum.
+  const modelo = useMemo(() => (FORMA ? modeloDaTela.criar(FORMA) : null), [modeloDaTela]);
+
   const aoSelecionar = useCallback((nome: string | null) => setSelecionada(nome), []);
   const aoMudarEstado = useCallback((novo: EstadoDoPalco) => setEstado(novo), []);
 
-  if (FORMA === undefined) return <main className="tela">O acervo de prova não tem forma.</main>;
+  if (FORMA === undefined || modelo === null) return <main className="tela">O acervo de prova não tem forma.</main>;
 
   return (
     <main className="tela palco3d">
@@ -84,14 +108,14 @@ export function TelaDaComposicao() {
             escolha que os controles abaixo, e ela passa pelo mesmo guarda nos dois casos.
           </p>
 
-          {/* O modelo de linguagem é o gerador de prova até o dono escolher um fornecedor (D12). A
-              chave de um fornecedor é segredo e não pode morar no navegador, então ele vai entrar por
-              uma função de servidor, e é só esta linha que muda. */}
+          {/* Quem responde vem por prop: o gerador de prova na tela pública, e o fornecedor da marca
+              na área protegida, quando o owner configurou um (D13). A chave do fornecedor nunca chega
+              aqui; o `modelo` da marca é uma chamada à nossa função de servidor. */}
           <PainelDePrompt
             forma={FORMA}
             catalogo={CATALOGO}
-            modelo={modeloDeLinguagemDeProva}
-            descricao={DESCRICAO_DO_GERADOR_DE_PROVA}
+            modelo={modelo}
+            descricao={modeloDaTela.descricao}
             geradoEmCena={composicao.geradaPorPrompt}
             aoGerar={composicao.aceitarOGerado}
           />
@@ -141,7 +165,7 @@ export function TelaDaComposicao() {
                   no lugar em que o calçado aparece. Fora de região viva, porque quem gerou já
                   ouviu o desfecho pelo painel. */}
               {composicao.geradaPorPrompt && (
-                <p className="palco3d__aviso-gerado">{avisoDaComposicaoGerada(DESCRICAO_DO_GERADOR_DE_PROVA)}</p>
+                <p className="palco3d__aviso-gerado">{avisoDaComposicaoGerada(modeloDaTela.descricao)}</p>
               )}
             </>
           )}

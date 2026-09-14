@@ -7,6 +7,8 @@ A tela em que o **owner** escolhe o fornecedor de modelo de linguagem da marca (
 |---|---|
 | [`TelaDoFornecedor.tsx`](TelaDoFornecedor.tsx) | A tela inteira. Confere o papel, cria o chamador da API e junta formulário e painel |
 | [`FormularioDoFornecedor.tsx`](FormularioDoFornecedor.tsx) | Escolher fornecedor, modelo, chave (só escrita), endereço e preços da API própria, teto mensal. Salvar, testar, remover |
+| [`TelaDeComporCalcado.tsx`](TelaDeComporCalcado.tsx) | "Compor calçado", para todo papel: diz quem responde o prompt e abre a tela da composição (lazy, com o three.js) com esse modelo |
+| [`modeloDaMarca.ts`](modeloDaMarca.ts) | O fornecedor da marca no formato `ModeloDaTela`: chama `gerar` com só forma e prompt, e a recusa da API vira `RecusaDoModelo` com a frase do servidor |
 | [`PainelDeGasto.tsx`](PainelDeGasto.tsx) | O painel de gasto do mês: totais, teto, por dia, por modelo, chamadas recentes |
 | [`montarCorpoDaConfiguracao.ts`](montarCorpoDaConfiguracao.ts) | Do formulário ao corpo do `PUT`, conferido com a MESMA regra do servidor antes do clique sair |
 | [`chamarApiDoModeloDeLinguagem.ts`](chamarApiDoModeloDeLinguagem.ts) | A única porta para `/api/v1/modelo-de-linguagem/*`: token da sessão, envelope, erro em português |
@@ -26,7 +28,9 @@ vazia e pareceria "nada configurado".
   final dela. Depois de salvar, o campo é limpo e o formulário remonta.
 - **"Testar conexão" testa o que está gravado.** Com o formulário alterado, o botão desliga e diz
   por quê, para não aprovar uma configuração diferente da que a pessoa está vendo.
-- **Membro não vê esta tela.** A navegação não mostra a entrada e a tela confere o papel de novo.
+- **"Compor calçado" abre só depois de saber quem responde.** Falha ao ler `em-uso` não vira "sem
+  fornecedor": a tela diz que não conseguiu saber, usa o gerador de prova e oferece "Tentar de novo".
+- **Membro não vê a tela do fornecedor.** A navegação não mostra a entrada e a tela confere o papel de novo.
   A permissão de verdade é o 403 do servidor.
 - **"Remover" pede confirmação** em dois cliques no mesmo lugar.
 

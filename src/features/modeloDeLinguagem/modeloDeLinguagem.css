@@ -125,3 +125,13 @@
 .gasto__tabela th { font-weight: 500; color: var(--cor-texto-fraco); }
 .gasto__ok { color: var(--cor-ok); }
 .gasto__falha { color: var(--cor-erro); }
+
+/* "Compor calçado": a faixa que diz quem responde o prompt, acima da tela da composição. */
+.compor__situacao {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  margin: 0; padding: 10px 28px; font-size: 13px;
+  color: var(--cor-texto-fraco); border-bottom: 1px solid var(--cor-borda);
+}
+.compor__situacao p { margin: 0; }
+.compor__situacao--erro { color: var(--cor-texto); }
+.compor__situacao button { font: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer; }

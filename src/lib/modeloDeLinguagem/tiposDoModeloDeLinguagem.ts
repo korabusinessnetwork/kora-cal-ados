@@ -18,6 +18,19 @@ export interface ConfiguracaoDoFornecedorVisivel {
   updated_at: string;
 }
 
+/**
+ * A resposta de `em-uso`: qual fornecedor responde o prompt da marca, para QUALQUER membro.
+ *
+ * Existe separada da configuração porque a configuração é do owner (tem preço, teto e o final da
+ * chave), e o membro que compõe calçado só precisa saber quem vai responder, que é o que a regra de
+ * transparência manda a tela dizer antes de gerar. `null` é "nenhum configurado": gerador de prova.
+ */
+export interface FornecedorEmUso {
+  fornecedor: IdDoFornecedor;
+  nome_do_fornecedor: string;
+  modelo: string;
+}
+
 /** A resposta de `gerar`: o texto cru do modelo, que a tela passa pelo guarda, e o que custou. */
 export interface RespostaDaGeracao {
   texto: string;

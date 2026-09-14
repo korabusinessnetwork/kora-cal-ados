@@ -23,6 +23,7 @@
 
 import { useState } from 'react';
 
+import { TelaDeComporCalcado } from './modeloDeLinguagem/TelaDeComporCalcado';
 import { TelaDoFornecedor } from './modeloDeLinguagem/TelaDoFornecedor';
 import { SecoesDaArea, type SecaoDaArea } from './SecoesDaArea';
 import { BarraDaSessao } from './sessao/BarraDaSessao';
@@ -85,6 +86,7 @@ function ConteudoDaMarca({ tenant }: { tenant: TenantDoUsuario }) {
     <>
       <SecoesDaArea papel={tenant.papel} atual={atual} aoEscolher={setSecao} />
       {atual === 'produtos' && <TelaDeProdutos tenantId={tenant.id} />}
+      {atual === 'compor' && <TelaDeComporCalcado tenant={tenant} />}
       {atual === 'fornecedor' && <TelaDoFornecedor tenant={tenant} />}
     </>
   );

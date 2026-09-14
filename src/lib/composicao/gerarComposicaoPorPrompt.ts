@@ -57,6 +57,22 @@ export class ModeloNaoRespondeu extends Error {
 }
 
 /**
+ * Recusa do modelo com frase ESCRITA POR NÓS, que pode ir para a tela como está.
+ *
+ * É o caso do fornecedor da marca atrás da nossa função de servidor (D13): quando a resposta é "o
+ * teto mensal foi atingido" ou "o fornecedor recusou a chave", a frase veio do nosso contrato, e não
+ * do fornecedor, e trocá-la por "o modelo não respondeu, tente de novo" mandaria a pessoa repetir
+ * um pedido que vai ser recusado igual. Quem lança esta classe garante que a mensagem não carrega
+ * texto de terceiro; qualquer outro erro continua virando `ModeloNaoRespondeu`.
+ */
+export class RecusaDoModelo extends Error {
+  constructor(mensagem: string, readonly codigo: string) {
+    super(mensagem);
+    this.name = 'RecusaDoModelo';
+  }
+}
+
+/**
  * A instrução fixa. Não tem nada de tenant nem de marca: identidade vem do tenant, e o que muda
  * de um tenant para outro é o catálogo, que vai em campo próprio.
  */
@@ -106,6 +122,7 @@ export async function gerarComposicaoPorPrompt(
       prompt: limpo,
     });
   } catch (erro) {
+    if (erro instanceof RecusaDoModelo) throw erro;
     throw new ModeloNaoRespondeu(erro);
   }
 
