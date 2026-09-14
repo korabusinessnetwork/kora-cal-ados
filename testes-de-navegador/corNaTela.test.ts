@@ -99,10 +99,16 @@ describe.skipIf(CHROME === null)('a cor escolhida é a cor que aparece, medida e
     expect(cena.pronto, 'a cena nunca desenhou nada dentro do limite de espera').toBe(true);
   }, 120_000);
 
+  // O mesmo orçamento da abertura, e pela mesma razão. Desmontar custa o que montar custa: matar o
+  // Chrome, esperar o processo sair, apagar um perfil de navegador inteiro (milhares de arquivos,
+  // com repetição enquanto o Windows ainda segura os identificadores) e derrubar o Vite. Isso
+  // passava dos 10 segundos padrão numa máquina carregada, e o resultado era o pior possível: os 5
+  // testes passavam e a suíte ficava vermelha no encerramento. Baseline que pisca vermelho sozinho
+  // é o que o R3-A33 já tinha consertado uma vez, porque ele impede a regra de ouro de funcionar.
   afterAll(async () => {
     await aba?.fechar();
     await parar?.();
-  });
+  }, 120_000);
 
   /**
    * Relê a tela até a condição valer, e devolve a última medida mesmo quando ela não valeu.
