@@ -118,6 +118,68 @@ export const TRANSPORTE_POR_CODIGO: Readonly<Record<CodigoDeTransporte, EntradaD
     familia: 'pedido',
     mensagem: 'Formato não suportado. Use format=svg.',
   },
+  // ── Os da D13, do fluxo de fornecedor de modelo de linguagem ────────────────────────
+  SESSAO_AUSENTE: {
+    status: 401,
+    familia: 'pedido',
+    mensagem: 'Entre na sua conta para usar o modelo de linguagem.',
+  },
+  SESSAO_INVALIDA: {
+    status: 401,
+    familia: 'pedido',
+    mensagem: 'Sua sessão expirou. Entre de novo.',
+  },
+  // 403 e não 404: aqui quem chama é a própria tela, com a sessão da pessoa, e o id do tenant
+  // veio da lista de tenants dela. Não há o que esconder, e um 404 mandaria a pessoa procurar
+  // uma marca que existe. A mensagem é a mesma para "não é membro" e "não é owner" de
+  // propósito, para não contar a quem não é membro que aquela marca existe.
+  SEM_PERMISSAO: {
+    status: 403,
+    familia: 'pedido',
+    mensagem: 'Esta ação é do dono da marca.',
+  },
+  FORNECEDOR_NAO_CONFIGURADO: {
+    status: 409,
+    familia: 'dado do tenant',
+    mensagem: 'Nenhum fornecedor de modelo de linguagem configurado para esta marca.',
+  },
+  ENDERECO_NAO_PERMITIDO: {
+    status: 400,
+    familia: 'pedido',
+    mensagem: 'O endereço da API própria não é aceito.',
+  },
+  // 502 e não 401 nos três de fornecedor: o 401 é sobre a chamada QUE CHEGOU aqui, e ela está
+  // autenticada. O que falhou foi a chamada que NÓS fizemos ao terceiro, que é o que 502 diz.
+  FORNECEDOR_RECUSOU_A_CHAVE: {
+    status: 502,
+    familia: 'dado do tenant',
+    mensagem: 'O fornecedor recusou a chave. Confira a chave em Modelo de linguagem, ou crie outra no site dele.',
+  },
+  FORNECEDOR_NAO_TEM_O_MODELO: {
+    status: 502,
+    familia: 'dado do tenant',
+    mensagem: 'O fornecedor não reconheceu esse modelo. Nome de modelo muda com o tempo: confira no site dele.',
+  },
+  FORNECEDOR_NO_LIMITE: {
+    status: 429,
+    familia: 'dado do tenant',
+    mensagem: 'O fornecedor recusou por limite de uso do plano. Tente de novo em alguns minutos.',
+  },
+  FORNECEDOR_NAO_RESPONDEU: {
+    status: 502,
+    familia: 'dado do tenant',
+    mensagem: 'O fornecedor não respondeu a tempo. Tente de novo em alguns segundos.',
+  },
+  LIMITE_DE_GERACOES: {
+    status: 429,
+    familia: 'pedido',
+    mensagem: 'Muitas gerações em pouco tempo. Espere um minuto e tente de novo.',
+  },
+  TETO_MENSAL_ATINGIDO: {
+    status: 409,
+    familia: 'dado do tenant',
+    mensagem: 'O teto mensal de gasto desta marca foi atingido. O dono pode aumentá-lo em Modelo de linguagem.',
+  },
   FALHA_INTERNA: { status: 500, familia: 'nossa', mensagem: MENSAGEM_DE_FALHA_INTERNA },
 };
 
@@ -137,10 +199,18 @@ function montarMensagem(entrada: EntradaDaTabela, mensagemDoMotor: string): stri
  * Monta uma falha de transporte pela tabela. `mensagem` sobrescreve quando há detalhe
  * acionável a dar (o `?format=png` recusado, por exemplo); o status nunca é sobrescrito.
  */
-export function criarFalhaDeTransporte(codigo: CodigoDeTransporte, mensagem?: string): FalhaDaApi {
+export function criarFalhaDeTransporte(
+  codigo: CodigoDeTransporte,
+  mensagem?: string,
+  cabecalhos?: Record<string, string>,
+): FalhaDaApi {
   const entrada = TRANSPORTE_POR_CODIGO[codigo];
+  // Os cabeçalhos entram por parâmetro só porque o `Allow` do 405 depende da ROTA: a de
+  // variante permite POST, a de configuração permite GET, PUT e DELETE. O status continua
+  // vindo da tabela, que é o que este arquivo existe para centralizar.
   return new FalhaDaApi(codigo, entrada.status, mensagem ?? entrada.mensagem, {
     ...entrada.cabecalhos,
+    ...cabecalhos,
   });
 }
 

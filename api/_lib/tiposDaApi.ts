@@ -22,6 +22,21 @@ export type CodigoDeTransporte =
   | 'METODO_NAO_PERMITIDO'
   | 'CORPO_INVALIDO'
   | 'FORMATO_NAO_SUPORTADO'
+  // Os de baixo são da D13, e chegam por uma porta diferente: quem chama
+  // `api/v1/modelo-de-linguagem/` é a TELA, com a sessão da pessoa, e não um sistema com chave
+  // de API. Por isso "sessão" e "chave" são códigos separados, mesmo os dois dando 401: a tela
+  // manda entrar de novo, e o integrador conserta a chave.
+  | 'SESSAO_AUSENTE'
+  | 'SESSAO_INVALIDA'
+  | 'SEM_PERMISSAO'
+  | 'FORNECEDOR_NAO_CONFIGURADO'
+  | 'ENDERECO_NAO_PERMITIDO'
+  | 'FORNECEDOR_RECUSOU_A_CHAVE'
+  | 'FORNECEDOR_NAO_TEM_O_MODELO'
+  | 'FORNECEDOR_NO_LIMITE'
+  | 'FORNECEDOR_NAO_RESPONDEU'
+  | 'LIMITE_DE_GERACOES'
+  | 'TETO_MENSAL_ATINGIDO'
   | 'FALHA_INTERNA';
 
 /** Todo `error.code` que a API pode devolver. É contrato: cliente compara com string. */

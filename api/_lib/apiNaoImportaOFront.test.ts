@@ -54,6 +54,21 @@ const fontes = arquivosDeFonte(RAIZ)
 const DE_SRC = /(?:^|\/)src\//;
 const DO_MOTOR = /(?:^|\/)src\/lib\/render\//;
 
+/**
+ * A allowlist do que `api/` pode importar de `src/`, e o motivo de cada item. Ela cresce por
+ * DECISÃO escrita, nunca porque um import ficou vermelho: o item entra aqui junto do porquê de ele
+ * ser seguro sob `service_role`, que é a hipótese que o resto de `src/` não respeita.
+ *
+ * - `src/lib/render/`, o motor. Duas implementações do recolor divergem, e a cor do editor deixaria
+ *   de ser a cor da API (princípio nº1 do projeto).
+ * - `src/lib/modeloDeLinguagem/`, as regras dos fornecedores (D13). Puro: lista de fornecedores,
+ *   guarda do endereço da API própria, custo e resumo do gasto. Não toca banco, não assume RLS nem
+ *   sessão. Duplicar em `api/` faria o servidor chamar um endereço que a tela não mostrou.
+ */
+const PERMITIDOS_DE_SRC = [DO_MOTOR, /(?:^|\/)src\/lib\/modeloDeLinguagem\//];
+
+const ehPermitido = (modulo: string) => PERMITIDOS_DE_SRC.some((permitido) => permitido.test(modulo));
+
 function culpadosQueImportam(proibido: RegExp): string[] {
   return fontes
     .filter(({ modulos }) => modulos.some((modulo) => proibido.test(modulo)))
@@ -87,18 +102,34 @@ describe('api/ não importa o front', () => {
     ).toEqual([]);
   });
 
-  it('de src/, api/ só importa o motor (src/lib/render/)', () => {
+  it('de src/, api/ só importa o que está na allowlist', () => {
     const culpados = fontes
-      .filter(({ modulos }) => modulos.some((m) => DE_SRC.test(m) && !DO_MOTOR.test(m)))
+      .filter(({ modulos }) => modulos.some((m) => DE_SRC.test(m) && !ehPermitido(m)))
       .map(({ caminho }) => caminho);
 
     expect(
       culpados,
-      'Um arquivo de api/ importou de src/ algo que não é o motor. A regra é uma allowlist ' +
-        'de um item só porque o resto de src/ foi escrito assumindo RLS e sessão de usuário; ' +
-        'aqui não há nem uma nem outra, e a hipótese quebrada não aparece em nenhum teste ' +
-        'de unidade, aparece como dado de um tenant saindo na resposta de outro.',
+      'Um arquivo de api/ importou de src/ algo que não está na allowlist (hoje o motor e ' +
+        'src/lib/modeloDeLinguagem/). A lista é curta porque o resto de src/ foi escrito ' +
+        'assumindo RLS e sessão de usuário; aqui não há nem uma nem outra, e a hipótese ' +
+        'quebrada não aparece em nenhum teste de unidade, aparece como dado de um tenant ' +
+        'saindo na resposta de outro. Item novo entra com o motivo escrito em PERMITIDOS_DE_SRC.',
     ).toEqual([]);
+  });
+
+  it('a allowlist não deixa passar o que ela não cita', () => {
+    // Contraprova da própria lista: sem isto, uma regex frouxa demais (um `src/lib/` inteiro,
+    // por exemplo) passaria despercebida e o teste acima ficaria verde para sempre.
+    for (const proibido of [
+      '../../src/features/zonas/listarZonasDoProduto',
+      '../../src/lib/supabase/cliente',
+      '../../src/lib/composicao/validarComposicao',
+      '../../src/lib/acervo/acervoDeProva',
+    ]) {
+      expect(ehPermitido(proibido), proibido).toBe(false);
+    }
+    expect(ehPermitido('../../src/lib/modeloDeLinguagem/calcularCustoEstimado')).toBe(true);
+    expect(ehPermitido('../../src/lib/render/erros')).toBe(true);
   });
 
   it('api/ importa o motor de src/lib/render/ (obrigatório, não só permitido)', () => {

@@ -19,6 +19,11 @@ export default defineConfig({
   build: { chunkSizeWarningLimit: 640 },
 
   test: {
+    // As worktrees das frentes paralelas moram em `.claude/worktrees/` (uma cópia inteira do
+    // repositório por frente). Sem esta exclusão, `npm test` coleta os testes DELAS junto com os
+    // daqui, e uma guarda antiga da cópia reprova o código novo daqui, que é um vermelho que não
+    // significa nada. Elas rodam o próprio `npm test` dentro da própria worktree.
+    exclude: ['**/node_modules/**', '**/dist/**', '.claude/worktrees/**'],
     // Node não tem DOMParser: registra o jsdom como DOM do motor antes de qualquer teste.
     // No navegador nada disso carrega (ver src/lib/render/dom.ts).
     setupFiles: ['./src/lib/render/domNode.ts'],

@@ -16,3 +16,7 @@ supabase/.temp/
 # que sobrevive à sessão). O que não vai é o processo: a trava do vigia é de uma máquina só,
 # e `vigia.log` já cai na regra de `*.log` acima.
 .full-auto/.vigia.lock
+
+# Worktrees das frentes paralelas do Full Automático: cópias inteiras do repositório, criadas
+# por sessão. O trabalho delas chega aqui por merge de branch, nunca por arquivo versionado.
+.claude/worktrees/
