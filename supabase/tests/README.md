@@ -10,6 +10,7 @@ vê coleção de outra. O que não vive aqui: teste de lógica pura (vai junto d
 | `isolamento.test.ts` | As asserções: leitura cruzada, escrita cruzada, Storage, papel de membro, anônimo |
 | `editorDeZonas.test.ts` | O caminho do editor contra o banco real: gravar zona, reler, e o que a RLS recusa |
 | `chaveDeApi.test.ts` | `tenant_api_keys`: o `hash` que nem o dono lê, o delete que não existe, e a chave da concorrente |
+| `modeloDeLinguagem.test.ts` | As duas tabelas da D13 (configuração do fornecedor e uso do modelo de linguagem): nem o owner lê ou grava pelo navegador, só o `service_role` da função |
 | `apiDeVariante.test.ts` | A API de variante inteira sobre o banco real: o 200 que recolore só a zona pedida, o 404 do concorrente e os 409 de dado do tenant |
 | `eloEditorApi.test.ts` | O elo: a zona gravada **pelo caminho do editor** é a zona que a API pinta, o princípio nº1 como asserção |
 
