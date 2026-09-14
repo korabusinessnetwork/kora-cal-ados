@@ -62,7 +62,13 @@ O texto original fica abaixo, como histórico.
 - **Como confirmar que funcionou:** `select count(*) from tenants where slug like 'marca-%'` devolve
   0, e `npm run test:banco` continua 58 de 58.
 
-## P05 Aplicar a migration dos dois índices no Supabase real [prioridade: média]
+## P05 Aplicar a migration dos dois índices no Supabase real [RESOLVIDA em 2026-09-14]
+
+- **Resolvida:** a pedido do Matheus ("roda a migration vc"), aplicada com `npx supabase db query --linked -f supabase/migrations/20260912_indice_em_chave_estrangeira.sql`, pelo login da CLI que ele mesmo fez. Antes, conferi que o projeto linkado é `fvasiruguggpxliprjpg`, o mesmo do `.env.local`, e que nenhum dos dois índices existia. Não usei `db push`, que aplicaria qualquer outra migration pendente junto.
+- **Conferido:** `pg_indexes` traz `tenant_members_user_id_idx` e `tenant_api_keys_created_by_idx`, e `npm run test:banco` passou 58 de 58 depois.
+
+O texto original fica abaixo, como histórico.
+
 
 - **Por quê:** `supabase/migrations/20260912_indice_em_chave_estrangeira.sql` está escrita e
   conferida, mas migration só vale quando roda. Enquanto ela não rodar,
