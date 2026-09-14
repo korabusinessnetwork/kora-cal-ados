@@ -23,7 +23,8 @@ glTF e mais nada.
 | `geometriaDeCadarco.ts` | O cadarço reto: **fileiras** de fita retangular cuja face de baixo segue uma superfície qualquer, no espaço dela | medidas + superfície → malha crua |
 | `cadarcoSobreOCabedal.ts` | O cadarço deitado no cabedal baixo padrão: o assento calculado da altura do peito do pé e o modelador com a base em Y = 0 | malha do cabedal + medidas → assento e modelador |
 | `cadarcoSobreOCabedal.test.ts` | Confere o cadarço contra os dois cabedais **lidos do glTF gravado** (critérios 12 a 14) e mede o limite conhecido com o calçado montado | - |
-| `malhaNaForma.ts` | Só para testes: a malha de um nó de glTF no espaço da forma, com escala e translação aplicadas | texto glTF + nome do nó → posições e índices |
+| `malhaNaForma.ts` | Só para testes: a malha de um nó de glTF no espaço da forma, com escala e translação aplicadas, e também como gravada (posições, normais, `min`/`max` declarados) | texto glTF + nome do nó → posições, normais e índices |
+| `coerenciaDasPecasGravadas.test.ts` | Confere nas 5 peças **gravadas**: `min`/`max` iguais às posições em float32, normais unitárias, todo triângulo virado para o lado das normais dos cantos (critérios 3 a 5) | - |
 | `montarGltfDePeca.ts` | Chama o modelador da peça (`modelar`, caixa quando ausente) e embrulha a geometria num glTF 2.0 com buffer em `data:` URI, nó/malha/material próprios (dupla face quando `materialDeDuplaFace`), e aplica o parâmetro como escala | descrição de peça + parâmetros → texto glTF |
 | `acervoDeProva.ts` | As 5 peças descritas, o `catalogoDeProva()` que `validarComposicao` consome e o `gltfDaPecaDeProva()` | id de peça → texto glTF |
 | `acervoDeProva.ts` (cont.) | `composicaoDeProva()` devolve `unknown`, de propósito: a demo entra por `validarComposicao` pelo mesmo portão que a saída de um modelo de linguagem | - |
