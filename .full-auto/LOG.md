@@ -76,3 +76,4 @@
 - 2026-09-14 F05 endpoints de modelo de linguagem (configuracao, testar, gerar, uso), 27 testes de handler, 12 mutações à mão todas pegas
 - 2026-09-14 F06 tela do owner (fornecedor, chave só escrita, testar, remover) e painel de gasto, 22 testes, 9 mutações pegas; verificação no navegador fica para o F08 (precisa da migration aplicada e de login)
 - 2026-09-14 F07 "Compor calçado" para todo papel, com o fornecedor da marca (rota em-uso, adaptador, RecusaDoModelo), 3D continua em chunk tardio; 10 testes novos, 8 mutações pegas; 1552 testes e build verdes
+- 2026-09-14 F08 (parte) migration 20260914_modelo_de_linguagem_por_tenant aplicada no Supabase real com o sim do dono; test:banco 75/75

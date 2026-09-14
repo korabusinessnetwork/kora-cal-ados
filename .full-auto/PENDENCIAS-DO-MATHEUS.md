@@ -87,7 +87,7 @@ O texto original fica abaixo, como histórico.
   nenhuma linha é tocada), diferente das outras pendências desta lista. O `if not exists` deixa
   rodar duas vezes sem erro.
 
-## P07 Confirmar a migration do fornecedor de modelo de linguagem, e depois a Vercel [prioridade: alta]
+## P07 Confirmar a migration do fornecedor de modelo de linguagem, e depois a Vercel [migration APLICADA em 2026-09-14; falta só a Vercel no deploy]
 
 - **Por quê:** a tela "Fornecedor de modelo de linguagem" e o "Compor calçado" leem duas tabelas novas (`tenant_modelos_de_linguagem`, `uso_do_modelo_de_linguagem`) que ainda não existem no Supabase real. A migration só cria tabelas e índices e tira privilégio de `anon` e `authenticated` nelas; não mexe em nenhuma tabela existente.
 - **O que você faz agora:** responder "pode aplicar a migration do modelo de linguagem" no chat. Eu aplico com `npx supabase db query --linked -f supabase/migrations/20260914_modelo_de_linguagem_por_tenant.sql` e rodo `npm run test:banco`.
