@@ -6,6 +6,8 @@
 --   20260812_schema_inicial.sql        , tabelas + RLS inicial            (APLICADA)
 --   20260812_correcao_rls_e_storage.sql, recursão, papéis e Storage       (APLICADA)
 --   20260908_chave_de_api_por_tenant.sql, tenant_api_keys (ADR-006)   (NÃO APLICADA)
+--   20260912_indice_em_chave_estrangeira.sql, os dois índices que faltavam   (APLICADA)
+--   20260914_modelo_de_linguagem_por_tenant.sql, fornecedor por marca e uso (D13)  (NÃO APLICADA)
 --
 -- As duas de agosto estão APLICADAS num projeto Supabase real desde 2026-09-05, provado
 -- por supabase/tests/isolamento.test.ts rodando 8/8 verde contra ele (BUG-006..009
@@ -23,6 +25,12 @@
 -- variants         (id, product_id, tenant_id, zone_colors jsonb, rendered_path, created_at)
 -- tenant_api_keys  (id, tenant_id, prefixo único, hash, label, created_by, created_at,
 --                   last_used_at, revoked_at)  , chave de API do tenant, ADR-006
+-- tenant_modelos_de_linguagem (tenant_id pk, fornecedor, modelo, endereco, chave_cifrada,
+--                   final_da_chave, preco_entrada_por_milhao, preco_saida_por_milhao,
+--                   teto_mensal_usd, updated_by, created_at, updated_at)  , D13
+-- uso_do_modelo_de_linguagem (id, tenant_id, usuario_id, created_at, fornecedor, modelo,
+--                   origem, sucesso, codigo_de_erro, tokens_de_entrada, tokens_de_saida,
+--                   custo_estimado_usd)  , uma linha por chamada ao fornecedor, D13
 --
 -- DDL completo: 20260812_schema_inicial.sql, 20260908_chave_de_api_por_tenant.sql e
 -- 20260912_indice_em_chave_estrangeira.sql
@@ -51,9 +59,13 @@
 --   tenant_members.user_id        tenant_members_user_id_idx        (20260912)
 --   tenant_api_keys.created_by    tenant_api_keys_created_by_idx    (20260912)
 --   tenant_members.tenant_id      coberta pelo unique (tenant_id, user_id)
+--   tenant_modelos_de_linguagem.tenant_id   coberta pela chave primária
+--   tenant_modelos_de_linguagem.updated_by  tenant_modelos_de_linguagem_updated_by_idx (20260914)
+--   uso_do_modelo_de_linguagem.tenant_id    uso_do_modelo_de_linguagem_tenant_id_created_at_idx (20260914)
+--   uso_do_modelo_de_linguagem.usuario_id   uso_do_modelo_de_linguagem_usuario_id_idx (20260914)
 
 -- ── Isolamento (estado final das policies) ──────────────────────────────
--- RLS ativa nas 6 tabelas. Helpers security definer:
+-- RLS ativa nas 8 tabelas. Helpers security definer:
 --   auth_tenant_ids()        → tenants do usuário autenticado
 --   auth_owner_tenant_ids()  → tenants onde ele é owner
 --
@@ -65,6 +77,14 @@
 -- | product_zones   | membro            | membro        | membro          | owner  |
 -- | variants        | membro            | membro        |,               | owner  |
 -- | tenant_api_keys | owner, sem `hash` | (service_role)| owner, só `revoked_at` | - |
+-- | tenant_modelos_de_linguagem | - | - | - | - |
+-- | uso_do_modelo_de_linguagem  | - | - | - | - |
+--
+-- As duas de D13 são as únicas tabelas SEM policy nenhuma, e com todo privilégio revogado de
+-- `anon` e `authenticated`: quem chega pelo navegador não tem caminho até elas. O acesso é só
+-- por `api/v1/modelo-de-linguagem/`, com service_role, depois de a função conferir sessão e papel.
+-- O motivo é a coluna `chave_cifrada`: ela é uma credencial de terceiro, decifrável pelo servidor,
+-- que custa dinheiro à marca. Ver o cabeçalho da migration 20260914.
 --
 -- tenant_api_keys é a única tabela onde policy não basta: RLS filtra linha, não coluna.
 -- A coluna `hash` fica fora do `grant select`, então `select *` nela dá permission denied

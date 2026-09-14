@@ -66,7 +66,7 @@ describe('toda tabela criada tem RLS ligada (A41)', () => {
 
   it('a varredura enxerga as tabelas de verdade, e não passa por acerto de regex vazio', () => {
     // Contraprova obrigatória: o teste acima passaria igual se o `create table` nunca casasse com
-    // coisa nenhuma, e aí a guarda inteira seria decoração. Estas são as seis tabelas de hoje.
+    // coisa nenhuma, e aí a guarda inteira seria decoração. Estas são as oito tabelas de hoje.
     const criadas = [...semComentarios(SQL).matchAll(/create\s+table\s+([\w.]+)/gi)].map(
       (achado) => achado[1],
     );
@@ -76,7 +76,9 @@ describe('toda tabela criada tem RLS ligada (A41)', () => {
       'products',
       'tenant_api_keys',
       'tenant_members',
+      'tenant_modelos_de_linguagem',
       'tenants',
+      'uso_do_modelo_de_linguagem',
       'variants',
     ]);
   });

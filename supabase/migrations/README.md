@@ -10,6 +10,7 @@ história de como se chegou lá.
 | `20260812_correcao_rls_e_storage.sql` | Ajuste das policies e do bucket dos SVGs base |
 | `20260908_chave_de_api_por_tenant.sql` | `tenant_api_keys`, que é o que faz o `tenant_id` sair da chave e nunca do pedido (ADR-006) |
 | `20260912_indice_em_chave_estrangeira.sql` | Índice em `tenant_members.user_id` e em `tenant_api_keys.created_by`, as duas que faltavam |
+| `20260914_modelo_de_linguagem_por_tenant.sql` | `tenant_modelos_de_linguagem` e `uso_do_modelo_de_linguagem`, o fornecedor de modelo de linguagem de cada marca e o gasto dele (D13). As duas sem policy, só pela função serverless |
 
 ## As duas guardas que moram aqui, e por que elas moram aqui
 

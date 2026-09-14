@@ -219,6 +219,10 @@ describe('toda chave estrangeira tem índice que a lidere (A53)', () => {
       'tenant_api_keys.tenant_id',
       'tenant_members.tenant_id',
       'tenant_members.user_id',
+      'tenant_modelos_de_linguagem.tenant_id',
+      'tenant_modelos_de_linguagem.updated_by',
+      'uso_do_modelo_de_linguagem.tenant_id',
+      'uso_do_modelo_de_linguagem.usuario_id',
       'variants.product_id',
       'variants.tenant_id',
     ]);
