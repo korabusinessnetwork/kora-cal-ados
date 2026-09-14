@@ -76,3 +76,20 @@ Uma entrada por decisão. Ele revisa no final e pode reverter qualquer uma.
 - **O que NÃO entra:** o fornecedor de verdade e o endpoint de servidor que o chamaria. A chave de um modelo de linguagem é segredo e nunca pode ir para o navegador (nem com prefixo `VITE_`), então o fornecedor real exige uma função serverless com autenticação e limite de chamadas, e escolher o fornecedor é gasto. Fica como pendência do dono, com a interface pronta para receber.
 - **Por quê:** é o contorno que a skill manda ("adapter com a interface real + implementação mock ativa por padrão"), e o custo continua zero. O gerador de prova diz na tela que não é IA: a regra de transparência de `memory/restrictions.md` proíbe a tela afirmar que uma IA fez o que um gerador de palavras-chave fez.
 - **Como reverter:** apagar a branch `full-auto/prompt-composicao`. Nada fora dela muda.
+
+
+## D13 Fornecedores de modelo de linguagem: cada marca usa a própria chave, grátis ou paga
+- **Contexto:** em 2026-09-14 o dono pediu: pesquisar o repositório OmniRoute, disponibilizar várias APIs grátis, um campo para escolher uma delas ou colocar uma API própria paga, e um painel de gasto.
+- **O que a pesquisa mostrou:** o OmniRoute (MIT, github.com/diegosouzapw/OmniRoute) cataloga os planos grátis em `docs/reference/FREE_TIERS.md`. Os que valem para texto são Groq, Google Gemini, Cerebras, Mistral, OpenRouter (modelos `:free`), SambaNova e GitHub Models, todos com chave e todos com endpoint compatível com OpenAI. O próprio documento avisa que a maioria restringe uso comercial e repasse da cota por outro serviço.
+- **Decisão:**
+  1. **Cada tenant usa a própria chave.** A Kora não tem uma chave grátis repartida entre as marcas. Repartir uma cota grátis entre clientes de um SaaS é o repasse que os termos proíbem, e uma marca esgotaria a cota de todas. A tela leva a pessoa ao site do fornecedor para criar a chave grátis dela.
+  2. **Fornecedores sem chave (Pollinations e parecidos) não entram.** São anônimos, sem garantia, com limite de uma chamada a cada vários segundos, e o uso comercial não está claro.
+  3. **API própria** é qualquer endpoint compatível com OpenAI (`/chat/completions`), com endereço, chave, modelo, preço por milhão de tokens de entrada e de saída, e teto mensal opcional.
+  4. **A chave nunca volta ao navegador.** Ela é cifrada no servidor (AES-256-GCM, com a chave de cifra em `CHAVE_DE_CIFRA_DOS_FORNECEDORES`, variável sem `VITE_`) e a tela só mostra os 4 últimos caracteres.
+  5. **Só o owner configura e só o owner vê o gasto.** Gasto é dado financeiro. Qualquer membro do tenant pode gerar composição com o fornecedor configurado.
+  6. **As duas tabelas novas não têm política para `authenticated`.** Tudo passa pela função serverless com service_role, que confere a sessão e o papel antes. Assim a chave cifrada não tem nem coluna legível pelo navegador.
+  7. **Limites no servidor:** 10 gerações por minuto e 300 por dia por tenant, e o teto mensal de custo estimado bloqueia a geração quando é atingido.
+  8. **API própria tem guarda contra SSRF:** só `https`, sem IP literal, sem `localhost`, e o nome resolvido não pode cair em rede privada.
+  9. **O custo é estimado**, com os tokens que o próprio fornecedor devolve em `usage` e o preço que o owner digitou. Fornecedor grátis custa zero. A tela diz que é estimativa e que a fatura de verdade é a do fornecedor.
+  10. O servidor monta a instrução e o catálogo, e o navegador manda só o prompt e a forma. Por isso `api/` passa a poder importar `src/lib/composicao/` e `src/lib/acervo/`, que são puros e não assumem RLS.
+- **Como reverter:** apagar a branch `full-auto/fornecedores-de-ia` e não aplicar a migration `20260914_modelo_de_linguagem_por_tenant.sql`.

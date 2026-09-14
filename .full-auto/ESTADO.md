@@ -1,6 +1,6 @@
 # Estado do Full Automático
 
-status: CONCLUIDO
+status: EXECUTANDO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
 
 ## Modo atual: refino (desde 2026-09-12)
@@ -192,3 +192,12 @@ rodada, e volta a importar na próxima.
 - **Verificação final:** tsc 0; `npm test` 1395 passando e 58 pulados (114 arquivos); build ok em 570 ms; `test:banco` 58 de 58; `test:navegador` 25 de 25; tela conferida no navegador a 629 e 375 px.
 - **Mockado:** quem responde o prompt é o gerador de prova, que não é IA. A tela diz isso. O fornecedor de verdade é a P06.
 - **Próximo passo:** nenhum sem decisão do dono. Merge das branches `refino/kora-calcados` e `full-auto/prompt-composicao`, e a P06.
+
+
+## Fase F, fornecedores de modelo de linguagem (desde 2026-09-14)
+
+- **Pedido do dono:** travessão fora do repositório (feito, `928ef31`), APIs grátis a partir do OmniRoute, campo para escolher ou colocar API própria paga, painel de gasto, merge em `main` e push.
+- **Branch:** `full-auto/fornecedores-de-ia`, a partir de `full-auto/prompt-composicao`.
+- **Frente paralela:** o dono pediu uma sessão paralela para o 3D. Ela roda numa worktree própria, na branch `full-auto/acervo-3d`, dona de `src/lib/acervo/` e da geometria. Esta sessão integra quando ela terminar.
+- **Decisão:** D13.
+- **Próximo passo:** F01.

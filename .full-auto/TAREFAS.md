@@ -636,3 +636,16 @@ logado não diz "falta o #", evidência só de código).
       formato no console depois de uma marca. **Limite:** o seletor preto de um navegador que siga a
       especificação à risca não foi visto, porque este Chrome mostra a cor mesmo com a forma curta.
       Baseline: 1346 testes, 25 no navegador, `tsc` limpo, build sem aviso, `npm audit` em zero.
+
+
+## Fase F: fornecedores de modelo de linguagem por marca, e o gasto (2026-09-14, D13)
+
+- [ ] F01 Termos no glossário | trilha: docs | depende: nenhum | pronto quando: fornecedor de modelo de linguagem, chave do fornecedor, API própria, uso do modelo de linguagem e teto mensal estão no glossário antes do código
+- [ ] F02 Catálogo de fornecedores e regras puras | trilha: ia | depende: F01 | pronto quando: `src/lib/modeloDeLinguagem/` tem os fornecedores grátis com endereço e link da chave, a validação da API própria (https, sem IP, sem localhost), o cálculo do custo estimado e a validação do que o owner envia; tudo com teste
+- [ ] F03 Migration das duas tabelas | trilha: dados | depende: F01 | pronto quando: `20260914_modelo_de_linguagem_por_tenant.sql` cria a configuração e o uso com RLS ligada, sem grant nenhum para anon e authenticated, e os testes de migration (`rlsEmTodaTabela`, `indiceEmChaveEstrangeira`) passam
+- [ ] F04 Peças do servidor | trilha: api | depende: F02, F03 | pronto quando: cifra da chave, autenticação da sessão do usuário com papel, chamada ao fornecedor com timeout e erro legível sem vazar chave, guarda de SSRF com DNS, limite por minuto, por dia e teto mensal, registro de uso; tudo com teste e fetch injetado
+- [ ] F05 Endpoints | trilha: api | depende: F04 | pronto quando: `api/v1/modelo-de-linguagem/` tem configuração (ler, gravar, apagar), testar, gerar e uso, com os códigos de erro no envelope do contrato e testes de handler com cliente e fetch injetados
+- [ ] F06 Tela do owner: escolher fornecedor e painel de gasto | trilha: front | depende: F05 | pronto quando: na área protegida o owner escolhe um fornecedor grátis ou API própria, cola a chave (que depois só aparece como final), testa a conexão, e vê o gasto do mês (chamadas, tokens, custo estimado, teto, por dia e por modelo); membro não vê a tela; estados de carregando, erro, vazio e sucesso
+- [ ] F07 Compor calçado com o fornecedor da marca | trilha: front | depende: F05 | pronto quando: a área protegida tem "Compor calçado", que usa o fornecedor configurado pelo servidor, com o aviso de transparência dizendo o nome do fornecedor e que é IA; sem fornecedor configurado, cai no gerador de prova e diz isso
+- [ ] F08 Verificação ponta a ponta | trilha: base | depende: F06, F07 | pronto quando: migration aplicada com confirmação do dono, teste de banco provando que authenticated não lê as tabelas novas, baseline completo verde, fluxo conferido no navegador
+- [ ] F09 Documentação, pendências e merge | trilha: docs | depende: F08 | pronto quando: endpoints documentados, pendência da variável na Vercel escrita, relatório atualizado, merge em `main` e push
