@@ -153,7 +153,7 @@ export const TRANSPORTE_POR_CODIGO: Readonly<Record<CodigoDeTransporte, EntradaD
   FORNECEDOR_RECUSOU_A_CHAVE: {
     status: 502,
     familia: 'dado do tenant',
-    mensagem: 'O fornecedor recusou a chave. Confira a chave em Modelo de linguagem, ou crie outra no site dele.',
+    mensagem: 'O fornecedor recusou a chave. Confira a chave em "Fornecedor de modelo de linguagem", ou crie outra no site dele.',
   },
   FORNECEDOR_NAO_TEM_O_MODELO: {
     status: 502,
@@ -178,7 +178,7 @@ export const TRANSPORTE_POR_CODIGO: Readonly<Record<CodigoDeTransporte, EntradaD
   TETO_MENSAL_ATINGIDO: {
     status: 409,
     familia: 'dado do tenant',
-    mensagem: 'O teto mensal de gasto desta marca foi atingido. O dono pode aumentá-lo em Modelo de linguagem.',
+    mensagem: 'O teto mensal de gasto desta marca foi atingido. O owner da marca pode aumentá-lo em "Fornecedor de modelo de linguagem".',
   },
   FALHA_INTERNA: { status: 500, familia: 'nossa', mensagem: MENSAGEM_DE_FALHA_INTERNA },
 };

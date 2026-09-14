@@ -80,7 +80,7 @@ export async function carregarConfiguracaoParaUso(
     // regravado, não erro nosso, e seguir sem endereço não daria chamada nenhuma.
     throw criarFalhaDeTransporte(
       'FORNECEDOR_NAO_CONFIGURADO',
-      'O fornecedor gravado não existe mais na lista. Escolha um fornecedor de novo em Modelo de linguagem.',
+      'O fornecedor gravado não existe mais na lista. Escolha um fornecedor de novo em "Fornecedor de modelo de linguagem".',
     );
   }
 

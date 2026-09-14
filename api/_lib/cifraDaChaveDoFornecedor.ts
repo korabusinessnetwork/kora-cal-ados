@@ -40,7 +40,7 @@ export class CifraNaoConfigurada extends Error {
 export class ChaveCifradaIlegivel extends Error {
   constructor() {
     // Sem detalhe do porquê de propósito: o detalhe só ajudaria quem está tentando adivinhar.
-    super('A chave gravada do fornecedor não pôde ser lida. Grave a chave de novo em Modelo de linguagem.');
+    super('A chave gravada do fornecedor não pôde ser lida. Grave a chave de novo em "Fornecedor de modelo de linguagem".');
     this.name = 'ChaveCifradaIlegivel';
   }
 }
