@@ -130,8 +130,8 @@ function escrever(campo: HTMLInputElement | HTMLTextAreaElement, valor: string) 
 }
 
 const areaDeColar = () => container.querySelector<HTMLTextAreaElement>('#composicao-colada')!;
-const faixaDoCabedal = () =>
-  container.querySelector<HTMLInputElement>('input[aria-label="altura-do-cano da zona cabedal"]')!;
+const faixaDaSola = () =>
+  container.querySelector<HTMLInputElement>('input[aria-label="espessura da zona sola"]')!;
 
 describe('a tela do calçado montado (A49)', () => {
   it('abre com o calçado de prova montado, três zonas e os controles de pé', () => {
@@ -193,23 +193,24 @@ describe('a tela do calçado montado (A49)', () => {
   });
 
   it('trocar de peça descarta o parâmetro da anterior, que é o BUG-019', () => {
-    // As duas peças de cabedal têm um parâmetro com o MESMO nome, `altura-do-cano`, e faixas que
-    // mal se encostam: 0,05 a 0,12 contra 0,1 a 0,22. Carregar o valor da peça velha para a nova
-    // produzia `PARAMETRO_INVALIDO` e a tela inteira virava uma linha vermelha, sem que ninguém
-    // tivesse feito nada errado. A regra tem teste em `composicaoDaTela.test.ts`; o que falta
-    // prender é que a TELA a usa, porque foi dentro do `.tsx` que o defeito nasceu.
-    escrever(faixaDoCabedal(), '0.05');
-    expect(faixaDoCabedal().value).toBe('0.05');
+    // As duas solas têm um parâmetro com o MESMO nome, `espessura`, e faixas diferentes: 0,01 a
+    // 0,04 contra 0,015 a 0,05. Carregar o valor da peça velha para a nova produzia
+    // `PARAMETRO_INVALIDO` e a tela inteira virava uma linha vermelha, sem que ninguém tivesse
+    // feito nada errado. O relato original foi no cabedal, que desde 2026-09-14 não tem parâmetro.
+    // A regra tem teste em `composicaoDaTela.test.ts`; o que falta prender é que a TELA a usa,
+    // porque foi dentro do `.tsx` que o defeito nasceu.
+    escrever(faixaDaSola(), '0.012');
+    expect(faixaDaSola().value).toBe('0.012');
 
-    clicar(botaoDe('Cabedal cano alto'));
+    clicar(botaoDe('Sola tratorada'));
 
-    // 0,05 não cabe na faixa nova. O que aparece é o padrão da peça nova, 0,14, e não um valor
+    // 0,012 não cabe na faixa nova. O que aparece é o padrão da peça nova, 0,03, e não um valor
     // aparado nem um erro.
-    expect(Number(faixaDoCabedal().value)).toBeCloseTo(0.14, 5);
+    expect(Number(faixaDaSola().value)).toBeCloseTo(0.03, 5);
     // O sintoma do BUG-019, pelo nome: a tela inteira virava uma linha vermelha com este código. E
     // a lista de zonas só existe quando a montagem deu certo, então ela é a outra metade da prova.
     expect(container.textContent ?? '').not.toContain('PARAMETRO_INVALIDO');
-    expect(zonasNaTela()).toContainEqual({ zona: 'cabedal', peca: 'prova-cabedal-cano-alto' });
+    expect(zonasNaTela()).toContainEqual({ zona: 'sola', peca: 'prova-sola-tratorada' });
   });
 
   it('o dublê não troca o palco: o de verdade está montado e respondeu sem WebGL', () => {

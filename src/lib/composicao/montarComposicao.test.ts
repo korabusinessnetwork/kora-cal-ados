@@ -173,27 +173,22 @@ describe('montarComposicao', () => {
     expect(medidaDoModelo3d(modelo).maximo[1]).toBeCloseTo(0.04 + 0.075, 6);
   });
 
-  it('cano esticado leva o cadarço junto, na proporção da altura em que ele deita (critério 15)', () => {
-    // Apoio `superficie` (D5). O cabedal vai de 0,075 para 0,12 de altura, 1,6 vez, esticado em
-    // volta da base dele (0,018). O ponto de apoio do cadarço é o meio da faixa dele no padrão, e
-    // ele tem que ficar 1,6 vez mais longe da base do cabedal do que estava. Com apoio `topo` o
-    // cadarço subiria os 0,045 inteiros do topo, e flutuaria acima do peito do pé.
-    const esticado = {
+  it('no cano alto o cadarço deita onde deita no cabedal baixo, sem subir ao topo (critério 15)', () => {
+    // Apoio `superficie` (D5). O cano alto é outra peça, com o MESMO peito do pé, e nenhum cabedal
+    // estica (decisão do dono de 2026-09-14), então o cadarço fica exatamente no assento em que foi
+    // modelado. Com apoio `topo` ele subiria para a boca do cano alto, 0,065 acima do cabedal baixo.
+    const canoAlto = {
       forma_id: CATALOGO.formas[0]?.id,
       pecas: [
         { peca_id: 'prova-sola-plana' },
-        { peca_id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.12 } },
+        { peca_id: 'prova-cabedal-cano-alto' },
         { peca_id: 'prova-cadarco-reto' },
       ],
     };
-    const { modelo } = montarComposicao(validar(esticado), DO_ACERVO);
+    const { modelo } = montarComposicao(validar(canoAlto), DO_ACERVO);
 
-    const pontoDeApoio = (CADARCO_SOZINHO.minimo[1] + CADARCO_SOZINHO.maximo[1]) / 2;
-    const subida = (pontoDeApoio - 0.018) * (0.12 / 0.075) - (pontoDeApoio - 0.018);
-
-    expect(posicaoDe(modelo, 'prova-cadarco-reto')[1]).toBeCloseTo(ASSENTO_DO_CADARCO[1] + subida, 6);
-    expect(subida).toBeGreaterThan(0.02);
-    expect(subida).toBeLessThan(0.045);
+    expect(posicaoDe(modelo, 'prova-cadarco-reto')[1]).toBeCloseTo(ASSENTO_DO_CADARCO[1], 6);
+    expect(medidaDoModelo3d(modelo).maximo[1]).toBeGreaterThan(CADARCO_SOZINHO.maximo[1] + 0.05);
   });
 
   it('sem o cabedal, o cadarço volta a assentar no topo da sola (D5)', () => {
@@ -222,17 +217,19 @@ describe('montarComposicao', () => {
       validar({
         forma_id: CATALOGO.formas[0]?.id,
         pecas: [
-          { peca_id: 'prova-sola-plana' },
-          { peca_id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.1 } },
+          { peca_id: 'prova-sola-plana', parametros: { espessura: 0.03 } },
+          { peca_id: 'prova-cabedal-baixo' },
+          { peca_id: 'prova-cadarco-reto' },
         ],
       }),
       espiao,
     );
 
     expect(pedidos).toEqual([
+      { id: 'prova-sola-plana', parametros: { espessura: 0.03 } },
+      { id: 'prova-cabedal-baixo', parametros: {} },
+      { id: 'prova-cadarco-reto', parametros: { espessura: 0.006 } },
       { id: 'prova-sola-plana', parametros: { espessura: 0.018 } },
-      { id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.1 } },
-      { id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.075 } },
     ]);
   });
 
@@ -383,7 +380,7 @@ describe('montarComposicao', () => {
 
     expect(pedidos).toEqual([
       { id: 'prova-sola-plana', parametros: { espessura: 0.018 } },
-      { id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.075 } },
+      { id: 'prova-cabedal-baixo', parametros: {} },
       { id: 'prova-cadarco-reto', parametros: { espessura: 0.006 } },
     ]);
   });

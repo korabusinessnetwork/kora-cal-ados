@@ -29,7 +29,7 @@ describe('interpolacaoMonotona', () => {
   it('não passa do valor dos pontos quando a sequência vira', () => {
     // Este é o motivo de o arquivo existir. Uma spline cúbica comum faria uma barriga acima de 1
     // entre os dois pontos do meio, e no perfil do cabedal essa barriga seria o calçado passando
-    // do parâmetro de altura do cano que o dono pediu.
+    // da altura declarada da peça.
     const curva = interpolacaoMonotona([
       [0, 0],
       [1, 1],

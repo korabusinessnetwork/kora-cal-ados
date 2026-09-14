@@ -55,10 +55,14 @@ export interface DescricaoDaPecaDeProva {
   largura: number;
   /**
    * O parâmetro que escala o eixo Y. O `padrao` dele é a medida que o modelador recebe como
-   * `altura`: na sola e no cabedal é a altura da caixa da peça; no cadarço é a espessura da fita, e
-   * a caixa dele é mais alta, porque a fita desce com o peito do pé.
+   * `altura`: na sola é a altura da caixa da peça; no cadarço é a espessura da fita, e a caixa dele
+   * é mais alta, porque a fita desce com o peito do pé.
+   *
+   * `{ fixa }` é a peça **sem parâmetro**: modelada nessa altura e nunca escalada. É o cabedal
+   * (decisão do dono de 2026-09-14): esticar o cabedal no eixo Y estica boca, calcanhar e peito do
+   * pé juntos, e o cano alto passou a ser outra peça, e não um número.
    */
-  altura: ParametroDePeca;
+  altura: ParametroDePeca | { fixa: number };
   /** Onde a peça assenta na forma, em metros. Vira a `translation` do nó. */
   assento: readonly [number, number, number];
   /**
@@ -112,7 +116,7 @@ export function montarGltfDePeca(
   const modelar = peca.modelar ?? geometriaDeCaixa;
   const geometria = modelar({
     comprimento: peca.comprimento,
-    altura: peca.altura.padrao,
+    altura: alturaModelada(peca),
     largura: peca.largura,
   });
 
@@ -226,9 +230,20 @@ function fatorDeEscala(
   peca: DescricaoDaPecaDeProva,
   parametros: Readonly<Record<string, number>>,
 ): number {
-  const pedido = parametros[peca.altura.nome];
+  const parametro = parametroDaPeca(peca);
+  const pedido = parametro === undefined ? undefined : parametros[parametro.nome];
 
-  return pedido === undefined ? 1 : pedido / peca.altura.padrao;
+  return parametro === undefined || pedido === undefined ? 1 : pedido / parametro.padrao;
+}
+
+/** A altura com que a peça é modelada: o padrão do parâmetro, ou a fixa da peça sem parâmetro. */
+export function alturaModelada(peca: DescricaoDaPecaDeProva): number {
+  return 'fixa' in peca.altura ? peca.altura.fixa : peca.altura.padrao;
+}
+
+/** O parâmetro que a peça aceita, ou `undefined` na peça de altura fixa. Vira o catálogo. */
+export function parametroDaPeca(peca: DescricaoDaPecaDeProva): ParametroDePeca | undefined {
+  return 'fixa' in peca.altura ? undefined : peca.altura;
 }
 
 interface Trecho {

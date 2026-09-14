@@ -10,6 +10,8 @@ const CATALOGO = catalogoDeProva();
 
 /** A lista vem do catálogo, nunca digitada aqui: peça nova entra nos testes sozinha. */
 const IDS = CATALOGO.pecas.map(({ id }) => id);
+/** As peças que aceitam parâmetro. O cabedal tem altura fixa, e o teste acima diz isso pelo nome. */
+const IDS_COM_PARAMETRO = CATALOGO.pecas.filter(({ parametros }) => parametros.length > 0).map(({ id }) => id);
 
 function pecasDaCategoria(categoria: string): string[] {
   return CATALOGO.pecas.filter((peca) => peca.categoria === categoria).map(({ id }) => id);
@@ -65,10 +67,17 @@ describe('catalogoDeProva', () => {
     }
   });
 
-  it('toda peça declara um parâmetro com faixa coerente e padrão dentro dela', () => {
-    for (const peca of CATALOGO.pecas) {
-      expect(peca.parametros.length).toBeGreaterThan(0);
+  it('só o cabedal não tem parâmetro: cano alto é outra peça, e não um número', () => {
+    // Decisão do dono de 2026-09-14. Esticar o cabedal no eixo Y esticava boca, calcanhar e peito do
+    // pé juntos, e o cadarço, que é rígido, ficava até 6,5 mm no ar.
+    expect(CATALOGO.pecas.filter(({ parametros }) => parametros.length === 0).map(({ id }) => id)).toEqual(
+      pecasDaCategoria('cabedal'),
+    );
+    expect(pecasDaCategoria('cabedal')).toEqual(['prova-cabedal-baixo', 'prova-cabedal-cano-alto']);
+  });
 
+  it('todo parâmetro declarado tem faixa coerente e padrão dentro dela', () => {
+    for (const peca of CATALOGO.pecas) {
       for (const parametro of peca.parametros) {
         expect(parametro.minimo).toBeLessThan(parametro.maximo);
         expect(parametro.padrao).toBeGreaterThanOrEqual(parametro.minimo);
@@ -131,7 +140,7 @@ describe('as 5 peças são glTF 2.0 válido pelo validador de referência da Khr
 
   // Os dois extremos, e não só o máximo (critério 1 da Fase G): o mínimo é a metade da faixa em que
   // a escala do nó fica abaixo de 1, e é a outra metade do que o dono pode pedir.
-  it.each(IDS.flatMap((id) => [[id, 'minimo'] as const, [id, 'maximo'] as const]))(
+  it.each(IDS_COM_PARAMETRO.flatMap((id) => [[id, 'minimo'] as const, [id, 'maximo'] as const]))(
     '%s continua válido com o parâmetro no %s da faixa',
     async (id, extremo) => {
       const peca = CATALOGO.pecas.find((candidata) => candidata.id === id);

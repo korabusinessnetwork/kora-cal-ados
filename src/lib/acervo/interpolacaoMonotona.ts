@@ -11,8 +11,8 @@
 // Por que não Catmull-Rom ou uma spline cúbica comum: as duas passam do valor dos pontos quando
 // a sequência muda de direção. No contorno isso criaria uma barriga onde a cintura deveria
 // afinar; na altura do cabedal, um pico acima do ponto mais alto, e o ponto mais alto do cabedal
-// **é** o padrão do parâmetro de altura do cano. Passar dele em meio milímetro quebraria a
-// igualdade entre altura modelada e parâmetro, que é critério de aceite.
+// **é** a altura declarada da peça. Passar dela em meio milímetro quebraria a igualdade entre
+// altura modelada e altura declarada, que é critério de aceite.
 //
 // O preço é a derivada: nos pontos de controle onde a sequência vira, a inclinação é zerada, e a
 // curva chega neles horizontal. Para perfil de calçado isso é aparência boa, não defeito.

@@ -87,6 +87,15 @@ O cano alto é o cabedal baixo com a borda e a frente da boca mais altas, e o tr
 é idêntico nos dois. É o que acontece numa forma de verdade (a forma é a mesma, o cano é que muda), e
 é o que faz um cadarço só servir nos dois cabedais sem se mexer.
 
+### D7. Cabedal sem parâmetro: cano alto é outra peça (decisão do dono, 2026-09-14)
+
+Adicionada depois da implementação. O cabedal deixou de aceitar `altura-do-cano`: os dois têm
+altura fixa (0,075 e 0,14) e o cano alto se escolhe trocando de peça. Escalar o cabedal em Y
+esticava boca, calcanhar e peito do pé juntos, e é o que produzia as linhas de cano da tabela
+abaixo, que ficam como histórico. Com isso o cadarço deita igual nos dois cabedais em qualquer
+composição, e o limite que sobra é só o da espessura do cadarço. Os critérios 1, 8 e 15 passam a
+valer só para peça com parâmetro; no cabedal a altura modelada é a altura fixa declarada.
+
 ## Limite conhecido, escrito para não ser redescoberto
 
 Uma peça rígida inclinada não acompanha com exatidão uma escala em Y. O cadarço inclinado sobre o

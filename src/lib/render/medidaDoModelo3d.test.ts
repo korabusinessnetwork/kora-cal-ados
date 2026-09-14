@@ -119,7 +119,8 @@ describe('a medida lida do JSON é a mesma que o three mede', () => {
     conferirCaixasIguais(medidaDoModelo3d(textoGltf), await medidaPeloThree(textoGltf));
   });
 
-  it.each(IDS)('%s continua batendo com o three depois de o parâmetro esticar a peça', async (id) => {
+  // O cabedal tem altura fixa e não estica (decisão do dono de 2026-09-14).
+  it.each(IDS.filter((id) => !id.startsWith('prova-cabedal-')))('%s continua batendo com o three depois de o parâmetro esticar a peça', async (id) => {
     // A versão padrão tem `scale: [1, 1, 1]`, então ela sozinha não provaria que a escala é
     // aplicada: uma implementação que ignorasse `scale` passaria no teste anterior inteiro.
     const parametro = parametroDaPeca(id);

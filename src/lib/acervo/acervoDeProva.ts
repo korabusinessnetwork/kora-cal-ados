@@ -15,7 +15,12 @@ import { cadarcoSobreOCabedal } from './cadarcoSobreOCabedal';
 import { geometriaDeCabedal } from './geometriaDeCabedal';
 import { geometriaDeSola } from './geometriaDeSola';
 import { CANO_ALTO, CANO_BAIXO } from './perfilDoCabedal';
-import { montarGltfDePeca, type DescricaoDaPecaDeProva, type ModeladorDePeca } from './montarGltfDePeca';
+import {
+  montarGltfDePeca,
+  parametroDaPeca,
+  type DescricaoDaPecaDeProva,
+  type ModeladorDePeca,
+} from './montarGltfDePeca';
 import type { CatalogoDoAcervo, PecaDoAcervo } from '../composicao/tiposDaComposicao';
 
 /** Uma forma só. Misturar formas é estado inválido (ADR-008 D4), e aqui não há com o que misturar. */
@@ -49,7 +54,13 @@ const LARGURA_DO_CABEDAL = 0.09;
 /** A altura do peito do pé no começo dele, onde a boca termina. Ver `perfilDoCabedal.ts`. */
 const ALTURA_DO_PEITO = 0.064;
 
-const ALTURA_DO_CABEDAL_BAIXO = { nome: 'altura-do-cano', minimo: 0.05, maximo: 0.12, padrao: 0.075 };
+/**
+ * As alturas dos dois cabedais, fixas. Nenhum cabedal aceita parâmetro (decisão do dono de
+ * 2026-09-14): escalar o cabedal no eixo Y esticava boca, calcanhar e peito do pé juntos, e o
+ * cadarço, que é rígido, ficava até 6,5 mm no ar. Quem quer cano alto troca de peça.
+ */
+const ALTURA_DO_CABEDAL_BAIXO = 0.075;
+const ALTURA_DO_CANO_ALTO = 0.14;
 
 const modelarCabedalBaixo: ModeladorDePeca = (medidas) =>
   geometriaDeCabedal({ ...medidas, alturaDoPeito: ALTURA_DO_PEITO, cano: CANO_BAIXO });
@@ -80,7 +91,7 @@ const CADARCO = cadarcoSobreOCabedal({
   cabedal: modelarCabedalBaixo({
     comprimento: COMPRIMENTO_DO_CABEDAL,
     largura: LARGURA_DO_CABEDAL,
-    altura: ALTURA_DO_CABEDAL_BAIXO.padrao,
+    altura: ALTURA_DO_CABEDAL_BAIXO,
   }),
   assentoDoCabedal: [0, ALTURA_DA_SOLA, 0],
   inicio: INICIO_DO_CADARCO,
@@ -127,7 +138,7 @@ const PECAS: readonly DescricaoDaPecaDeProva[] = [
     rotulo: 'Cabedal baixo',
     comprimento: COMPRIMENTO_DO_CABEDAL,
     largura: LARGURA_DO_CABEDAL,
-    altura: ALTURA_DO_CABEDAL_BAIXO,
+    altura: { fixa: ALTURA_DO_CABEDAL_BAIXO },
     assento: [0, ALTURA_DA_SOLA, 0],
     modelar: modelarCabedalBaixo,
     materialDeDuplaFace: true,
@@ -138,7 +149,7 @@ const PECAS: readonly DescricaoDaPecaDeProva[] = [
     rotulo: 'Cabedal cano alto',
     comprimento: COMPRIMENTO_DO_CABEDAL,
     largura: LARGURA_DO_CABEDAL,
-    altura: { nome: 'altura-do-cano', minimo: 0.1, maximo: 0.22, padrao: 0.14 },
+    altura: { fixa: ALTURA_DO_CANO_ALTO },
     assento: [0, ALTURA_DA_SOLA, 0],
     modelar: (medidas) => geometriaDeCabedal({ ...medidas, alturaDoPeito: ALTURA_DO_PEITO, cano: CANO_ALTO }),
     materialDeDuplaFace: true,
@@ -192,7 +203,7 @@ export function catalogoDeProva(): CatalogoDoAcervo {
         categoria: peca.categoria,
         forma_id: FORMA_DE_PROVA,
         rotulo: peca.rotulo,
-        parametros: [peca.altura],
+        parametros: [parametroDaPeca(peca)].filter((parametro) => parametro !== undefined),
       }),
     ),
   };

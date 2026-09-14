@@ -20,7 +20,7 @@ export interface MedidasDoCabedal {
   comprimento: number;
   /** Metros, eixo Z, a largura do contorno do pé na base. */
   largura: number;
-  /** Metros, eixo Y, o ponto mais alto. É o `padrao` do parâmetro de altura do cano. */
+  /** Metros, eixo Y, o ponto mais alto. É a altura fixa declarada da peça (cabedal não tem parâmetro). */
   altura: number;
   /** Metros. Igual em todo cabedal da forma, ver `perfilDoCabedal.ts`. */
   alturaDoPeito: number;

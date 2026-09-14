@@ -50,9 +50,10 @@ export function escolhasDaComposicao(composicao: ComposicaoValidada): Map<string
 /**
  * Uma mudança numa categoria, com a única regra de transição que a tela tem.
  *
- * **Trocar de peça descarta os parâmetros da peça anterior.** Existe por causa do BUG-019: o
- * cabedal baixo e o cabedal cano alto têm um parâmetro com o MESMO nome, `altura-do-cano`, e
- * faixas que mal se encostam (0,05 a 0,12 contra 0,1 a 0,22). Carregar 0,075 da peça velha para a
+ * **Trocar de peça descarta os parâmetros da peça anterior.** Existe por causa do BUG-019: duas
+ * peças da mesma categoria com um parâmetro de MESMO nome e faixas diferentes. O relato foi no
+ * cabedal (que desde 2026-09-14 não tem parâmetro, cano alto é outra peça); hoje são as duas
+ * solas, com `espessura` de 0,01 a 0,04 contra 0,015 a 0,05. Carregar o valor da peça velha para a
  * nova produzia `PARAMETRO_INVALIDO` e a tela inteira virava uma linha vermelha, sem que ninguém
  * tivesse feito nada errado: a pessoa só trocou de peça.
  *

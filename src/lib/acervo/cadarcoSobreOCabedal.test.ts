@@ -176,18 +176,18 @@ describe('a fita é um sólido fechado, virado para fora', () => {
   });
 });
 
-describe('o limite conhecido: peça rígida sobre peça esticada', () => {
+describe('o limite conhecido: cadarço rígido com espessura fora do padrão', () => {
   const CATALOGO = catalogoDeProva();
 
   /** A distância de cada ponto de apoio à superfície do cabedal, com o calçado montado. */
-  function desencontroMontado(parametrosDoCabedal: Record<string, number>, parametrosDoCadarco = {}): number[] {
+  function desencontroMontado(cabedalId: string, parametrosDoCadarco = {}): number[] {
     const { modelo } = montarComposicao(
       validarComposicao(
         {
           forma_id: CATALOGO.formas[0]?.id,
           pecas: [
             { peca_id: 'prova-sola-plana' },
-            { peca_id: 'prova-cabedal-baixo', parametros: parametrosDoCabedal },
+            { peca_id: cabedalId },
             { peca_id: CADARCO, parametros: parametrosDoCadarco },
           ],
         },
@@ -195,7 +195,7 @@ describe('o limite conhecido: peça rígida sobre peça esticada', () => {
       ),
       (peca, parametros) => gltfDaPecaDeProva(peca.id, parametros),
     );
-    const cabedal = malhaNaForma(modelo, 'prova-cabedal-baixo');
+    const cabedal = malhaNaForma(modelo, cabedalId);
 
     return pontosDeApoio(pontos(malhaNaForma(modelo, CADARCO))).map(
       ([x, y, z]) => y - superficieEm(cabedal, x, z),
@@ -203,7 +203,15 @@ describe('o limite conhecido: peça rígida sobre peça esticada', () => {
   }
 
   it('nos tamanhos padrão, montado, o cadarço continua deitado: o limite só existe fora do padrão', () => {
-    const desencontro = desencontroMontado({});
+    const desencontro = desencontroMontado('prova-cabedal-baixo');
+
+    expect(Math.min(...desencontro)).toBeGreaterThan(0);
+    expect(Math.max(...desencontro)).toBeLessThan(0.001);
+  });
+
+  it('no cano alto montado o cadarço deita igual: o peito do pé é o mesmo e nada estica', () => {
+    // Antes, cano no máximo era parâmetro e deixava o cadarço até 6,5 mm no ar.
+    const desencontro = desencontroMontado('prova-cabedal-cano-alto');
 
     expect(Math.min(...desencontro)).toBeGreaterThan(0);
     expect(Math.max(...desencontro)).toBeLessThan(0.001);
@@ -212,18 +220,16 @@ describe('o limite conhecido: peça rígida sobre peça esticada', () => {
   // Os números medidos em 2026-09-14, com uma folga de meio milímetro para o teste não ficar
   // vermelho por arredondamento. Negativo é o cadarço entrando no cabedal, positivo é flutuando.
   //
-  // O cano esticado fica na casa dos milímetros porque o ponto de apoio é o meio do cadarço: ele
-  // acerta ali e erra nas pontas. A espessura erra mais, e é de propósito que o teste diga isso:
+  // O cano não entra mais aqui: cano alto é outra peça e nenhum cabedal estica (decisão do dono de
+  // 2026-09-14). A espessura continua errando, e é de propósito que o teste diga isso:
   // a espessura escala em Y em volta da base do próprio cadarço, e a fileira mais alta (a de trás,
   // 1,5 cm acima da base por causa da descida do peito do pé) sobe junto com a fita. O conserto é
   // parâmetro que remodela malha, que o ADR-008 D7 recusa; fica como pendência, medida aqui.
   it.each([
-    ['cano no mínimo', { 'altura-do-cano': 0.05 }, {}, -0.0037, 0.0021],
-    ['cano no máximo', { 'altura-do-cano': 0.12 }, {}, -0.0025, 0.0071],
-    ['cadarço mais fino', {}, { espessura: 0.003 }, -0.0073, 0.001],
-    ['cadarço mais grosso', {}, { espessura: 0.012 }, 0, 0.015],
-  ])('%s: o desencontro fica dentro da faixa medida', (_, doCabedal, doCadarco, menor, maior) => {
-    const desencontro = desencontroMontado(doCabedal, doCadarco);
+    ['cadarço mais fino', { espessura: 0.003 }, -0.0073, 0.001],
+    ['cadarço mais grosso', { espessura: 0.012 }, 0, 0.015],
+  ])('%s: o desencontro fica dentro da faixa medida', (_, doCadarco, menor, maior) => {
+    const desencontro = desencontroMontado('prova-cabedal-baixo', doCadarco);
 
     expect(Math.min(...desencontro)).toBeGreaterThan(menor);
     expect(Math.max(...desencontro)).toBeLessThan(maior);

@@ -134,51 +134,49 @@ describe('montarDaTela', () => {
 });
 
 describe('mudarEscolhaDaTela', () => {
-  // BUG-019, encontrado pela conferência a olho do dono e não pela suíte: trocar o cabedal baixo
-  // pelo cano alto pintava a tela inteira de vermelho com `PARAMETRO_INVALIDO`. As duas peças têm
-  // um parâmetro com o mesmo nome, `altura-do-cano`, e faixas que mal se encostam, então o valor
-  // da peça velha chegava na peça nova já fora de faixa.
+  // BUG-019, encontrado pela conferência a olho do dono e não pela suíte: trocar de peça pintava a
+  // tela inteira de vermelho com `PARAMETRO_INVALIDO`, porque o valor da peça velha chegava na
+  // peça nova já fora de faixa. O relato foi no cabedal, que desde 2026-09-14 não tem parâmetro
+  // (cano alto é outra peça); as duas solas continuam com um parâmetro de MESMO nome, `espessura`,
+  // e faixas diferentes (0,01 a 0,04 contra 0,015 a 0,05), e são elas que prendem a regra.
 
-  it('trocar o cabedal baixo pelo cano alto não carrega a altura da peça anterior', () => {
-    // O caso exato do relato: 0,075 é o padrão do cabedal baixo e está fora dos 0,1 a 0,22 do cano
-    // alto. Sem descartar, a tela monta nada e mostra só a linha de erro.
-    const antes = escolhasDaComposicao(DEMO);
-    expect(antes.get('cabedal')?.parametros).toEqual({ 'altura-do-cano': 0.075 });
+  it('trocar a sola plana pela tratorada não carrega a espessura da peça anterior', () => {
+    // 0,012 cabe na plana e está fora dos 0,015 a 0,05 da tratorada. Sem descartar, a tela monta
+    // nada e mostra só a linha de erro.
+    const fina = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'sola', { parametros: { espessura: 0.012 } });
+    expect(montar(fina).erro).toBeNull();
 
-    const depois = mudarEscolhaDaTela(antes, 'cabedal', { pecaId: 'prova-cabedal-cano-alto' });
+    const depois = mudarEscolhaDaTela(fina, 'sola', { pecaId: 'prova-sola-tratorada' });
 
-    expect(depois.get('cabedal')?.parametros).toBeUndefined();
+    expect(depois.get('sola')?.parametros).toBeUndefined();
     expect(montar(depois).erro).toBeNull();
-    expect(montar(depois).modelo).toContain('prova-cabedal-cano-alto');
+    expect(montar(depois).modelo).toContain('prova-sola-tratorada');
   });
 
   it('o caminho de volta também não carrega, porque a faixa é apertada nos dois sentidos', () => {
-    // 0,14 é o padrão do cano alto e está fora dos 0,05 a 0,12 do baixo. Um conserto que só
-    // olhasse o sentido do relato deixaria metade do defeito em pé.
-    const comCanoAlto = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
-      pecaId: 'prova-cabedal-cano-alto',
-    });
-    const montado = montar(comCanoAlto);
-    expect(montado.erro).toBeNull();
-
-    const deVolta = mudarEscolhaDaTela(
-      escolhasDaComposicao(validarComposicao(
-        {
-          forma_id: FORMA.id,
-          pecas: [
-            { peca_id: 'prova-sola-plana' },
-            { peca_id: 'prova-cabedal-cano-alto' },
-            { peca_id: 'prova-cadarco-reto' },
-          ],
-        },
-        CATALOGO,
-      )),
-      'cabedal',
-      { pecaId: 'prova-cabedal-baixo' },
+    // 0,045 cabe na tratorada e está fora dos 0,01 a 0,04 da plana. Um conserto que só olhasse o
+    // sentido do relato deixaria metade do defeito em pé.
+    const grossa = mudarEscolhaDaTela(
+      mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'sola', { pecaId: 'prova-sola-tratorada' }),
+      'sola',
+      { parametros: { espessura: 0.045 } },
     );
+    expect(montar(grossa).erro).toBeNull();
 
-    expect(deVolta.get('cabedal')?.parametros).toBeUndefined();
+    const deVolta = mudarEscolhaDaTela(grossa, 'sola', { pecaId: 'prova-sola-plana' });
+
+    expect(deVolta.get('sola')?.parametros).toBeUndefined();
     expect(montar(deVolta).erro).toBeNull();
+  });
+
+  it('trocar o cabedal baixo pelo cano alto monta, e o cabedal segue sem parâmetro', () => {
+    const antes = escolhasDaComposicao(DEMO);
+    expect(antes.get('cabedal')?.parametros).toEqual({});
+
+    const depois = mudarEscolhaDaTela(antes, 'cabedal', { pecaId: 'prova-cabedal-cano-alto' });
+
+    expect(montar(depois).erro).toBeNull();
+    expect(montar(depois).modelo).toContain('prova-cabedal-cano-alto');
   });
 
   it('a cor sobrevive à troca de peça, porque cor é escolha da marca sobre a zona', () => {
@@ -195,15 +193,15 @@ describe('mudarEscolhaDaTela', () => {
   it('mexer só na cor preserva o parâmetro já escolhido', () => {
     // O descarte é da troca de peça, não de qualquer mudança. Se pintar a zona zerasse a altura,
     // a pessoa perderia o ajuste sem ter tocado nele.
-    const comAltura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
-      parametros: { 'altura-do-cano': 0.11 },
+    const comEspessura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'sola', {
+      parametros: { espessura: 0.03 },
     });
-    const pintado = mudarEscolhaDaTela(comAltura, 'cabedal', { cor: '#C0392B' });
+    const pintado = mudarEscolhaDaTela(comEspessura, 'sola', { cor: '#C0392B' });
 
-    expect(pintado.get('cabedal')).toMatchObject({
-      pecaId: 'prova-cabedal-baixo',
+    expect(pintado.get('sola')).toMatchObject({
+      pecaId: 'prova-sola-plana',
       cor: '#C0392B',
-      parametros: { 'altura-do-cano': 0.11 },
+      parametros: { espessura: 0.03 },
     });
   });
 
@@ -223,26 +221,26 @@ describe('mudarEscolhaDaTela', () => {
 
   it('trocar de peça junto com um parâmetro ainda descarta os da peça anterior', () => {
     // A soma não pode furar o BUG-019: se a mudança troca a peça, o que vale é só o que veio nela.
-    const comAltura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
-      parametros: { 'altura-do-cano': 0.07 },
+    const comEspessura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'sola', {
+      parametros: { espessura: 0.012 },
     });
-    const trocada = mudarEscolhaDaTela(comAltura, 'cabedal', {
-      pecaId: 'prova-cabedal-cano-alto',
+    const trocada = mudarEscolhaDaTela(comEspessura, 'sola', {
+      pecaId: 'prova-sola-tratorada',
       parametros: { outro: 1 },
     });
 
-    expect(trocada.get('cabedal')?.parametros).toBeUndefined();
+    expect(trocada.get('sola')?.parametros).toBeUndefined();
   });
 
   it('reescolher a mesma peça não é troca, e não apaga o ajuste', () => {
-    // Clicar de novo no botão que já está ligado é gesto comum. Zerar a altura ali seria perda de
-    // trabalho sem nenhuma mudança na tela para explicá-la.
-    const comAltura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'cabedal', {
-      parametros: { 'altura-do-cano': 0.11 },
+    // Clicar de novo no botão que já está ligado é gesto comum. Zerar a espessura ali seria perda
+    // de trabalho sem nenhuma mudança na tela para explicá-la.
+    const comEspessura = mudarEscolhaDaTela(escolhasDaComposicao(DEMO), 'sola', {
+      parametros: { espessura: 0.03 },
     });
-    const denovo = mudarEscolhaDaTela(comAltura, 'cabedal', { pecaId: 'prova-cabedal-baixo' });
+    const denovo = mudarEscolhaDaTela(comEspessura, 'sola', { pecaId: 'prova-sola-plana' });
 
-    expect(denovo.get('cabedal')?.parametros).toEqual({ 'altura-do-cano': 0.11 });
+    expect(denovo.get('sola')?.parametros).toEqual({ espessura: 0.03 });
   });
 
   it('tirar a categoria opcional descarta o parâmetro dela junto', () => {
@@ -270,7 +268,7 @@ describe('mudarEscolhaDaTela', () => {
     expect(depois).not.toBe(antes);
     expect(antes.get('cabedal')).toMatchObject({
       pecaId: 'prova-cabedal-baixo',
-      parametros: { 'altura-do-cano': 0.075 },
+      parametros: {},
     });
   });
 });

@@ -136,7 +136,7 @@ describe('montarGltfDePeca', () => {
     // O caminho inteiro de ida e volta: número em JavaScript, float32 little-endian no buffer,
     // base64 no JSON, e de volta. É aqui que uma troca de endianness apareceria.
     const documento = ler();
-    const esperada = geometriaDeCaixa({ comprimento: SOLA.comprimento, altura: SOLA.altura.padrao, largura: SOLA.largura });
+    const esperada = geometriaDeCaixa({ comprimento: SOLA.comprimento, altura: 0.018, largura: SOLA.largura });
     const leitura = new DataView(bytesDoBuffer(documento).buffer);
     const view = documento.bufferViews[0];
 
@@ -149,7 +149,7 @@ describe('montarGltfDePeca', () => {
 
   it('os índices gravados no buffer são os que a geometria calculou', () => {
     const documento = ler();
-    const esperada = geometriaDeCaixa({ comprimento: SOLA.comprimento, altura: SOLA.altura.padrao, largura: SOLA.largura });
+    const esperada = geometriaDeCaixa({ comprimento: SOLA.comprimento, altura: 0.018, largura: SOLA.largura });
     const leitura = new DataView(bytesDoBuffer(documento).buffer);
     const view = documento.bufferViews[2];
 
@@ -186,7 +186,16 @@ describe('montarGltfDePeca', () => {
     });
 
     it('parâmetro de outro nome não mexe na peça', () => {
-      expect(ler(SOLA, { 'altura-do-cano': 0.2 }).nodes[0]?.scale).toEqual([1, 1, 1]);
+      expect(ler(SOLA, { largura: 0.2 }).nodes[0]?.scale).toEqual([1, 1, 1]);
+    });
+
+    it('peça de altura fixa é modelada nela e nunca escala, nem com o nome de um parâmetro', () => {
+      // O cabedal (decisão do dono de 2026-09-14): cano alto é outra peça, e não um número.
+      const fixa: DescricaoDaPecaDeProva = { ...SOLA, altura: { fixa: 0.05 } };
+      const documento = ler(fixa, { espessura: 0.036 });
+
+      expect(documento.nodes[0]?.scale).toEqual([1, 1, 1]);
+      expect(documento.accessors[0]?.max?.[1]).toBeCloseTo(0.05, 6);
     });
 
     it('dois valores de parâmetro produzem a MESMA geometria, byte a byte', () => {

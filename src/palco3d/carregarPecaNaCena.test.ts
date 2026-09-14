@@ -56,8 +56,12 @@ describe('carregarPecaNaCena', () => {
       // pega um fator 100 perdido.
       expect(tamanho.y).toBeGreaterThan(parametro?.padrao ?? 0);
       expect(tamanho.y).toBeLessThan(0.04);
+    } else if (parametro === undefined) {
+      // O cabedal, de altura fixa: a medida vem da peça, e não de um parâmetro. Centímetros também.
+      expect(tamanho.y).toBeGreaterThan(0.05);
+      expect(tamanho.y).toBeLessThan(0.2);
     } else {
-      expect(tamanho.y).toBeCloseTo(parametro?.padrao ?? 0, 6);
+      expect(tamanho.y).toBeCloseTo(parametro.padrao, 6);
     }
     expect(tamanho.x).toBeGreaterThan(0.05);
     expect(tamanho.x).toBeLessThan(0.4);
