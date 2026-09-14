@@ -35,6 +35,14 @@ módulos na ordem e não decide nada (ver `../README.md`).
 | `listarZonasDoProdutoDoTenant.ts` | Zonas com filtro de tenant **explícito** | **Existe** |
 | `baixarAssetBaseComServiceRole.ts` | `.download(base_asset_path)` direto do bucket privado | **Existe** |
 | `registrarUsoDaChave.ts` | `last_used_at` em fire-and-forget, nunca aguardado | **Existe** |
+| `autenticarSessaoDoUsuario.ts` | `Request` com a sessão Supabase da pessoa → usuário e papel no tenant, ou 401/403. A autenticação das rotas do modelo de linguagem, que não é a chave de API | **Existe** |
+| `pedidoDoModeloDeLinguagem.ts` | Método, `?tenant=` e sessão das rotas do modelo de linguagem, na ordem, antes do corpo | **Existe** |
+| `cifraDaChaveDoFornecedor.ts` | AES-256-GCM da chave do fornecedor com `CHAVE_DE_CIFRA_DOS_FORNECEDORES` | **Existe** |
+| `configuracaoDoModeloDeLinguagem.ts` | Ler, gravar e remover a configuração do fornecedor do tenant, com filtro de tenant explícito | **Existe** |
+| `chamarFornecedorDeModeloDeLinguagem.ts` | A chamada ao fornecedor (formato compatível com OpenAI), com tempo esgotado e erro traduzido sem repassar texto dele | **Existe** |
+| `verificarEnderecoPublico.ts` | A guarda de SSRF da API própria: o nome não pode resolver para rede privada | **Existe** |
+| `limitesDoModeloDeLinguagem.ts` | 10 por minuto, 300 por dia e teto mensal, contados no uso gravado | **Existe** |
+| `registrarUsoDoModeloDeLinguagem.ts` | Uma linha de uso por chamada ao fornecedor, inclusive a que falhou | **Existe** |
 | `apiNaoImportaOFront.test.ts` | Varredura: proíbe `api/` de importar `src/features/` e `src/lib/supabase/`, e exige que o motor continue sendo importado | **Existe** |
 
 ## Guarda que lê o próprio fonte: as duas regras

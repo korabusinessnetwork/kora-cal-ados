@@ -9,6 +9,7 @@
 | Arquivo | O que responde | Estado |
 |---|---|---|
 | [`endpoints.md`](endpoints.md) | O contrato do endpoint: rota, método, corpo, resposta 200 (SVG cru), envelope de erro, tabela de códigos e status, exemplos `curl` | **Contrato escrito**, endpoint não implementado |
+| [`modelo-de-linguagem.md`](modelo-de-linguagem.md) | As rotas internas do fornecedor de modelo de linguagem da marca (D13): configuração, testar, em-uso, gerar, uso, limites e códigos | **Implementado** |
 | [`autenticacao.md`](autenticacao.md) | Como o sistema do cliente se autentica: chave de API por tenant, header, revogação, respostas 401/404 | **Decidido** (ADR-006), não implementado |
 
 O contrato do endpoint (rota, corpo, resposta, códigos) **mudou de lugar**: até 2026-09-08 ele

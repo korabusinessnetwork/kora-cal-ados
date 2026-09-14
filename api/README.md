@@ -42,6 +42,7 @@ por varredura (`api/_lib/apiNaoImportaOFront.test.ts`), não por lembrança.
 | Caminho | O que é |
 |---|---|
 | `v1/products/[productId]/variants.ts` | O handler HTTP. Orquestra os passos na ordem e **não decide nada** |
+| `v1/modelo-de-linguagem/` | As rotas do fornecedor de modelo de linguagem da marca (D13), chamadas pela tela com a sessão da pessoa. Índice em `v1/modelo-de-linguagem/README.md`, contrato em `docs/07_APIS/modelo-de-linguagem.md` |
 | `_lib/` | Toda a lógica: autenticação, leitura com escopo de tenant, tradução de erro, montagem da resposta. Índice em `_lib/README.md` |
 | `_local/` | Um servidor local para abrir e dirigir a função sem depender de deploy. Índice em `_local/README.md` |
 

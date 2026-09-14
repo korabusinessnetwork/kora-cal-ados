@@ -2,7 +2,7 @@
 
 As rotas da D13 (`.full-auto/DECISOES.md`): a marca configura o fornecedor dela, com a chave
 dela, e o time compõe calçado por prompt usando esse fornecedor. Contrato em
-`docs/07_APIS/endpoints.md`.
+`docs/07_APIS/modelo-de-linguagem.md`.
 
 **Estas rotas não são a API que o produto vende.** Quem chama é a TELA do próprio produto, com a
 sessão Supabase da pessoa (`Authorization: Bearer <access_token>`), e não o servidor da marca com
