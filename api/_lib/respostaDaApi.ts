@@ -53,6 +53,28 @@ export function respostaDeSucesso(svg: string): Response {
 }
 
 /**
+ * 200 com o envelope de sucesso, para as rotas cujo sucesso é DADO e não artefato.
+ *
+ * A rota de variante responde o SVG cru, e o comentário do topo explica por quê: o artefato vira
+ * calçado, e qualquer transformação no meio do caminho é risco de desenho mudado em silêncio. As
+ * rotas de `modelo-de-linguagem/` não têm artefato nenhum, elas respondem configuração, uso e texto,
+ * e quem as consome é a NOSSA tela, que já sabe ler o envelope de erro. Um envelope nos dois casos
+ * dá à tela um só formato para tratar, com `data` preenchido ou `error` preenchido, nunca os dois.
+ */
+export function respostaDeSucessoEmJson(dados: unknown, relogio: () => Date = () => new Date()): Response {
+  const envelope = {
+    data: dados,
+    error: null,
+    meta: { timestamp: relogio().toISOString(), version: VERSAO_DO_ENVELOPE },
+  };
+
+  return new Response(JSON.stringify(envelope), {
+    status: 200,
+    headers: { 'Content-Type': TIPO_DO_ENVELOPE, 'Cache-Control': SEM_CACHE },
+  });
+}
+
+/**
  * A resposta de erro: o envelope JSON, com o status e os cabeçalhos que a `FalhaDaApi` já
  * carrega (hoje só `Allow: POST` no 405). Este módulo **não traduz** erro nenhum, quem
  * decide código, status e mensagem é `traduzirParaFalhaDaApi`, dono único da tabela.

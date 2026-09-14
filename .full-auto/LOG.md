@@ -73,3 +73,4 @@
 2026-09-13 · T09a · prompt vira composição validada, com o modelo injetado e a resposta passando pelo guarda · 4a3e737
 2026-09-13 · T09b · gerador de prova, sem IA, sem rede e sem custo, cumprindo o contrato de modelo de linguagem · c8afec1
 2026-09-13 · T09c · painel de prompt na tela da composição, com o aviso de transparência perto do calçado · e811d63
+- 2026-09-14 F05 endpoints de modelo de linguagem (configuracao, testar, gerar, uso), 27 testes de handler, 12 mutações à mão todas pegas

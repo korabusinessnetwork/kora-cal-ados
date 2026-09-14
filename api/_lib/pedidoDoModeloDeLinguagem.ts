@@ -1,0 +1,72 @@
+// O que os quatro handlers de `api/v1/modelo-de-linguagem/` fazem igual.
+//
+// Existe para os handlers ficarem com o que é deles (o método, o corpo, a ordem dos passos) e para
+// a regra comum ter um lugar só com teste: o tenant que vem da URL, o método recusado com o `Allow`
+// certo, e a montagem do que vai ao fornecedor.
+//
+// A ORDEM DOS PASSOS de cada handler é propriedade de segurança, como na rota de variante:
+//   1. método   2. tenant da URL   3. sessão e papel   4. corpo   5. configuração   6. limites
+//      7. fornecedor   8. registro do uso
+// O corpo é conferido DEPOIS da sessão de propósito: recusa nossa é informação, e quem não provou
+// ser da marca não recebe mensagem diferenciada sobre o que aquela marca tem configurado.
+
+import { INSTRUCAO_AO_MODELO } from '../../src/lib/composicao/gerarComposicaoPorPrompt';
+import { montarCatalogoParaModelo } from '../../src/lib/composicao/montarCatalogoParaModelo';
+import type { CatalogoDoAcervo, Forma } from '../../src/lib/composicao/tiposDaComposicao';
+import { criarFalhaDeTransporte } from './traduzirParaFalhaDaApi';
+import { ehUuid } from './autenticarSessaoDoUsuario';
+
+/** O tenant vem da query string, e é conferido como uuid antes de qualquer consulta. */
+export function lerTenantDaUrl(pedido: Request): string {
+  const tenant = new URL(pedido.url).searchParams.get('tenant') ?? '';
+  // `SEM_PERMISSAO` e não `CORPO_INVALIDO`: quem não manda tenant válido não provou nada sobre
+  // marca nenhuma, e a resposta é a mesma de quem pede uma marca de que não é membro.
+  if (!ehUuid(tenant)) throw criarFalhaDeTransporte('SEM_PERMISSAO');
+  return tenant;
+}
+
+/** Recusa o método com o `Allow` daquela rota, que é o que deixa um cliente HTTP se corrigir. */
+export function exigirMetodo(pedido: Request, permitidos: string[]): string {
+  const metodo = pedido.method.toUpperCase();
+  if (!permitidos.includes(metodo)) {
+    throw criarFalhaDeTransporte('METODO_NAO_PERMITIDO', `Método não permitido. Use ${permitidos.join(', ')}.`, {
+      Allow: permitidos.join(', '),
+    });
+  }
+  return metodo;
+}
+
+/** O corpo JSON do pedido, ou recusa. Corpo vazio vira objeto vazio, que a validação recusa depois. */
+export async function lerCorpoJson(pedido: Request): Promise<unknown> {
+  const texto = await pedido.text();
+  if (texto.trim() === '') return {};
+  try {
+    return JSON.parse(texto);
+  } catch {
+    throw criarFalhaDeTransporte('CORPO_INVALIDO', 'Envie um corpo JSON válido.');
+  }
+}
+
+/**
+ * A instrução que vai ao fornecedor como mensagem de sistema: a instrução fixa do ADR-008 mais o
+ * catálogo daquela forma.
+ *
+ * É montada NO SERVIDOR, e não recebida do navegador, e essa é a diferença entre um endpoint de
+ * composição e um proxy de modelo de linguagem com a chave da marca dentro. O prompt da pessoa vai
+ * em campo separado, como mensagem de usuário (ADR-008 D1, item 2).
+ */
+export function montarInstrucaoComCatalogo(forma: Forma, catalogo: CatalogoDoAcervo): string {
+  return `${INSTRUCAO_AO_MODELO}\n\nCatálogo de peças disponíveis:\n${montarCatalogoParaModelo(forma, catalogo)}`;
+}
+
+/** A forma pedida, dentro do catálogo. Id que não existe é pedido inválido, não erro nosso. */
+export function acharForma(catalogo: CatalogoDoAcervo, formaId: unknown): Forma {
+  const forma = typeof formaId === 'string' ? catalogo.formas.find(({ id }) => id === formaId) : undefined;
+  if (forma === undefined) {
+    throw criarFalhaDeTransporte(
+      'CORPO_INVALIDO',
+      `Envie "forma_id" com uma forma do acervo. Formas disponíveis: ${catalogo.formas.map(({ id }) => id).join(', ')}.`,
+    );
+  }
+  return forma;
+}

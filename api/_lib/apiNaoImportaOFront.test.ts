@@ -64,8 +64,19 @@ const DO_MOTOR = /(?:^|\/)src\/lib\/render\//;
  * - `src/lib/modeloDeLinguagem/`, as regras dos fornecedores (D13). Puro: lista de fornecedores,
  *   guarda do endereço da API própria, custo e resumo do gasto. Não toca banco, não assume RLS nem
  *   sessão. Duplicar em `api/` faria o servidor chamar um endereço que a tela não mostrou.
+ * - `src/lib/composicao/` e `src/lib/acervo/`, o guarda da composição, a instrução ao modelo e o
+ *   catálogo (ADR-008; e o item 10 da D13 de `.full-auto/DECISOES.md`). Entram porque é o SERVIDOR que monta a instrução e o catálogo
+ *   mandados ao fornecedor: deixar isso no navegador daria a quem abrisse o console a chave da
+ *   marca como um modelo de linguagem de uso geral. Os dois são puros, não consultam banco e não
+ *   assumem RLS, o acervo de hoje é gerado por código. No dia em que o acervo passar a vir do
+ *   banco, este item sai daqui e vira uma função de `api/_lib/` com filtro explícito de tenant.
  */
-const PERMITIDOS_DE_SRC = [DO_MOTOR, /(?:^|\/)src\/lib\/modeloDeLinguagem\//];
+const PERMITIDOS_DE_SRC = [
+  DO_MOTOR,
+  /(?:^|\/)src\/lib\/modeloDeLinguagem\//,
+  /(?:^|\/)src\/lib\/composicao\//,
+  /(?:^|\/)src\/lib\/acervo\//,
+];
 
 const ehPermitido = (modulo: string) => PERMITIDOS_DE_SRC.some((permitido) => permitido.test(modulo));
 
@@ -123,8 +134,6 @@ describe('api/ não importa o front', () => {
     for (const proibido of [
       '../../src/features/zonas/listarZonasDoProduto',
       '../../src/lib/supabase/cliente',
-      '../../src/lib/composicao/validarComposicao',
-      '../../src/lib/acervo/acervoDeProva',
     ]) {
       expect(ehPermitido(proibido), proibido).toBe(false);
     }
