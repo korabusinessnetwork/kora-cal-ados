@@ -1,7 +1,12 @@
 # Estado do Full Automático
 
-status: EXECUTANDO
+status: PAUSADO
 <!-- valores: EXECUTANDO | AGUARDANDO_MATHEUS | PAUSADO | CONCLUIDO -->
+
+**Pausado em 2026-09-14 a pedido do Matheus ("stop").** Fase F: F01 a F07 feitas. F08 parada em
+dois pontos que são dele: aplicar `20260914_modelo_de_linguagem_por_tenant.sql` no banco real (as
+duas tabelas ainda não existem, conferido) e o login para a conferência no navegador. Baseline
+verde em `07cee84`. Para retomar: mudar o status para EXECUTANDO e responder essas duas.
 
 ## Modo atual: refino (desde 2026-09-12)
 
