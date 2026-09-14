@@ -77,3 +77,5 @@
 - 2026-09-14 F06 tela do owner (fornecedor, chave só escrita, testar, remover) e painel de gasto, 22 testes, 9 mutações pegas; verificação no navegador fica para o F08 (precisa da migration aplicada e de login)
 - 2026-09-14 F07 "Compor calçado" para todo papel, com o fornecedor da marca (rota em-uso, adaptador, RecusaDoModelo), 3D continua em chunk tardio; 10 testes novos, 8 mutações pegas; 1552 testes e build verdes
 - 2026-09-14 F08 (parte) migration 20260914_modelo_de_linguagem_por_tenant aplicada no Supabase real com o sim do dono; test:banco 75/75
+- 2026-09-14 F08 conferido no Chrome do dono logado como owner da Calçados Aurora: seções aparecem, tela do fornecedor lê configuração e gasto da API local, Compor calçado avisa o gerador de prova e gera sem erro no console; baseline 1552 testes, tsc, build, test:banco 75/75. Chamada a fornecedor real não conferida: exige a chave do dono, que eu não digito
+- 2026-09-14 F09 contrato em docs/07_APIS/modelo-de-linguagem.md, índices, pendência P07 da Vercel, merge em main

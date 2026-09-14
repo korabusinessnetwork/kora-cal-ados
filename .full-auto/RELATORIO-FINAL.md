@@ -344,6 +344,13 @@ abre e mostra as 9 zonas do tênis de demonstração.
 
 ---
 
+## 9b. Fase F, fornecedores de modelo de linguagem (2026-09-14)
+
+- **Entregue:** cada marca escolhe um fornecedor grátis da lista (Groq, Gemini, Cerebras, Mistral, OpenRouter, SambaNova, GitHub Models) ou uma API própria paga compatível com OpenAI; chave cifrada no servidor, só de escrita; teste de conexão; painel de gasto do mês com teto; "Compor calçado" para todo o time usando esse fornecedor. Decisão D13, contrato em `docs/07_APIS/modelo-de-linguagem.md`.
+- **Verificado:** 1552 testes, `tsc`, build, `test:banco` 75/75 com a migration aplicada no Supabase real, e o fluxo sem fornecedor conferido no navegador logado.
+- **Não verificado:** uma chamada a fornecedor real. Precisa de uma chave criada por você, colada na tela "Fornecedor de modelo de linguagem"; eu não digito chave. Custo estimado é estimativa, a fatura é a do fornecedor.
+- **Pendência:** P07, a variável `CHAVE_DE_CIFRA_DOS_FORNECEDORES` na Vercel no deploy.
+
 ## 10. Sugestão de próximo passo
 
 O configurador é produto vendável hoje, sobre um acervo que não é vendável. **O gargalo virou

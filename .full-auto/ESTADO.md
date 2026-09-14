@@ -207,5 +207,5 @@ rodada, e volta a importar na próxima.
 - **Decisão:** D13.
 - **Feito até 2026-09-14 14:50:** F01 a F07 `[x]`. Do F08 e do F09, adiantado o que não depende do banco real: `supabase/tests/modeloDeLinguagem.test.ts` (`1258bac`), `CHAVE_DE_CIFRA_DOS_FORNECEDORES` no `.env.example` e gerada no `.env.local`, contrato em `docs/07_APIS/modelo-de-linguagem.md` e índices (`7c770fb`), mensagens do servidor apontando para a seção certa (`d23f5f2`). Último baseline completo (em `cec842b`): 1552 testes, `tsc` e build limpos, three.js fora do chunk da área protegida.
 - **Migration aplicada em 2026-09-14** com o sim do dono ("pode fazer as migrations"). `npm run test:banco`: 75 de 75, eram 58, os 17 novos são de `modeloDeLinguagem.test.ts`.
-- **Esperando o dono:** vincular `matheusbonato3561@gmail.com` como owner da Calçados Aurora (`aurora-demo`). Ele pediu, mas a gravação foi barrada pela permissão do Claude Code; o comando ficou com ele. Sem o vínculo não dá para conferir as telas no navegador (F08).
-- **Próximo passo:** conferência no navegador com o dono logado, baseline completo, F09 (relatório, merge da frente 3D, merge em `main`, push com confirmação).
+- **F01 a F09 `[x]`.** Dono vinculado como owner da Calçados Aurora (ele rodou o comando). Fluxo conferido no Chrome dele. Merge em `main` feito.
+- **Aberto:** frente paralela do 3D (agente em worktree) ainda rodando; integrar quando reportar, com merge de uma branch por vez e baseline completo.
