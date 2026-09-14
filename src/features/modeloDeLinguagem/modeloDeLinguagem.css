@@ -1,0 +1,127 @@
+/* Estilo da tela "Fornecedor de modelo de linguagem" e do painel de gasto, separado do JSX (white-label, CLAUDE.md).
+   Só tokens de cor do tema: nenhuma cor de marca escrita aqui. */
+
+.fornecedor {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.fornecedor__titulo { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.fornecedor__subtitulo { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+.fornecedor__intro,
+.fornecedor__nota { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--cor-texto-fraco); }
+.fornecedor__situacao { margin: 0 0 14px; font-size: 13px; }
+
+.fornecedor__secao,
+.gasto {
+  padding: 18px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.fornecedor__vazio {
+  margin: 0;
+  padding: 22px;
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cor-texto-fraco);
+}
+
+.fornecedor__erro {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 16px;
+  background: var(--cor-erro-fundo);
+  border: 1px solid var(--cor-erro);
+  border-radius: var(--raio);
+}
+.fornecedor__erro p { margin: 0; font-size: 13px; }
+.fornecedor__erro button {
+  padding: 8px 14px; background: var(--cor-erro); color: var(--cor-fundo); border: none;
+  border-radius: 7px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+
+/* ── Formulário ─────────────────────────────────────────────────────── */
+.fornecedor__formulario { display: flex; flex-direction: column; gap: 14px; max-width: 640px; }
+.fornecedor__linha { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.fornecedor__campo { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--cor-texto-fraco); }
+.fornecedor__campo input,
+.fornecedor__campo select {
+  padding: 9px 11px;
+  background: var(--cor-fundo); color: var(--cor-texto);
+  border: 1px solid var(--cor-borda); border-radius: 7px;
+  font: inherit; font-size: 13.5px;
+}
+.fornecedor__campo input:focus-visible,
+.fornecedor__campo select:focus-visible { outline: 2px solid var(--cor-acento); outline-offset: 1px; }
+.fornecedor__ajuda { margin: -4px 0 0; font-size: 12px; line-height: 1.6; color: var(--cor-texto-fraco); }
+.fornecedor__ajuda a { color: var(--cor-acento); }
+.fornecedor__ajuda code,
+.gasto code { font-size: 11.5px; }
+
+.fornecedor__aviso { margin: 0; padding: 11px 14px; border-radius: var(--raio); font-size: 13px; line-height: 1.5; }
+.fornecedor__aviso p { margin: 0 0 6px; }
+.fornecedor__aviso ul { margin: 0; padding-left: 18px; }
+.fornecedor__aviso--erro { background: var(--cor-erro-fundo); border: 1px solid var(--cor-erro); }
+.fornecedor__aviso--sucesso { border: 1px solid var(--cor-ok); }
+
+.fornecedor__acoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.fornecedor__botao {
+  padding: 9px 15px;
+  background: transparent; color: var(--cor-texto);
+  border: 1px solid var(--cor-borda); border-radius: 7px;
+  font: inherit; font-size: 13px; cursor: pointer;
+}
+.fornecedor__botao:hover:not(:disabled) { background: var(--cor-superficie-alta); }
+.fornecedor__botao:disabled { opacity: 0.5; cursor: not-allowed; }
+.fornecedor__botao--principal { background: var(--cor-acento); border-color: var(--cor-acento); color: var(--cor-fundo); font-weight: 600; }
+.fornecedor__botao--principal:hover:not(:disabled) { background: var(--cor-acento); filter: brightness(1.1); }
+.fornecedor__botao--perigo { border-color: var(--cor-erro); color: var(--cor-erro); }
+
+/* ── Painel de gasto ────────────────────────────────────────────────── */
+.gasto { display: flex; flex-direction: column; gap: 16px; }
+.gasto__cabecalho { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.gasto__cabecalho .fornecedor__subtitulo { margin: 0; }
+.gasto__mes { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--cor-texto-fraco); }
+.gasto__mes input {
+  padding: 6px 9px; background: var(--cor-fundo); color: var(--cor-texto);
+  border: 1px solid var(--cor-borda); border-radius: 7px; font: inherit; color-scheme: dark;
+}
+
+.gasto__cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.gasto__cartao {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px; background: var(--cor-fundo);
+  border: 1px solid var(--cor-borda); border-radius: var(--raio);
+}
+.gasto__rotulo { font-size: 11.5px; color: var(--cor-texto-fraco); }
+.gasto__valor { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.gasto__detalhe { font-size: 11.5px; color: var(--cor-texto-fraco); }
+
+.gasto__teto { display: flex; flex-direction: column; gap: 6px; }
+.gasto__teto-texto { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12.5px; }
+.gasto__teto-trilho { height: 8px; background: var(--cor-fundo); border: 1px solid var(--cor-borda); border-radius: 999px; overflow: hidden; }
+.gasto__teto-preenchido { height: 100%; background: var(--cor-acento); }
+.gasto__teto-trilho--atingido .gasto__teto-preenchido { background: var(--cor-erro); }
+
+.gasto__bloco-titulo { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+.gasto__dias { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.gasto__dia { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 10px; font-size: 12px; }
+.gasto__dia-data { color: var(--cor-texto-fraco); font-variant-numeric: tabular-nums; }
+.gasto__dia-trilho { height: 8px; background: var(--cor-fundo); border-radius: 999px; overflow: hidden; }
+.gasto__dia-barra { display: block; height: 100%; background: var(--cor-acento); }
+.gasto__dia-numeros { color: var(--cor-texto-fraco); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.gasto__tabela-rolagem { overflow-x: auto; }
+.gasto__tabela { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.gasto__tabela th,
+.gasto__tabela td { padding: 7px 10px; border-bottom: 1px solid var(--cor-borda); text-align: left; white-space: nowrap; }
+.gasto__tabela th { font-weight: 500; color: var(--cor-texto-fraco); }
+.gasto__ok { color: var(--cor-ok); }
+.gasto__falha { color: var(--cor-erro); }

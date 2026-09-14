@@ -21,7 +21,12 @@
 // DEPOIS de saber qual tela vai abrir, que era o ponto da ordem antiga: conferir antes derrubava o
 // app inteiro por falta de `.env.local`, inclusive o esboço, que não faz uma requisição sequer.
 
+import { useState } from 'react';
+
+import { TelaDoFornecedor } from './modeloDeLinguagem/TelaDoFornecedor';
+import { SecoesDaArea, type SecaoDaArea } from './SecoesDaArea';
 import { BarraDaSessao } from './sessao/BarraDaSessao';
+import type { TenantDoUsuario } from './sessao/carregarTenantsDoUsuario';
 import { ProvedorDeSessao } from './sessao/ContextoDeSessao';
 import { RotaProtegida } from './sessao/RotaProtegida';
 import { TelaDeProdutos } from './produtos/TelaDeProdutos';
@@ -61,13 +66,27 @@ export function AreaProtegida({ ambiente }: Props = {}) {
           <>
             <BarraDaSessao />
             {/* `key` no tenant: trocar de marca REMONTA a tela. Sem isso o estado da anterior
-                (produto aberto, SVG baixado) sobreviveria à troca e mostraria o modelo de um
-                concorrente sob o nome da marca nova. */}
-            <TelaDeProdutos key={tenant.id} tenantId={tenant.id} />
+                (produto aberto, SVG baixado, seção escolhida) sobreviveria à troca e mostraria o
+                modelo de um concorrente sob o nome da marca nova. */}
+            <ConteudoDaMarca key={tenant.id} tenant={tenant} />
           </>
         )}
       </RotaProtegida>
     </ProvedorDeSessao>
+  );
+}
+
+function ConteudoDaMarca({ tenant }: { tenant: TenantDoUsuario }) {
+  const [secao, setSecao] = useState<SecaoDaArea>('produtos');
+  // Membro nunca fica na seção do owner, nem se o estado chegar lá por outro caminho.
+  const atual: SecaoDaArea = secao === 'fornecedor' && tenant.papel !== 'owner' ? 'produtos' : secao;
+
+  return (
+    <>
+      <SecoesDaArea papel={tenant.papel} atual={atual} aoEscolher={setSecao} />
+      {atual === 'produtos' && <TelaDeProdutos tenantId={tenant.id} />}
+      {atual === 'fornecedor' && <TelaDoFornecedor tenant={tenant} />}
+    </>
   );
 }
 

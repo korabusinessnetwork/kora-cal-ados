@@ -8,7 +8,14 @@ export default defineConfig({
   plugins: [react()],
 
   // `?raw` do Vite traz o SVG como string, o motor recebe texto, nunca um <img>.
-  server: { port: 5173 },
+  server: {
+    port: 5173,
+    // Em desenvolvimento a tela chama `/api/v1/...` no MESMO endereço, como em produção na Vercel,
+    // e o Vite repassa ao `npm run api:local`. Assim o front não carrega URL de API nenhuma, nem
+    // variável de ambiente para ela, e o código que roda aqui é o mesmo que roda publicado.
+    // A porta segue a do servidor local, que lê `PORTA_API_LOCAL` com 3210 como padrão.
+    proxy: { '/api': `http://localhost:${process.env.PORTA_API_LOCAL ?? '3210'}` },
+  },
 
   // O aviso de chunk grande do Vite fica logo ACIMA do chunk do three.js, e não no padrão de 500 kB.
   // Com o padrão, todo build imprimia o aviso por causa do three.js (619,51 kB no R7), que é tardio

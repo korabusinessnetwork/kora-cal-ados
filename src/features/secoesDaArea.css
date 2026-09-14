@@ -1,0 +1,13 @@
+/* A navegação entre as seções da área protegida, separada do JSX (white-label, CLAUDE.md). */
+.secoes-da-area {
+  display: flex; gap: 4px; padding: 8px 28px 0;
+  border-bottom: 1px solid var(--cor-borda);
+  overflow-x: auto;
+}
+.secoes-da-area__botao {
+  padding: 9px 14px; background: transparent; color: var(--cor-texto-fraco);
+  border: none; border-bottom: 2px solid transparent;
+  font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.secoes-da-area__botao:hover { color: var(--cor-texto); }
+.secoes-da-area__botao[aria-current='page'] { color: var(--cor-texto); border-bottom-color: var(--cor-acento); font-weight: 500; }
