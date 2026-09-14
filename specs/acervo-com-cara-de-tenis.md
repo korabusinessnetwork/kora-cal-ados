@@ -96,6 +96,22 @@ em Y também estica a inclinação. Isto não tem conserto dentro de "parâmetro
 rotação": o conserto é parâmetro que remodela malha, que o ADR-008 D7 recusa, ou peças separadas
 por espessura. Fica registrado como pendência, com o desencontro medido em teste.
 
+Medido na implementação (2026-09-14, `src/lib/acervo/cadarcoSobreOCabedal.test.ts`), distância dos
+pontos de apoio do cadarço até o cabedal montado, negativo entrando nele e positivo flutuando:
+
+| Caso | Menor | Maior |
+|---|---|---|
+| Tudo no padrão | +0,3 mm | abaixo de 1 mm |
+| Cano no mínimo (0,05) | -3,2 mm | +1,6 mm |
+| Cano no máximo (0,12) | -2,0 mm | +6,5 mm |
+| Cadarço mais fino (0,003) | -6,8 mm | +0,3 mm |
+| Cadarço mais grosso (0,012) | +0,3 mm | +14,5 mm |
+
+A espessura passa da ordem de milímetros que este parágrafo previa: a fileira de trás fica 1,5 cm
+acima da base do cadarço por causa da descida do peito do pé, e dobrar a espessura dobra essa
+altura. O ponto de apoio usado é o meio da faixa do cadarço no tamanho padrão (D5), o que divide o
+erro do cano entre as duas pontas, mas não alcança o erro da espessura, que é interno à peça.
+
 ## Critérios de aceite
 
 1. Todas as peças passam no validador da Khronos sem erro e sem aviso, no padrão e nos extremos da

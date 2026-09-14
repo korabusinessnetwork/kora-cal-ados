@@ -60,7 +60,22 @@ export interface CategoriaDaForma {
    * com cada peça no assento em que foi modelada.
    */
   assenta_sobre?: string;
+  /**
+   * Como esta categoria assenta sobre a de baixo. Ausente é `'topo'`.
+   *
+   * - `'topo'`: a base da peça vai para o ponto mais alto da peça de baixo. É a sola e o cabedal.
+   * - `'superficie'`: a peça foi modelada deitada sobre a peça de baixo no tamanho padrão dela, e
+   *   acompanha a transformação vertical dela: sobe o que ela subiu e estica na mesma proporção.
+   *   É o cadarço, que deita sobre o peito do pé, bem abaixo do ponto mais alto do cabedal.
+   *
+   * Opcional pela mesma razão de `assenta_sobre`: toda forma que existia antes deste campo continua
+   * montando exatamente como montava. Decisão D5 da spec `acervo-com-cara-de-tenis`.
+   */
+  apoio?: ApoioDaCategoria;
 }
+
+/** Os dois modos de assentar. Ver `CategoriaDaForma.apoio`. */
+export type ApoioDaCategoria = 'topo' | 'superficie';
 
 /**
  * O molde do pé, e o que agrupa o acervo (ADR-008 D4).

@@ -37,6 +37,10 @@ export interface FaixaVertical {
  * composição é a que o modelo de linguagem escreveu, não a anatomia do calçado, e um empilhamento
  * que dependesse dela mudaria o calçado conforme a frase que gerou o pedido.
  *
+ * `faixasNoPadrao` é a faixa de cada peça medida com os parâmetros **padrão**. Só a categoria de
+ * apoio `superficie` precisa dela (a dela e a da base), para saber quanto a base foi esticada; por
+ * isso é opcional, e toda forma sem superfície monta sem ela, exatamente como antes (D5).
+ *
  * Lança `Error` cru, e não `ErroDeVariante`, nos dois casos de catálogo quebrado (base que a forma
  * não declara, e ciclo). Não é pedido malformado de cliente: é a nossa forma descrevendo uma
  * anatomia impossível, e um código de erro público ensinaria o integrador a consertar algo que
@@ -45,10 +49,12 @@ export interface FaixaVertical {
 export function empilharComposicao(
   forma: Forma,
   faixas: ReadonlyMap<string, FaixaVertical>,
+  faixasNoPadrao: ReadonlyMap<string, FaixaVertical> = new Map(),
 ): Map<string, number> {
   const baseDeclarada = new Map(
     forma.categorias.map(({ categoria, assenta_sobre }) => [categoria, assenta_sobre]),
   );
+  const apoioDeclarado = new Map(forma.categorias.map(({ categoria, apoio }) => [categoria, apoio]));
   recusarBaseQueAFormaNaoDeclara(forma, baseDeclarada);
 
   const deslocamentos = new Map<string, number>();
@@ -98,10 +104,23 @@ export function empilharComposicao(
 
     // `base` só volta de `basePresente` quando `faixas.has(base)`, então os dois são definidos
     // juntos ou nenhum dos dois. O `&&` diz isso ao compilador sem inventar um terceiro caso.
-    const deslocamento =
-      base !== undefined && faixaDaBase !== undefined
-        ? faixaDaBase.topo + deslocamentoDe(base, faixaDaBase, caminho) - faixa.base
-        : 0;
+    let deslocamento = 0;
+
+    if (base !== undefined && faixaDaBase !== undefined) {
+      const deslocamentoDaBase = deslocamentoDe(base, faixaDaBase, caminho);
+
+      // Superfície só vale sobre a base DECLARADA. Se ela faltou e a subida parou numa categoria
+      // mais abaixo, a superfície em que a peça foi modelada não existe neste calçado, e assentar
+      // no topo do que existe é o que já acontecia antes do apoio existir (D5).
+      deslocamento =
+        apoioDeclarado.get(categoria) === 'superficie' && baseDeclarada.get(categoria) === base
+          ? deslocamentoSobreASuperficie(
+              { categoria, base },
+              { faixaDaBase, deslocamentoDaBase },
+              faixasNoPadrao,
+            )
+          : faixaDaBase.topo + deslocamentoDaBase - faixa.base;
+    }
 
     caminho.delete(categoria);
     deslocamentos.set(categoria, deslocamento);
@@ -112,6 +131,54 @@ export function empilharComposicao(
   for (const [categoria, faixa] of faixas) deslocamentoDe(categoria, faixa, new Set());
 
   return deslocamentos;
+}
+
+/**
+ * O deslocamento de uma peça de apoio `superficie`: o quanto o ponto de apoio dela precisa andar
+ * para continuar sobre a peça de baixo.
+ *
+ * A peça de baixo é esticada em Y em volta da própria base (ADR-008 D7), então um ponto dela que
+ * estava `h` acima da base no tamanho padrão passa a estar `h · escala` acima. O ponto de apoio
+ * acompanha esse ponto, e a peça inteira anda o mesmo tanto, porque ela é rígida.
+ *
+ * O ponto de apoio é o **meio** da faixa vertical da peça no tamanho padrão, e não a base dela. Uma
+ * peça inclinada (o cadarço sobre o peito do pé) só acompanha com exatidão um ponto; nos outros ela
+ * desencontra na proporção da distância até ele. Com o meio, o desencontro se divide entre as duas
+ * pontas em vez de cair inteiro numa só. É o limite conhecido da spec `acervo-com-cara-de-tenis`.
+ *
+ * Usa a faixa **padrão** da própria peça, e não a pedida, para que o parâmetro dela (a espessura do
+ * cadarço) não mova o ponto de apoio: engrossar o cadarço não pode fazê-lo afundar no cabedal.
+ */
+function deslocamentoSobreASuperficie(
+  { categoria, base }: { categoria: string; base: string },
+  { faixaDaBase, deslocamentoDaBase }: { faixaDaBase: FaixaVertical; deslocamentoDaBase: number },
+  faixasNoPadrao: ReadonlyMap<string, FaixaVertical>,
+): number {
+  const daPecaNoPadrao = faixasNoPadrao.get(categoria);
+  const daBaseNoPadrao = faixasNoPadrao.get(base);
+
+  // Sem as faixas padrão a conta não existe. Cair para `topo` em silêncio poria o cadarço flutuando
+  // na altura da borda da boca, sem erro nenhum, que é exatamente o defeito que o apoio veio tirar.
+  if (daPecaNoPadrao === undefined || daBaseNoPadrao === undefined) {
+    throw new Error(
+      `A categoria "${categoria}" assenta na superfície de "${base}", e a montagem não entregou a faixa das duas no tamanho padrão.`,
+    );
+  }
+
+  const alturaNoPadrao = daBaseNoPadrao.topo - daBaseNoPadrao.base;
+
+  if (!(alturaNoPadrao > 0)) {
+    throw new Error(
+      `A categoria "${base}" não tem altura no tamanho padrão, e sem altura não há superfície para "${categoria}" acompanhar.`,
+    );
+  }
+
+  const escala = (faixaDaBase.topo - faixaDaBase.base) / alturaNoPadrao;
+  const pontoDeApoio = (daPecaNoPadrao.base + daPecaNoPadrao.topo) / 2;
+  const pontoDeApoioNaBaseAtual =
+    faixaDaBase.base + deslocamentoDaBase + (pontoDeApoio - daBaseNoPadrao.base) * escala;
+
+  return pontoDeApoioNaBaseAtual - pontoDeApoio;
 }
 
 function ciclo(forma: Forma, categoria: string): Error {

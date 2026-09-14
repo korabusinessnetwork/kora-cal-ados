@@ -19,6 +19,11 @@ glTF e mais nada.
 | `perfilDoCabedal.ts` | A **crista** do cabedal estação por estação: o cano (que muda entre cabedal baixo e cano alto) e o **peito do pé** (igual nos dois), com o ponto mais alto resolvido para ser exatamente a altura pedida | posições, alcance, alturas, cano → cristas em metros |
 | `geometriaDeCabedal.ts` | O cabedal: casca em arco de superelipse sobre o contorno do pé, aberta embaixo e na **boca** | medidas do cabedal → malha de peça |
 | `cabedalSobreSola.test.ts` | Confere cabedal contra sola **lidos do glTF gravado**: base no plano do topo da sola, contorno dentro do topo dela, dupla face só nos cabedais | - |
+| `alturaDaSuperficie.ts` | A maior altura em que a vertical por um ponto cruza uma malha, triângulo por triângulo | malha, x, z → altura ou `undefined` |
+| `geometriaDeCadarco.ts` | O cadarço reto: **fileiras** de fita retangular cuja face de baixo segue uma superfície qualquer, no espaço dela | medidas + superfície → malha crua |
+| `cadarcoSobreOCabedal.ts` | O cadarço deitado no cabedal baixo padrão: o assento calculado da altura do peito do pé e o modelador com a base em Y = 0 | malha do cabedal + medidas → assento e modelador |
+| `cadarcoSobreOCabedal.test.ts` | Confere o cadarço contra os dois cabedais **lidos do glTF gravado** (critérios 12 a 14) e mede o limite conhecido com o calçado montado | - |
+| `malhaNaForma.ts` | Só para testes: a malha de um nó de glTF no espaço da forma, com escala e translação aplicadas | texto glTF + nome do nó → posições e índices |
 | `montarGltfDePeca.ts` | Chama o modelador da peça (`modelar`, caixa quando ausente) e embrulha a geometria num glTF 2.0 com buffer em `data:` URI, nó/malha/material próprios (dupla face quando `materialDeDuplaFace`), e aplica o parâmetro como escala | descrição de peça + parâmetros → texto glTF |
 | `acervoDeProva.ts` | As 5 peças descritas, o `catalogoDeProva()` que `validarComposicao` consome e o `gltfDaPecaDeProva()` | id de peça → texto glTF |
 | `acervoDeProva.ts` (cont.) | `composicaoDeProva()` devolve `unknown`, de propósito: a demo entra por `validarComposicao` pelo mesmo portão que a saída de um modelo de linguagem | - |
@@ -37,13 +42,19 @@ carrega geometria, coisa que o README dele afirma. Aqui é o oposto: só geometr
 
 A caixa provou a esteira. O passo seguinte (spec `specs/acervo-com-cara-de-tenis.md`) é o
 calçado **parecer um tênis**, ainda por código: as solas já são o contorno do pé extrudado, a
-sola tratorada tem cravos, e os dois cabedais são cascas com boca aberta sobre o mesmo peito do
-pé. O contrato não muda: um nó, uma malha, um material sem cor, base em Y = 0, parâmetro como
+sola tratorada tem cravos, os dois cabedais são cascas com boca aberta sobre o mesmo peito do
+pé, e o cadarço são fileiras deitadas nele. O contrato não muda: um nó, uma malha, um material sem cor, base em Y = 0, parâmetro como
 escala em Y e geometria idêntica byte a byte entre dois valores.
 
 O cabedal é a única peça com material de dupla face (`doubleSided`), porque é a única aberta: pela
 boca se vê o lado de dentro dele. Peça fechada continua de face única, que é o que deixa uma face
 do avesso sumir da tela e ser notada.
+
+O cadarço deita sobre o peito do pé, que é igual nos dois cabedais (D6), e por isso o assento dele
+não é digitado: sai da altura do cabedal baixo embaixo da fileira mais baixa. É também a única peça
+em que o `padrao` do parâmetro não é a altura da caixa: o parâmetro é a espessura da fita, e a caixa
+soma a descida do peito do pé. Na montagem ele tem apoio `superficie` (ver o README de
+`src/lib/composicao/`), e o limite de peça rígida sobre peça esticada está medido no teste dele.
 
 A caixa continua sendo o modelador padrão de `montarGltfDePeca`, de propósito: é a peça mais
 simples que exercita buffer, accessor, validador e normalização, e os testes daquele arquivo

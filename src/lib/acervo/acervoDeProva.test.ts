@@ -20,12 +20,13 @@ describe('catalogoDeProva', () => {
     // A ordem da lista é a anatomia de baixo para cima, e `assenta_sobre` é o que `empilharComposicao`
     // lê para saber quem sobe quando a peça de baixo muda de tamanho. Sola sem `assenta_sobre` não é
     // esquecimento: é a peça que assenta no chão, e trocar isso por 'chao' inventaria uma categoria.
+    // O cadarço tem apoio `superficie` porque deita no peito do pé, abaixo do topo do cabedal (D5).
     expect(CATALOGO.formas).toHaveLength(1);
     expect(CATALOGO.formas[0]?.id).toBe(FORMA_DE_PROVA);
     expect(CATALOGO.formas[0]?.categorias).toEqual([
       { categoria: 'sola', obrigatoria: true },
       { categoria: 'cabedal', obrigatoria: true, assenta_sobre: 'sola' },
-      { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal' },
+      { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal', apoio: 'superficie' },
     ]);
   });
 

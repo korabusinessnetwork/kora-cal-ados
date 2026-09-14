@@ -9,30 +9,22 @@ import { describe, expect, it } from 'vitest';
 
 import { gltfDaPecaDeProva } from './acervoDeProva';
 import { meiaLarguraEm, type EstacaoDoContorno } from './contornoDoPe';
+import { malhaNaForma } from './malhaNaForma';
 
 type Ponto = [number, number, number];
 
 interface DocumentoDaPeca {
-  nodes: Array<{ translation: [number, number, number] }>;
   materials: Array<{ doubleSided?: boolean }>;
-  accessors: Array<{ count: number }>;
-  bufferViews: Array<{ byteOffset: number }>;
-  buffers: Array<{ uri: string }>;
 }
 
 /** As posições da peça no espaço da forma: o vértice gravado mais o assento do nó. */
 function posicoesNaForma(pecaId: string): Ponto[] {
-  const documento = JSON.parse(gltfDaPecaDeProva(pecaId)) as DocumentoDaPeca;
-  const base64 = (documento.buffers[0]?.uri ?? '').split(',')[1] ?? '';
-  const bytes = Uint8Array.from(atob(base64), (letra) => letra.charCodeAt(0));
-  const leitura = new DataView(bytes.buffer);
-  const inicio = documento.bufferViews[0]?.byteOffset ?? 0;
-  const [dx, dy, dz] = documento.nodes[0]?.translation ?? [0, 0, 0];
+  const { posicoes } = malhaNaForma(gltfDaPecaDeProva(pecaId), pecaId);
 
-  return Array.from({ length: documento.accessors[0]?.count ?? 0 }, (_, ponto): Ponto => [
-    leitura.getFloat32(inicio + ponto * 12, true) + dx,
-    leitura.getFloat32(inicio + ponto * 12 + 4, true) + dy,
-    leitura.getFloat32(inicio + ponto * 12 + 8, true) + dz,
+  return Array.from({ length: posicoes.length / 3 }, (_, ponto): Ponto => [
+    posicoes[ponto * 3] ?? 0,
+    posicoes[ponto * 3 + 1] ?? 0,
+    posicoes[ponto * 3 + 2] ?? 0,
   ]);
 }
 

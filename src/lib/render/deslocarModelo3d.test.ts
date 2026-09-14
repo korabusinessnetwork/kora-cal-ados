@@ -96,16 +96,30 @@ function comDuasRaizes(): string {
   return escrever(documento);
 }
 
+/**
+ * Onde o cadarço assenta antes de qualquer deslocamento.
+ *
+ * Lido da peça e não digitado: desde a Fase G o assento do cadarço sai da altura do peito do pé
+ * (`cadarcoSobreOCabedal.ts`), e um número copiado aqui mudaria a cada ajuste do cabedal sem nada
+ * a ver com deslocar. O que estes testes provam é a soma, e para isso basta um assento fora da origem.
+ */
+const ASSENTO_DO_CADARCO = translacaoDoNo(canonico('prova-cadarco-reto'), 'prova-cadarco-reto');
+
 describe('deslocarModelo3d', () => {
+  it('o cadarço assenta fora da origem nos dois eixos, que é o que dá sentido aos testes de soma', () => {
+    expect(ASSENTO_DO_CADARCO[0]).toBeGreaterThan(0.01);
+    expect(ASSENTO_DO_CADARCO[1]).toBeGreaterThan(0.05);
+  });
+
   it('soma na translação que já existe, em vez de trocá-la pelo deslocamento', () => {
-    // O cadarço assenta em [0,03, 0,093, 0]. Se a função escrevesse o deslocamento em vez de
-    // somar, o Y daria 0,01 (parece plausível) e o X daria 0 (a peça saltaria da biqueira para o
-    // meio do calçado). Por isso o X entra na asserção: ele é a metade que denuncia a troca.
+    // O cadarço assenta acima do cabedal e à frente do meio do calçado. Se a função escrevesse o
+    // deslocamento em vez de somar, o Y daria 0,01 (parece plausível) e o X daria 0 (a peça saltaria
+    // para o meio do calçado). Por isso o X entra na asserção: ele é a metade que denuncia a troca.
     const deslocado = deslocarModelo3d(canonico('prova-cadarco-reto'), [0, 0.01, 0]);
     const [x, y, z] = translacaoDoNo(deslocado, 'prova-cadarco-reto');
 
-    expect(x).toBeCloseTo(0.03, 9);
-    expect(y).toBeCloseTo(0.103, 9);
+    expect(x).toBeCloseTo(ASSENTO_DO_CADARCO[0] ?? 0, 9);
+    expect(y).toBeCloseTo((ASSENTO_DO_CADARCO[1] ?? 0) + 0.01, 9);
     expect(z).toBeCloseTo(0, 9);
   });
 
@@ -138,11 +152,11 @@ describe('deslocarModelo3d', () => {
 
   it('sobe a partir de onde a peça já estava, e não a partir do chão', () => {
     // A sola tem assento zero e o cadarço não. Uma implementação que ignorasse a translação
-    // atual acertaria a sola e derrubaria o cadarço de 0,093 para 0,01, o que na tela vira o
+    // atual acertaria a sola e derrubaria o cadarço do peito do pé para 0,02, o que na tela vira o
     // cadarço enterrado dentro do cabedal.
     const deslocado = deslocarModelo3d(canonico('prova-cadarco-reto'), [0, 0.02, 0]);
 
-    expect(translacaoDoNo(deslocado, 'prova-cadarco-reto')[1]).toBeCloseTo(0.113, 9);
+    expect(translacaoDoNo(deslocado, 'prova-cadarco-reto')[1]).toBeCloseTo((ASSENTO_DO_CADARCO[1] ?? 0) + 0.02, 9);
   });
 
   it('deslocar duas vezes acumula, em vez de a segunda anular a primeira', () => {
@@ -158,7 +172,7 @@ describe('deslocarModelo3d', () => {
     const antes = canonico('prova-cadarco-reto');
     const depois = deslocarModelo3d(antes, [0, -0.05, 0]);
 
-    expect(translacaoDoNo(depois, 'prova-cadarco-reto')[1]).toBeCloseTo(0.043, 9);
+    expect(translacaoDoNo(depois, 'prova-cadarco-reto')[1]).toBeCloseTo((ASSENTO_DO_CADARCO[1] ?? 0) - 0.05, 9);
     expect((await caixaDe(depois)).min.y).toBeLessThan((await caixaDe(antes)).min.y);
   });
 

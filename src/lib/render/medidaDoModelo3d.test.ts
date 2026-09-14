@@ -30,9 +30,17 @@ const CASAS_DE_FLOAT32 = 6;
 
 /** O assento do cabedal na forma de prova, conforme `acervoDeProva.ts`. */
 const ALTURA_DA_SOLA = 0.018;
-/** O assento do cadarço: sobre o cabedal baixo, deslocado para a biqueira. */
-const ASSENTO_DO_CADARCO_Y = ALTURA_DA_SOLA + 0.075;
-const ASSENTO_DO_CADARCO_X = 0.03;
+
+/**
+ * O assento do cadarço, lido da `translation` do nó dele.
+ *
+ * Desde a Fase G o assento do cadarço é calculado da altura do peito do pé (`cadarcoSobreOCabedal.ts`)
+ * e deixou de ser um número digitado. Ler do nó é a comparação que estes testes querem: a medida
+ * começa onde o nó diz que a peça está, e não em zero.
+ */
+const [ASSENTO_DO_CADARCO_X = 0, ASSENTO_DO_CADARCO_Y = 0] = (
+  JSON.parse(gltfDaPecaDeProva('prova-cadarco-reto')) as { nodes: Array<{ translation: number[] }> }
+).nodes[0]?.translation ?? [];
 
 function parametroDaPeca(id: string): ParametroDePeca {
   const parametro = CATALOGO.pecas.find((peca) => peca.id === id)?.parametros[0];

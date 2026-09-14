@@ -10,7 +10,7 @@ glTF.
 | Arquivo | Papel | Entrada → saída |
 |---|---|---|
 | `validarComposicao.ts` | O guarda do ADR-008 D1: resolve a composição contra o acervo ou recusa | composição (não confiável) + catálogo → composição validada |
-| `empilharComposicao.ts` | De quanto cada peça sobe para assentar sobre a de baixo (T14) | forma + faixa vertical de cada peça → deslocamento por categoria |
+| `empilharComposicao.ts` | De quanto cada peça sobe para assentar sobre a de baixo (T14) | forma + faixa vertical de cada peça (+ faixa no padrão, para apoio `superficie`) → deslocamento por categoria |
 | `montarComposicao.ts` | A orquestração de T14: mede, empilha, desloca, junta e pinta, nessa ordem | composição validada + provedor de glTF → um glTF só, já colorido |
 | `montarCatalogoParaModelo.ts` | O catálogo para o modelo (T05): só as peças da forma, com id, categoria, rótulo e faixa, em JSON | forma + catálogo → texto que o modelo de linguagem lê |
 | `gerarComposicaoPorPrompt.ts` | Prompt vira composição (T09): confere o prompt, chama o modelo de linguagem injetado e passa a resposta pelo guarda. Define `ModeloDeLinguagem` | prompt + forma + catálogo + modelo → composição validada |
@@ -106,6 +106,32 @@ Duas propriedades do desenho merecem ficar escritas:
 Quem assenta sobre quem é a **forma** que declara, em `assenta_sobre` (ADR-008 D4). Campo
 opcional: categoria sem ele mantém o assento em que foi modelada, então uma forma que ainda não
 declarou anatomia continua montando exatamente como antes.
+
+### Apoio: topo ou superfície
+
+Assentar no **topo** da peça de baixo serve para caixa sobre caixa, e para a sola sob o cabedal.
+Não serve para o cadarço: ele deita sobre o peito do pé, bem abaixo do ponto mais alto do cabedal,
+e no topo flutuaria na altura da frente da boca. Por isso a categoria da forma pode declarar
+`apoio: 'superficie'` (spec `acervo-com-cara-de-tenis`, D5; o termo está no glossário).
+
+- `topo` (ou o campo ausente): a base da peça vai para o topo da peça de baixo.
+- `superficie`: a peça foi modelada deitada sobre a de baixo no tamanho padrão, e acompanha o que
+  a de baixo fez. Se ela subiu, sobe junto; se foi esticada em Y, o **ponto de apoio** (o meio da
+  faixa da peça no padrão) sobe na mesma proporção em relação à base dela.
+
+Para saber a proporção, `montarComposicao` mede cada peça também com os parâmetros **padrão**, e
+entrega essas faixas como terceiro argumento de `empilharComposicao`. Só mede quando a forma tem
+alguma categoria de superfície, e reusa a medida da peça que já está no padrão, então forma sem
+superfície faz exatamente as chamadas ao provedor de antes.
+
+Se a base declarada não está na composição, a superfície em que a peça foi modelada não existe
+naquele calçado, e o apoio volta a ser `topo` sobre a categoria que existe.
+
+**Limite conhecido**: peça rígida inclinada só acompanha com exatidão o ponto de apoio. Com o cano no
+máximo, o cadarço de prova fica até 7 mm acima do peito do pé numa ponta; com a espessura do cadarço
+no máximo, a fileira de trás flutua até 1,5 cm, porque a escala em Y do cadarço estica também a
+descida dele. Medido em `src/lib/acervo/cadarcoSobreOCabedal.test.ts`; o conserto é parâmetro que
+remodela malha, que o ADR-008 D7 recusa.
 
 ## Limites conhecidos
 

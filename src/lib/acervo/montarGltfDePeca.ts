@@ -38,8 +38,9 @@ export type ModeladorDePeca = (medidas: MedidasDaPeca) => MalhaDePeca;
 /**
  * Uma peça do acervo de prova, pelas medidas dela e por quem sabe modelá-la.
  *
- * `altura` é ao mesmo tempo o parâmetro de peça e a altura em que a peça é modelada: o campo
- * `padrao` dele **é** a altura da malha. Foi feito assim para que os dois não possam divergir,
+ * `altura` é ao mesmo tempo o parâmetro de peça e a medida com que a peça é modelada: o campo
+ * `padrao` dele **é** a medida que o modelador recebe (a altura da malha, ou a espessura da fita no
+ * cadarço). Foi feito assim para que os dois não possam divergir,
  * que é o defeito que este módulo mais convidaria (declarar a sola com 18 mm no catálogo e
  * modelá-la com 20 mm, e ninguém perceber porque as duas informações moram em lugares
  * diferentes).
@@ -52,7 +53,11 @@ export interface DescricaoDaPecaDeProva {
   comprimento: number;
   /** Metros, eixo Z. */
   largura: number;
-  /** O parâmetro que escala o eixo Y. O `padrao` dele é a altura modelada da peça. */
+  /**
+   * O parâmetro que escala o eixo Y. O `padrao` dele é a medida que o modelador recebe como
+   * `altura`: na sola e no cabedal é a altura da caixa da peça; no cadarço é a espessura da fita, e
+   * a caixa dele é mais alta, porque a fita desce com o peito do pé.
+   */
   altura: ParametroDePeca;
   /** Onde a peça assenta na forma, em metros. Vira a `translation` do nó. */
   assento: readonly [number, number, number];
