@@ -14,6 +14,13 @@ import { catalogoDeProva, gltfDaPecaDeProva } from '../lib/acervo/acervoDeProva'
 const CATALOGO = catalogoDeProva();
 const IDS = CATALOGO.pecas.map(({ id }) => id);
 
+/** As categorias de apoio `superficie`, lidas da forma e não digitadas (D5 de `acervo-com-cara-de-tenis`). */
+const DEITAM_NA_SUPERFICIE = new Set(
+  CATALOGO.formas.flatMap(({ categorias }) =>
+    categorias.filter(({ apoio }) => apoio === 'superficie').map(({ categoria }) => categoria),
+  ),
+);
+
 function malhas(objeto: Object3D): Mesh[] {
   const encontradas: Mesh[] = [];
   objeto.traverse((no) => {
@@ -43,7 +50,15 @@ describe('carregarPecaNaCena', () => {
     const { caixa } = await carregarPecaNaCena(gltfDaPecaDeProva(id));
     const tamanho = caixa.getSize(new Vector3());
 
-    expect(tamanho.y).toBeCloseTo(parametro?.padrao ?? 0, 6);
+    if (DEITAM_NA_SUPERFICIE.has(peca?.categoria ?? '')) {
+      // Peça de apoio `superficie` (o cadarço) desce com o peito do pé, então a caixa dela é a
+      // espessura do parâmetro mais essa descida. Continua na escala de centímetros, que é o que
+      // pega um fator 100 perdido.
+      expect(tamanho.y).toBeGreaterThan(parametro?.padrao ?? 0);
+      expect(tamanho.y).toBeLessThan(0.04);
+    } else {
+      expect(tamanho.y).toBeCloseTo(parametro?.padrao ?? 0, 6);
+    }
     expect(tamanho.x).toBeGreaterThan(0.05);
     expect(tamanho.x).toBeLessThan(0.4);
   });
@@ -96,7 +111,7 @@ describe('carregarPecaNaCena', () => {
 
 describe('enquadrar', () => {
   it.each(IDS)('%s recebe uma distância proporcional ao próprio tamanho', async (id) => {
-    // Distância fixa faria o cadarço (0,13 m) virar um ponto enquanto a sola (0,28 m) estoura o
+    // Distância fixa faria o cadarço (uns 5 cm) virar um ponto enquanto a sola (0,28 m) estoura o
     // quadro. A distância sai da caixa envolvente, então toda peça preenche o quadro igual.
     const { caixa, distancia } = await carregarPecaNaCena(gltfDaPecaDeProva(id));
     const tamanho = caixa.getSize(new Vector3());

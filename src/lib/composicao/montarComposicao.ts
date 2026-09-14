@@ -67,7 +67,11 @@ export function montarComposicao(
   const faixas = new Map<string, FaixaVertical>(
     modelados.map(({ escolha, gltf }) => [escolha.categoria, faixaVerticalDe(gltf)]),
   );
-  const deslocamentos = empilharComposicao(composicao.forma, faixas);
+  const deslocamentos = empilharComposicao(
+    composicao.forma,
+    faixas,
+    faixasNoPadrao(composicao, provedorDeGltf, faixas),
+  );
 
   // A ordem em que as peças entram na junção é a da composição, que é a que o modelo de linguagem
   // escreveu. Ela decide só a numeração dos índices no documento final, nunca onde a peça fica:
@@ -96,6 +100,40 @@ function faixaVerticalDe(gltf: string): FaixaVertical {
   const caixa = medidaDoModelo3d(gltf);
 
   return { base: caixa.minimo[1], topo: caixa.maximo[1] };
+}
+
+/**
+ * A faixa de cada peça com os parâmetros padrão, que é o que o apoio `superficie` compara (D5).
+ *
+ * Medida gerando a peça de novo, e não calculada da faixa pedida dividindo pela escala, pela lição
+ * do BUG-013: a regra fica derivada da geometria, e não de um campo (a escala) que pode deixar de
+ * ser a única coisa que o parâmetro muda.
+ *
+ * Duas economias, nenhuma delas muda o resultado. Forma sem categoria de superfície não mede nada,
+ * e monta com as mesmas chamadas ao provedor de antes. E peça que já está nos parâmetros padrão
+ * reusa a faixa medida, porque gerar de novo com os mesmos números daria a mesma faixa.
+ */
+function faixasNoPadrao(
+  composicao: ComposicaoValidada,
+  provedorDeGltf: ProvedorDeGltfDaPeca,
+  faixas: ReadonlyMap<string, FaixaVertical>,
+): Map<string, FaixaVertical> {
+  const medidas = new Map<string, FaixaVertical>();
+
+  if (!composicao.forma.categorias.some(({ apoio }) => apoio === 'superficie')) return medidas;
+
+  for (const { categoria, peca, parametros } of composicao.pecas) {
+    const padrao = Object.fromEntries(peca.parametros.map(({ nome, padrao: valor }) => [nome, valor]));
+    const jaNoPadrao = Object.entries(padrao).every(([nome, valor]) => parametros[nome] === valor);
+    const medida = faixas.get(categoria);
+
+    medidas.set(
+      categoria,
+      jaNoPadrao && medida !== undefined ? medida : faixaVerticalDe(provedorDeGltf(peca, padrao)),
+    );
+  }
+
+  return medidas;
 }
 
 /**

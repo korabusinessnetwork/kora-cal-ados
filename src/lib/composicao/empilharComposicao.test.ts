@@ -11,7 +11,11 @@ import { describe, expect, it } from 'vitest';
 import { empilharComposicao, type FaixaVertical } from './empilharComposicao';
 import type { Forma } from './tiposDaComposicao';
 
-/** A forma de prova, com a mesma anatomia que `acervoDeProva` declara. */
+/**
+ * A anatomia do tênis de prova **sem** apoio declarado, que é como toda forma montava antes de o
+ * apoio existir. Os testes da regra `topo` usam ela; o acervo de prova de hoje declara o cadarço
+ * com apoio `superficie`, e esse caso tem o bloco dele no fim do arquivo.
+ */
 const TENIS: Forma = {
   id: 'prova-tenis-01',
   rotulo: 'Tênis de prova',
@@ -174,5 +178,84 @@ describe('empilharComposicao', () => {
     const deslocamentos = empilharComposicao(TENIS, PADRAO);
 
     expect([...deslocamentos.keys()].sort()).toEqual(['cabedal', 'cadarco', 'sola']);
+  });
+});
+
+describe('empilharComposicao com apoio superficie (D5 de acervo-com-cara-de-tenis)', () => {
+  // Números redondos de propósito, para cada conta caber de cabeça: sola de 0,02, cabedal de 0,08
+  // em cima dela, e o cadarço deitado entre 0,06 e 0,07, bem abaixo do topo do cabedal (0,10). O
+  // ponto de apoio do cadarço é o meio da faixa dele, 0,065, que fica 0,045 acima da base do cabedal.
+  const COM_APOIO: Forma = {
+    ...TENIS,
+    categorias: TENIS.categorias.map((categoria) =>
+      categoria.categoria === 'cadarco' ? { ...categoria, apoio: 'superficie' as const } : categoria,
+    ),
+  };
+  const NO_PADRAO = new Map<string, FaixaVertical>([
+    ['sola', { base: 0, topo: 0.02 }],
+    ['cabedal', { base: 0.02, topo: 0.1 }],
+    ['cadarco', { base: 0.06, topo: 0.07 }],
+  ]);
+
+  it('com tudo no padrão, não mexe em nada', () => {
+    expect([...empilharComposicao(COM_APOIO, NO_PADRAO, NO_PADRAO).values()]).toEqual([0, 0, 0]);
+  });
+
+  it('sola mais grossa sobe o cadarço o mesmo tanto que o cabedal', () => {
+    const faixas = new Map(NO_PADRAO).set('sola', { base: 0, topo: 0.03 });
+    const deslocamentos = empilharComposicao(COM_APOIO, faixas, NO_PADRAO);
+
+    expect(deslocamentos.get('cabedal')).toBeCloseTo(0.01, 12);
+    expect(deslocamentos.get('cadarco')).toBeCloseTo(0.01, 12);
+  });
+
+  it('cabedal esticado sobe o cadarço na proporção da altura do ponto de apoio, e não o topo inteiro', () => {
+    // Cabedal de 0,08 para 0,12, 1,5 vez. O ponto de apoio estava 0,045 acima da base e passa a
+    // estar 0,0675: sobe 0,0225. Com apoio `topo` a base do cadarço iria para o topo do cabedal
+    // (0,14), 0,08 acima de onde ele deita, flutuando sobre a frente da boca.
+    const faixas = new Map(NO_PADRAO).set('cabedal', { base: 0.02, topo: 0.14 });
+
+    expect(empilharComposicao(COM_APOIO, faixas, NO_PADRAO).get('cadarco')).toBeCloseTo(0.0225, 12);
+    expect(empilharComposicao(TENIS, faixas, NO_PADRAO).get('cadarco')).toBeCloseTo(0.08, 12);
+  });
+
+  it('sola grossa e cabedal esticado se somam no cadarço', () => {
+    const faixas = new Map(NO_PADRAO).set('sola', { base: 0, topo: 0.03 }).set('cabedal', { base: 0.02, topo: 0.14 });
+
+    expect(empilharComposicao(COM_APOIO, faixas, NO_PADRAO).get('cadarco')).toBeCloseTo(0.01 + 0.0225, 12);
+  });
+
+  it('o parâmetro do próprio cadarço não move o ponto de apoio', () => {
+    // Engrossar o cadarço muda a faixa pedida dele, e não a padrão. Se a conta usasse a pedida,
+    // engrossar o faria descer para dentro do cabedal.
+    const faixas = new Map(NO_PADRAO).set('cadarco', { base: 0.06, topo: 0.08 });
+
+    expect(empilharComposicao(COM_APOIO, faixas, NO_PADRAO).get('cadarco')).toBe(0);
+  });
+
+  it('sem a base declarada, volta para topo sobre a categoria que existe', () => {
+    const semCabedal = new Map([...NO_PADRAO].filter(([categoria]) => categoria !== 'cabedal'));
+
+    expect(empilharComposicao(COM_APOIO, semCabedal, NO_PADRAO).get('cadarco')).toBeCloseTo(0.02 - 0.06, 12);
+  });
+
+  it('apoio topo escrito é o mesmo que apoio ausente (critério 16)', () => {
+    const topoEscrito: Forma = {
+      ...TENIS,
+      categorias: TENIS.categorias.map((categoria) => ({ ...categoria, apoio: 'topo' as const })),
+    };
+    const faixas = comSola(0.04).set('cabedal', { base: 0.018, topo: 0.018 + 0.12 });
+
+    expect([...empilharComposicao(topoEscrito, faixas)]).toEqual([...empilharComposicao(TENIS, faixas)]);
+  });
+
+  it('recusa superfície sem as faixas no padrão, em vez de cair para topo calado', () => {
+    expect(() => empilharComposicao(COM_APOIO, NO_PADRAO)).toThrow(/tamanho padrão/);
+  });
+
+  it('recusa base sem altura no padrão, que não tem superfície para acompanhar', () => {
+    const achatado = new Map(NO_PADRAO).set('cabedal', { base: 0.02, topo: 0.02 });
+
+    expect(() => empilharComposicao(COM_APOIO, NO_PADRAO, achatado)).toThrow(/não tem altura/);
   });
 });

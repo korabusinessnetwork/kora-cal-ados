@@ -11,7 +11,11 @@
 //
 // Todas as medidas em metros, que é a unidade que o glTF 2.0 fixa. Um tênis 42 tem uns 0,28 m.
 
-import { montarGltfDePeca, type DescricaoDaPecaDeProva } from './montarGltfDePeca';
+import { cadarcoSobreOCabedal } from './cadarcoSobreOCabedal';
+import { geometriaDeCabedal } from './geometriaDeCabedal';
+import { geometriaDeSola } from './geometriaDeSola';
+import { CANO_ALTO, CANO_BAIXO } from './perfilDoCabedal';
+import { montarGltfDePeca, type DescricaoDaPecaDeProva, type ModeladorDePeca } from './montarGltfDePeca';
 import type { CatalogoDoAcervo, PecaDoAcervo } from '../composicao/tiposDaComposicao';
 
 /** Uma forma só. Misturar formas é estado inválido (ADR-008 D4), e aqui não há com o que misturar. */
@@ -19,6 +23,71 @@ export const FORMA_DE_PROVA = 'prova-tenis-01';
 
 /** A altura da sola padrão, e o degrau em que o cabedal assenta. Ver `assento` abaixo. */
 const ALTURA_DA_SOLA = 0.018;
+
+/**
+ * A altura dos cravos da sola tratorada, em metros.
+ *
+ * Fica **dentro** da espessura da sola, não somada a ela: a tratorada de 30 mm tem 7 mm de cravo
+ * e 23 mm de laje. Somar mudaria a altura do calçado ao trocar de sola sem ninguém ter pedido, e
+ * faria a altura modelada deixar de bater com o padrão do parâmetro.
+ */
+const ALTURA_DO_CRAVO = 0.007;
+
+/**
+ * As medidas dos dois cabedais, escritas uma vez para os dois.
+ *
+ * Comprimento, largura e peito do pé **precisam** ser iguais nos dois cabedais: é o que faz o
+ * trecho onde o cadarço deita ser idêntico (decisão D6 da spec `acervo-com-cara-de-tenis`). Uma
+ * constante só impede que alguém ajuste um cabedal e esqueça o outro.
+ *
+ * A largura é menor que a da sola plana (0,1 m) com folga: o topo da sola recua um pouco por causa
+ * do bisel, e o contorno do cabedal precisa caber inteiro dentro dele, estação por estação.
+ */
+const COMPRIMENTO_DO_CABEDAL = 0.26;
+const LARGURA_DO_CABEDAL = 0.09;
+
+/** A altura do peito do pé no começo dele, onde a boca termina. Ver `perfilDoCabedal.ts`. */
+const ALTURA_DO_PEITO = 0.064;
+
+const ALTURA_DO_CABEDAL_BAIXO = { nome: 'altura-do-cano', minimo: 0.05, maximo: 0.12, padrao: 0.075 };
+
+const modelarCabedalBaixo: ModeladorDePeca = (medidas) =>
+  geometriaDeCabedal({ ...medidas, alturaDoPeito: ALTURA_DO_PEITO, cano: CANO_BAIXO });
+
+/**
+ * As medidas do cadarço reto. A espessura é o parâmetro; comprimento e largura são a área que as
+ * fileiras cobrem sobre o peito do pé.
+ */
+const COMPRIMENTO_DO_CADARCO = 0.054;
+const LARGURA_DO_CADARCO = 0.042;
+const ESPESSURA_DO_CADARCO = { nome: 'espessura', minimo: 0.003, maximo: 0.012, padrao: 0.006 };
+
+/**
+ * Onde a primeira fileira começa: 2 mm à frente do meio do cabedal.
+ *
+ * O meio do comprimento é a primeira estação do cabedal que já está inteira no peito do pé (as
+ * estações vão em cosseno, e a anterior cai dentro da transição da boca). Começar ali é o que faz o
+ * cadarço deitar em triângulos **idênticos** nos dois cabedais (D6), e os 2 mm são para a borda de
+ * trás da fita não cair exatamente na aresta entre a transição e o peito do pé.
+ */
+const INICIO_DO_CADARCO = 0.002;
+
+/**
+ * O cadarço deitado no cabedal baixo no tamanho padrão, que é onde ele foi modelado. A montagem faz
+ * ele acompanhar o cabedal que estiver na composição (apoio `superficie`, D5).
+ */
+const CADARCO = cadarcoSobreOCabedal({
+  cabedal: modelarCabedalBaixo({
+    comprimento: COMPRIMENTO_DO_CABEDAL,
+    largura: LARGURA_DO_CABEDAL,
+    altura: ALTURA_DO_CABEDAL_BAIXO.padrao,
+  }),
+  assentoDoCabedal: [0, ALTURA_DA_SOLA, 0],
+  inicio: INICIO_DO_CADARCO,
+  comprimento: COMPRIMENTO_DO_CADARCO,
+  largura: LARGURA_DO_CADARCO,
+  altura: ESPESSURA_DO_CADARCO.padrao,
+});
 
 /**
  * As 5 peças, e a razão de cada número.
@@ -38,6 +107,7 @@ const PECAS: readonly DescricaoDaPecaDeProva[] = [
     largura: 0.1,
     altura: { nome: 'espessura', minimo: 0.01, maximo: 0.04, padrao: ALTURA_DA_SOLA },
     assento: [0, 0, 0],
+    modelar: geometriaDeSola,
   },
   {
     id: 'prova-sola-tratorada',
@@ -49,35 +119,43 @@ const PECAS: readonly DescricaoDaPecaDeProva[] = [
     largura: 0.108,
     altura: { nome: 'espessura', minimo: 0.015, maximo: 0.05, padrao: 0.03 },
     assento: [0, 0, 0],
+    modelar: (medidas) => geometriaDeSola({ ...medidas, alturaDoCravo: ALTURA_DO_CRAVO }),
   },
   {
     id: 'prova-cabedal-baixo',
     categoria: 'cabedal',
     rotulo: 'Cabedal baixo',
-    comprimento: 0.26,
-    largura: 0.095,
-    altura: { nome: 'altura-do-cano', minimo: 0.05, maximo: 0.12, padrao: 0.075 },
+    comprimento: COMPRIMENTO_DO_CABEDAL,
+    largura: LARGURA_DO_CABEDAL,
+    altura: ALTURA_DO_CABEDAL_BAIXO,
     assento: [0, ALTURA_DA_SOLA, 0],
+    modelar: modelarCabedalBaixo,
+    materialDeDuplaFace: true,
   },
   {
     id: 'prova-cabedal-cano-alto',
     categoria: 'cabedal',
     rotulo: 'Cabedal cano alto',
-    comprimento: 0.26,
-    largura: 0.095,
+    comprimento: COMPRIMENTO_DO_CABEDAL,
+    largura: LARGURA_DO_CABEDAL,
     altura: { nome: 'altura-do-cano', minimo: 0.1, maximo: 0.22, padrao: 0.14 },
     assento: [0, ALTURA_DA_SOLA, 0],
+    modelar: (medidas) => geometriaDeCabedal({ ...medidas, alturaDoPeito: ALTURA_DO_PEITO, cano: CANO_ALTO }),
+    materialDeDuplaFace: true,
   },
   {
     id: 'prova-cadarco-reto',
     categoria: 'cadarco',
     rotulo: 'Cadarço reto',
-    comprimento: 0.13,
-    largura: 0.05,
-    altura: { nome: 'espessura', minimo: 0.003, maximo: 0.012, padrao: 0.006 },
-    // Deslocado para a biqueira e apoiado no cabedal baixo. Cadarço é categoria opcional na
-    // forma, então esta é a peça que prova que composição sem ela continua válida.
-    assento: [0.03, ALTURA_DA_SOLA + 0.075, 0],
+    comprimento: COMPRIMENTO_DO_CADARCO,
+    largura: LARGURA_DO_CADARCO,
+    // A espessura da fita, e não a altura da peça inteira: o cadarço desce com o peito do pé, e a
+    // caixa dele é mais alta que a fita. É a única peça em que o `padrao` não é a altura da caixa.
+    altura: ESPESSURA_DO_CADARCO,
+    // Cadarço é categoria opcional na forma, então esta é a peça que prova que composição sem ela
+    // continua válida.
+    assento: CADARCO.assento,
+    modelar: CADARCO.modelar,
   },
 ];
 
@@ -102,7 +180,9 @@ export function catalogoDeProva(): CatalogoDoAcervo {
         categorias: [
           { categoria: 'sola', obrigatoria: true },
           { categoria: 'cabedal', obrigatoria: true, assenta_sobre: 'sola' },
-          { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal' },
+          // O cadarço deita sobre o peito do pé, bem abaixo do ponto mais alto do cabedal. No topo
+          // ele flutuaria na altura da frente da boca (D5).
+          { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal', apoio: 'superficie' },
         ],
       },
     ],

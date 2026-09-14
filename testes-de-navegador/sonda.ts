@@ -75,6 +75,14 @@ export const ESPERAR_CENA = `(async () => {
  * O agrupamento joga fora os 2 bits baixos de cada canal antes de contar. É o que transforma o
  * degradê de iluminação de uma face em UMA entrada na contagem, em vez de dezenas de tons quase
  * iguais que empurrariam a peça de verdade para fora das primeiras posições.
+ *
+ * Devolve os 40 grupos maiores, e não mais os 12 de quando o acervo era de caixas. Caixa tem face
+ * plana, e face plana sai de um tom só; o cabedal com cara de tênis (Fase G) é curvo, e a luz
+ * espalha o azul dele por uns 10 grupos vizinhos. Com 12, a sola pintada de vermelho, que na tela
+ * é só a faixa lateral abaixo do cabedal, caía para fora da lista inteira, e o teste dizia "a sola
+ * não ficou vermelha" com a sola vermelha na tela (medido em 2026-09-14: o maior grupo vermelho
+ * ficou abaixo do 12º, que tinha 209 pixels). O 40 deixa folga para o cano alto, que tem mais
+ * superfície curva ainda.
  */
 export const INSTALAR_LEITOR = `(() => {
   window.__koraLerPixels = (tentativas = 5) => new Promise((pronto) => {
@@ -115,7 +123,7 @@ export const INSTALAR_LEITOR = `(() => {
 
       const grupos = [...contagem.entries()]
         .sort((um, outro) => outro[1] - um[1])
-        .slice(0, 12)
+        .slice(0, 40)
         .map(([chave, quantos]) => {
           const [r, g, b] = chave.split(',').map((n) => Number(n) << 2);
 

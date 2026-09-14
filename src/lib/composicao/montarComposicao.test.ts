@@ -60,6 +60,46 @@ function posicaoDe(modelo: string, pecaId: string): number[] {
   return translacaoDe(modelo, pecaId).map((valor) => Number(valor.toFixed(6)));
 }
 
+/**
+ * O cadarço fora da montagem: a caixa dele e onde ele assenta.
+ *
+ * Lidos da peça e não digitados, porque desde a Fase G o assento do cadarço sai da altura do peito
+ * do pé (`cadarcoSobreOCabedal.ts`). O que estes testes provam é o quanto a montagem o move, e não
+ * onde ele foi modelado.
+ */
+const CADARCO_SOZINHO = medidaDoModelo3d(gltfDaPecaDeProva('prova-cadarco-reto'));
+const [ASSENTO_DO_CADARCO_X = 0, ASSENTO_DO_CADARCO_Y = 0] = translacaoDe(
+  gltfDaPecaDeProva('prova-cadarco-reto'),
+  'prova-cadarco-reto',
+);
+const ASSENTO_DO_CADARCO = [ASSENTO_DO_CADARCO_X, ASSENTO_DO_CADARCO_Y] as const;
+
+/**
+ * Uma composição sem o cabedal, que `validarComposicao` recusa (o cabedal é obrigatório na forma).
+ *
+ * Montada à mão para exercitar o que acontece quando a base declarada falta, que é o caso que a
+ * regra do apoio precisa tratar para formas em que a base é opcional. A escolha de cada peça é a
+ * que o guarda produziria.
+ */
+function validarSemObrigatoria(entrada: { forma_id?: string; pecas: Array<{ peca_id: string }> }): ComposicaoValidada {
+  const forma = CATALOGO.formas.find(({ id }) => id === entrada.forma_id);
+  if (forma === undefined) throw new Error('forma de prova ausente');
+
+  return {
+    forma,
+    pecas: entrada.pecas.map(({ peca_id }) => {
+      const peca = CATALOGO.pecas.find(({ id }) => id === peca_id);
+      if (peca === undefined) throw new Error(`peça ${peca_id} ausente`);
+
+      return {
+        categoria: peca.categoria,
+        peca,
+        parametros: Object.fromEntries(peca.parametros.map(({ nome, padrao }) => [nome, padrao])),
+      };
+    }),
+  };
+}
+
 function materiaisDe(modelo: string): unknown[] {
   return (JSON.parse(modelo) as { materials?: unknown[] }).materials ?? [];
 }
@@ -101,12 +141,14 @@ describe('montarComposicao', () => {
 
     expect(posicaoDe(modelo, 'prova-sola-plana')).toEqual([0, 0, 0]);
     expect(posicaoDe(modelo, 'prova-cabedal-baixo')).toEqual([0, 0.018, 0]);
-    expect(posicaoDe(modelo, 'prova-cadarco-reto')).toEqual([0.03, 0.093, 0]);
+    expect(posicaoDe(modelo, 'prova-cadarco-reto')).toEqual(posicaoDe(gltfDaPecaDeProva('prova-cadarco-reto'), 'prova-cadarco-reto'));
 
-    // E o calçado inteiro vai do chão ao topo do cadarço, sem sobra em cima nem embaixo.
+    // E o calçado inteiro vai do chão ao ponto mais alto do cabedal, que é a frente da boca: o
+    // cadarço deita no peito do pé, abaixo dela (D5), e não soma altura ao calçado.
     const caixa = medidaDoModelo3d(modelo);
     expect(caixa.minimo[1]).toBeCloseTo(0, 6);
-    expect(caixa.maximo[1]).toBeCloseTo(0.099, 6);
+    expect(caixa.maximo[1]).toBeCloseTo(0.018 + 0.075, 6);
+    expect(CADARCO_SOZINHO.maximo[1]).toBeLessThan(0.018 + 0.075);
   });
 
   it('sola mais grossa levanta o cabedal e o cadarço, e não a si mesma (critério 22)', () => {
@@ -124,11 +166,74 @@ describe('montarComposicao', () => {
 
     expect(posicaoDe(modelo, 'prova-sola-plana')).toEqual([0, 0, 0]);
     expect(posicaoDe(modelo, 'prova-cabedal-baixo')[1]).toBeCloseTo(0.04, 6);
-    expect(posicaoDe(modelo, 'prova-cadarco-reto')[1]).toBeCloseTo(0.115, 6);
+    expect(posicaoDe(modelo, 'prova-cadarco-reto')[1]).toBeCloseTo(ASSENTO_DO_CADARCO[1] + 0.022, 6);
 
-    // A peça sobe inteira: o X do cadarço é o da biqueira e não pode ter sido tocado.
-    expect(posicaoDe(modelo, 'prova-cadarco-reto')[0]).toBeCloseTo(0.03, 6);
-    expect(medidaDoModelo3d(modelo).maximo[1]).toBeCloseTo(0.121, 6);
+    // A peça sobe inteira: o X do cadarço é o do peito do pé e não pode ter sido tocado.
+    expect(posicaoDe(modelo, 'prova-cadarco-reto')[0]).toBeCloseTo(ASSENTO_DO_CADARCO[0], 6);
+    expect(medidaDoModelo3d(modelo).maximo[1]).toBeCloseTo(0.04 + 0.075, 6);
+  });
+
+  it('cano esticado leva o cadarço junto, na proporção da altura em que ele deita (critério 15)', () => {
+    // Apoio `superficie` (D5). O cabedal vai de 0,075 para 0,12 de altura, 1,6 vez, esticado em
+    // volta da base dele (0,018). O ponto de apoio do cadarço é o meio da faixa dele no padrão, e
+    // ele tem que ficar 1,6 vez mais longe da base do cabedal do que estava. Com apoio `topo` o
+    // cadarço subiria os 0,045 inteiros do topo, e flutuaria acima do peito do pé.
+    const esticado = {
+      forma_id: CATALOGO.formas[0]?.id,
+      pecas: [
+        { peca_id: 'prova-sola-plana' },
+        { peca_id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.12 } },
+        { peca_id: 'prova-cadarco-reto' },
+      ],
+    };
+    const { modelo } = montarComposicao(validar(esticado), DO_ACERVO);
+
+    const pontoDeApoio = (CADARCO_SOZINHO.minimo[1] + CADARCO_SOZINHO.maximo[1]) / 2;
+    const subida = (pontoDeApoio - 0.018) * (0.12 / 0.075) - (pontoDeApoio - 0.018);
+
+    expect(posicaoDe(modelo, 'prova-cadarco-reto')[1]).toBeCloseTo(ASSENTO_DO_CADARCO[1] + subida, 6);
+    expect(subida).toBeGreaterThan(0.02);
+    expect(subida).toBeLessThan(0.045);
+  });
+
+  it('sem o cabedal, o cadarço volta a assentar no topo da sola (D5)', () => {
+    // A superfície em que o cadarço foi modelado não existe neste calçado. Acompanhar a sola como
+    // se fosse o cabedal o deixaria pendurado no ar; assentar no topo do que existe é o que já
+    // acontecia antes do apoio existir.
+    const semCabedal = {
+      forma_id: CATALOGO.formas[0]?.id,
+      pecas: [{ peca_id: 'prova-sola-plana' }, { peca_id: 'prova-cadarco-reto' }],
+    };
+    const forjada = validarSemObrigatoria(semCabedal);
+    const { modelo } = montarComposicao(forjada, DO_ACERVO);
+
+    expect(medidaDoModelo3d(modelo).minimo[1]).toBeCloseTo(0, 6);
+    expect(posicaoDe(modelo, 'prova-cadarco-reto')[1]).toBeCloseTo(0.018, 6);
+  });
+
+  it('mede a peça fora do padrão também no padrão, e só ela (D5)', () => {
+    const pedidos: Array<{ id: string; parametros: Record<string, number> }> = [];
+    const espiao: ProvedorDeGltfDaPeca = (peca, parametros) => {
+      pedidos.push({ id: peca.id, parametros: { ...parametros } });
+      return gltfDaPecaDeProva(peca.id, parametros);
+    };
+
+    montarComposicao(
+      validar({
+        forma_id: CATALOGO.formas[0]?.id,
+        pecas: [
+          { peca_id: 'prova-sola-plana' },
+          { peca_id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.1 } },
+        ],
+      }),
+      espiao,
+    );
+
+    expect(pedidos).toEqual([
+      { id: 'prova-sola-plana', parametros: { espessura: 0.018 } },
+      { id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.1 } },
+      { id: 'prova-cabedal-baixo', parametros: { 'altura-do-cano': 0.075 } },
+    ]);
   });
 
   it('trocar a cor de UMA zona não encosta nos outros materiais (critério 23)', () => {

@@ -9,6 +9,8 @@
 // investir em modelagem. Caixa é o menor sólido fechado que dá para ver girando na tela e
 // clicar para identificar, que é exatamente o que T13 precisa provar.
 
+import { arredondarParaFloat32 } from './malhaDePeca';
+
 /** Metros. glTF 2.0 fixa o metro como unidade, e um tênis 42 tem uns 0,28 m. */
 export interface DimensoesDaCaixa {
   /** Eixo X, do calcanhar à biqueira. */
@@ -128,17 +130,6 @@ function extremo(posicoes: number[], escolher: (...valores: number[]) => number)
   return [eixo(0), eixo(1), eixo(2)];
 }
 
-/**
- * Força o número para a precisão em que ele vai ser gravado.
- *
- * O buffer do glTF guarda POSITION em float32; o JavaScript calcula em float64. Sem este
- * arredondamento, `minimo` e `maximo` sairiam do cálculo em float64 e o vértice sairia do
- * buffer em float32, e os dois discordariam na última casa. O validador da Khronos chama isso
- * de `ACCESSOR_MAX_MISMATCH` e é o primeiro erro que um gerador de glTF escrito à mão comete.
- *
- * Efeito colateral aceito: `0,28` vira `0.2800000011920929` no JSON. Ninguém lê este arquivo à
- * mão, e o número está certo, apenas escrito por extenso.
- */
-export function arredondarParaFloat32(valor: number): number {
-  return Math.fround(valor);
-}
+// `arredondarParaFloat32` mora em `malhaDePeca.ts`, que é onde toda geometria do acervo o busca.
+// Continua exportado daqui para quem já importava deste arquivo não quebrar.
+export { arredondarParaFloat32 };

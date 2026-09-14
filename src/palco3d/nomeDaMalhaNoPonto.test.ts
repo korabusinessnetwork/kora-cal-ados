@@ -136,7 +136,14 @@ describe('nomeDaMalhaNoPonto', () => {
   it('acerta a peça de vários ângulos de órbita, não só do inicial', async () => {
     // Enquadramento e órbita conversam: girar não pode jogar a peça para fora do centro do
     // quadro. Se jogasse, clicar no meio da tela erraria a peça depois de o usuário girar.
-    const { objeto, alvo, distancia } = await carregarPecaNaCena(gltfDaPecaDeProva('prova-cabedal-cano-alto'));
+    //
+    // A peça é uma sola, que é maciça, e não o cano alto que este teste usava quando o acervo era
+    // de caixas. O cabedal virou casca com boca aberta (Fase G), e o centro da caixa dele fica
+    // acima do peito do pé: de lado, o raio que passa pelo centro do quadro raspa por cima do peito
+    // e não acerta nada, e isso é verdade na tela também (ali se vê o fundo). O que este teste
+    // prova é enquadramento e órbita, e peça maciça tem o centro da caixa dentro dela, então
+    // qualquer raio que passe por ele atravessa a peça.
+    const { objeto, alvo, distancia } = await carregarPecaNaCena(gltfDaPecaDeProva('prova-sola-tratorada'));
     const cena = new Scene();
     cena.add(objeto);
     const camera = new PerspectiveCamera(45, 1, 0.01, 100);
@@ -147,7 +154,7 @@ describe('nomeDaMalhaNoPonto', () => {
       camera.lookAt(alvo);
       camera.updateMatrixWorld(true);
 
-      expect(nomeDaMalhaNoPonto({ x: 0, y: 0 }, camera, cena as Object3D)).toBe('prova-cabedal-cano-alto');
+      expect(nomeDaMalhaNoPonto({ x: 0, y: 0 }, camera, cena as Object3D)).toBe('prova-sola-tratorada');
     }
   });
 });

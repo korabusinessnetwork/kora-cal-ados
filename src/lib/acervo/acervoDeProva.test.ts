@@ -20,12 +20,13 @@ describe('catalogoDeProva', () => {
     // A ordem da lista é a anatomia de baixo para cima, e `assenta_sobre` é o que `empilharComposicao`
     // lê para saber quem sobe quando a peça de baixo muda de tamanho. Sola sem `assenta_sobre` não é
     // esquecimento: é a peça que assenta no chão, e trocar isso por 'chao' inventaria uma categoria.
+    // O cadarço tem apoio `superficie` porque deita no peito do pé, abaixo do topo do cabedal (D5).
     expect(CATALOGO.formas).toHaveLength(1);
     expect(CATALOGO.formas[0]?.id).toBe(FORMA_DE_PROVA);
     expect(CATALOGO.formas[0]?.categorias).toEqual([
       { categoria: 'sola', obrigatoria: true },
       { categoria: 'cabedal', obrigatoria: true, assenta_sobre: 'sola' },
-      { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal' },
+      { categoria: 'cadarco', obrigatoria: false, assenta_sobre: 'cabedal', apoio: 'superficie' },
     ]);
   });
 
@@ -128,15 +129,20 @@ describe('as 5 peças são glTF 2.0 válido pelo validador de referência da Khr
     expect(issues.numWarnings).toBe(0);
   });
 
-  it.each(IDS)('%s continua válido com o parâmetro no extremo da faixa', async (id) => {
-    const peca = CATALOGO.pecas.find((candidata) => candidata.id === id);
-    const parametro = peca?.parametros[0];
-    const texto = gltfDaPecaDeProva(id, { [parametro?.nome ?? '']: parametro?.maximo ?? 0 });
-    const { issues } = await validateBytes(new TextEncoder().encode(texto));
+  // Os dois extremos, e não só o máximo (critério 1 da Fase G): o mínimo é a metade da faixa em que
+  // a escala do nó fica abaixo de 1, e é a outra metade do que o dono pode pedir.
+  it.each(IDS.flatMap((id) => [[id, 'minimo'] as const, [id, 'maximo'] as const]))(
+    '%s continua válido com o parâmetro no %s da faixa',
+    async (id, extremo) => {
+      const peca = CATALOGO.pecas.find((candidata) => candidata.id === id);
+      const parametro = peca?.parametros[0];
+      const texto = gltfDaPecaDeProva(id, { [parametro?.nome ?? '']: parametro?.[extremo] ?? 0 });
+      const { issues } = await validateBytes(new TextEncoder().encode(texto));
 
-    expect(issues.numErrors).toBe(0);
-    expect(issues.numWarnings).toBe(0);
-  });
+      expect(issues.numErrors).toBe(0);
+      expect(issues.numWarnings).toBe(0);
+    },
+  );
 });
 
 describe('as peças já nascem canônicas: normalizar é um no-op', () => {

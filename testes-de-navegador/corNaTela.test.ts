@@ -62,8 +62,17 @@ function faceDaPeca(medida: Medida, hexPedido: string): Grupo | undefined {
 
   // Folga de saturação aberta no peneiramento: aqui a pergunta é só "esta face é desta peça?".
   // O julgamento de saturação vem depois, sobre a face escolhida, e é ele que vale.
+  //
+  // Grupo com menos de 1% dos pixels pintados não é face, é franja: o pixel da borda entre duas
+  // peças, meio de uma cor e meio da outra. Enquanto o acervo era de caixas, a face mais saturada
+  // era sempre uma face grande. Com o cabedal curvo (Fase G) apareceram grupos azuis de 30 a 40
+  // pixels mais saturados que as faces, na borda com a sola, e a contagem deles muda quando a sola
+  // muda de cor, porque metade de cada pixel ali É a sola. Perguntar a eles fazia "trocar a cor
+  // da sola mexeu no cabedal" reprovar sem o cabedal ter mudado (medido em 2026-09-14: 37 contra
+  // 46 pixels).
+  const minimoDeUmaFace = medida.pintados * 0.01;
   const candidatas = medida.grupos.filter(
-    (grupo) => corConfere(pedida, grupo, { saturacao: 1 }).confere,
+    (grupo) => grupo.pixels >= minimoDeUmaFace && corConfere(pedida, grupo, { saturacao: 1 }).confere,
   );
 
   return candidatas.reduce<Grupo | undefined>(
