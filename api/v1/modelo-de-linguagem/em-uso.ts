@@ -13,9 +13,8 @@ import type { FornecedorEmUso } from '../../../src/lib/modeloDeLinguagem/tiposDo
 import { autenticarSessaoDoUsuario } from '../../_lib/autenticarSessaoDoUsuario';
 import { criarClienteDeServico } from '../../_lib/clienteDeServico';
 import { carregarConfiguracaoVisivel } from '../../_lib/configuracaoDoModeloDeLinguagem';
-import { exigirMetodo, lerTenantDaUrl } from '../../_lib/pedidoDoModeloDeLinguagem';
+import { exigirMetodo, lerTenantDaUrl, falhaDaRotaDoModelo } from '../../_lib/pedidoDoModeloDeLinguagem';
 import { respostaDeErro, respostaDeSucessoEmJson } from '../../_lib/respostaDaApi';
-import { traduzirParaFalhaDaApi } from '../../_lib/traduzirParaFalhaDaApi';
 
 export default {
   async fetch(pedido: Request, clienteInjetado?: SupabaseClient): Promise<Response> {
@@ -38,7 +37,7 @@ export default {
 
       return respostaDeSucessoEmJson({ fornecedor_em_uso: emUso });
     } catch (erro) {
-      return respostaDeErro(traduzirParaFalhaDaApi(erro));
+      return respostaDeErro(falhaDaRotaDoModelo('em-uso', erro));
     }
   },
 };

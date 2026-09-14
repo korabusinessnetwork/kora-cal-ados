@@ -13,7 +13,8 @@
 import { INSTRUCAO_AO_MODELO } from '../../src/lib/composicao/gerarComposicaoPorPrompt';
 import { montarCatalogoParaModelo } from '../../src/lib/composicao/montarCatalogoParaModelo';
 import type { CatalogoDoAcervo, Forma } from '../../src/lib/composicao/tiposDaComposicao';
-import { criarFalhaDeTransporte } from './traduzirParaFalhaDaApi';
+import { FalhaDaApi } from './tiposDaApi';
+import { criarFalhaDeTransporte, traduzirParaFalhaDaApi } from './traduzirParaFalhaDaApi';
 import { ehUuid } from './autenticarSessaoDoUsuario';
 
 /** O tenant vem da query string, e é conferido como uuid antes de qualquer consulta. */
@@ -69,4 +70,29 @@ export function acharForma(catalogo: CatalogoDoAcervo, formaId: unknown): Forma 
     );
   }
   return forma;
+}
+
+/** O 500 destas rotas. A mensagem da tabela fala em "variante", que é a outra API. */
+export const MENSAGEM_DE_FALHA_INTERNA_DO_MODELO =
+  'Erro interno no servidor. O detalhe ficou no nosso log; se persistir, informe o horário.';
+
+/**
+ * Qualquer erro do handler vira a resposta de erro. O que não é recusa nossa (erro do banco, código
+ * quebrado) vai para o log com a rota e a mensagem, e a resposta sai com a frase fixa.
+ *
+ * Existe porque o 500 dizia "o detalhe ficou no nosso log" sem ninguém ter escrito log nenhum: o
+ * erro de 2026-09-14 ao trocar o modelo só foi achado lendo o código. A mensagem logada é a da
+ * exceção, que nestas rotas vem do Supabase ou da cifra; a chave do fornecedor nunca é lançada em
+ * erro (`chamarFornecedorDeModeloDeLinguagem.ts`, regra 1).
+ */
+export function falhaDaRotaDoModelo(
+  rota: string,
+  erro: unknown,
+  escrever: (linha: string) => void = (linha) => console.error(linha),
+): FalhaDaApi {
+  const falha = traduzirParaFalhaDaApi(erro);
+  if (falha.codigo !== 'FALHA_INTERNA') return falha;
+  const detalhe = erro instanceof Error ? `${erro.name}: ${erro.message}` : typeof erro;
+  escrever(`[modelo-de-linguagem] rota=${rota} codigo=FALHA_INTERNA detalhe=${JSON.stringify(detalhe.slice(0, 500))}`);
+  return new FalhaDaApi('FALHA_INTERNA', falha.status, MENSAGEM_DE_FALHA_INTERNA_DO_MODELO);
 }

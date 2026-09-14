@@ -110,6 +110,17 @@ describe('a chamada ao fornecedor, o que dá errado', () => {
     expect(await codigoAoChamar(new Response('{"choices":[]}', { status: 200 }))).toBe('FORNECEDOR_NAO_RESPONDEU');
   });
 
+  it('no teste de conexão, 200 com conteúdo vazio de modelo que raciocina conta como aceito', async () => {
+    const { buscar } = buscadorQueDevolve(respostaDeChat(''));
+    await expect(chamarFornecedorDeModeloDeLinguagem({ ...PEDIDO, exigirConteudo: false }, buscar)).resolves.toMatchObject({ texto: '' });
+
+    // Mas o que não é resposta de chat continua recusado, mesmo no teste.
+    const semEscolhas = buscadorQueDevolve(new Response('{"choices":[]}', { status: 200 }));
+    await expect(
+      chamarFornecedorDeModeloDeLinguagem({ ...PEDIDO, exigirConteudo: false }, semEscolhas.buscar),
+    ).rejects.toMatchObject({ codigo: 'FORNECEDOR_NAO_RESPONDEU' });
+  });
+
   it('NADA do corpo do fornecedor entra na mensagem, nem a chave', async () => {
     // O modo de falha que este teste existe para impedir: fornecedor que devolve o cabeçalho
     // recebido (com a chave dentro) e a gente repassa isso para a tela e para o log.

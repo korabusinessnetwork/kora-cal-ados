@@ -46,7 +46,9 @@ export const FORNECEDORES_DE_MODELO_DE_LINGUAGEM: readonly FornecedorDeModeloDeL
     nome: 'Groq',
     enderecoBase: 'https://api.groq.com/openai/v1',
     linkDaChave: 'https://console.groq.com/keys',
-    modelosSugeridos: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
+    // Os Llama saíram do plano grátis em 2026-08-16 (a Groq devolve 404 para eles). Os GPT OSS são
+    // modelos que raciocinam antes de responder: por isso o teto de tokens da chamada é folgado.
+    modelosSugeridos: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'],
     planoGratis: 'Grátis com limite por minuto e por dia, e muito rápido.',
   },
   {

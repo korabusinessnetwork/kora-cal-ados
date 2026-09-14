@@ -14,9 +14,9 @@ import { autenticarSessaoDoUsuario } from '../../_lib/autenticarSessaoDoUsuario'
 import { criarClienteDeServico } from '../../_lib/clienteDeServico';
 import { carregarConfiguracaoVisivel } from '../../_lib/configuracaoDoModeloDeLinguagem';
 import { TABELA_DO_USO } from '../../_lib/limitesDoModeloDeLinguagem';
-import { exigirMetodo, lerTenantDaUrl } from '../../_lib/pedidoDoModeloDeLinguagem';
+import { exigirMetodo, lerTenantDaUrl, falhaDaRotaDoModelo } from '../../_lib/pedidoDoModeloDeLinguagem';
 import { respostaDeErro, respostaDeSucessoEmJson } from '../../_lib/respostaDaApi';
-import { criarFalhaDeTransporte, traduzirParaFalhaDaApi } from '../../_lib/traduzirParaFalhaDaApi';
+import { criarFalhaDeTransporte } from '../../_lib/traduzirParaFalhaDaApi';
 
 /** Teto de linhas lidas de um mês. Ver o comentário no `.limit` abaixo. */
 const LIMITE_DE_LINHAS = 5000;
@@ -62,7 +62,7 @@ export default {
         completo: chamadas.length < LIMITE_DE_LINHAS,
       });
     } catch (erro) {
-      return respostaDeErro(traduzirParaFalhaDaApi(erro));
+      return respostaDeErro(falhaDaRotaDoModelo('uso', erro));
     }
   },
 };

@@ -21,17 +21,18 @@ import { lerChaveDeCifra } from '../../_lib/cifraDaChaveDoFornecedor';
 import { criarClienteDeServico } from '../../_lib/clienteDeServico';
 import { carregarConfiguracaoParaUso } from '../../_lib/configuracaoDoModeloDeLinguagem';
 import { conferirLimitesDeUso } from '../../_lib/limitesDoModeloDeLinguagem';
-import { exigirMetodo, lerTenantDaUrl } from '../../_lib/pedidoDoModeloDeLinguagem';
+import { exigirMetodo, lerTenantDaUrl, falhaDaRotaDoModelo } from '../../_lib/pedidoDoModeloDeLinguagem';
 import { registrarUsoDoModeloDeLinguagem } from '../../_lib/registrarUsoDoModeloDeLinguagem';
 import { respostaDeErro, respostaDeSucessoEmJson } from '../../_lib/respostaDaApi';
-import { FalhaDaApi } from '../../_lib/tiposDaApi';
 import { traduzirParaFalhaDaApi } from '../../_lib/traduzirParaFalhaDaApi';
 import { verificarEnderecoPublico } from '../../_lib/verificarEnderecoPublico';
 
 /** Curto de propósito: o que se quer saber é se a chave vale, não o que o modelo sabe responder. */
 const INSTRUCAO_DO_TESTE = 'Responda apenas com a palavra OK.';
 const PROMPT_DO_TESTE = 'teste de conexão';
-const MAXIMO_DE_TOKENS_DO_TESTE = 5;
+// Não é 5: modelo que raciocina gasta tokens pensando antes do "OK", e com teto baixo a Groq recusa
+// ou devolve vazio. O custo continua de centavos de centavo.
+const MAXIMO_DE_TOKENS_DO_TESTE = 300;
 
 export default {
   async fetch(pedido: Request, clienteInjetado?: SupabaseClient, buscar?: Buscador): Promise<Response> {
@@ -55,6 +56,7 @@ export default {
             instrucao: INSTRUCAO_DO_TESTE,
             prompt: PROMPT_DO_TESTE,
             maximoDeTokens: MAXIMO_DE_TOKENS_DO_TESTE,
+            exigirConteudo: false,
           },
           buscar,
         );
@@ -92,7 +94,7 @@ export default {
         throw falha;
       }
     } catch (erro) {
-      return respostaDeErro(erro instanceof FalhaDaApi ? erro : traduzirParaFalhaDaApi(erro));
+      return respostaDeErro(falhaDaRotaDoModelo('testar', erro));
     }
   },
 };

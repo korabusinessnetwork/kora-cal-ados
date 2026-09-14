@@ -29,6 +29,12 @@ export interface PedidoAoFornecedor {
   prompt: string;
   /** Teto de tokens da resposta. Composição cabe folgada; serve para o custo não explodir. */
   maximoDeTokens?: number;
+  /**
+   * `false` só no teste de conexão. Modelo que raciocina gasta o teto pensando e pode devolver 200
+   * com o conteúdo vazio; para o teste isso já prova que chave e modelo foram aceitos. Na geração,
+   * conteúdo vazio continua sendo falha, porque não há composição para montar.
+   */
+  exigirConteudo?: boolean;
 }
 
 export interface RespostaDoFornecedor {
@@ -38,7 +44,8 @@ export interface RespostaDoFornecedor {
 }
 
 export const SEGUNDOS_DE_ESPERA = 25;
-const MAXIMO_DE_TOKENS_PADRAO = 900;
+// Folgado porque modelo que raciocina (GPT OSS, Qwen) conta o raciocínio neste teto antes do JSON.
+const MAXIMO_DE_TOKENS_PADRAO = 4000;
 /** Resposta gigante de um endereço que não é fornecedor nenhum não vira memória nossa. */
 const MAXIMO_DE_CARACTERES_DA_RESPOSTA = 200_000;
 
@@ -90,7 +97,7 @@ export async function chamarFornecedorDeModeloDeLinguagem(
     );
   }
 
-  const texto = conteudoDaResposta(corpo);
+  const texto = conteudoDaResposta(corpo) ?? (pedido.exigirConteudo === false && ehRespostaDeChat(corpo) ? '' : null);
   if (texto === null) {
     throw criarFalhaDeTransporte(
       'FORNECEDOR_NAO_RESPONDEU',
@@ -119,6 +126,12 @@ function falhaDoStatus(status: number) {
   // 3xx cai aqui por causa do `redirect: 'manual'`, e é para cair: seguir o desvio é o caminho
   // mais curto de um endereço público para um interno.
   return criarFalhaDeTransporte('FORNECEDOR_NAO_RESPONDEU');
+}
+
+/** Tem `choices[0].message`: é resposta de chat, mesmo que o conteúdo tenha vindo vazio. */
+function ehRespostaDeChat(corpo: unknown): boolean {
+  const escolhas = (corpo as { choices?: unknown } | null)?.choices;
+  return Array.isArray(escolhas) && typeof (escolhas[0] as { message?: unknown } | undefined)?.message === 'object';
 }
 
 /** `choices[0].message.content`, tolerando o conteúdo em partes que alguns fornecedores devolvem. */

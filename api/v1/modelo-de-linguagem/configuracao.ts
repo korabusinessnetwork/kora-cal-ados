@@ -18,9 +18,9 @@ import {
   carregarConfiguracaoVisivel,
   gravarConfiguracao,
 } from '../../_lib/configuracaoDoModeloDeLinguagem';
-import { exigirMetodo, lerCorpoJson, lerTenantDaUrl } from '../../_lib/pedidoDoModeloDeLinguagem';
+import { exigirMetodo, lerCorpoJson, lerTenantDaUrl, falhaDaRotaDoModelo } from '../../_lib/pedidoDoModeloDeLinguagem';
 import { respostaDeErro, respostaDeSucessoEmJson } from '../../_lib/respostaDaApi';
-import { criarFalhaDeTransporte, traduzirParaFalhaDaApi } from '../../_lib/traduzirParaFalhaDaApi';
+import { criarFalhaDeTransporte } from '../../_lib/traduzirParaFalhaDaApi';
 import { verificarEnderecoPublico } from '../../_lib/verificarEnderecoPublico';
 
 const METODOS = ['GET', 'PUT', 'DELETE'];
@@ -64,7 +64,7 @@ export default {
       );
       return respostaDeSucessoEmJson({ configuracao });
     } catch (erro) {
-      return respostaDeErro(traduzirParaFalhaDaApi(erro));
+      return respostaDeErro(falhaDaRotaDoModelo('configuracao', erro));
     }
   },
 };

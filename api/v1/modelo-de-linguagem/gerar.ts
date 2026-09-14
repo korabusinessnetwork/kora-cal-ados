@@ -37,10 +37,10 @@ import {
   lerCorpoJson,
   lerTenantDaUrl,
   montarInstrucaoComCatalogo,
+  falhaDaRotaDoModelo,
 } from '../../_lib/pedidoDoModeloDeLinguagem';
 import { registrarUsoDoModeloDeLinguagem } from '../../_lib/registrarUsoDoModeloDeLinguagem';
 import { respostaDeErro, respostaDeSucessoEmJson } from '../../_lib/respostaDaApi';
-import { FalhaDaApi } from '../../_lib/tiposDaApi';
 import { criarFalhaDeTransporte, traduzirParaFalhaDaApi } from '../../_lib/traduzirParaFalhaDaApi';
 import { verificarEnderecoPublico } from '../../_lib/verificarEnderecoPublico';
 
@@ -116,7 +116,7 @@ export default {
         throw falha;
       }
     } catch (erro) {
-      return respostaDeErro(erro instanceof FalhaDaApi ? erro : traduzirParaFalhaDaApi(erro));
+      return respostaDeErro(falhaDaRotaDoModelo('gerar', erro));
     }
   },
 };
