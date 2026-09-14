@@ -174,4 +174,40 @@ describe('campo de cor da categoria', () => {
     expect(recebidas).toEqual(['#00FF00']);
     expect(campoDeTexto().value).toBe('#00FF00');
   });
+
+  it('cor trocada de fora (composição gerada pelo prompt) reescreve o texto (o erro de 2026-09-14)', async () => {
+    // O campo guardava o texto só no primeiro render. Gerar pelo prompt pintava a sola de azul, o
+    // seletor ao lado ficava azul, e o texto seguia dizendo #555555: a tela mostrava duas cores.
+    await montar('#555555');
+    await remontar('#1E3A6E');
+
+    expect(campoDeTexto().value).toBe('#1E3A6E');
+    expect(erro()).toBeNull();
+    expect(recebidas).toEqual([]);
+  });
+
+  it('a própria digitação voltando como cor não reescreve o texto de quem digita', async () => {
+    // `#f00` sobe como `#FF0000` e volta pelo pai. Trocar o texto nessa volta mexeria no campo
+    // enquanto a pessoa ainda está nele.
+    await montar();
+    await digitar(campoDeTexto(), '#f00');
+    await remontar('#FF0000');
+
+    expect(campoDeTexto().value).toBe('#f00');
+  });
 });
+
+/** Renderiza de novo na mesma raiz, como o pai faz quando a composição muda. */
+async function remontar(cor: string) {
+  await act(async () => {
+    raiz?.render(
+      <CampoDeCorDaCategoria
+        categoria="sola"
+        cor={cor}
+        aoTrocar={(nova) => {
+          recebidas.push(nova);
+        }}
+      />,
+    );
+  });
+}

@@ -49,9 +49,20 @@ export function CampoDeCorDaCategoria({ categoria, cor, aoTrocar }: CampoDeCorDa
   // O texto cru do campo, separado da cor em vigor. Sem essa separação, cada tecla mandaria um
   // valor pela metade para o motor e o calçado piscaria durante a digitação.
   const [texto, setTexto] = useState(cor);
+  const [corVista, setCorVista] = useState(cor);
 
   const estado = estadoDoHexDigitado(texto);
   const completo = estado === 'completo';
+
+  // A cor também muda de FORA: gerar pelo prompt, colar uma composição, trocar a peça. Sem isto o
+  // texto ficava na cor do primeiro render, com o seletor ao lado e a peça já em outra, e a tela
+  // mostrava duas cores para a mesma zona (princípio nº1). O ajuste é durante o render, e não num
+  // efeito, para não haver um quadro com as duas cores. A volta da própria digitação (`#f00` que
+  // sobe como `#FF0000`) não reescreve o texto de quem ainda está no campo.
+  if (cor !== corVista) {
+    setCorVista(cor);
+    if (!(completo && validarCor(texto, categoria) === cor)) setTexto(cor);
+  }
   const idDoErro = `composicao-hex-erro-${categoria}`;
 
   function digitar(valor: string) {
