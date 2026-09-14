@@ -640,7 +640,7 @@ logado não diz "falta o #", evidência só de código).
 
 ## Fase F: fornecedores de modelo de linguagem por marca, e o gasto (2026-09-14, D13)
 
-- [ ] F01 Termos no glossário | trilha: docs | depende: nenhum | pronto quando: fornecedor de modelo de linguagem, chave do fornecedor, API própria, uso do modelo de linguagem e teto mensal estão no glossário antes do código
+- [x] F01 Termos no glossário | trilha: docs | depende: nenhum | pronto quando: fornecedor de modelo de linguagem, chave do fornecedor, API própria, uso do modelo de linguagem e teto mensal estão no glossário antes do código
 - [ ] F02 Catálogo de fornecedores e regras puras | trilha: ia | depende: F01 | pronto quando: `src/lib/modeloDeLinguagem/` tem os fornecedores grátis com endereço e link da chave, a validação da API própria (https, sem IP, sem localhost), o cálculo do custo estimado e a validação do que o owner envia; tudo com teste
 - [ ] F03 Migration das duas tabelas | trilha: dados | depende: F01 | pronto quando: `20260914_modelo_de_linguagem_por_tenant.sql` cria a configuração e o uso com RLS ligada, sem grant nenhum para anon e authenticated, e os testes de migration (`rlsEmTodaTabela`, `indiceEmChaveEstrangeira`) passam
 - [ ] F04 Peças do servidor | trilha: api | depende: F02, F03 | pronto quando: cifra da chave, autenticação da sessão do usuário com papel, chamada ao fornecedor com timeout e erro legível sem vazar chave, guarda de SSRF com DNS, limite por minuto, por dia e teto mensal, registro de uso; tudo com teste e fetch injetado
