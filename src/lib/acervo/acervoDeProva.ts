@@ -11,7 +11,9 @@
 //
 // Todas as medidas em metros, que é a unidade que o glTF 2.0 fixa. Um tênis 42 tem uns 0,28 m.
 
+import { geometriaDeCabedal } from './geometriaDeCabedal';
 import { geometriaDeSola } from './geometriaDeSola';
+import { CANO_ALTO, CANO_BAIXO } from './perfilDoCabedal';
 import { montarGltfDePeca, type DescricaoDaPecaDeProva } from './montarGltfDePeca';
 import type { CatalogoDoAcervo, PecaDoAcervo } from '../composicao/tiposDaComposicao';
 
@@ -29,6 +31,22 @@ const ALTURA_DA_SOLA = 0.018;
  * faria a altura modelada deixar de bater com o padrão do parâmetro.
  */
 const ALTURA_DO_CRAVO = 0.007;
+
+/**
+ * As medidas dos dois cabedais, escritas uma vez para os dois.
+ *
+ * Comprimento, largura e peito do pé **precisam** ser iguais nos dois cabedais: é o que faz o
+ * trecho onde o cadarço deita ser idêntico (decisão D6 da spec `acervo-com-cara-de-tenis`). Uma
+ * constante só impede que alguém ajuste um cabedal e esqueça o outro.
+ *
+ * A largura é menor que a da sola plana (0,1 m) com folga: o topo da sola recua um pouco por causa
+ * do bisel, e o contorno do cabedal precisa caber inteiro dentro dele, estação por estação.
+ */
+const COMPRIMENTO_DO_CABEDAL = 0.26;
+const LARGURA_DO_CABEDAL = 0.09;
+
+/** A altura do peito do pé no começo dele, onde a boca termina. Ver `perfilDoCabedal.ts`. */
+const ALTURA_DO_PEITO = 0.064;
 
 /**
  * As 5 peças, e a razão de cada número.
@@ -66,19 +84,23 @@ const PECAS: readonly DescricaoDaPecaDeProva[] = [
     id: 'prova-cabedal-baixo',
     categoria: 'cabedal',
     rotulo: 'Cabedal baixo',
-    comprimento: 0.26,
-    largura: 0.095,
+    comprimento: COMPRIMENTO_DO_CABEDAL,
+    largura: LARGURA_DO_CABEDAL,
     altura: { nome: 'altura-do-cano', minimo: 0.05, maximo: 0.12, padrao: 0.075 },
     assento: [0, ALTURA_DA_SOLA, 0],
+    modelar: (medidas) => geometriaDeCabedal({ ...medidas, alturaDoPeito: ALTURA_DO_PEITO, cano: CANO_BAIXO }),
+    materialDeDuplaFace: true,
   },
   {
     id: 'prova-cabedal-cano-alto',
     categoria: 'cabedal',
     rotulo: 'Cabedal cano alto',
-    comprimento: 0.26,
-    largura: 0.095,
+    comprimento: COMPRIMENTO_DO_CABEDAL,
+    largura: LARGURA_DO_CABEDAL,
     altura: { nome: 'altura-do-cano', minimo: 0.1, maximo: 0.22, padrao: 0.14 },
     assento: [0, ALTURA_DA_SOLA, 0],
+    modelar: (medidas) => geometriaDeCabedal({ ...medidas, alturaDoPeito: ALTURA_DO_PEITO, cano: CANO_ALTO }),
+    materialDeDuplaFace: true,
   },
   {
     id: 'prova-cadarco-reto',

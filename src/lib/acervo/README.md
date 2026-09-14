@@ -16,7 +16,10 @@ glTF e mais nada.
 | `contornoDoPe.ts` | O **contorno do pé** por **estações**: meia largura do lado de dentro e do lado de fora, pontas em zero exato | comprimento, largura, estações → estações |
 | `extrusaoDoContorno.ts` | Pilha de contornos vira sólido fechado: tampas com vértices próprios (quina) e parede com vértices compartilhados (lisa) | níveis → malha crua |
 | `geometriaDeSola.ts` | A sola: contorno do pé extrudado com bisel e barriga na lateral, e **cravos** opcionais dentro da espessura | medidas da sola → malha de peça |
-| `montarGltfDePeca.ts` | Chama o modelador da peça (`modelar`, caixa quando ausente) e embrulha a geometria num glTF 2.0 com buffer em `data:` URI, nó/malha/material próprios, e aplica o parâmetro como escala | descrição de peça + parâmetros → texto glTF |
+| `perfilDoCabedal.ts` | A **crista** do cabedal estação por estação: o cano (que muda entre cabedal baixo e cano alto) e o **peito do pé** (igual nos dois), com o ponto mais alto resolvido para ser exatamente a altura pedida | posições, alcance, alturas, cano → cristas em metros |
+| `geometriaDeCabedal.ts` | O cabedal: casca em arco de superelipse sobre o contorno do pé, aberta embaixo e na **boca** | medidas do cabedal → malha de peça |
+| `cabedalSobreSola.test.ts` | Confere cabedal contra sola **lidos do glTF gravado**: base no plano do topo da sola, contorno dentro do topo dela, dupla face só nos cabedais | - |
+| `montarGltfDePeca.ts` | Chama o modelador da peça (`modelar`, caixa quando ausente) e embrulha a geometria num glTF 2.0 com buffer em `data:` URI, nó/malha/material próprios (dupla face quando `materialDeDuplaFace`), e aplica o parâmetro como escala | descrição de peça + parâmetros → texto glTF |
 | `acervoDeProva.ts` | As 5 peças descritas, o `catalogoDeProva()` que `validarComposicao` consome e o `gltfDaPecaDeProva()` | id de peça → texto glTF |
 | `acervoDeProva.ts` (cont.) | `composicaoDeProva()` devolve `unknown`, de propósito: a demo entra por `validarComposicao` pelo mesmo portão que a saída de um modelo de linguagem | - |
 | `gltfValidator.d.ts` | Tipos do validador de referência da Khronos, que é compilado de Dart e não traz os próprios | - |
@@ -33,9 +36,14 @@ carrega geometria, coisa que o README dele afirma. Aqui é o oposto: só geometr
 ## Da caixa para o tênis (Fase G)
 
 A caixa provou a esteira. O passo seguinte (spec `specs/acervo-com-cara-de-tenis.md`) é o
-calçado **parecer um tênis**, ainda por código: as solas já são o contorno do pé extrudado, e a
-sola tratorada tem cravos. O contrato não muda: um nó, uma malha, um material sem cor, base em
-Y = 0, parâmetro como escala em Y e geometria idêntica byte a byte entre dois valores.
+calçado **parecer um tênis**, ainda por código: as solas já são o contorno do pé extrudado, a
+sola tratorada tem cravos, e os dois cabedais são cascas com boca aberta sobre o mesmo peito do
+pé. O contrato não muda: um nó, uma malha, um material sem cor, base em Y = 0, parâmetro como
+escala em Y e geometria idêntica byte a byte entre dois valores.
+
+O cabedal é a única peça com material de dupla face (`doubleSided`), porque é a única aberta: pela
+boca se vê o lado de dentro dele. Peça fechada continua de face única, que é o que deixa uma face
+do avesso sumir da tela e ser notada.
 
 A caixa continua sendo o modelador padrão de `montarGltfDePeca`, de propósito: é a peça mais
 simples que exercita buffer, accessor, validador e normalização, e os testes daquele arquivo

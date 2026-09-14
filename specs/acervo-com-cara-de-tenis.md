@@ -54,7 +54,7 @@ do palco fica do lado errado e ninguém sabe dizer por quê.
 
 ### D4. O cabedal é aberto na boca, e por isso o material dele é de dupla face
 
-A boca do pé (o colarinho) é um buraco de verdade. Olhando por ela se vê o lado de dentro da parede,
+A boca do cabedal é um buraco de verdade. Olhando por ela se vê o lado de dentro da parede,
 que o renderizador descartaria sem `doubleSided: true`, e o calçado pareceria oco e transparente.
 Acabamento continua sendo propriedade física do material, e continua sem cor.
 
@@ -62,8 +62,8 @@ Acabamento continua sendo propriedade física do material, e continua sem cor.
 
 Uma caixa assenta no topo da caixa de baixo, e a regra de T14 (`assenta_sobre`) resolve isso.
 Um cadarço não assenta no topo do cabedal: ele deita sobre o peito do pé, bem abaixo do ponto mais
-alto (que é a língua no cabedal baixo e o colarinho no cano alto). Com a regra antiga o cadarço
-flutuaria na altura do colarinho.
+alto (que é a frente da boca no cabedal baixo e a borda de trás da boca no cano alto). Com a regra antiga o cadarço
+flutuaria na altura da borda da boca.
 
 `CategoriaDaForma` ganha `apoio?: 'topo' | 'superficie'`, com `'topo'` por padrão, o que deixa toda
 forma existente montando exatamente como antes.
@@ -83,7 +83,7 @@ assentar no topo do que existe é o que já acontecia antes.
 
 ### D6. Os dois cabedais têm o **mesmo peito do pé**
 
-O cano alto é o cabedal baixo com o colarinho e a língua mais altos, e o trecho onde o cadarço deita
+O cano alto é o cabedal baixo com a borda e a frente da boca mais altas, e o trecho onde o cadarço deita
 é idêntico nos dois. É o que acontece numa forma de verdade (a forma é a mesma, o cano é que muda), e
 é o que faz um cadarço só servir nos dois cabedais sem se mexer.
 
@@ -112,7 +112,8 @@ por espessura. Fica registrado como pendência, com o desencontro medido em test
    continua valendo para as quatro).
 9. A pegada do cabedal cabe inteira dentro do topo da sola plana, em toda estação.
 10. O cabedal não tem vão nem interpenetração com a sola: a base dele está no plano do topo da sola.
-11. O cabedal tem boca: o ponto mais alto do cabedal baixo é a língua; não existe teto sobre o
+11. O cabedal tem boca: o ponto mais alto do cabedal baixo é a frente da boca (onde num tênis de
+    verdade fica a língua, que aqui é parte do cabedal e não peça); não existe teto sobre o
     calcanhar.
 12. Cabedal baixo e cano alto coincidem no trecho do peito do pé onde o cadarço deita.
 13. O cadarço deita sobre o cabedal: todo ponto de apoio do cadarço fica a menos de 1 mm da

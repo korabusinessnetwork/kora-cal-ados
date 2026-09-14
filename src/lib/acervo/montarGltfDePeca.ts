@@ -65,6 +65,16 @@ export interface DescricaoDaPecaDeProva {
    * defeito no layout de buffer aparece aqui, sem os dois se misturarem.
    */
   modelar?: ModeladorDePeca;
+  /**
+   * A peça é uma casca aberta, e o lado de dentro dela aparece. Vira `doubleSided: true` no
+   * material.
+   *
+   * É opcional e desligado por padrão porque dupla face custa o dobro de desenho e esconde defeito
+   * de sentido de triângulo: num sólido fechado, uma face virada do avesso ficaria invisível e
+   * alguém notaria; com dupla face ela aparece normalmente e o defeito passa. Só quem é aberto de
+   * verdade (o cabedal, pela boca) liga.
+   */
+  materialDeDuplaFace?: boolean;
 }
 
 /** Constantes do glTF 2.0, escritas por extenso porque número solto no meio do JSON não se lê. */
@@ -139,7 +149,13 @@ export function montarGltfDePeca(
       // cor de verdade passaria calada. Omitir o campo mantém "só o recolor escreve cor no
       // glTF" literalmente verdadeiro, em vez de verdadeiro com exceção.
       materials: [
-        { name: peca.id, pbrMetallicRoughness: { metallicFactor: 0, roughnessFactor: 0.9 } },
+        {
+          name: peca.id,
+          pbrMetallicRoughness: { metallicFactor: 0, roughnessFactor: 0.9 },
+          // Campo ausente e não `false` quando desligado: `false` é o padrão do glTF 2.0, e
+          // escrevê-lo mudaria o texto de toda peça que já existia sem mudar nada na tela.
+          ...(peca.materialDeDuplaFace === true ? { doubleSided: true } : {}),
+        },
       ],
       accessors: [
         {
