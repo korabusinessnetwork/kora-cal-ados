@@ -11,6 +11,7 @@
 //
 // Todas as medidas em metros, que é a unidade que o glTF 2.0 fixa. Um tênis 42 tem uns 0,28 m.
 
+import { geometriaDeSola } from './geometriaDeSola';
 import { montarGltfDePeca, type DescricaoDaPecaDeProva } from './montarGltfDePeca';
 import type { CatalogoDoAcervo, PecaDoAcervo } from '../composicao/tiposDaComposicao';
 
@@ -19,6 +20,15 @@ export const FORMA_DE_PROVA = 'prova-tenis-01';
 
 /** A altura da sola padrão, e o degrau em que o cabedal assenta. Ver `assento` abaixo. */
 const ALTURA_DA_SOLA = 0.018;
+
+/**
+ * A altura dos cravos da sola tratorada, em metros.
+ *
+ * Fica **dentro** da espessura da sola, não somada a ela: a tratorada de 30 mm tem 7 mm de cravo
+ * e 23 mm de laje. Somar mudaria a altura do calçado ao trocar de sola sem ninguém ter pedido, e
+ * faria a altura modelada deixar de bater com o padrão do parâmetro.
+ */
+const ALTURA_DO_CRAVO = 0.007;
 
 /**
  * As 5 peças, e a razão de cada número.
@@ -38,6 +48,7 @@ const PECAS: readonly DescricaoDaPecaDeProva[] = [
     largura: 0.1,
     altura: { nome: 'espessura', minimo: 0.01, maximo: 0.04, padrao: ALTURA_DA_SOLA },
     assento: [0, 0, 0],
+    modelar: geometriaDeSola,
   },
   {
     id: 'prova-sola-tratorada',
@@ -49,6 +60,7 @@ const PECAS: readonly DescricaoDaPecaDeProva[] = [
     largura: 0.108,
     altura: { nome: 'espessura', minimo: 0.015, maximo: 0.05, padrao: 0.03 },
     assento: [0, 0, 0],
+    modelar: (medidas) => geometriaDeSola({ ...medidas, alturaDoCravo: ALTURA_DO_CRAVO }),
   },
   {
     id: 'prova-cabedal-baixo',

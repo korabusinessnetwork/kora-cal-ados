@@ -11,7 +11,12 @@ glTF e mais nada.
 | Arquivo | Papel | Entrada → saída |
 |---|---|---|
 | `geometriaDeCaixa.ts` | A geometria grosseira, sem conhecer glTF: 24 vértices, 6 normais, 36 índices e o `min`/`max` do POSITION | dimensões em metros → listas de números |
-| `montarGltfDePeca.ts` | Embrulha a geometria num glTF 2.0 com buffer em `data:` URI, nó/malha/material próprios, e aplica o parâmetro como escala | descrição de peça + parâmetros → texto glTF |
+| `malhaDePeca.ts` | As contas que toda geometria faz do mesmo jeito: arredondar para float32, normais por área, `min`/`max` das posições gravadas, juntar e transladar partes | malha crua → malha de peça |
+| `interpolacaoMonotona.ts` | Curva suave pelos pontos de controle que não passa do valor deles (Fritsch e Carlson), para os perfis do calçado | pontos de controle → função |
+| `contornoDoPe.ts` | O **contorno do pé** por **estações**: meia largura do lado de dentro e do lado de fora, pontas em zero exato | comprimento, largura, estações → estações |
+| `extrusaoDoContorno.ts` | Pilha de contornos vira sólido fechado: tampas com vértices próprios (quina) e parede com vértices compartilhados (lisa) | níveis → malha crua |
+| `geometriaDeSola.ts` | A sola: contorno do pé extrudado com bisel e barriga na lateral, e **cravos** opcionais dentro da espessura | medidas da sola → malha de peça |
+| `montarGltfDePeca.ts` | Chama o modelador da peça (`modelar`, caixa quando ausente) e embrulha a geometria num glTF 2.0 com buffer em `data:` URI, nó/malha/material próprios, e aplica o parâmetro como escala | descrição de peça + parâmetros → texto glTF |
 | `acervoDeProva.ts` | As 5 peças descritas, o `catalogoDeProva()` que `validarComposicao` consome e o `gltfDaPecaDeProva()` | id de peça → texto glTF |
 | `acervoDeProva.ts` (cont.) | `composicaoDeProva()` devolve `unknown`, de propósito: a demo entra por `validarComposicao` pelo mesmo portão que a saída de um modelo de linguagem | - |
 | `gltfValidator.d.ts` | Tipos do validador de referência da Khronos, que é compilado de Dart e não traz os próprios | - |
@@ -24,6 +29,17 @@ mentir sobre o que vive lá.
 
 Também não vai em `src/lib/composicao/`, porque aquele módulo compara identificadores e nunca
 carrega geometria, coisa que o README dele afirma. Aqui é o oposto: só geometria.
+
+## Da caixa para o tênis (Fase G)
+
+A caixa provou a esteira. O passo seguinte (spec `specs/acervo-com-cara-de-tenis.md`) é o
+calçado **parecer um tênis**, ainda por código: as solas já são o contorno do pé extrudado, e a
+sola tratorada tem cravos. O contrato não muda: um nó, uma malha, um material sem cor, base em
+Y = 0, parâmetro como escala em Y e geometria idêntica byte a byte entre dois valores.
+
+A caixa continua sendo o modelador padrão de `montarGltfDePeca`, de propósito: é a peça mais
+simples que exercita buffer, accessor, validador e normalização, e os testes daquele arquivo
+usam ela. Defeito de geometria aparece nos testes da geometria; defeito de buffer, lá.
 
 ## Por que caixa, e por que isso basta
 

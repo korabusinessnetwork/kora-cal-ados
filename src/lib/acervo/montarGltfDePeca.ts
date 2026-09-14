@@ -11,14 +11,35 @@
 // tem que ser um no-op, e o teste afirma isso. Se um dia deixar de ser, o acervo de prova
 // deixou de imitar o acervo de verdade.
 
-import { geometriaDeCaixa, type GeometriaDeCaixa } from './geometriaDeCaixa';
+import { geometriaDeCaixa } from './geometriaDeCaixa';
+import type { MalhaDePeca } from './malhaDePeca';
 import type { ParametroDePeca } from '../composicao/tiposDaComposicao';
 
+/** As três medidas da caixa que a peça ocupa. É tudo que um modelador precisa saber de fora. */
+export interface MedidasDaPeca {
+  /** Metros, eixo X. */
+  comprimento: number;
+  /** Metros, eixo Y. */
+  altura: number;
+  /** Metros, eixo Z. */
+  largura: number;
+}
+
 /**
- * Uma peça do acervo de prova, do jeito que se descreve uma caixa.
+ * Quem transforma as medidas da peça em malha.
  *
- * `altura` é ao mesmo tempo o parâmetro de peça e a altura em que a caixa é modelada: o campo
- * `padrao` dele **é** a altura da caixa. Foi feito assim para que os dois não possam divergir,
+ * A função **precisa** entregar a peça com a base em Y = 0 e ocupando as medidas pedidas: o
+ * parâmetro escala o eixo Y do nó em volta da origem, e o resto do projeto mede a peça pela
+ * caixa dela. Um modelador que devolvesse a peça centrada na origem a afundaria no chão a cada
+ * milímetro de espessura.
+ */
+export type ModeladorDePeca = (medidas: MedidasDaPeca) => MalhaDePeca;
+
+/**
+ * Uma peça do acervo de prova, pelas medidas dela e por quem sabe modelá-la.
+ *
+ * `altura` é ao mesmo tempo o parâmetro de peça e a altura em que a peça é modelada: o campo
+ * `padrao` dele **é** a altura da malha. Foi feito assim para que os dois não possam divergir,
  * que é o defeito que este módulo mais convidaria (declarar a sola com 18 mm no catálogo e
  * modelá-la com 20 mm, e ninguém perceber porque as duas informações moram em lugares
  * diferentes).
@@ -31,10 +52,19 @@ export interface DescricaoDaPecaDeProva {
   comprimento: number;
   /** Metros, eixo Z. */
   largura: number;
-  /** O parâmetro que escala o eixo Y. O `padrao` dele é a altura modelada da caixa. */
+  /** O parâmetro que escala o eixo Y. O `padrao` dele é a altura modelada da peça. */
   altura: ParametroDePeca;
   /** Onde a peça assenta na forma, em metros. Vira a `translation` do nó. */
   assento: readonly [number, number, number];
+  /**
+   * Como a peça é modelada. Sem este campo, ela é uma caixa.
+   *
+   * A caixa continua sendo o padrão de propósito: ela é a peça mais simples que ainda exercita
+   * todo o caminho (buffer, accessor, validador, normalização), e é ela que os testes deste
+   * módulo usam. Assim um defeito na geometria de uma sola aparece nos testes da sola, e um
+   * defeito no layout de buffer aparece aqui, sem os dois se misturarem.
+   */
+  modelar?: ModeladorDePeca;
 }
 
 /** Constantes do glTF 2.0, escritas por extenso porque número solto no meio do JSON não se lê. */
@@ -46,7 +76,10 @@ const ELEMENT_ARRAY_BUFFER = 34963;
 const BYTES_POR_FLOAT = 4;
 const BYTES_POR_INDICE = 2;
 
-/** `unsigned short` guarda até este índice. Uma caixa usa 24, então sobra muito. */
+/**
+ * `unsigned short` guarda até este índice. Uma caixa usa 24 vértices e uma sola com cravos umas
+ * poucas centenas, então sobra muito.
+ */
 const MAIOR_INDICE_EM_16_BITS = 65535;
 
 /**
@@ -61,7 +94,8 @@ export function montarGltfDePeca(
   peca: DescricaoDaPecaDeProva,
   parametros: Readonly<Record<string, number>> = {},
 ): string {
-  const geometria = geometriaDeCaixa({
+  const modelar = peca.modelar ?? geometriaDeCaixa;
+  const geometria = modelar({
     comprimento: peca.comprimento,
     altura: peca.altura.padrao,
     largura: peca.largura,
@@ -141,8 +175,8 @@ export function montarGltfDePeca(
 }
 
 /**
- * Uma caixa usa 24 vértices, então esta guarda nunca dispara hoje. Ela existe pelo que
- * aconteceria se disparasse em silêncio: `setUint16` de um índice acima de 65535 **não lança**,
+ * Nenhuma peça do acervo de prova chega perto do limite, então esta guarda nunca dispara hoje.
+ * Ela existe pelo que aconteceria se disparasse em silêncio: `setUint16` de um índice acima de 65535 **não lança**,
  * ele trunca. O resultado seria um modelo com triângulos apontando para o vértice errado, que
  * abre no navegador e desenha uma coisa que ninguém modelou.
  *
@@ -192,12 +226,12 @@ interface BufferDaPeca {
  * Escreve os três trechos num buffer só, na ordem posições, normais, índices.
  *
  * **Alinhamento**: o `byteOffset` de um accessor precisa ser múltiplo do tamanho do componente
- * dele. Os dois trechos de float ocupam 288 bytes cada (24 vértices × 3 eixos × 4 bytes), então
- * os índices começam em 576, que é múltiplo de 2. Nada de preenchimento é necessário **para
- * esta forma de peça**, e é por isso que o deslocamento é calculado em vez de digitado: uma
- * peça com outra contagem de vértices continua alinhada sozinha.
+ * dele. Os dois trechos de float ocupam 12 bytes por vértice cada (3 eixos × 4 bytes), então o
+ * trecho de índices sempre começa num múltiplo de 4, que já é múltiplo de 2. O deslocamento é
+ * calculado em vez de digitado justamente por isso: peça de qualquer contagem de vértices,
+ * caixa ou sola com cravos, continua alinhada sozinha.
  */
-function montarBuffer(geometria: GeometriaDeCaixa): BufferDaPeca {
+function montarBuffer(geometria: MalhaDePeca): BufferDaPeca {
   const posicoes: Trecho = { deslocamento: 0, tamanho: geometria.posicoes.length * BYTES_POR_FLOAT };
   const normais: Trecho = {
     deslocamento: posicoes.tamanho,
