@@ -32,7 +32,13 @@ O texto original fica abaixo, como histórico.
 - **Como confirmar que funcionou:** a linha continua em `tenant_api_keys` com `revoked_at` preenchido, e um `curl` com ela passa a devolver 401.
 - **Por que eu não fiz:** revogar é irreversível para quem estiver usando a chave, e o trabalho local ainda pode precisar dela. Quando você fechar o assunto, rode.
 
-## P04 Apagar 8 tenants de teste órfãos no Supabase real [prioridade: média]
+## P04 Apagar tenants de teste órfãos no Supabase real [RESOLVIDA em 2026-09-14]
+
+- **Resolvida:** a listagem só de leitura achou mais do que o texto abaixo dizia: 20 tenants `marca-%` de 10 rodadas (as de 17:50, 18:09 e 18:17 UTC de 2026-09-12), 11 produtos em cascade, 26 usuários `@teste.kora` e 5 pastas em `assets-base/tenants/`. O Matheus confirmou no chat ("pode apagar") e eu apaguei exatamente essa lista, com ids e e-mails fixos: 5 de 5 arquivos, 26 de 26 usuários, 20 de 20 tenants. A 6ª pasta do bucket, que não é de teste, ficou.
+- **Conferido:** a listagem de novo devolveu 0 tenants `marca-%` e 0 usuários `@teste.kora`; `npm run test:banco` passou 58 de 58, e depois dele a contagem continuou 0, então a limpeza dos testes está funcionando.
+
+O texto original fica abaixo, como histórico.
+
 
 - **Por quê:** uma rodada de `npm run test:banco` reprovou na limpeza (o `afterAll` de
   `exportarTenant.test.ts` estourava o teto de 10 s do vitest) e deixou o cenário dela no projeto
