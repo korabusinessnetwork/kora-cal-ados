@@ -1,4 +1,4 @@
-/* Estilo das telas de produto, separado do JSX (white-label — CLAUDE.md).
+/* Estilo das telas de produto, separado do JSX (white-label, CLAUDE.md).
    Regra que não muda com o tema: o palco não recebe filtro, sombra nem overlay. O que
    aparece ali é o pixel que a API devolve (design system, itens 6 e 7). */
 
@@ -73,14 +73,14 @@
 }
 
 /* A area e um bloco simples com um filho: o editor de zonas. A grade de duas colunas mora
-   em `zonas.css`, junto do componente que a usa — duas folhas dividindo a mesma grade e a
+   em `zonas.css`, junto do componente que a usa, duas folhas dividindo a mesma grade e a
    ordem de import passa a decidir o layout, o que e invisivel em revisao. */
 .produto__area {
   display: block;
 }
 
 /* `display` de autor vence o `[hidden] { display: none }` da folha do navegador, então a
-   regra acima sozinha deixaria a área VISÍVEL durante o carregando e o erro — palco vazio
+   regra acima sozinha deixaria a área VISÍVEL durante o carregando e o erro, palco vazio
    lido como "modelo sem desenho", que é o oposto do estado nomeado (BUG-015). Vale para
    qualquer `display` que se coloque acima, não só o `block`. */
 .produto__area[hidden] {

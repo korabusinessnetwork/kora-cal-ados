@@ -286,7 +286,7 @@ function recusarCategoriaObrigatoriaAusente(forma: Forma, pecas: PecaValidada[])
   }
 }
 
-/** `a`, `b` e `c` — lista legível numa mensagem de erro, sem virgular o último item. */
+/** `a`, `b` e `c`, lista legível numa mensagem de erro, sem virgular o último item. */
 function listar(itens: string[]): string {
   const citados = itens.map((item) => `"${item}"`);
   const ultimo = citados.pop();

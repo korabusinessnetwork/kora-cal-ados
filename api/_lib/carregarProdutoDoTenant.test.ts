@@ -1,6 +1,6 @@
 // A FORMA do pedido é o que este arquivo protege, e aqui ela vale mais do que no editor:
 // esta consulta sai com `service_role` e a RLS não recusa nada. Um `.eq('tenant_id', ...)`
-// que suma numa refatoração não quebra teste de retorno nenhum — só passa a entregar o
+// que suma numa refatoração não quebra teste de retorno nenhum, só passa a entregar o
 // produto de uma marca ao sistema da concorrente, em silêncio. Por isso os testes afirmam
 // tabela, campos e OS DOIS filtros, e ainda há uma guarda que lê o próprio fonte.
 //
@@ -28,7 +28,7 @@ const PRODUTO_DO_BANCO = {
 };
 
 /**
- * O cliente falso só devolve a linha quando os DOIS filtros casam com ela — é o que faz o
+ * O cliente falso só devolve a linha quando os DOIS filtros casam com ela, é o que faz o
  * teste do produto alheio significar alguma coisa. Um falso que devolvesse a linha ignorando
  * os filtros passaria verde mesmo com o filtro de tenant removido do fonte.
  */
@@ -101,7 +101,7 @@ describe('a forma do pedido', () => {
 
   it('devolve `base_asset_path` exatamente como veio do banco', async () => {
     // Remontar o caminho a partir de tenant_id/id faria o download depender de uma convenção
-    // repetida em dois lugares — e no dia em que ela mudasse, baixaria o arquivo errado (ou o
+    // repetida em dois lugares, e no dia em que ela mudasse, baixaria o arquivo errado (ou o
     // de outra marca) em vez de falhar.
     const { cliente } = clienteFalso({});
     const produto = await carregarProdutoDoTenant(cliente, 'prod-1', 'tenant-1');
@@ -139,7 +139,7 @@ describe('produto que a chave não pode ver', () => {
   });
 
   it('produto de outro tenant responde idêntico ao produto inexistente', async () => {
-    // O cliente falso devolve `null` porque o segundo filtro não casou — que é exatamente o
+    // O cliente falso devolve `null` porque o segundo filtro não casou, que é exatamente o
     // que o Postgres faz. Qualquer diferença entre as duas respostas (código, status,
     // mensagem, cabeçalho) seria um oráculo de existência de id.
     const { cliente: clienteAlheio } = clienteFalso({});
@@ -160,7 +160,7 @@ describe('produto que a chave não pode ver', () => {
 
   it('a mensagem do 404 não ecoa o tenantId', async () => {
     // Eco do `productId` não seria vazamento (o integrador o escreveu na URL); eco do
-    // `tenantId` seria — ele é dado nosso, derivado da chave, e o integrador não o enviou.
+    // `tenantId` seria, ele é dado nosso, derivado da chave, e o integrador não o enviou.
     // Como nenhum dos dois acrescenta detalhe acionável, a mensagem é a fixa da tabela.
     const { cliente } = clienteFalso({ linha: null });
     const falha = (await capturarFalha(() =>

@@ -2,7 +2,7 @@
 // chave UMA vez.
 //
 // Por que este arquivo vive em `supabase/` e NUNCA em `src/`: o insert em
-// `tenant_api_keys` é `service_role` de propósito (ADR-006, D4 — a tabela não aceita
+// `tenant_api_keys` é `service_role` de propósito (ADR-006, D4, a tabela não aceita
 // insert de ninguém autenticado), e nada que leia a service_role pode chegar ao bundle do
 // navegador. Na Fase 1 a venda é manual e a UI de chaves ainda não existe; quem provisiona
 // roda isto e combina a chave com o cliente por fora.
@@ -66,7 +66,7 @@ async function principal(): Promise<void> {
 
   if (inserida.error) {
     // Nada fica pela metade: a chave gerada existe só na memória deste processo e morre
-    // com ele. Sem linha no banco não há credencial válida — é seguro simplesmente falhar
+    // com ele. Sem linha no banco não há credencial válida, é seguro simplesmente falhar
     // e mandar rodar de novo.
     throw inserida.error;
   }
@@ -76,7 +76,7 @@ async function principal(): Promise<void> {
 
 /**
  * A única exibição da chave em toda a vida dela. O banco guarda o hash SHA-256 do segredo,
- * então "ver de novo" é impossível por construção, não por falta de tela (ADR-006, D1) —
+ * então "ver de novo" é impossível por construção, não por falta de tela (ADR-006, D1),
  * e o aviso precisa ser explícito no momento em que dá para copiar, não num doc.
  */
 function imprimirChaveUmaVez(gerada: ChaveGerada, nomeDoTenant: string, args: Argumentos): void {
@@ -86,7 +86,7 @@ function imprimirChaveUmaVez(gerada: ChaveGerada, nomeDoTenant: string, args: Ar
   console.log('Esta é a ÚNICA vez que a chave aparece: o banco guarda só o prefixo e o');
   console.log('hash do segredo, então não existe "ver a chave de novo". Se ela se perder,');
   console.log('revogue o prefixo e gere outra.');
-  console.log(`\nPrefixo (identifica a chave sem permitir usá-la — este pode ir para log,`);
+  console.log(`\nPrefixo (identifica a chave sem permitir usá-la, este pode ir para log,`);
   console.log(`chamado e planilha): ${gerada.prefixo}`);
   console.log('Entregue a chave ao cliente por canal combinado. Ela vai em');
   console.log('`Authorization: Bearer <chave>`, nunca em query string.');

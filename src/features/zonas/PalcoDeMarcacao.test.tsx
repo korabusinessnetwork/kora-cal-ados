@@ -1,7 +1,7 @@
 // O teste que impede o editor de divergir da API.
 //
 // O palco é o único lugar do produto onde alguém decide uma cor OLHANDO. Se ele pintasse
-// por conta própria — CSS, filtro, overlay — a tela mostraria uma cor que a geração não
+// por conta própria, CSS, filtro, overlay, a tela mostraria uma cor que a geração não
 // produz, e o erro só apareceria no calçado fabricado. Por isso a asserção principal aqui
 // é byte a byte contra `gerarVarianteDeCor`, e não "tem a cor tal no HTML".
 //
@@ -60,7 +60,7 @@ const renderizar = (props: Partial<PropsDoPalcoDeMarcacao> = {}): string =>
     />,
   );
 
-describe('palco de marcação — o desenho', () => {
+describe('palco de marcação, o desenho', () => {
   it('sem cor pedida, contém byte a byte a saída de gerarVarianteDeCor', () => {
     // Esta é a asserção que protege o princípio nº1: o palco não tem desenho próprio, ele
     // exibe o markup do MOTOR mesmo quando não há nada para pintar. Qualquer atalho
@@ -70,7 +70,7 @@ describe('palco de marcação — o desenho', () => {
 
   it('com cor pedida, contém byte a byte a saída de gerarVarianteDeCor', () => {
     // O mesmo, agora com pintura: se o palco aplicasse a cor por CSS, o HTML aqui não
-    // bateria com o que a API devolve — e é exatamente essa divergência que ninguém
+    // bateria com o que a API devolve, e é exatamente essa divergência que ninguém
     // descobre até o calçado sair fabricado.
     const coresPorZona = { sola: '#C0392B' };
 
@@ -90,7 +90,7 @@ describe('palco de marcação — o desenho', () => {
   });
 });
 
-describe('palco de marcação — erro do motor', () => {
+describe('palco de marcação, erro do motor', () => {
   it('zona com gradiente vira alerta com código, sem pintar nada', () => {
     const html = renderToStaticMarkup(
       <PalcoDeMarcacao
@@ -125,7 +125,7 @@ describe('palco de marcação — erro do motor', () => {
   });
 });
 
-describe('palco de marcação — camada de contorno', () => {
+describe('palco de marcação, camada de contorno', () => {
   it('traz um <use> por id marcado, com o viewBox do canônico e aria-hidden', () => {
     const camada = CAMADA_DE_CONTORNO.exec(
       renderizar({ idsMarcados: ['elemento-1', 'elemento-2'] }),
@@ -153,9 +153,9 @@ describe('palco de marcação — camada de contorno', () => {
   });
 });
 
-describe('palco de marcação — camada de foco', () => {
+describe('palco de marcação, camada de foco', () => {
   // Quem abre um modelo já mapeado precisa ver NO DESENHO o que o painel lista. Sem esta
-  // camada o painel dizia "sola: 3 elementos" e o calçado ficava mudo — clicar em "sola"
+  // camada o painel dizia "sola: 3 elementos" e o calçado ficava mudo, clicar em "sola"
   // não mostrava onde a sola fica.
 
   it('traz um <use> por id em foco, com as mesmas garantias da camada de marcação', () => {
@@ -198,7 +198,7 @@ describe('palco de marcação — camada de foco', () => {
   it('id presente nas duas listas aparece nas duas camadas', () => {
     // Sobreposição INTENCIONAL: a pessoa está acrescentando um elemento à zona que está em
     // foco, e as duas leituras são verdadeiras ao mesmo tempo. Esconder uma delas seria
-    // decidir aparência no JSX — quem decide isso é o `zonas.css`.
+    // decidir aparência no JSX, quem decide isso é o `zonas.css`.
     const html = renderizar({ idsMarcados: ['elemento-1'], idsEmFoco: ['elemento-1'] });
 
     expect(CAMADA_DE_FOCO.exec(html)?.[0]).toContain('href="#elemento-1"');
@@ -216,7 +216,7 @@ describe('palco de marcação — camada de foco', () => {
   it('destacar uma zona não altera um byte do desenho', () => {
     // A asserção que fecha o princípio nº1 para o foco: o realce é camada, nunca filtro ou
     // overlay sobre o desenho. Removida a camada de foco, o markup tem de ser IDÊNTICO ao
-    // de um palco sem foco nenhum — o que a API devolveria é exatamente o mesmo.
+    // de um palco sem foco nenhum, o que a API devolveria é exatamente o mesmo.
     const coresPorZona = { sola: '#C0392B' };
     const semFoco = renderizar({ coresPorZona, idsMarcados: ['elemento-1'] });
     const comFoco = renderizar({
@@ -231,7 +231,7 @@ describe('palco de marcação — camada de foco', () => {
   });
 });
 
-describe('palco de marcação — estado desabilitado', () => {
+describe('palco de marcação, estado desabilitado', () => {
   it('anuncia o desabilitado na classe e na acessibilidade', () => {
     const html = renderizar({ desabilitado: true });
 

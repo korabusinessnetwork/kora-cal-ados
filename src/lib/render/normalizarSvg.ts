@@ -1,9 +1,9 @@
 // Normalizador de asset-base (ADR-004). Roda UMA vez, no upload, e produz o
-// asset-base canônico — a única versão que o editor e a API leem.
+// asset-base canônico, a única versão que o editor e a API leem.
 //
 // Por que no upload e não na geração: depois daqui, a cor de cada elemento mora no
 // atributo de apresentação, que todo renderizador (navegador do editor e resvg/sharp
-// do PNG) interpreta igual. Enquanto a cor mora em CSS, quem decide é o renderizador —
+// do PNG) interpreta igual. Enquanto a cor mora em CSS, quem decide é o renderizador,
 // e editor divergir da API é exatamente o que o princípio nº1 do CLAUDE.md proíbe.
 
 import { analisarSvg, serializarSvg } from './dom';
@@ -27,7 +27,7 @@ const PESO_IMPORTANTE = 1e12;
 
 export interface RelatorioDeNormalizacao {
   idsRenomeados: Array<{ de: string; para: string }>;
-  /** Ids cunhados em elemento que veio sem id — é o que torna a zona endereçável (ADR-005). */
+  /** Ids cunhados em elemento que veio sem id, é o que torna a zona endereçável (ADR-005). */
   idsAtribuidos: string[];
   declaracoesAchatadas: number;
   scriptsRemovidos: number;
@@ -42,7 +42,7 @@ export interface ResultadoDeNormalizacao {
 
 /**
  * Recebe o SVG cru do cliente e devolve o asset-base canônico + relatório do que mudou.
- * Lança `SVG_INVALIDO` / `SVG_NAO_NORMALIZAVEL` quando não dá para garantir fidelidade —
+ * Lança `SVG_INVALIDO` / `SVG_NAO_NORMALIZAVEL` quando não dá para garantir fidelidade,
  * rejeitar com explicação é preferível a aceitar um produto meio-quebrado (ADR-004, q2).
  */
 export function normalizarSvg(svgTexto: string): ResultadoDeNormalizacao {

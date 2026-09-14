@@ -1,4 +1,4 @@
-# ADR-002 — Estratégia multi-tenant e white-label
+# ADR-002, Estratégia multi-tenant e white-label
 
 **Status**: Aceito
 **Data**: 2026-08-12
@@ -12,7 +12,7 @@
 
 Kora Calçados atende times internos de marcas e fabricantes calçadistas. Diferente da
 maioria dos SaaS B2B, o público-alvo inclui **marcas concorrentes diretas** dividindo o
-mesmo sistema — o que eleva o custo de um vazamento entre tenants de "incidente de
+mesmo sistema, o que eleva o custo de um vazamento entre tenants de "incidente de
 dado pessoal" para "vazamento de coleção não lançada pra concorrência". Isso exige
 tratar isolamento como requisito de produto desde a modelagem, não como detalhe de
 implementação a ajustar depois.
@@ -29,7 +29,7 @@ Modelar **multi-tenant desde o schema inicial**, com `tenant_id` em toda tabela 
 negócio (`products`, `product_zones`, `variants`) e política de RLS correspondente sem
 exceção. White-label **sim**: identidade visual (nome, logo, cor) do editor por tenant
 vem de configuração, nunca hardcoded. Planos/feature flags ficam **modelados como
-conceito** (atributo do tenant) mas **não aplicados** na Fase 1 — venda é manual, sem
+conceito** (atributo do tenant) mas **não aplicados** na Fase 1, venda é manual, sem
 enforcement automático de limite de plano ainda.
 
 ---
@@ -51,7 +51,7 @@ enforcement automático de limite de plano ainda.
 ### 3. Planos/feature flags aplicados (enforcement automático) já na Fase 1
 
 - **Prós**: pronto pra self-serve quando chegar
-- **Contras**: venda é manual/contrato na Fase 1 (ver `respostas-intake.md`, Bloco 6) — não há necessidade de enforcement automático de limite ainda
+- **Contras**: venda é manual/contrato na Fase 1 (ver `respostas-intake.md`, Bloco 6), não há necessidade de enforcement automático de limite ainda
 - **Descartado por ora**: modelar o atributo de plano no tenant (sem enforcement) já evita retrabalho; enforcement de fato entra na Fase 3
 
 ---
@@ -69,7 +69,7 @@ enforcement automático de limite de plano ainda.
 ### Negativas / Trade-offs
 
 - Todo código novo carrega a obrigação de nunca hardcodar identidade nem esquecer RLS
-  — mais rigor exigido desde a primeira tabela, mesmo com poucos clientes
+  mais rigor exigido desde a primeira tabela, mesmo com poucos clientes
 - Overhead pequeno de indireção (resolver tema/config do tenant em runtime) mesmo
   quando há um único cliente ativo
 
@@ -77,16 +77,16 @@ enforcement automático de limite de plano ainda.
 
 ## Referências
 
-- `references/multi-tenant-white-label.md` (skill fundacao-de-projeto) — checklist completo aplicado aqui
-- `docs/11_SEGURANCA/multi-tenancy-rls.md` — modelo de ameaças e controles de isolamento
-- `docs/01_ARQUITETURA/overview.md` — modelo de dados (`tenants`, `products`, `product_zones`, `variants`)
-- ADR-001 — stack que hospeda essa estratégia (Supabase RLS como mecanismo de isolamento)
+- `references/multi-tenant-white-label.md` (skill fundacao-de-projeto), checklist completo aplicado aqui
+- `docs/11_SEGURANCA/multi-tenancy-rls.md`, modelo de ameaças e controles de isolamento
+- `docs/01_ARQUITETURA/overview.md`, modelo de dados (`tenants`, `products`, `product_zones`, `variants`)
+- ADR-001, stack que hospeda essa estratégia (Supabase RLS como mecanismo de isolamento)
 
 ---
 
 ## Notas de Implementação
 
-- Toda tabela nova: `tenant_id` + RLS, sem exceção — aviso explícito obrigatório ao criar tabela
+- Toda tabela nova: `tenant_id` + RLS, sem exceção, aviso explícito obrigatório ao criar tabela
 - Nenhuma `service_role` (ou equivalente) em código que roda no navegador
 - Teste de isolamento (dois tenants, garantir que um não vê produto/zona do outro) antes
   de considerar qualquer feature sensível pronta

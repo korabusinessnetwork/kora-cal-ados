@@ -1,4 +1,4 @@
-# 03 — REGRAS DE NEGÓCIO · Kora Calçados (codinome)
+# 03, REGRAS DE NEGÓCIO · Kora Calçados (codinome)
 
 > Regras que definem como o negócio funciona, por módulo. Documento antes de codar.
 
@@ -20,23 +20,23 @@
 
 ## Arquivos sugeridos
 
-- `modulo-autenticacao.md` — roles, permissões, 2FA, token lifetime
-- `modulo-pedidos.md` — ciclo de vida, validações, cancelamento, reembolso
-- `modulo-faturamento.md` — cálculo de taxas, planos, billing cycles
-- `modulo-inventario.md` — movimentação, reserva, ajustes, unidades
-- `JARVAS.md` — insights, alertas, sugestões (referência para IA)
-- `conformidade.md` — LGPD, compliance fiscal, retenção de dados
+- `modulo-autenticacao.md`, roles, permissões, 2FA, token lifetime
+- `modulo-pedidos.md`, ciclo de vida, validações, cancelamento, reembolso
+- `modulo-faturamento.md`, cálculo de taxas, planos, billing cycles
+- `modulo-inventario.md`, movimentação, reserva, ajustes, unidades
+- `JARVAS.md`, insights, alertas, sugestões (referência para IA)
+- `conformidade.md`, LGPD, compliance fiscal, retenção de dados
 
 ## Como preencher
 
 1. **Entreviste stakeholders**: o que DEVE acontecer, o que NUNCA pode acontecer
 2. **Escreva em pseudocódigo**: "Se (pedido.status == aberto AND data > prazo) ENTÃO..."
-3. **Documente exceções**: "E se o pagamento falhar?" — sempre tem plano B
+3. **Documente exceções**: "E se o pagamento falhar?", sempre tem plano B
 4. **ANTES de codar feature**: regra de negócio vive aqui, versioned
 5. **Regra muda? Update e marca data**: produto anda, documentação acompanha
 
 ## Ligações
 
-- `CLAUDE.md` — referência ao Jarvas (IA transversal)
-- `05_FLUXOS/` — fluxos que executam essas regras
-- `07_APIS/` — validações que garantem as regras (ex: endpoint valida estado)
+- `CLAUDE.md`, referência ao Jarvas (IA transversal)
+- `05_FLUXOS/`, fluxos que executam essas regras
+- `07_APIS/`, validações que garantem as regras (ex: endpoint valida estado)

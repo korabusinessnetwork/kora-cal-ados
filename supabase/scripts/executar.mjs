@@ -1,6 +1,6 @@
 // Carregador dos scripts em TypeScript.
 //
-// Por que ele existe: os scripts importam o motor de render (`src/lib/render/`) — têm de
+// Por que ele existe: os scripts importam o motor de render (`src/lib/render/`), têm de
 // importar, porque normalizar com uma segunda implementação é exatamente o que o
 // princípio nº1 proíbe. O Node executa TypeScript, mas não resolve os imports sem
 // extensão que o motor usa, e falha com ERR_MODULE_NOT_FOUND.

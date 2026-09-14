@@ -1,7 +1,7 @@
 // Baixa o asset-base canônico do produto aberto.
 //
 // Separado de `useProdutos` porque a lista não deve pagar o download de N SVGs para
-// mostrar N nomes — o arquivo só desce quando alguém abre o produto.
+// mostrar N nomes, o arquivo só desce quando alguém abre o produto.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -61,7 +61,7 @@ export function useAssetBase(
 
   const [leitura, setLeitura] = useState<LeituraDoAsset>(() => aindaNaoBaixado(baseAssetPath));
   // Contador em vez de um `recarregar` que chama a função direto: assim a tentativa nova
-  // passa pelo MESMO efeito, com a mesma limpeza do `vivo` — dois caminhos de download
+  // passa pelo MESMO efeito, com a mesma limpeza do `vivo`, dois caminhos de download
   // acabariam divergindo justamente no cancelamento.
   const [tentativa, setTentativa] = useState(0);
 

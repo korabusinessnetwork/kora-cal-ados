@@ -2,13 +2,13 @@
 // válidas** (o que o motor recebe). A pessoa digita `#`, `#C`, `#C0`… e cada tecla dispara
 // um render: se o texto cru fosse direto para `gerarVarianteDeCor`, o palco cairia em
 // `COR_INVALIDA` a cada tecla, o calçado sumiria durante a digitação e o painel acusaria
-// um erro que a pessoa ainda não cometeu — ela só não terminou de digitar.
+// um erro que a pessoa ainda não cometeu, ela só não terminou de digitar.
 //
 // A regra mora fora do hook de propósito, como em `marcacaoEmCurso.ts`: não usamos
 // testing-library neste projeto (restrição de custo, `memory/restrictions.md`), então
 // lógica dentro de hook é lógica não testada.
 //
-// Quem decide se um texto é cor válida é sempre `validarCor` — o mesmo validador que a API
+// Quem decide se um texto é cor válida é sempre `validarCor`, o mesmo validador que a API
 // usa (princípio nº1: cor no editor = cor na API). Aqui só se decide **quando ainda é cedo
 // para reclamar**, nunca o que é um hex.
 
@@ -21,7 +21,7 @@ import type { CoresPorZona } from '../../lib/render/gerarVarianteDeCor';
 export type CoresEmEdicao = Record<string, string>;
 
 /**
- * Só o que `validarCor` aceita, já normalizado em `#RRGGBB` maiúsculo — é isto que vai
+ * Só o que `validarCor` aceita, já normalizado em `#RRGGBB` maiúsculo, é isto que vai
  * para `gerarVarianteDeCor`. Rascunho e texto errado simplesmente não participam do
  * pedido: uma zona sendo digitada não pode impedir as outras de continuarem pintadas.
  */
@@ -69,7 +69,7 @@ export function errosDeCor(emEdicao: CoresEmEdicao): Record<string, string> {
 }
 
 /**
- * Define ou limpa a cor de uma zona sem mutar o objeto recebido — mutar o objeto que está
+ * Define ou limpa a cor de uma zona sem mutar o objeto recebido, mutar o objeto que está
  * no `useState` faz a tela não atualizar (React compara por identidade).
  *
  * Valor vazio **remove a chave** em vez de guardar `''`: zona sem preview e zona com

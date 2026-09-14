@@ -1,7 +1,7 @@
 // O portão. Nada protegido renderiza sem usuário autenticado E tenant ativo.
 //
 // Os dois, não um: com usuário mas sem tenant, qualquer consulta sairia sem saber a que
-// marca pertence — e "descobrir o tenant no meio da tela" é como um app multi-tenant
+// marca pertence, e "descobrir o tenant no meio da tela" é como um app multi-tenant
 // acaba mostrando dado do concorrente.
 //
 // O `children` é função e não elemento de propósito: assim o tenant chega tipado e não

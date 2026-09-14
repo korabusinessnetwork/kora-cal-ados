@@ -21,7 +21,7 @@ describe('elemento anônimo vira endereçável (ADR-005)', () => {
     expect(ids(canonico)).toEqual(['elemento-1']);
   });
 
-  it('id que o designer escreveu é preservado — só o anônimo é cunhado', () => {
+  it('id que o designer escreveu é preservado, só o anônimo é cunhado', () => {
     const { svg: canonico, relatorio } = normalizarSvg(
       svg('<path id="zona-sola" fill="#111111"/><path fill="#222222"/>'),
     );
@@ -40,7 +40,7 @@ describe('elemento anônimo vira endereçável (ADR-005)', () => {
     expect(ids(canonico)).toEqual(['elemento-1', 'elemento-2']);
   });
 
-  it('grupo <g> não é cunhado — zona endereça elemento pintável', () => {
+  it('grupo <g> não é cunhado, zona endereça elemento pintável', () => {
     const { svg: canonico } = normalizarSvg(svg('<g><path fill="#111111"/></g>'));
 
     expect(ids(canonico)).toEqual(['elemento-1']);
@@ -57,7 +57,7 @@ describe('elemento anônimo vira endereçável (ADR-005)', () => {
 
 describe('id sempre endereçável por seletor', () => {
   it('id com caractere que quebra "#id" é renomeado e reportado', () => {
-    // `#zona.sola` seria lido como "id zona, classe sola" — endereço errado, calado.
+    // `#zona.sola` seria lido como "id zona, classe sola", endereço errado, calado.
     const { svg: canonico, relatorio } = normalizarSvg(svg('<path id="zona.sola" fill="#111111"/>'));
 
     expect(ids(canonico)).toEqual(['zona-sola']);
@@ -81,5 +81,5 @@ describe('id sempre endereçável por seletor', () => {
 });
 
 // A idempotência COM elemento anônimo mora em `normalizarSvg.test.ts`, junto da
-// idempotência geral — é a mesma afirmação, e duplicá-la aqui criaria dois lugares para
+// idempotência geral, é a mesma afirmação, e duplicá-la aqui criaria dois lugares para
 // consertar quando ela mudar.

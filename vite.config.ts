@@ -1,4 +1,4 @@
-// Config única do Vite + Vitest. Uma só porque o vitest lê `vite.config.ts` por padrão —
+// Config única do Vite + Vitest. Uma só porque o vitest lê `vite.config.ts` por padrão,
 // dois arquivos divergiriam em silêncio.
 
 import { defineConfig } from 'vitest/config';
@@ -7,7 +7,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
 
-  // `?raw` do Vite traz o SVG como string — o motor recebe texto, nunca um <img>.
+  // `?raw` do Vite traz o SVG como string, o motor recebe texto, nunca um <img>.
   server: { port: 5173 },
 
   // O aviso de chunk grande do Vite fica logo ACIMA do chunk do three.js, e não no padrão de 500 kB.

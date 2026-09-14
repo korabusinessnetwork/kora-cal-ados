@@ -1,5 +1,5 @@
 // O que estes testes protegem: (1) que o corpo do cliente vire cor sem nenhuma validação
-// própria deste módulo — os erros de cor e de chave têm de sair do MOTOR, com a classe e o
+// própria deste módulo, os erros de cor e de chave têm de sair do MOTOR, com a classe e o
 // código do motor, senão a API e o editor podem divergir (princípio nº1); e (2) que a forma
 // do corpo seja recusada nos casos que passam por objeto sem ser um mapa de zonas, com o
 // array na frente: `typeof [] === 'object'` é a pegadinha que deixa um array virar mapa vazio.
@@ -19,7 +19,7 @@ function capturar(corpo: unknown): unknown {
   throw new Error('esperava um erro e a chamada passou');
 }
 
-describe('lerCoresPedidas — caminho feliz', () => {
+describe('lerCoresPedidas, caminho feliz', () => {
   it('devolve o mapa de zona para cor que o motor recebe', () => {
     expect(lerCoresPedidas({ sola: '#C0392B', cabedal: '#111111' })).toEqual({
       sola: '#C0392B',
@@ -45,14 +45,14 @@ describe('lerCoresPedidas — caminho feliz', () => {
   });
 });
 
-describe('lerCoresPedidas — os erros vêm do motor, não de uma segunda validação', () => {
+describe('lerCoresPedidas, os erros vêm do motor, não de uma segunda validação', () => {
   it('cor que não é hex propaga COR_INVALIDA do motor', () => {
     const erro = capturar({ sola: 'vermelho' });
 
     expect(erro).toBeInstanceOf(ErroDeVariante);
     expect(erro).not.toBeInstanceOf(FalhaDaApi);
     expect((erro as ErroDeVariante).codigo).toBe('COR_INVALIDA');
-    // A mensagem do motor nomeia a zona — é o que torna o 422 acionável para o integrador.
+    // A mensagem do motor nomeia a zona, é o que torna o 422 acionável para o integrador.
     expect((erro as ErroDeVariante).message).toContain('sola');
   });
 
@@ -85,7 +85,7 @@ describe('lerCoresPedidas — os erros vêm do motor, não de uma segunda valida
   });
 });
 
-describe('lerCoresPedidas — forma do corpo recusada com CORPO_INVALIDO 400', () => {
+describe('lerCoresPedidas, forma do corpo recusada com CORPO_INVALIDO 400', () => {
   it('array é recusado (typeof [] === "object" deixaria passar como mapa vazio)', () => {
     const erro = capturar([{ sola: '#C0392B' }]);
 
@@ -116,7 +116,7 @@ describe('lerCoresPedidas — forma do corpo recusada com CORPO_INVALIDO 400', (
     expect((capturar(undefined) as FalhaDaApi).codigo).toBe('CORPO_INVALIDO');
   });
 
-  it('corpo vazio {} é RECUSADO — variante sem cor nenhuma devolveria o asset-base intocado', () => {
+  it('corpo vazio {} é RECUSADO, variante sem cor nenhuma devolveria o asset-base intocado', () => {
     const erro = capturar({});
 
     expect(erro).toBeInstanceOf(FalhaDaApi);
@@ -126,7 +126,7 @@ describe('lerCoresPedidas — forma do corpo recusada com CORPO_INVALIDO 400', (
 
   it('91 zonas passa do teto e é recusado antes de validar par por par', () => {
     // A cor é inválida de propósito: se a resposta fosse COR_INVALIDA, o teto estaria sendo
-    // conferido depois do laço — e o pedido gigante teria sido processado inteiro, que é
+    // conferido depois do laço, e o pedido gigante teria sido processado inteiro, que é
     // exatamente o custo que o limite existe para evitar.
     const corpo = Object.fromEntries(
       Array.from({ length: 91 }, (_, i) => [`zona-${i}`, 'vermelho']),

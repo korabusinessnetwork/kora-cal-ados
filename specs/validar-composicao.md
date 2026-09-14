@@ -1,4 +1,4 @@
-# Spec — `validarComposicao`: o guarda da saída do modelo de linguagem
+# Spec, `validarComposicao`: o guarda da saída do modelo de linguagem
 
 **Data**: 2026-09-10 · **Origem**: ADR-008 D1/D2/D4/D7 e as Notas de Implementação dele
 **Tarefa**: T04 de `.full-auto/TAREFAS.md`
@@ -28,20 +28,20 @@ ordem errada de exatamente uma dessas duas coisas.
 
 Um módulo puro em `src/lib/composicao/` que recebe uma **composição** (as escolhas de peça, uma
 por categoria, com cor e parâmetros) e o **catálogo do acervo visível**, e devolve a composição
-**resolvida contra o catálogo** ou recusa com código de erro explícito — sem nunca deixar passar
+**resolvida contra o catálogo** ou recusa com código de erro explícito, sem nunca deixar passar
 um identificador de peça que o catálogo não contenha.
 
 ---
 
 ## 2. Fora de escopo
 
-- three.js, palco 3D, montagem da composição em cena — bloqueados no acervo (T07/T08)
-- a chamada ao modelo de linguagem e a construção do prompt — T09, e além disso dependem de
+- three.js, palco 3D, montagem da composição em cena, bloqueados no acervo (T07/T08)
+- a chamada ao modelo de linguagem e a construção do prompt, T09, e além disso dependem de
   decisão de custo do dono (P03)
-- o schema do banco do acervo, migrations e RLS — T06, e depende de banco real
-- `montarCatalogoParaModelo` (o recorte do acervo que vai para o modelo) — T05
+- o schema do banco do acervo, migrations e RLS, T06, e depende de banco real
+- `montarCatalogoParaModelo` (o recorte do acervo que vai para o modelo), T05
 - carregar geometria de peça, resolver caminho de arquivo, tocar em Storage
-- a aplicação dos parâmetros de D7 como transformação na cena — isto valida os números, quem
+- a aplicação dos parâmetros de D7 como transformação na cena, isto valida os números, quem
   os aplica é o palco
 - qualquer coisa que precise das ~15 peças reais existirem
 
@@ -76,15 +76,15 @@ um identificador de peça que o catálogo não contenha.
 
 ### O vocabulário de erro
 
-1. **Quatro códigos novos em `erros.ts`**, e cada um ensina um conserto diferente — é o mesmo
+1. **Quatro códigos novos em `erros.ts`**, e cada um ensina um conserto diferente, é o mesmo
    argumento que fez `MODELO_3D_INVALIDO` não reusar `SVG_INVALIDO`:
-   - `PECA_NAO_ENCONTRADA` — o id não está no catálogo. **É o código de D1**, o que separa
+   - `PECA_NAO_ENCONTRADA`, o id não está no catálogo. **É o código de D1**, o que separa
      escolha de arquivo de vulnerabilidade
-   - `COMPOSICAO_INVALIDA` — a estrutura está errada: não é objeto, falta forma, falta uma
+   - `COMPOSICAO_INVALIDA`, a estrutura está errada: não é objeto, falta forma, falta uma
      categoria obrigatória, categoria repetida, categoria que não é `zone_key` válida
-   - `FORMAS_MISTURADAS` — a peça existe, mas é de outra forma. Conserto diferente de todos os
+   - `FORMAS_MISTURADAS`, a peça existe, mas é de outra forma. Conserto diferente de todos os
      outros: não é "corrija o id", é "escolha peças que encaixam" (ADR-008 D4)
-   - `PARAMETRO_INVALIDO` — parâmetro fora da faixa, não numérico, ou não declarado pela peça
+   - `PARAMETRO_INVALIDO`, parâmetro fora da faixa, não numérico, ou não declarado pela peça
 2. Nenhum código existente muda de texto. `erros.ts` promete que **mudar** um código quebra
    cliente; acrescentar não quebra ninguém, e o arquivo passa a dizer isso com todas as letras.
 3. Os quatro entram em `traduzirParaFalhaDaApi` como **422**, e a mensagem de cada um nomeia o
@@ -125,7 +125,7 @@ um identificador de peça que o catálogo não contenha.
     reimplementar validação de hex. Cor ausente é válida: a peça mantém a cor própria dela.
 14. Parâmetro fora de `[minimo, maximo]` → `PARAMETRO_INVALIDO` com o valor, o nome e a faixa.
 15. Parâmetro `NaN`, `Infinity` ou não numérico → `PARAMETRO_INVALIDO`. (`NaN` passa por
-    qualquer comparação de faixa sem disparar, então precisa de checagem própria — é o mesmo
+    qualquer comparação de faixa sem disparar, então precisa de checagem própria, é o mesmo
     buraco que `limitar` tapa em `corSrgbLinear.ts`.)
 16. Parâmetro que a peça não declara → `PARAMETRO_INVALIDO`. Ignorar em silêncio faria "sola
     mais robusta" não ter efeito nenhum sem ninguém saber.
@@ -138,18 +138,18 @@ um identificador de peça que o catálogo não contenha.
 19. **`ComposicaoValidada` carrega a peça do catálogo, não o id que veio na entrada.** Este é o
     critério que faz o módulo ser um guarda e não um conferidor: quem consome a saída recebe a
     entrada do catálogo já resolvida e não tem como usar a string crua do modelo de linguagem
-    para montar caminho de arquivo. Verificável por teste de identidade — o objeto na saída é o
+    para montar caminho de arquivo. Verificável por teste de identidade, o objeto na saída é o
     **mesmo** objeto do catálogo.
 20. A validação é por **pertencimento ao catálogo**, nunca por formato do id. Um teste registra
     isso: um id sintaticamente perfeito (`sola-corrida-04`) que não está no catálogo é recusado.
-21. Nenhuma leitura de arquivo, nenhuma rede, nenhum acesso a Storage no módulo — função pura,
+21. Nenhuma leitura de arquivo, nenhuma rede, nenhum acesso a Storage no módulo, função pura,
     testável sem ambiente.
 
 ### Processo
 
 22. Verificação por mutação: pelo menos três quebras deliberadas, cada uma matando ao menos um
     teste, com o arquivo restaurado e a restauração conferida por `md5sum` (arquivo novo é
-    **untracked**, e `git checkout --` não o restaura — está em `memory/learnings.md`).
+    **untracked**, e `git checkout --` não o restaura, está em `memory/learnings.md`).
 23. `npm test` verde na suíte inteira, `npx tsc --noEmit` limpo.
 24. `src/lib/composicao/README.md` existe e indexa cada arquivo do diretório.
 
@@ -159,15 +159,15 @@ um identificador de peça que o catálogo não contenha.
 
 | Caso | Resposta esperada |
 |---|---|
-| Composição sem nenhuma escolha (lista vazia) | `COMPOSICAO_INVALIDA` — falta toda categoria obrigatória, e a mensagem lista as que faltam |
+| Composição sem nenhuma escolha (lista vazia) | `COMPOSICAO_INVALIDA`, falta toda categoria obrigatória, e a mensagem lista as que faltam |
 | Forma que não existe no catálogo | `COMPOSICAO_INVALIDA` nomeando a forma. Não é `PECA_NAO_ENCONTRADA`: nenhuma peça foi consultada ainda |
 | Catálogo vazio (tenant sem acervo visível) | Toda peça vira `PECA_NAO_ENCONTRADA`. Não é caso especial e **não** deve ganhar código próprio |
 | Duas peças de categorias diferentes com o mesmo id | Catálogo malformado, não composição malformada. A validação usa o id como chave e o teste registra que ids são únicos no catálogo |
 | Peça sem parâmetro nenhum declarado | Válida. Ausência de parâmetros não é erro, é uma peça sem variação (D7 é opcional por peça) |
 | `parametros` presente mas vazio | Igual a ausente: todos recebem o padrão |
-| Faixa invertida no catálogo (`minimo > maximo`) | Catálogo malformado. Nenhum valor passaria, e o erro apontaria a composição em vez do acervo — o teste registra o caso, a decisão de recusar o catálogo fica anotada |
+| Faixa invertida no catálogo (`minimo > maximo`) | Catálogo malformado. Nenhum valor passaria, e o erro apontaria a composição em vez do acervo, o teste registra o caso, a decisão de recusar o catálogo fica anotada |
 | Cor `#F00` (forma curta) | Válida, expandida por `validarCor` para `#FF0000`. Uma única expansão, num lugar só |
-| Categoria com acento (`cadarço`) | `COMPOSICAO_INVALIDA` via `validarZoneKey` — mesma regra do produto trazido, mesma mensagem |
+| Categoria com acento (`cadarço`) | `COMPOSICAO_INVALIDA` via `validarZoneKey`, mesma regra do produto trazido, mesma mensagem |
 | `parametros` com valor `null` | `PARAMETRO_INVALIDO`, não "ausente". `null` é alguém tendo mandado algo, e virar padrão em silêncio é conserto calado |
 
 ---
@@ -177,12 +177,12 @@ um identificador de peça que o catálogo não contenha.
 Todos os 24 critérios respondidos com sim; suíte inteira verde e `tsc --noEmit` limpo; três
 mutações deliberadas mataram testes e o arquivo voltou com `md5sum` conferido; nenhum `TODO`
 sem justificativa e nenhum `console.log`; nenhuma regressão nos fluxos existentes; e a
-propriedade do critério 19 provada por teste — a saída carrega a peça do catálogo, de modo que
+propriedade do critério 19 provada por teste, a saída carrega a peça do catálogo, de modo que
 um id inventado pelo modelo de linguagem não tem como virar caminho de arquivo depois.
 
 ---
 
-## 7. Resultado da revisão — 2026-09-10
+## 7. Resultado da revisão, 2026-09-10
 
 **Veredito: aprovado sem ressalvas.** 24 de 24 critérios em sim. 698 testes verdes na suíte
 inteira (eram 638), `tsc --noEmit` limpo, 56 testes no módulo novo.
@@ -202,7 +202,7 @@ e conferido por `md5sum` depois (`dc7acd13fa8861a3d3b65a1131a5ebea` nas cinco re
 
 A mutação (a) é a que justifica o módulo: ela é literalmente a implementação errada que o
 ADR-008 descreve, e mata os três testes de pertencimento, incluindo o do id sintaticamente
-impecável. A (d) mata exatamente um teste, o do critério 19, e é o único que a pega — o que
+impecável. A (d) mata exatamente um teste, o do critério 19, e é o único que a pega, o que
 está certo, porque é uma propriedade e não um comportamento visível.
 
 ### O que a mutação (c) revelou, e que virou correção
@@ -214,7 +214,7 @@ pela **checagem de faixa** (`Infinity > 40`), não pelo mecanismo que o nome anu
 O comportamento estava certo e a cobertura anunciada estava errada. Se um dia a faixa saísse,
 aquele caso sumiria junto sem ninguém notar, porque ele nunca protegeu o que dizia proteger.
 Corrigido: o `it.each` passou a se chamar "é recusado como valor de parâmetro", sem prometer
-por onde, e `NaN` ganhou teste próprio nomeando o mecanismo — verificado morrendo pela
+por onde, e `NaN` ganhou teste próprio nomeando o mecanismo, verificado morrendo pela
 mutação (c). Generalizado em `memory/learnings.md`: **quando um caso sobrevive à quebra do
 mecanismo que ele nomeia, ele está sendo segurado por outra coisa**, e isso se esconde
 especialmente bem dentro de um `it.each`.
@@ -223,7 +223,7 @@ especialmente bem dentro de um `it.each`.
 
 1. **`EscolhaDePeca` perdeu o campo `categoria`.** O spec desenhava
    `{categoria, peca_id, cor?, parametros?}`. A peça do catálogo já sabe a categoria dela, e um
-   segundo campo dizendo a mesma coisa é um campo que **pode discordar** — a composição diria
+   segundo campo dizendo a mesma coisa é um campo que **pode discordar**, a composição diria
    `cadarco` apontando para uma sola, e alguém teria que decidir qual vale. Campo redundante
    que diverge é a família de defeito que este projeto persegue desde o BUG-013. A detecção de
    categoria repetida não foi afetada, porque `pecas` continua sendo lista.
@@ -240,7 +240,7 @@ especialmente bem dentro de um `it.each`.
 - **Acervo malformado não recusa o pedido.** Id repetido no catálogo faz o primeiro vencer, e
   faixa invertida recusa com mensagem dizendo que o defeito é **nosso**. Quebrar o pedido do
   designer por causa de uma linha duplicada no nosso banco o deixaria sem saída nenhuma. Se o
-  acervo crescer, isto merece validação própria **no cadastro da peça**, não no pedido — está
+  acervo crescer, isto merece validação própria **no cadastro da peça**, não no pedido, está
   em "Limites conhecidos" do README do módulo.
 - **A ordem das duas conferências de conjunto não é indiferente:** repetida antes de ausente,
   porque uma sola escolhida duas vezes também satisfaz "sola presente", e reclamar da falta
@@ -250,6 +250,6 @@ especialmente bem dentro de um `it.each`.
 
 - **Onde a composição é gravada** é decisão de schema (tabela nova, RLS de D6), e é a T06 de
   `.full-auto/TAREFAS.md`. Nada aqui depende dela: o módulo recebe o catálogo como parâmetro.
-- **O caso do 409** — composição já gravada que fica inválida porque o acervo mudou — está
+- **O caso do 409**, composição já gravada que fica inválida porque o acervo mudou, está
   anotado em `docs/07_APIS/endpoints.md` com a saída pronta (pré-checagem no handler, como
   `ZONA_NAO_ENCONTRADA` já faz), para o dia em que existir esse ponto de chamada.

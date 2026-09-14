@@ -1,11 +1,11 @@
 // Adaptador de DOM do motor de render.
 //
-// Por que existe: o princípio nº1 do CLAUDE.md exige o MESMO motor no editor e na API —
+// Por que existe: o princípio nº1 do CLAUDE.md exige o MESMO motor no editor e na API,
 // "nunca duas implementações que podem divergir". Só que `jsdom` não roda no navegador e
 // `DOMParser` não existe no Node. Sem este adaptador, a única saída seria reescrever o
 // motor para o front, que é exatamente o que o princípio proíbe.
 //
-// Navegador: usa o DOMParser/XMLSerializer nativos, sem dependência nenhuma — o `jsdom`
+// Navegador: usa o DOMParser/XMLSerializer nativos, sem dependência nenhuma, o `jsdom`
 // não entra no bundle porque nada no front importa `./domNode`.
 // Node (testes, função serverless): quem roda lá importa `./domNode` uma vez.
 

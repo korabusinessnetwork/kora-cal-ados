@@ -9,7 +9,7 @@ const HEX_LONGO = /^#[0-9a-fA-F]{6}$/;
 
 /**
  * Devolve a cor em `#RRGGBB` maiúsculo, ou lança `COR_INVALIDA`.
- * Aceita a forma curta (`#F00`) porque é inequívoca — expande para a longa.
+ * Aceita a forma curta (`#F00`) porque é inequívoca, expande para a longa.
  */
 export function validarCor(valor: unknown, zoneKey: string): string {
   if (typeof valor !== 'string') {

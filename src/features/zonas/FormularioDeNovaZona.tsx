@@ -1,5 +1,5 @@
 // O formulário que dá nome à zona recém-marcada: `zone_key`, `label` e `cor_default`.
-// Componente burro e controlado — todo o estado vem por props, como `ListaDeProdutos`.
+// Componente burro e controlado, todo o estado vem por props, como `ListaDeProdutos`.
 // É o que permite testar a validação inteira com `renderToStaticMarkup`, sem rede.
 //
 // Por que a validação acontece AQUI, e com as mesmas funções do motor: `zone_key` e cor
@@ -19,7 +19,7 @@ export interface PropsDoFormularioDeNovaZona {
   rotulo: string;
   /** A chave pública da API. */
   zoneKey: string;
-  /** Cor padrão, opcional — string vazia = sem cor padrão. */
+  /** Cor padrão, opcional, string vazia = sem cor padrão. */
   corDefault: string;
   /** Quantos elementos estão marcados no palco agora. */
   quantidadeMarcada: number;

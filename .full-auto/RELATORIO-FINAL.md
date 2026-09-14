@@ -290,15 +290,15 @@ pendências suas.
 
 ## 6. Suas pendências, em ordem
 
-1. **P02, revogar a chave `2aec9a55` do `aurora-demo`** — `npm run revogar-chave -- --prefixo 2aec9a55`.
+1. **P02, revogar a chave `2aec9a55` do `aurora-demo`**, `npm run revogar-chave -- --prefixo 2aec9a55`.
    Continua ativa. Não fiz porque revogar é irreversível.
-2. **P01, instalar o hook de continuidade** — recusado três vezes pelo classificador do modo
+2. **P01, instalar o hook de continuidade**, recusado três vezes pelo classificador do modo
    automático, e vale você saber por quê antes de instalar: o instalador escreve um
    `.worktreeinclude` que copia `.env.local` (com a `service_role`) para toda worktree, e o vigia
    relança o Claude com `--permission-mode auto`. A leitura completa está em P01.
 3. **Aplicar a migration `20260908`** quando for usar chave de API, e atualizar `schema.sql` no
    mesmo commit.
-4. **P03, o travessão no acervo antigo** — decisão de estilo, sem pressa.
+4. **P03, o travessão no acervo antigo**, decisão de estilo, sem pressa.
 
 Detalhes e passo a passo em `.full-auto/PENDENCIAS-DO-MATHEUS.md`.
 

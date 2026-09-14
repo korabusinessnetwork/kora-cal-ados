@@ -1,4 +1,4 @@
-# 05 — FLUXOS · Kora Calçados (codinome)
+# 05, FLUXOS · Kora Calçados (codinome)
 
 > Fluxos ponta-a-ponta: o caminho que um usuário (ou sistema) segue de início ao fim.
 
@@ -24,18 +24,18 @@
 |---|---|---|
 | [`fluxo-marcacao-de-zona.md`](fluxo-marcacao-de-zona.md) | Login → tenant → modelo → asset-base canônico → **marcar zona** → linha em `product_zones` que sobrevive ao F5. Inclui as recusas no clique e ao salvar, os erros de banco/rede/RLS e os pontos de perda de dado | Vigente (Etapas 0–5) |
 
-O caminho contrário — a API de variante lendo `product_zones` e devolvendo o SVG colorido —
+O caminho contrário, a API de variante lendo `product_zones` e devolvendo o SVG colorido,
 ainda não tem fluxo aqui porque **ainda não tem código**. Ele entra quando a função
 serverless existir.
 
 ## Arquivos sugeridos
 
-- `fluxo-autenticacao.md` — sign-up, login, 2FA, logout (sequence diagram)
-- `fluxo-pedido.md` — criação, validação, pagamento, confirmação, entrega
-- `fluxo-onboarding.md` — novo tenant, configuração inicial, primeira operação
-- `fluxo-integracao-pagamento.md` — checkout → gateway → webhook → confirmação
-- `fluxo-erro.md` — o que fazer quando X falha (retry, rollback, notificar)
-- `diagramas/` — Mermaid sequence diagrams, UML, swimlanes
+- `fluxo-autenticacao.md`, sign-up, login, 2FA, logout (sequence diagram)
+- `fluxo-pedido.md`, criação, validação, pagamento, confirmação, entrega
+- `fluxo-onboarding.md`, novo tenant, configuração inicial, primeira operação
+- `fluxo-integracao-pagamento.md`, checkout → gateway → webhook → confirmação
+- `fluxo-erro.md`, o que fazer quando X falha (retry, rollback, notificar)
+- `diagramas/`, Mermaid sequence diagrams, UML, swimlanes
 
 ## Como preencher
 
@@ -47,6 +47,6 @@ serverless existir.
 
 ## Ligações
 
-- `03_REGRAS_DE_NEGOCIO/` — regras que cada passo valida
-- `07_APIS/` — endpoints que implementam cada passo
-- `05_FLUXOS/` — se fluxo A chama fluxo B, documenta a composição
+- `03_REGRAS_DE_NEGOCIO/`, regras que cada passo valida
+- `07_APIS/`, endpoints que implementam cada passo
+- `05_FLUXOS/`, se fluxo A chama fluxo B, documenta a composição

@@ -96,7 +96,11 @@ O texto original fica abaixo, como histórico.
 - **Onde colar o resultado:** a chave no painel da Vercel, em Settings, Environment Variables, com um nome sem `VITE_` (sugestão: `CHAVE_DO_MODELO_DE_LINGUAGEM`). Nunca no `.env` versionado nem no chat.
 - **Como confirmar que funcionou:** em `?tela=composicao`, a ajuda do painel diz "um modelo de linguagem (IA)", e uma frase sem nenhuma palavra-chave ("um tênis para correr no frio") monta um calçado diferente do padrão. No DevTools, aba Network, nenhuma resposta nem pedido do navegador contém a chave.
 
-## P03 Normalizar o travessão no repositório inteiro [prioridade: baixa]
+## P03 Normalizar o travessão no repositório inteiro [RESOLVIDA em 2026-09-14]
+
+- **Resolvida:** o Matheus decidiu "pode tirar o travessão de tudo". 2145 travessões em 208 arquivos versionados viraram vírgula num commit só de estilo, sem mudança de conteúdo. Célula vazia de tabela virou hífen. A guarda `src/textoSemTravessao.test.ts` monta o caractere pelo código para não ser ela mesma um travessão.
+- **Conferido:** `git ls-files | xargs grep -l` com o caractere devolve 0 arquivos; tsc 0, 1395 testes, build ok, navegador 25 de 25.
+
 
 - **Por quê:** sua regra é não usar travessão em português. O repositório inteiro usa, porque foi escrito antes de a regra entrar. Aplicá-la só em arquivo novo cria inconsistência num projeto cuja tese é justamente consistência para agentes.
 - **Contorno atual:** todo texto novo sai sem travessão a partir de 2026-09-10 (o ADR-009 é o primeiro). O acervo antigo fica como está.

@@ -4,13 +4,13 @@
 // "adicionar mais um elemento à zona sola" é UPDATE do `svg_selector` da linha existente,
 // nunca uma segunda linha. Gravar tudo por uma chamada única e cega, que insere ou
 // sobrescreve conforme a chave já exista, seria mais curto e apagaria em silêncio o
-// mapeamento que um colega acabou de salvar — INSERT e UPDATE significam coisas
+// mapeamento que um colega acabou de salvar, INSERT e UPDATE significam coisas
 // diferentes, e a diferença é quem some. `gravarZonaNoBanco.test.ts` tem um teste que lê
 // este fonte e falha se essa chamada única voltar numa refatoração; o comentário sozinho
 // não segura a regra.
 //
 // Duas pessoas criando a mesma `zone_key` ao mesmo tempo esbarram na unique e voltam com
-// Postgres 23505. Isso é o comportamento CERTO — a segunda gravação seria destrutiva —,
+// Postgres 23505. Isso é o comportamento CERTO, a segunda gravação seria destrutiva,
 // então ele é traduzido para uma frase acionável em vez de contornado.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -93,7 +93,7 @@ async function atualizarZona(
     })
     .eq('id', idExistente)
     // O segundo filtro existe para um id vindo de outra tela (ou de estado velho) não
-    // conseguir reescrever a zona de OUTRO produto — a RLS deixaria passar, porque os
+    // conseguir reescrever a zona de OUTRO produto, a RLS deixaria passar, porque os
     // dois produtos podem ser do mesmo tenant.
     .eq('product_id', productId)
     .select(CAMPOS)
@@ -125,7 +125,7 @@ function codigoDe(error: unknown): string | undefined {
 
 /**
  * Traduz o erro do banco para uma frase que diz o que fazer. O objeto cru do Supabase
- * nunca sai daqui — ele carrega detalhe de schema ("duplicate key value violates unique
+ * nunca sai daqui, ele carrega detalhe de schema ("duplicate key value violates unique
  * constraint product_zones_product_id_zone_key_key") que não ajuda ninguém na tela e não
  * deve ser logado.
  */

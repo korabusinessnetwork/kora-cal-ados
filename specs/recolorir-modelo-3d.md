@@ -1,4 +1,4 @@
-# Spec — `recolorirModelo3d`, o motor de cor do calçado 3D
+# Spec, `recolorirModelo3d`, o motor de cor do calçado 3D
 
 > Loop `/spec → /build → /review`. Aberto em 2026-09-10, logo depois de `normalizarModelo3d`
 > (commit `784bf4c`).
@@ -6,7 +6,7 @@
 ## 0. Por que isto, e por que agora
 
 `normalizarModelo3d` entregou o canônico: toda malha endereçável com nome único e material
-próprio. Falta a outra metade — **pintar**. Sem ela o rumo 3D tem provisionamento e não tem
+próprio. Falta a outra metade, **pintar**. Sem ela o rumo 3D tem provisionamento e não tem
 produto: nada consome o canônico, e o ADR-007 continua sendo promessa.
 
 É a peça certa agora por eliminação, pelo mesmo argumento que escolheu a anterior: **não
@@ -15,7 +15,7 @@ escrever num campo de objeto, e fixtures escritas à mão exercitam cada regra.
 
 E ela carrega o que o ADR-007 chama, com todas as letras, de **detalhe de maior risco do ADR
 inteiro** (D3): o hex que a pessoa digita é sRGB, o `baseColorFactor` do glTF é **linear**, e
-escrever `0xC0/255` direto produz uma cor errada de um jeito plausível — alguns tons mais
+escrever `0xC0/255` direto produz uma cor errada de um jeito plausível, alguns tons mais
 clara, do tipo que passa numa conferência a olho e só aparece quando o cliente compara com o
 Pantone. Num sistema cujo princípio nº1 é "cor no editor = cor na API", esse é o defeito mais
 caro que existe: ele não quebra nada, ele fabrica o calçado errado.
@@ -24,9 +24,9 @@ caro que existe: ele não quebra nada, ele fabrica o calçado errado.
 
 Dois módulos puros em `src/lib/render/`:
 
-1. **`corSrgbLinear.ts`** — `hexParaLinear` / `linearParaHex`, o **único** lugar do projeto
+1. **`corSrgbLinear.ts`**, `hexParaLinear` / `linearParaHex`, o **único** lugar do projeto
    autorizado a converter entre o hex do usuário e o float linear do glTF (ADR-007 D3).
-2. **`recolorirModelo3d.ts`** — o gêmeo de `gerarVarianteDeCor`: recebe o **modelo 3D
+2. **`recolorirModelo3d.ts`**, o gêmeo de `gerarVarianteDeCor`: recebe o **modelo 3D
    canônico**, as zonas e `{zone_key: cor}`, devolve o glTF da variante, ou recusa com código.
 
 Mais o `relatorioDeZonas3d`, gêmeo de `relatorioDeZonas`: quantas malhas cada zona resolve
@@ -50,11 +50,11 @@ Mais o `relatorioDeZonas3d`, gêmeo de `relatorioDeZonas`: quantas malhas cada z
 
 | Arquivo | O quê |
 |---|---|
-| `src/lib/render/corSrgbLinear.ts` | **novo** — a conversão, e só ela |
-| `src/lib/render/corSrgbLinear.test.ts` | **novo** — ida e volta, a bateria de cores, o valor conhecido |
-| `src/lib/render/recolorirModelo3d.ts` | **novo** — o motor |
+| `src/lib/render/corSrgbLinear.ts` | **novo**, a conversão, e só ela |
+| `src/lib/render/corSrgbLinear.test.ts` | **novo**, ida e volta, a bateria de cores, o valor conhecido |
+| `src/lib/render/recolorirModelo3d.ts` | **novo**, o motor |
 | `src/lib/render/recolorirModelo3d.test.ts` | **novo** |
-| `src/lib/render/soUmLugarEscreveCorNoGltf.test.ts` | **novo** — a guarda de fonte do critério 3 |
+| `src/lib/render/soUmLugarEscreveCorNoGltf.test.ts` | **novo**, a guarda de fonte do critério 3 |
 | `src/lib/render/fixtures/gltfDeTeste.ts` | ganha o que faltar para descrever um canônico já pronto |
 | `src/lib/render/README.md` | índice do diretório ganha as linhas novas |
 | `docs/03_REGRAS_DE_NEGOCIO/glossario.md` | conferir se **variante 3D** precisa de linha |
@@ -67,17 +67,17 @@ Nenhum código existente muda de comportamento.
 
 1. **Ida e volta exata.** `linearParaHex(hexParaLinear(hex)) === hex` para uma bateria que
    inclui `#000000`, `#FFFFFF`, `#C0392B`, cinzas, primárias e **a faixa baixa**
-   (`#010101`…`#0A0A0A`), onde a curva do sRGB é linear e não exponencial — que é exatamente
+   (`#010101`…`#0A0A0A`), onde a curva do sRGB é linear e não exponencial, que é exatamente
    onde uma implementação apressada erra.
 2. **A conversão não é ingênua, e o teste prova pelo valor.** `hexParaLinear('#808080')` devolve
    ≈ `0.2159`, **não** `0.502`. Um teste que só verificasse ida e volta passaria com
-   `c/255` — porque `c/255` também volta. Este critério é o que mata essa mutação.
+   `c/255`, porque `c/255` também volta. Este critério é o que mata essa mutação.
 3. **Exatamente um lugar escreve cor no glTF.** Uma guarda de fonte varre `src/` e `api/` e
    falha se `baseColorFactor` for escrito fora de `recolorirModelo3d.ts`, ou se a fórmula do
    sRGB (`1.055`, `0.04045`, `2.4`) aparecer fora de `corSrgbLinear.ts`. A guarda lê **código**,
    não prosa: tira os comentários antes de comparar (aprendizado de 2026-09-08).
 4. **Alfa preservado.** `baseColorFactor` é RGBA. Recolorir troca os três primeiros e **mantém
-   o quarto** — forçar `1` tornaria opaca uma peça translúcida sem ninguém pedir.
+   o quarto**, forçar `1` tornaria opaca uma peça translúcida sem ninguém pedir.
 
 ### O motor
 
@@ -88,27 +88,27 @@ Nenhum código existente muda de comportamento.
    conceito, e o glossário proíbe dois nomes para a mesma coisa.
 8. **Nome de malha que o modelo não tem** → `ZONA_NAO_ENCONTRADA`, com o nome na mensagem. É o
    gêmeo de "o seletor resolveu zero elementos": mapeamento quebrado, não zona vazia.
-9. **Cor inválida** → `COR_INVALIDA`, **delegando** a `validarCor` — sem reimplementar hex.
+9. **Cor inválida** → `COR_INVALIDA`, **delegando** a `validarCor`, sem reimplementar hex.
 10. **Malha com `baseColorTexture`** → `ZONA_NAO_RECOLORIVEL`. É aqui que a observação que
     `normalizarModelo3d` deixou em `malhasNaoRecoloriveis` vira recusa, exatamente como o
     gradiente do SVG: o normalizador anota, o motor recusa (ADR-004 D1).
 11. **Duas zonas que caem no mesmo material** → `ZONAS_SOBREPOSTAS`. Não basta comparar nomes de
     malha: num canônico cada malha tem material próprio, mas um modelo **não** normalizado pode
-    ter duas malhas de nomes diferentes no mesmo material — e aí a última chave do JSON
+    ter duas malhas de nomes diferentes no mesmo material, e aí a última chave do JSON
     decidiria a cor das duas (BUG-013 outra vez, por outro caminho). A comparação é por
     **índice de material**, que é o que de fato recebe a cor.
-12. **Valida tudo antes de pintar.** Variante sai inteira ou não sai — nenhum documento
+12. **Valida tudo antes de pintar.** Variante sai inteira ou não sai, nenhum documento
     meio-pintado é devolvido, nem em caso de erro na terceira das quatro zonas.
 13. **Só `baseColorFactor` muda.** O resto do documento sai byte a byte igual ao que entrou,
     incluindo campos que o motor não entende. Verificável: zerar a diferença dos dois JSON
     exceto pelos `baseColorFactor` tocados.
-14. **`relatorioDeZonas3d`** devolve `{ zone_key, malhas: number }` por zona — quantas malhas o
+14. **`relatorioDeZonas3d`** devolve `{ zone_key, malhas: number }` por zona, quantas malhas o
     mapeamento resolve hoje. Zero é mapeamento quebrado e precisa aparecer como zero, não
     lançar.
 
 ### Processo
 
-15. **Verificado por mutação.** No mínimo três, cada uma matando teste e restaurada — e a
+15. **Verificado por mutação.** No mínimo três, cada uma matando teste e restaurada, e a
     restauração conferida por `md5sum`, não por lembrança (aprendizado de 2026-09-10, arquivo
     novo é untracked e `git checkout --` não serve). Obrigatórias: (a) trocar a conversão sRGB
     por `c/255`; (b) forçar alfa `1`; (c) comparar sobreposição por nome de malha em vez de
@@ -121,11 +121,11 @@ Nenhum código existente muda de comportamento.
   recebe texto e não pode confiar. Decidir e escrever: recusa ou cria? Recusar é coerente com
   "o motor assume canônico" (a mesma regra que `gerarVarianteDeCor` já tem para o SVG).
 - **`baseColorFactor` ausente** no material: o glTF permite, e o padrão é `[1,1,1,1]`. Escrever
-  o campo do zero é correto — mas o alfa a preservar é o `1` do padrão, não `undefined`.
-- **Duas zonas pedindo a mesma malha** com cores diferentes — caso direto do critério 11.
+  o campo do zero é correto, mas o alfa a preservar é o `1` do padrão, não `undefined`.
+- **Duas zonas pedindo a mesma malha** com cores diferentes, caso direto do critério 11.
 - **Pedido vazio** (`{}`): devolve o modelo inalterado, sem erro. É o mesmo que o SVG faz, e
   recusar seria transformar "nada a pintar" em falha.
-- **Zona no banco cuja malha sumiu** porque o modelo foi renormalizado — o critério 8 é
+- **Zona no banco cuja malha sumiu** porque o modelo foi renormalizado, o critério 8 é
   justamente a rede para isso, e é por isso que a mensagem precisa dizer **qual** nome faltou.
 - **Cor no limite da faixa baixa** (`#010101`, cujo canal cai abaixo de `0.04045`): a curva ali
   é divisão por 12.92, não potência. É o critério 1.
@@ -139,11 +139,11 @@ decisões dos edge cases "primitiva sem material" e "`baseColorFactor` ausente" 
 código com o porquê**.
 
 Se a rodada achar defeito de produto, ele vira linha em `memory/bugs.md` e correção no mesmo
-commit — e o loop recomeça do `/review`.
+commit, e o loop recomeça do `/review`.
 
 ---
 
-## 7. Resultado da revisão — 2026-09-10
+## 7. Resultado da revisão, 2026-09-10
 
 **Aprovado sem ressalvas.** Os 16 critérios em "sim"; `npx tsc --noEmit` limpo; `npx vitest run`
 638/638 (eram 576 antes da entrega, 62 casos novos); `npm run test:banco` 48/48.

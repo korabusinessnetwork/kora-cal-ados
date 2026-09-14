@@ -1,6 +1,6 @@
 // Prova que `marcarZona` recusa todo estado inválido ANTES do banco: elemento que não
 // existe no asset-base, elemento que não aceita cor, e principalmente sobreposição de
-// zonas (BUG-013 — sem essa recusa, a ordem das chaves do JSON decidiria a cor na
+// zonas (BUG-013, sem essa recusa, a ordem das chaves do JSON decidiria a cor na
 // geração, em silêncio). Cada teste afirma o `codigo` do erro, não só que lançou: código
 // errado vira mensagem errada na UI e o time não sabe o que corrigir.
 
@@ -57,7 +57,7 @@ function erroDe(acao: () => unknown): ErroDeVariante {
   throw new Error('Esperava um ErroDeVariante, mas nada foi lançado.');
 }
 
-describe('marcarZona — zona nova', () => {
+describe('marcarZona, zona nova', () => {
   it('devolve idExistente null (é INSERT) e o seletor no formato do motor', () => {
     const zona = marcarZona(pedido({ zoneKey: 'sola', idsMarcados: ['sola'] }));
 
@@ -72,13 +72,13 @@ describe('marcarZona — zona nova', () => {
     expect(zona.svg_selector).toBe('#lingueta, #painel');
   });
 
-  it('aceita um <g> inteiro como zona — o motor expande para os filhos pintáveis', () => {
+  it('aceita um <g> inteiro como zona, o motor expande para os filhos pintáveis', () => {
     const zona = marcarZona(pedido({ zoneKey: 'cabedal', idsMarcados: ['grupo-cabedal'] }));
 
     expect(zona.svg_selector).toBe('#grupo-cabedal');
   });
 
-  it('normaliza a zone_key (trim) antes de gravar — a chave é contrato com a API', () => {
+  it('normaliza a zone_key (trim) antes de gravar, a chave é contrato com a API', () => {
     expect(marcarZona(pedido({ zoneKey: '  sola  ' })).zone_key).toBe('sola');
   });
 
@@ -89,7 +89,7 @@ describe('marcarZona — zona nova', () => {
   });
 });
 
-describe('marcarZona — zona existente é UPDATE, nunca um segundo INSERT', () => {
+describe('marcarZona, zona existente é UPDATE, nunca um segundo INSERT', () => {
   // `unique (product_id, zone_key)`: um segundo INSERT voltaria 23505, e um `upsert` cego
   // apagaria o mapeamento que um colega acabou de gravar.
   const cabedal = zonaGravada({ id: 'linha-cabedal', zone_key: 'cabedal', svg_selector: '#painel' });
@@ -126,7 +126,7 @@ describe('marcarZona — zona existente é UPDATE, nunca um segundo INSERT', () 
   });
 });
 
-describe('marcarZona — recusas, cada uma com o código certo', () => {
+describe('marcarZona, recusas, cada uma com o código certo', () => {
   it('zone_key inválida recusa com ZONE_KEY_INVALIDA', () => {
     expect(erroDe(() => marcarZona(pedido({ zoneKey: 'Sola Lateral' }))).codigo).toBe(
       'ZONE_KEY_INVALIDA',
@@ -168,7 +168,7 @@ describe('marcarZona — recusas, cada uma com o código certo', () => {
   });
 });
 
-describe('marcarZona — sobreposição (BUG-013)', () => {
+describe('marcarZona, sobreposição (BUG-013)', () => {
   it('elemento já usado por outra zona recusa com ZONAS_SOBREPOSTAS nomeando a outra zona', () => {
     const erro = erroDe(() =>
       marcarZona(
@@ -198,7 +198,7 @@ describe('marcarZona — sobreposição (BUG-013)', () => {
     expect(erro.message).toContain('2');
   });
 
-  it('pega o compartilhamento escondido dentro de um <g> — comparar seletor não veria', () => {
+  it('pega o compartilhamento escondido dentro de um <g>, comparar seletor não veria', () => {
     // A outra zona endereça o grupo; a marcação nova endereça um filho dele.
     const erro = erroDe(() =>
       marcarZona(
@@ -226,7 +226,7 @@ describe('marcarZona — sobreposição (BUG-013)', () => {
   });
 });
 
-describe('marcarZona — label e cor_default', () => {
+describe('marcarZona, label e cor_default', () => {
   const sola = zonaGravada({
     id: 'linha-sola',
     zone_key: 'sola',
@@ -257,7 +257,7 @@ describe('marcarZona — label e cor_default', () => {
     expect(zona.cor_default).toBe('#FF0000');
   });
 
-  it('null presente limpa o gravado — apagar é uma intenção, não um esquecimento', () => {
+  it('null presente limpa o gravado, apagar é uma intenção, não um esquecimento', () => {
     const zona = marcarZona(
       pedido({
         zonasAtuais: [sola],
@@ -322,7 +322,7 @@ describe('idsDoSeletor', () => {
 //
 // Os ids NOVOS sempre foram conferidos um a um. Os GRAVADOS nunca: vêm da linha do banco e
 // ninguém os confrontava com o desenho de hoje. Asset-base trocado depois do mapeamento, ou
-// linha copiada de outro produto, deixavam id morto no seletor — e acrescentar um elemento
+// linha copiada de outro produto, deixavam id morto no seletor, e acrescentar um elemento
 // regravava o seletor carregando o morto junto, em silêncio. A zona passa a pintar menos do
 // que o painel promete, que é o princípio nº1 quebrado onde ninguém olha.
 
@@ -368,7 +368,7 @@ describe('o seletor gravado é conferido contra o desenho de hoje (ADR-005)', ()
     expect(erro.message).toContain('sola-v1');
   });
 
-  it('mapeamento íntegro passa — a conferência não pode virar pedágio', () => {
+  it('mapeamento íntegro passa, a conferência não pode virar pedágio', () => {
     // O caminho normal precisa continuar barato e verde: acrescentar `lingueta` a uma zona
     // que já tem `painel` é a operação mais comum do editor.
     const linha = marcarZona(

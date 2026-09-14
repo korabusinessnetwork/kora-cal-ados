@@ -1,5 +1,5 @@
 // A ordem destes ids vira `svg_selector` no banco (via `montarSeletorDeZona`). Se o
-// comportamento aqui mudar, muda o que foi gravado como zona — é por isso que este teste
+// comportamento aqui mudar, muda o que foi gravado como zona, é por isso que este teste
 // existe, mesmo a regra sendo curta.
 
 import { describe, expect, it } from 'vitest';
@@ -12,7 +12,7 @@ describe('marcação em curso', () => {
       expect(alternarId(['sola'], 'cabedal')).toEqual(['sola', 'cabedal']);
     });
 
-    it('marcar de novo o mesmo id desmarca — o clique é o desfazer do usuário', () => {
+    it('marcar de novo o mesmo id desmarca, o clique é o desfazer do usuário', () => {
       expect(alternarId(['sola', 'cabedal'], 'sola')).toEqual(['cabedal']);
     });
 
@@ -22,7 +22,7 @@ describe('marcação em curso', () => {
 
     it('remarcar um id desmarcado o coloca no fim, não no lugar antigo', () => {
       // Intencional: o id volta como marcação nova. Marcar A, marcar B, desmarcar A e
-      // marcar A de novo deixa ['b', 'a'] — e é esse seletor que vai para o banco.
+      // marcar A de novo deixa ['b', 'a'], e é esse seletor que vai para o banco.
       const passo1 = alternarId([], 'a');
       const passo2 = alternarId(passo1, 'b');
       const passo3 = alternarId(passo2, 'a');

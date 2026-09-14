@@ -5,7 +5,7 @@
 // itera a própria tabela do módulo. Um código novo em `src/lib/render/erros.ts` quebra o
 // `npm run typecheck` (o `Record<CodigoDeErro, ...>` da tabela passa a exigir a chave) e, no
 // instante em que a entrada é criada para o typecheck voltar ao verde, este teste passa a
-// exercê-la sozinho — sem ninguém lembrar de vir aqui. Uma lista de 7 strings escrita aqui
+// exercê-la sozinho, sem ninguém lembrar de vir aqui. Uma lista de 7 strings escrita aqui
 // faria o contrário: seguiria verde testando 7 códigos enquanto a API responderia 500 para o
 // oitavo, e o silêncio duraria até um cliente reclamar.
 
@@ -38,7 +38,7 @@ describe('cobertura: todo código do motor tem status', () => {
       expect(falha).toBeInstanceOf(FalhaDaApi);
       expect(falha.codigo).toBe(codigo);
       // 500 aqui significaria "defeito nosso" para um erro que é do pedido ou do dado do
-      // tenant — e 500 convida cliente com retry automático a reprocessar em laço algo que
+      // tenant, e 500 convida cliente com retry automático a reprocessar em laço algo que
       // não conserta sozinho.
       expect(falha.status).not.toBe(500);
       expect([409, 422]).toContain(falha.status);
@@ -46,7 +46,7 @@ describe('cobertura: todo código do motor tem status', () => {
     }
   });
 
-  it('a mensagem do motor é sempre repassada — ela nomeia a zona, a cor e o seletor', () => {
+  it('a mensagem do motor é sempre repassada, ela nomeia a zona, a cor e o seletor', () => {
     for (const codigo of CODIGOS_DO_MOTOR) {
       const falha = traduzirParaFalhaDaApi(
         new ErroDeVariante(codigo, 'A zona "sola" tem algum problema.'),
@@ -90,7 +90,7 @@ describe('os códigos de modelo 3D são dado do tenant, como os de SVG', () => {
   // O laço de cobertura acima já os exerceria sozinho. Esta asserção existe nomeada porque o
   // status deles é **decisão** (spec de `normalizarModelo3d`, critério 12), não consequência:
   // se alguém um dia mover MODELO_3D_* para 422, o laço genérico continua verde e só esta
-  // linha fica vermelha — e o integrador deixaria de ser mandado a corrigir o modelo.
+  // linha fica vermelha, e o integrador deixaria de ser mandado a corrigir o modelo.
   it.each(['MODELO_3D_INVALIDO', 'MODELO_3D_NAO_NORMALIZAVEL'] as const)(
     '%s é 409 e manda corrigir o dado da marca, nunca o pedido',
     (codigo) => {
@@ -128,7 +128,7 @@ describe('os códigos de composição são pedido, e é por isso que são 422 e 
 
   it('a mensagem de 422 sai limpa, sem o acréscimo que só o 409 recebe', () => {
     // O acréscimo de "dado do tenant" manda corrigir no editor da marca. Emendado numa
-    // recusa de composição, ele apontaria para o lugar errado — a composição não mora lá.
+    // recusa de composição, ele apontaria para o lugar errado, a composição não mora lá.
     const falha = traduzirParaFalhaDaApi(
       new ErroDeVariante('PECA_NAO_ENCONTRADA', 'A peça "sola-x" não existe no acervo visível.'),
     );
@@ -138,7 +138,7 @@ describe('os códigos de composição são pedido, e é por isso que são 422 e 
 });
 
 describe('ZONA_NAO_ENCONTRADA, o único código com dois status', () => {
-  it('vinda do motor é 409 — depois da pré-checagem, só sobra seletor gravado quebrado', () => {
+  it('vinda do motor é 409, depois da pré-checagem, só sobra seletor gravado quebrado', () => {
     const falha = traduzirParaFalhaDaApi(
       new ErroDeVariante('ZONA_NAO_ENCONTRADA', 'O seletor "#p1" da zona "sola" não encontrou.'),
     );
@@ -274,7 +274,7 @@ describe('criarFalhaDeTransporte', () => {
 });
 
 
-describe('criarFalhaDeZonaDesconhecida — o mesmo código com dois status, e os dois certos', () => {
+describe('criarFalhaDeZonaDesconhecida, o mesmo código com dois status, e os dois certos', () => {
   it('a pré-checagem do handler dá 422, e não o 409 da tabela do motor', () => {
     // Este é o par mais fácil de contradizer do projeto: `ZONA_NAO_ENCONTRADA` vale 422 quando
     // é o integrador pedindo uma zona que o produto não tem, e 409 quando é o `svg_selector`
@@ -287,7 +287,7 @@ describe('criarFalhaDeZonaDesconhecida — o mesmo código com dois status, e os
     expect(STATUS_POR_CODIGO_DO_MOTOR.ZONA_NAO_ENCONTRADA.status).toBe(409);
   });
 
-  it('e a mensagem é a de quem chamou — só o handler sabe quais zonas o produto tem', () => {
+  it('e a mensagem é a de quem chamou, só o handler sabe quais zonas o produto tem', () => {
     const falha = criarFalhaDeZonaDesconhecida('Zonas deste produto: "sola", "cabedal".');
 
     expect(falha.message).toBe('Zonas deste produto: "sola", "cabedal".');
@@ -296,7 +296,7 @@ describe('criarFalhaDeZonaDesconhecida — o mesmo código com dois status, e os
   it('e o tradutor devolve a falha INTACTA, sem rebaixá-la para o 409 do motor', () => {
     // Sem este comportamento a pré-checagem seria inútil: a falha passaria pelo `catch` do
     // handler, seria retraduzida pela tabela do motor e o integrador receberia 409 mandando
-    // corrigir o mapeamento de zonas — quando o que ele precisa é corrigir a `zone_key` que
+    // corrigir o mapeamento de zonas, quando o que ele precisa é corrigir a `zone_key` que
     // digitou. O 422 existe exatamente para não mandá-lo ao lugar errado.
     const falha = criarFalhaDeZonaDesconhecida('A zona "bico" não existe neste produto.');
 
@@ -305,7 +305,7 @@ describe('criarFalhaDeZonaDesconhecida — o mesmo código com dois status, e os
   });
 
   it('não é `ErroDeVariante`: é falha de resposta, já com status', () => {
-    // Se fosse `ErroDeVariante`, o `catch` do handler a traduziria pela tabela do motor — 409
+    // Se fosse `ErroDeVariante`, o `catch` do handler a traduziria pela tabela do motor, 409
     // de novo. O tipo é o que garante o caminho.
     const falha = criarFalhaDeZonaDesconhecida('qualquer');
 

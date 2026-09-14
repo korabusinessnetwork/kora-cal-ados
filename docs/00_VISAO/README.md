@@ -1,4 +1,4 @@
-# 00 — VISÃO · Kora Calçados (codinome)
+# 00, VISÃO · Kora Calçados (codinome)
 
 > Propósito claro do produto, problema resolvido e porquê importa.
 
@@ -20,9 +20,9 @@
 
 ## Arquivos sugeridos
 
-- `visao-produto.md` — declaração da visão, problem statement, north star
-- `persona.md` — personas, jobs to be done, pains/gains
-- `proposta-valor.md` — diferencial, positioning, go-to-market initial
+- `visao-produto.md`, declaração da visão, problem statement, north star
+- `persona.md`, personas, jobs to be done, pains/gains
+- `proposta-valor.md`, diferencial, positioning, go-to-market initial
 
 ## Como preencher
 
@@ -33,6 +33,6 @@
 
 ## Ligações
 
-- `memory/identity.md` — nome, marca, identidade; consulte antes de falar da visão externamente
-- `memory/restrictions.md` — restrições (custo, escopo inicial) que moldaram a visão
-- `docs/03_REGRAS_DE_NEGOCIO/` — regras que refletem a visão
+- `memory/identity.md`, nome, marca, identidade; consulte antes de falar da visão externamente
+- `memory/restrictions.md`, restrições (custo, escopo inicial) que moldaram a visão
+- `docs/03_REGRAS_DE_NEGOCIO/`, regras que refletem a visão

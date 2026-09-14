@@ -56,7 +56,7 @@ describe('listar produtos', () => {
     expect(pedido.filtro).toEqual(['tenant_id', 'tenant-1']);
   });
 
-  it('ordena explicitamente — sem isso a lista troca de posição sozinha', async () => {
+  it('ordena explicitamente, sem isso a lista troca de posição sozinha', async () => {
     // Postgres não promete ordem sem `order by`. Lista instável faz clicar no modelo
     // errado por memória muscular.
     const { cliente, pedido } = clienteFalso({ data: [] });
@@ -65,7 +65,7 @@ describe('listar produtos', () => {
     expect(pedido.ordem).toEqual(['created_at', { ascending: true }]);
   });
 
-  it('erro do banco sobe — não vira lista vazia', async () => {
+  it('erro do banco sobe, não vira lista vazia', async () => {
     // "Nenhum modelo cadastrado" é uma afirmação sobre o catálogo do cliente. Dizer isso
     // quando o que houve foi falha de rede é mentir na tela.
     const { cliente } = clienteFalso({ error: new Error('timeout') });
@@ -102,7 +102,7 @@ describe('baixar asset-base', () => {
 
   it('usa o caminho gravado, sem remontar nada', async () => {
     // Remontar `tenants/{id}/products/{id}/base.svg` no front parece equivalente: basta o
-    // formato mudar uma vez para pedir objeto inexistente — ou o de outro produto.
+    // formato mudar uma vez para pedir objeto inexistente, ou o de outro produto.
     const gravado = 'tenants/abc/products/def/base.svg';
     const { cliente, pedido } = clienteDeStorage({ error: new Error('sem permissão') });
 
@@ -111,7 +111,7 @@ describe('baixar asset-base', () => {
     expect(pedido.bucket).toBe('assets-base');
   });
 
-  it('a URL assinada é curta — ela não é para ser guardada', async () => {
+  it('a URL assinada é curta, ela não é para ser guardada', async () => {
     const { cliente, pedido } = clienteDeStorage({ error: new Error('x') });
     await expect(baixarAssetBase(cliente, 'tenants/a/products/b/base.svg')).rejects.toThrow();
 

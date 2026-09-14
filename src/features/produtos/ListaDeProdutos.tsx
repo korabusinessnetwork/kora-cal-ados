@@ -30,7 +30,7 @@ export function ListaDeProdutos({
       )}
 
       {estado === 'erro' && (
-        // Banner com ação, que fica até alguém agir (memory/patterns.md) — não um toast
+        // Banner com ação, que fica até alguém agir (memory/patterns.md), não um toast
         // que some antes de ser lido.
         <div className="produtos__erro" role="alert">
           <p>{erro ?? 'Não foi possível carregar os modelos.'}</p>

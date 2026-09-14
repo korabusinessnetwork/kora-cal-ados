@@ -1,7 +1,7 @@
 // O que este painel precisa provar não é "renderiza a lista": é que o time CONSEGUE VER,
 // antes de gerar variante, que marcou o que achou que marcou. Cada teste abaixo protege um
-// modo de falha silenciosa — zona que não pega nada, zonas que dividem elemento (BUG-013) e
-// cor que o motor recusou — porque depois da geração o erro já é calçado fabricado errado.
+// modo de falha silenciosa, zona que não pega nada, zonas que dividem elemento (BUG-013) e
+// cor que o motor recusou, porque depois da geração o erro já é calçado fabricado errado.
 
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -30,7 +30,7 @@ const painel = (props: Partial<Parameters<typeof PainelDeZonas>[0]> = {}) =>
     />,
   );
 
-/** Os `<li>` da lista, um por string — não há `<li>` aninhado neste painel. */
+/** Os `<li>` da lista, um por string, não há `<li>` aninhado neste painel. */
 function itens(html: string): string[] {
   return html.split('<li').slice(1);
 }
@@ -59,7 +59,7 @@ describe('painel de zonas', () => {
 
   it('zona que captura 0 elementos vira alerta dizendo que a geração vai falhar ali', () => {
     // Seletor gravado que não acha nada no canônico é mapeamento quebrado. Mostrar só
-    // "0 elementos" deixaria o time descobrir isso na hora de gerar — falhar alto aqui.
+    // "0 elementos" deixaria o time descobrir isso na hora de gerar, falhar alto aqui.
     const html = painel({ zonas: [zona({ zone_key: 'bico', elementos: 0 })] });
 
     expect(html).toContain('role="alert"');
@@ -142,7 +142,7 @@ describe('painel de zonas', () => {
     expect(html).not.toMatch(/sem nome|sem rótulo|não nomeada/i);
   });
 
-  it('a chave da API aparece junto do rótulo — é ela que o cliente manda no JSON', () => {
+  it('a chave da API aparece junto do rótulo, é ela que o cliente manda no JSON', () => {
     const html = painel({ zonas: [zona({ zone_key: 'sola', label: 'Sola de borracha' })] });
 
     expect(html).toContain('painel-zonas__chave');
@@ -150,7 +150,7 @@ describe('painel de zonas', () => {
     expect(html).toContain('Sola de borracha');
   });
 
-  it('não renderiza nome de marca — o produto é white-label', () => {
+  it('não renderiza nome de marca, o produto é white-label', () => {
     const html = painel({
       zonas: [zona({ zone_key: 'sola', elementos: 0, corEmEdicao: '#x', erroDaCor: 'erro' })],
       sobreposicoes: [{ zone_key_a: 'sola', zone_key_b: 'cabedal', elementos: 1 }],
@@ -159,7 +159,7 @@ describe('painel de zonas', () => {
     expect(html).not.toMatch(/kora|aurora|runner/i);
   });
 
-  it('nenhum estilo inline no painel — estilo mora no CSS, para o white-label', () => {
+  it('nenhum estilo inline no painel, estilo mora no CSS, para o white-label', () => {
     const html = painel({
       zonas: [zona({ corEmEdicao: '#112233' }), zona({ zone_key: 'bico', elementos: 0 })],
       sobreposicoes: [{ zone_key_a: 'sola', zone_key_b: 'bico', elementos: 1 }],

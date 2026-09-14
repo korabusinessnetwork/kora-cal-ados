@@ -1,7 +1,7 @@
 // Raiz do app. Monta as telas por `useState`, sem roteador: hoje são quatro, e uma
 // dependência nova só se paga quando houver URL que precise ser compartilhável.
 //
-// Tudo o que toca o banco vive dentro de `RotaProtegida` — a autenticação é verificada
+// Tudo o que toca o banco vive dentro de `RotaProtegida`, a autenticação é verificada
 // antes de a tela existir, não dentro dela.
 //
 // Cada tela entra dentro de uma `RedeDeProtecao`, e o rodapé fica FORA dela: assim uma exceção
@@ -14,7 +14,7 @@
 //
 // A ordem das checagens aqui é deliberada, e já foi o contrário: a configuração do
 // Supabase é conferida DEPOIS de saber qual tela vai abrir, não antes. Conferir antes
-// derrubava o app inteiro por falta de `.env.local` — inclusive o esboço, que não faz
+// derrubava o app inteiro por falta de `.env.local`, inclusive o esboço, que não faz
 // uma requisição sequer. Cobrar credencial de quem não vai usar credencial nenhuma é
 // justamente a "prevenção de erro" do princípio nº1 aplicada ao contrário. A conferência hoje
 // mora em `features/AreaProtegida.tsx`, e a ordem continua sendo essa: ela só acontece quando a
@@ -97,7 +97,7 @@ export function App() {
   }
 
   // O esboço do motor roda sem Supabase: SVG commitado, zero rede, zero sessão. Sai
-  // antes da checagem de configuração de propósito — é o que faz `?tela=esboco`
+  // antes da checagem de configuração de propósito, é o que faz `?tela=esboco`
   // funcionar num clone recém-baixado, sem conta e sem `.env.local`.
   if (tela === 'esboco') {
     return (

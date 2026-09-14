@@ -3,7 +3,7 @@
 //
 // Os dois defeitos que eles impedem são de custo muito diferente. O primeiro só custa
 // tempo: sem a recusa, o erro aparece na primeira consulta, disfarçado de falha de rede.
-// O segundo é o defeito nº 1 desta etapa — mensagem de erro vai para log, e log de função
+// O segundo é o defeito nº 1 desta etapa, mensagem de erro vai para log, e log de função
 // serverless é lido por gente e guardado por plataforma. A service_role em log é a chave
 // que ignora a RLS solta num lugar que ninguém trata como cofre.
 
@@ -131,7 +131,7 @@ describe('nenhuma mensagem de erro carrega a chave', () => {
   //
   // `segredos` é o que a mensagem NÃO pode conter: a chave inteira e cada pedaço dela que
   // sozinho já a identificaria numa busca de log. O prefixo público (`sb_publishable_`) e o
-  // nome do papel ficam de fora de propósito — a mensagem precisa nomear o papel para ser
+  // nome do papel ficam de fora de propósito, a mensagem precisa nomear o papel para ser
   // útil, e nomear o papel não entrega chave nenhuma.
   const casos: Array<{ nome: string; ambiente: Record<string, string>; segredos: string[] }> = [
     {

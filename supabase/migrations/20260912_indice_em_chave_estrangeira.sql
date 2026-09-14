@@ -1,4 +1,4 @@
--- Kora Calçados (codinome) — índice nas duas chaves estrangeiras que não tinham
+-- Kora Calçados (codinome), índice nas duas chaves estrangeiras que não tinham
 -- Ver ADR-002 (multi-tenant/RLS) e ADR-006 (chave de API por tenant) em docs/08_DECISOES/
 -- Convenção Kora: migrations em YYYYMMDD_descricao.sql
 

@@ -1,5 +1,5 @@
 // O normalizador é a peça que decide se um modelo entra no catálogo. Ele pode recusar
-// arquivo — então precisa recusar pelo motivo certo, e nunca aceitar calado algo que
+// arquivo, então precisa recusar pelo motivo certo, e nunca aceitar calado algo que
 // mudaria a cor depois (ADR-004).
 
 import { describe, it, expect } from 'vitest';
@@ -85,7 +85,7 @@ describe('recusa explícita em vez de achatar errado', () => {
 describe('idempotência', () => {
   // Canário do ADR-005: o id cunhado é contrato. Se uma segunda passada renumerasse, todo
   // `svg_selector` já gravado em `product_zones` repointaria em silêncio. Por isso o
-  // arquivo aqui tem elemento ANÔNIMO — normalizar arquivo já identificado não exercita
+  // arquivo aqui tem elemento ANÔNIMO, normalizar arquivo já identificado não exercita
   // a cunhagem, que é justamente a parte que pode escorregar.
   it('normalizar duas vezes dá o mesmo resultado, mesmo com elemento anônimo', () => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg"><style>.st0{fill:#333333;}</style><rect id="zona-sola" class="st0" style="stroke:#000000"/><path fill="#111111"/><g><circle fill="#222222"/></g></svg>`;

@@ -13,7 +13,7 @@ const VERMELHO = '#FF0000';
 
 /**
  * O cabeçalho do fixture é um comentário que descreve a sujeira do arquivo, então cita
- * "<style>", "<script>" e "onclick" como texto. A normalização preserva comentários — o
+ * "<style>", "<script>" e "onclick" como texto. A normalização preserva comentários, o
  * que ela remove é markup vivo. Sem tirar os comentários, o teste acusaria a própria
  * documentação do fixture como se fosse código sobrevivente.
  */
@@ -45,7 +45,7 @@ describe('normalização do asset-base de demonstração', () => {
 });
 
 describe('nenhuma zona do esboço usa seletor de prefixo (ADR-005)', () => {
-  // O esboço é a tela que o time abre para aprender o produto — seletor de prefixo aqui
+  // O esboço é a tela que o time abre para aprender o produto, seletor de prefixo aqui
   // seria copiado para uma zona de verdade, e `[id^="zona-cadarco"]` capturaria uma zona
   // futura `zona-cadarco-lateral` pintando o lugar errado em silêncio.
   const LISTA_DE_IDS_EXATOS = /^#[A-Za-z_][A-Za-z0-9_-]*(, #[A-Za-z_][A-Za-z0-9_-]*)*$/;
@@ -76,7 +76,7 @@ describe('mapeamento de zonas', () => {
 describe('o comparativo do esboço mostra um fato', () => {
   it('a lista de ids exatos captura os mesmos 4 cadarços no cru e no canônico', () => {
     // O comparativo passa o MESMO pedido de cor pelos dois arquivos, então a zona precisa
-    // capturar o mesmo conjunto nos dois — senão a diferença entre os lados seria "menos
+    // capturar o mesmo conjunto nos dois, senão a diferença entre os lados seria "menos
     // cadarço de um lado", e não o BUG-001 que o esboço existe para mostrar.
     //
     // No cru os 4 paths ainda dividem `id="zona-cadarco"`. A lista continua pegando os 4
@@ -111,7 +111,7 @@ describe('o comparativo do esboço mostra um fato', () => {
   it('no arquivo cru, os 4 cadarços recebem o atributo e ainda assim ficam bege (BUG-001)', () => {
     // O cadarço é a zona de N elementos E uma das que o `<style>` sequestra. Se o pedido
     // só alcançasse o primeiro path, três continuariam com a cor original e o teste acima
-    // não perceberia — ele olha o cabedal, que é um path só.
+    // não perceberia, ele olha o cabedal, que é um path só.
     const variante = gerarVarianteDeCor(assetBaseCru, zonasDoProduto, { cadarco: VERMELHO });
 
     expect((variante.match(new RegExp(`fill="${VERMELHO}"`, 'gi')) ?? []).length).toBe(4);

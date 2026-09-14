@@ -3,7 +3,7 @@
 //
 // O que este arquivo protege é o que NENHUM teste de `api/_lib/` consegue proteger: a ORDEM
 // dos passos. Cada módulo de `_lib/` está certo isoladamente e continuaria verde se o handler
-// os chamasse em outra sequência — e a sequência é uma propriedade de segurança, não estilo
+// os chamasse em outra sequência, e a sequência é uma propriedade de segurança, não estilo
 // (ver o cabeçalho de `variants.ts`). Um 400 de `?format=png` respondido antes da
 // autenticação, por exemplo, não quebra teste nenhum de `_lib/`: ele só passa a contar a quem
 // não tem chave que a requisição chegou a ser processada.
@@ -55,7 +55,7 @@ interface OpcoesDoFalso {
 }
 
 /**
- * Banco falso com DUAS marcas na mesma tabela — a situação real que a `service_role` deixa
+ * Banco falso com DUAS marcas na mesma tabela, a situação real que a `service_role` deixa
  * de proteger. `tenant-2` existe para que "produto da concorrente" seja um produto que
  * realmente está lá, e não um id inventado.
  */
@@ -308,7 +308,7 @@ describe('autenticação antes de tudo', () => {
 describe('o produto da concorrente é indistinguível de um produto que não existe', () => {
   async function corpoNormalizado(resposta: Response): Promise<string> {
     // O `meta.timestamp` é a única diferença legítima entre duas respostas emitidas em
-    // milissegundos diferentes. Neutralizado, o resto tem de bater byte a byte — é o que
+    // milissegundos diferentes. Neutralizado, o resto tem de bater byte a byte, é o que
     // significa "a mesma resposta" para quem sonda ids de marcas concorrentes.
     const texto = await resposta.text();
     return texto.replace(/"timestamp":"[^"]*"/, '"timestamp":"<hora>"');
@@ -333,7 +333,7 @@ describe('o produto da concorrente é indistinguível de um produto que não exi
     expect(await corpoNormalizado(alheio)).toBe(await corpoNormalizado(inexistente));
   });
 
-  it('nunca 403 — o código é PRODUTO_NAO_ENCONTRADO', async () => {
+  it('nunca 403, o código é PRODUTO_NAO_ENCONTRADO', async () => {
     const { cliente } = clienteFalso();
     const resposta = await handler.fetch(
       pedidoDeVariante({ caminho: `/api/v1/products/${PRODUTO_DA_CONCORRENTE}/variants` }),
@@ -537,7 +537,7 @@ describe('a pré-checagem de zone_key, e o contraste que dá sentido a ela', () 
     expect((await envelopeDe(resposta)).error.message).toContain('nenhuma zona marcada');
   });
 
-  it('seletor gravado quebrado é 409, com o MESMO código — é o que a pré-checagem separa', async () => {
+  it('seletor gravado quebrado é 409, com o MESMO código, é o que a pré-checagem separa', async () => {
     const { cliente } = clienteFalso({
       zonas: [
         {
@@ -595,7 +595,7 @@ describe('o sucesso é o artefato, sem envelope', () => {
     expect(() => JSON.parse(corpo)).toThrow();
   });
 
-  it('a cor pedida saiu aplicada — o motor foi mesmo chamado com o asset-base do produto', async () => {
+  it('a cor pedida saiu aplicada, o motor foi mesmo chamado com o asset-base do produto', async () => {
     const { cliente, chamadas } = clienteFalso();
     const corpo = await (await handler.fetch(pedidoDeVariante(), cliente)).text();
 
@@ -635,7 +635,7 @@ describe('o 500 não vaza e não some', () => {
     expect(envelope.error.message).not.toContain(SEGREDO_DA_MENSAGEM);
   });
 
-  it('o detalhe do 500 fica no log — sem ele o defeito é impossível de investigar', async () => {
+  it('o detalhe do 500 fica no log, sem ele o defeito é impossível de investigar', async () => {
     const { cliente } = clienteFalso({
       asset: () => {
         throw new Error(`falha ao ler ${SEGREDO_DA_MENSAGEM}`);
@@ -690,7 +690,7 @@ describe('uma linha de log por requisição, sempre', () => {
     expect(saidaDeErro[0]).toContain('prefixo=ausente');
   });
 
-  it('a query string não entra no log — é por ali que a chave vazaria', async () => {
+  it('a query string não entra no log, é por ali que a chave vazaria', async () => {
     const { cliente } = clienteFalso();
     await handler.fetch(
       pedidoDeVariante({ caminho: `/api/v1/products/${PRODUTO}/variants?format=svg` }),
@@ -703,7 +703,7 @@ describe('uma linha de log por requisição, sempre', () => {
 
 // A guarda que lê o próprio fonte. Duas regras (`api/_lib/README.md`): ela lê o código SEM
 // comentários, e para identificador importado exige mais de uma ocorrência. Todas as três
-// abaixo foram MUTADAS antes de serem consideradas prontas — guarda não mutada é guarda não
+// abaixo foram MUTADAS antes de serem consideradas prontas, guarda não mutada é guarda não
 // verificada.
 describe('guarda de fonte do handler', () => {
   const fonte = readFileSync(CAMINHO_DO_FONTE, 'utf8');
@@ -716,7 +716,7 @@ describe('guarda de fonte do handler', () => {
 
   it('importa `domNode` como efeito colateral, e é o domNode do motor', () => {
     // Sem este import o adaptador de DOM não é registrado e TODA requisição vira 500. Não
-    // aparece em `tsc --noEmit` nem no comportamento testado aqui — o vitest registra o
+    // aparece em `tsc --noEmit` nem no comportamento testado aqui, o vitest registra o
     // adaptador por `setupFiles`, então os 48 testes acima passam sem o import. Só quebra em
     // runtime, na primeira chamada de cliente. Esta é a única checagem que pega isso.
     const achado = /import\s+'([^']*domNode)'/.exec(codigo);
@@ -727,7 +727,7 @@ describe('guarda de fonte do handler', () => {
 
     // Resolvido em disco, e conferido contra o arquivo do MOTOR: `..` a mais ou a menos o
     // próprio carregador de módulos já recusa, mas um `domNode` copiado para dentro de
-    // `api/` resolveria e registraria um segundo adaptador — duas implementações de DOM,
+    // `api/` resolveria e registraria um segundo adaptador, duas implementações de DOM,
     // que é o princípio nº1 quebrado no lugar onde ninguém procuraria.
     const especificador = achado?.[1] ?? '';
     const resolvido = join(dirname(CAMINHO_DO_FONTE), `${especificador}.ts`);
@@ -742,16 +742,16 @@ describe('guarda de fonte do handler', () => {
     // exceção. O 422 de `ZONA_NAO_ENCONTRADA` foi o caso difícil: `criarFalhaDeTransporte` só
     // aceita `CodigoDeTransporte` e este é código do motor, então por um tempo ele foi escrito
     // à mão neste arquivo. A solução não foi abrir exceção e sim mover o par para
-    // `criarFalhaDeZonaDesconhecida`, ao lado das duas tabelas — porque o MESMO código vale
+    // `criarFalhaDeZonaDesconhecida`, ao lado das duas tabelas, porque o MESMO código vale
     // 422 vindo da pré-checagem e 409 vindo do motor, e os dois precisam ser vistos juntos.
     expect(codigo).not.toContain('new FalhaDaApi(');
 
     // E nenhum 4xx solto: todo status de erro do cliente nasce numa fábrica de `_lib/`, então
-    // um `422` ou `409` digitado neste arquivo é a tabela renascendo aqui — inclusive por um
+    // um `422` ou `409` digitado neste arquivo é a tabela renascendo aqui, inclusive por um
     // caminho que a guarda acima não veria, como passar o número para outra função. Os `5xx`
     // ficam de fora da proibição de propósito: `let status = 500` é a semente da linha de log
     // (o valor que sai quando nem o `catch` responde) e `falha.status >= 500` é o corte do
-    // rastro no console — nenhum dos dois decide o status de uma resposta.
+    // rastro no console, nenhum dos dois decide o status de uma resposta.
     expect(codigo).not.toMatch(/\b4\d\d\b/);
   });
 

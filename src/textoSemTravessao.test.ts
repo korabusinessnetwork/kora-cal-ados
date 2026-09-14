@@ -12,8 +12,9 @@
 //   É também a razão de a checagem não ser um `grep`: um `grep` fora de linhas de comentário erra
 //   comentário no fim de linha e texto de JSX que quebra linha, e os dois existem aqui.
 // - Arquivo de teste. Título de `describe` e `it` só aparece para quem roda o teste, e um dos
-//   literais com travessão é de propósito, um SVG com caracteres fora do ASCII que prova que a API
-//   não estraga texto. Os títulos antigos ficam como estão, e é uma escolha dita às claras.
+//   literais com travessão era de propósito, um SVG com caracteres fora do ASCII que prova que a API
+//   não estraga texto. Desde 2026-09-14 (P03) o repositório inteiro está sem travessão, testes e
+//   comentários incluídos; esta guarda continua cobrando só o que chega a alguém, que é o que quebra.
 //
 // Por que o parser do rolldown, e não o do TypeScript: o TypeScript deste projeto é o 7, que não
 // tem API em JavaScript. O rolldown já está na árvore porque é o empacotador do Vite 8, e se ele
@@ -25,7 +26,8 @@ import { fileURLToPath } from 'node:url';
 import { parseAst } from 'rolldown/parseAst';
 import { describe, expect, it } from 'vitest';
 
-const TRAVESSAO = '—';
+// Montado pelo código do caractere, e não escrito, para esta guarda não ser ela mesma um travessão no repositório.
+const TRAVESSAO = String.fromCharCode(0x2014);
 const RAIZ = fileURLToPath(new URL('..', import.meta.url));
 
 interface No {

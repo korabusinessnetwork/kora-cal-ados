@@ -4,11 +4,11 @@
 // O painel existe para tornar visível o princípio nº1: as duas colunas saem da mesma
 // chamada de `gerarVarianteDeCor`, então o hex daqui é o hex de lá, por construção.
 //
-// DE ONDE VEM O CONTRATO MOSTRADO AQUI: `docs/07_APIS/endpoints.md` — rota, corpo,
+// DE ONDE VEM O CONTRATO MOSTRADO AQUI: `docs/07_APIS/endpoints.md`, rota, corpo,
 // cabeçalhos, envelope de erro e a tabela de status. Ele está fechado desde a Etapa 1, e
 // nada nesta tela decide contrato; quem editar este arquivo confere cada string contra
 // aquele doc. A forma do envelope de erro espelha `api/_lib/respostaDaApi.ts`, que é quem
-// monta a `Response` de verdade — espelha e não importa, porque `src/` vai inteiro para o
+// monta a `Response` de verdade, espelha e não importa, porque `src/` vai inteiro para o
 // bundle do navegador e `api/` carrega a `service_role`.
 //
 // Este painel já exibiu, por semanas, um contrato que nunca existiu (rota em português,
@@ -30,7 +30,7 @@ interface Props {
 /** Chave de exemplo, nunca uma chave real. O prefixo é o do exemplo do contrato. */
 const CHAVE_DE_EXEMPLO = 'kora_live_7f3ab902_SEGREDO_DE_EXEMPLO';
 
-/** `meta.version` do envelope — o `VERSAO_DO_ENVELOPE` de `api/_lib/respostaDaApi.ts`. */
+/** `meta.version` do envelope, o `VERSAO_DO_ENVELOPE` de `api/_lib/respostaDaApi.ts`. */
 const VERSAO_DO_ENVELOPE = '1';
 
 /**
@@ -47,13 +47,13 @@ interface RespostaDeErroMostrada {
 }
 
 /**
- * Status e família por código do motor — cópia da tabela de `docs/07_APIS/endpoints.md`, e
+ * Status e família por código do motor, cópia da tabela de `docs/07_APIS/endpoints.md`, e
  * não um import de `api/_lib/traduzirParaFalhaDaApi.ts`: `src/` não pode importar de `api/`.
- * `Record<CodigoDeErro, ...>` de propósito — código novo no motor vira erro de compilação
+ * `Record<CodigoDeErro, ...>` de propósito, código novo no motor vira erro de compilação
  * aqui, e não status inventado na tela.
  *
  * `ZONA_NAO_ENCONTRADA` é 409 e não 422 porque, vindo do MOTOR, ele só acontece com seletor
- * gravado quebrado — dado do tenant. O 422 de mesmo código é o da pré-checagem do handler,
+ * gravado quebrado, dado do tenant. O 422 de mesmo código é o da pré-checagem do handler,
  * que o esboço não tem (não há banco aqui).
  */
 const RESPOSTA_DE_ERRO_POR_CODIGO: Readonly<Record<CodigoDeErro, RespostaDeErroMostrada>> = {
@@ -64,14 +64,14 @@ const RESPOSTA_DE_ERRO_POR_CODIGO: Readonly<Record<CodigoDeErro, RespostaDeErroM
   ZONAS_SOBREPOSTAS: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
   SVG_INVALIDO: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
   SVG_NAO_NORMALIZAVEL: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
-  // Gêmeos 3D (ADR-007). O esboço nunca os produz — ele pinta SVG —, mas o
+  // Gêmeos 3D (ADR-007). O esboço nunca os produz, ele pinta SVG, mas o
   // `Record<CodigoDeErro, ...>` acima obriga a linha, e é assim que ele funciona: foi
   // este erro de compilação que avisou que a tela existia, quando os códigos entraram.
   MODELO_3D_INVALIDO: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
   MODELO_3D_NAO_NORMALIZAVEL: { status: 409, texto: 'Conflict', familia: 'dado do tenant' },
   // Composição (ADR-008), e aconteceu de novo exatamente como o comentário acima descreve:
   // os quatro códigos entraram no motor e o erro de compilação apontou para esta tela. 422 e
-  // não 409 porque a composição vem no corpo do pedido — quem corrige é quem enviou.
+  // não 409 porque a composição vem no corpo do pedido, quem corrige é quem enviou.
   PECA_NAO_ENCONTRADA: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
   COMPOSICAO_INVALIDA: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
   FORMAS_MISTURADAS: { status: 422, texto: 'Unprocessable Entity', familia: 'pedido' },
@@ -81,7 +81,7 @@ const RESPOSTA_DE_ERRO_POR_CODIGO: Readonly<Record<CodigoDeErro, RespostaDeErroM
 export function PainelDaApi({ cores, relatorio, erro }: Props) {
   // As cores vão no TOPO do corpo, uma chave por `zone_key`. Nada que não seja cor entra
   // aqui: o topo é espaço de nomes do tenant, e um campo nosso colidiria com uma zona de
-  // mesmo nome como cor não aplicada — não como erro (endpoints.md, "O corpo do pedido").
+  // mesmo nome como cor não aplicada, não como erro (endpoints.md, "O corpo do pedido").
   const corpoDoPedido = JSON.stringify(cores, null, 2);
 
   const requisicao = [
@@ -161,7 +161,7 @@ export function PainelDaApi({ cores, relatorio, erro }: Props) {
       <pre className="codigo codigo--requisicao">{requisicao}</pre>
 
       {/* A assimetria é o ponto pedagógico: sucesso é o artefato, erro é o envelope. Mostrar
-          o 200 envelopado — como este painel mostrou por semanas — ensina um round-trip de
+          o 200 envelopado, como este painel mostrou por semanas, ensina um round-trip de
           escape/unescape que o contrato proíbe justamente porque ele muda o desenho em
           silêncio (endpoints.md, "A resposta"). */}
       <pre className={`codigo ${erro ? 'codigo--erro' : 'codigo--ok'}`}>

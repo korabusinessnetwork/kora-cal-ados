@@ -1,13 +1,13 @@
 // A última barreira antes de um mapeamento errado virar cor no calçado errado.
 //
 // Função PURA: recebe "o time clicou nestes elementos e chamou isto de sola" e devolve a
-// linha de `product_zones` pronta para gravar — ou recusa o estado inválido antes de o
+// linha de `product_zones` pronta para gravar, ou recusa o estado inválido antes de o
 // banco ver qualquer coisa. Nada de I/O aqui, porque esta é a regra que o editor e a tela
 // de revisão precisam rodar sem rede, e regra que depende de rede vira regra que alguém
 // pula "só desta vez".
 //
 // O editor é SOMENTE-LEITURA sobre o asset-base (ADR-005): nada aqui reescreve o SVG.
-// A checagem de "o que é pintável" e o formato do seletor moram no motor de render —
+// A checagem de "o que é pintável" e o formato do seletor moram no motor de render,
 // duas implementações da mesma regra divergiriam, e a divergência apareceria como cor no
 // lugar errado (princípio nº1 do CLAUDE.md).
 
@@ -78,7 +78,7 @@ export function marcarZona(pedido: PedidoDeMarcacao): ZonaParaGravar {
     label: pedido.label !== undefined ? pedido.label : (existente?.label ?? null),
     cor_default: resolverCor(pedido, existente, chave),
     // `unique (product_id, zone_key)`: acrescentar elemento a uma zona é UPDATE da linha,
-    // nunca um segundo INSERT — e `upsert` cego apagaria o mapeamento de um colega.
+    // nunca um segundo INSERT, e `upsert` cego apagaria o mapeamento de um colega.
     idExistente: existente?.id ?? null,
   };
 }
@@ -142,7 +142,7 @@ function recusarSobreposicao(
  * Os ids NOVOS já foram conferidos um a um lá em cima. Os GRAVADOS não: eles vêm da linha
  * do banco e ninguém nunca os confrontou com o desenho de hoje. Se o asset-base de um
  * produto foi trocado depois do mapeamento, ou se a linha veio de outro produto, o id
- * gravado não resolve mais nada — e acrescentar um elemento à zona regravaria o seletor
+ * gravado não resolve mais nada, e acrescentar um elemento à zona regravaria o seletor
  * carregando o id morto junto, em silêncio. A zona passaria a pintar menos do que o painel
  * promete, que é o princípio nº1 quebrado exatamente onde ninguém olha.
  *

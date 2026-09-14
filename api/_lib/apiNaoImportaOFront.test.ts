@@ -3,11 +3,11 @@
 // Existe como teste, e não como revisão de código, porque o erro que ela pega é INVISÍVEL
 // na leitura. `api/` roda com `service_role`, que bypassa a RLS: aqui o Postgres não guarda
 // mais nada, e o isolamento entre marcas concorrentes passa a ser deste código
-// (`api/README.md`). Código de `src/` foi escrito sob a hipótese oposta — que a RLS filtra
+// (`api/README.md`). Código de `src/` foi escrito sob a hipótese oposta, que a RLS filtra
 // por trás. Reusado aqui, ele roda sem filtro nenhum e continua parecendo correto.
 //
 // A checagem é textual de propósito: pega o import mesmo que nenhum teste execute a linha.
-// Comentários são descontados — explicar a regra é o que os READMEs deste projeto fazem.
+// Comentários são descontados, explicar a regra é o que os READMEs deste projeto fazem.
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { extname, join } from 'node:path';
@@ -31,7 +31,7 @@ function semComentarios(codigo: string): string {
 
 /**
  * Todo módulo citado no arquivo: `from '…'`, `import '…'` de efeito colateral e
- * `import('…')` dinâmico. Vale ler os três — o dinâmico é justamente por onde alguém
+ * `import('…')` dinâmico. Vale ler os três, o dinâmico é justamente por onde alguém
  * contornaria uma varredura que só olhasse `from`.
  */
 function modulosImportados(codigo: string): string[] {
@@ -40,7 +40,7 @@ function modulosImportados(codigo: string): string[] {
   );
 }
 
-/** O próprio arquivo cita os caminhos proibidos em `string` — montado para não se pegar. */
+/** O próprio arquivo cita os caminhos proibidos em `string`, montado para não se pegar. */
 const ISENTOS = new Set([join('api', '_lib', 'apiNaoImportaOFront.test.ts')]);
 
 const fontes = arquivosDeFonte(RAIZ)
@@ -69,7 +69,7 @@ describe('api/ não importa o front', () => {
       'Um arquivo de api/ importou src/features/. Perigo concreto: ' +
         '`src/features/zonas/listarZonasDoProduto.ts` NÃO filtra por tenant_id de propósito ' +
         '(o comentário dele diz: quem recusa é a RLS). Sob service_role não existe RLS, ' +
-        'então reusar aquela função entrega as zonas de uma marca ao sistema de outra — e o ' +
+        'então reusar aquela função entrega as zonas de uma marca ao sistema de outra, e o ' +
         'código continua parecendo correto na leitura. Use o par com filtro explícito de ' +
         'tenant em api/_lib/.',
     ).toEqual([]);
@@ -97,14 +97,14 @@ describe('api/ não importa o front', () => {
       'Um arquivo de api/ importou de src/ algo que não é o motor. A regra é uma allowlist ' +
         'de um item só porque o resto de src/ foi escrito assumindo RLS e sessão de usuário; ' +
         'aqui não há nem uma nem outra, e a hipótese quebrada não aparece em nenhum teste ' +
-        'de unidade — aparece como dado de um tenant saindo na resposta de outro.',
+        'de unidade, aparece como dado de um tenant saindo na resposta de outro.',
     ).toEqual([]);
   });
 
   it('api/ importa o motor de src/lib/render/ (obrigatório, não só permitido)', () => {
     // O outro lado da regra: se um dia api/ parar de importar o motor, é porque alguém
     // copiou o recolor para cá. Duas implementações divergem, e a cor do editor deixa de
-    // ser a cor da API — o princípio nº1 do projeto quebrado por construção.
+    // ser a cor da API, o princípio nº1 do projeto quebrado por construção.
     const importamOMotor = fontes.filter(({ modulos }) => modulos.some((m) => DO_MOTOR.test(m)));
 
     expect(

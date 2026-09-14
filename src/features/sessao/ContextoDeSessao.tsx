@@ -25,7 +25,7 @@ export type EstadoDaSessao =
   | 'carregando'
   | 'anonimo'
   // `entrando` é separado de `carregando` porque a tela desenhada é outra: mantém o
-  // formulário montado. Sem isso, um login recusado apagaria o e-mail já digitado —
+  // formulário montado. Sem isso, um login recusado apagaria o e-mail já digitado,
   // React desmonta o componente quando o estado troca o tipo do elemento raiz.
   | 'entrando'
   | 'escolhendo-tenant'
@@ -60,7 +60,7 @@ export function ProvedorDeSessao({
   cliente = clienteSupabase(),
 }: {
   children: ReactNode;
-  /** Injetável para teste — em produção é sempre o cliente único. */
+  /** Injetável para teste, em produção é sempre o cliente único. */
   cliente?: SupabaseClient;
 }) {
   const [estado, setEstado] = useState<EstadoDaSessao>('carregando');
@@ -142,7 +142,7 @@ export function ProvedorDeSessao({
         setErro('E-mail ou senha inválidos.');
         setEstado('anonimo');
       }
-      // O sucesso chega pelo onAuthStateChange — um caminho só para montar a sessão.
+      // O sucesso chega pelo onAuthStateChange, um caminho só para montar a sessão.
     },
     [cliente],
   );

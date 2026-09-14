@@ -1,7 +1,7 @@
 // O que estes testes protegem: que a chave de API nunca chegue ao log.
 //
-// É o defeito mais caro possível neste módulo — credencial em texto puro, num arquivo que
-// muita gente lê e que fica guardado por meses — e é também o mais fácil de introduzir sem
+// É o defeito mais caro possível neste módulo, credencial em texto puro, num arquivo que
+// muita gente lê e que fica guardado por meses, e é também o mais fácil de introduzir sem
 // perceber, porque nada quebra quando acontece. Por isso os testes não se limitam ao uso
 // correto: eles exercitam o **uso errado** (a chave inteira passada no campo do prefixo, a
 // chave em query string na rota) e exigem que mesmo assim nada vaze.
@@ -22,7 +22,7 @@ function coletor() {
 
 const ROTA = '/api/v1/products/a3f1c2d4-5e6b-4a7c-8d9e-0f1a2b3c4d5e/variants';
 
-describe('logDaRequisicao — o que a linha precisa dizer para servir a quem depura', () => {
+describe('logDaRequisicao, o que a linha precisa dizer para servir a quem depura', () => {
   it('traz método, rota, status, duração e prefixo em pares chave=valor', () => {
     const saida = coletor();
 
@@ -65,7 +65,7 @@ describe('logDaRequisicao — o que a linha precisa dizer para servir a quem dep
     expect(saida.ultima()).not.toContain('codigo=');
   });
 
-  it('escreve uma linha só — log multilinha faz grep devolver fragmento sem contexto', () => {
+  it('escreve uma linha só, log multilinha faz grep devolver fragmento sem contexto', () => {
     const saida = coletor();
     logDaRequisicao({ metodo: 'POST', rota: ROTA, status: 500, duracaoMs: 9 }, saida.escrever);
     expect(saida.ultima()).not.toContain('\n');
@@ -107,7 +107,7 @@ describe('a chave nunca chega ao log, nem quando quem chama erra', () => {
     expect(saida.ultima()).not.toContain('SEGREDO');
   });
 
-  it('chave em query string não entra na linha — a URL é o vazamento clássico', () => {
+  it('chave em query string não entra na linha, a URL é o vazamento clássico', () => {
     const saida = coletor();
     const gerada = gerarChaveDeApi('live');
 
@@ -139,7 +139,7 @@ describe('a chave nunca chega ao log, nem quando quem chama erra', () => {
 
   it('canário: o prefixo de uma chave real passa pelo filtro', () => {
     // Sem isto, uma mudança no formato do prefixo faria o log dizer `invalido` para toda
-    // requisição — silenciosamente, e justo no campo que existe para achar a chave no
+    // requisição, silenciosamente, e justo no campo que existe para achar a chave no
     // suporte. O canário quebra em vez de deixar o log emudecer.
     const saida = coletor();
     const gerada = gerarChaveDeApi('test');
@@ -154,7 +154,7 @@ describe('a chave nunca chega ao log, nem quando quem chama erra', () => {
 });
 
 describe('a linha não pode ser forjada por quem chama', () => {
-  /** Os campos reais da linha são os pedaços separados por espaço — nada mais é campo. */
+  /** Os campos reais da linha são os pedaços separados por espaço, nada mais é campo. */
   const campos = (linha: string, nome: string) =>
     linha.split(' ').filter((campo) => campo.startsWith(`${nome}=`));
 

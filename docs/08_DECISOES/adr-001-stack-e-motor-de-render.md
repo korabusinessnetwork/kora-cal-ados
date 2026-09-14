@@ -1,12 +1,12 @@
-# ADR-001 — Stack e motor de renderização (vetor-first)
+# ADR-001, Stack e motor de renderização (vetor-first)
 
 **Status**: Aceito
 **Data**: 2026-08-12
 **Decisores**: Matheus Bonato
-**Supersede**: (nenhum — primeira decisão do projeto)
-**Supersedido por**: ADR-005, **parcialmente** — só a escolha de Fabric.js para o editor.
-E ADR-007, **parcialmente** — só o “MVP vetor-only”, que passa a admitir produto 3D ao
-lado do vetorial (nenhum produto SVG é migrado). E ADR-008, **parcialmente** — o “MVP sem
+**Supersede**: (nenhum, primeira decisão do projeto)
+**Supersedido por**: ADR-005, **parcialmente**, só a escolha de Fabric.js para o editor.
+E ADR-007, **parcialmente**, só o “MVP vetor-only”, que passa a admitir produto 3D ao
+lado do vetorial (nenhum produto SVG é migrado). E ADR-008, **parcialmente**, o “MVP sem
 componente de IA” deixa de valer no modo generativo, em que o prompt escolhe peças de um
 acervo. O resto (React+Vite, Supabase, Vercel Functions) continua vigente.
 
@@ -17,16 +17,16 @@ acervo. O resto (React+Vite, Supabase, Vercel Functions) continua vigente.
 Kora Calçados precisa de duas capacidades desde o dia 1: um editor visual (time de
 produto marca zonas num modelo de calçado) e uma API que gera variantes de cor/material
 dessas zonas em escala. O produto atende marcas calçadistas, que podem incluir
-concorrentes diretas no mesmo sistema — isolamento entre tenants é requisito crítico,
+concorrentes diretas no mesmo sistema, isolamento entre tenants é requisito crítico,
 não incremental.
 
 Os modelos-base podem ser vetor/ilustração (zonas já separadas no arquivo) ou foto real
-(precisa segmentação/máscara). O MVP foi escopado para vetor/ilustração apenas — foto
+(precisa segmentação/máscara). O MVP foi escopado para vetor/ilustração apenas, foto
 real fica para uma fase futura porque exige IA de segmentação (SAM ou equivalente),
 custo de computação real, e complexidade que não é necessária pra validar o valor
 central do produto (gerar variante em escala).
 
-Projeto em fase bootstrap, pré-receita, venda B2B manual/contrato — sem orçamento pra
+Projeto em fase bootstrap, pré-receita, venda B2B manual/contrato, sem orçamento pra
 infraestrutura paga na Fase 1.
 
 ---
@@ -34,14 +34,14 @@ infraestrutura paga na Fase 1.
 ## Decisão
 
 > ⚠️ **A parte "Fabric.js" desta decisão foi supersedida pelo ADR-005** (2026-09-05):
-> o editor manipula SVG no DOM, sem canvas. O texto abaixo fica como foi escrito — ADR não
+> o editor manipula SVG no DOM, sem canvas. O texto abaixo fica como foi escrito, ADR não
 > se reescreve, se supersede.
 
 Vamos usar **React + Vite + Fabric.js** no editor, **Supabase** (Postgres + RLS +
 Storage + Auth) como camada de dados, e **Vercel Serverless Functions** como motor de
 geração de variante (recolore SVG via manipulação de atributo `fill`, rasteriza com
 `sharp`/`resvg` quando PNG for pedido). Nenhum worker sempre-ligado, nenhuma GPU, nenhum
-serviço de IA nesta fase — o MVP é deliberadamente vetor-only para manter o motor de
+serviço de IA nesta fase, o MVP é deliberadamente vetor-only para manter o motor de
 render leve o bastante para rodar em função serverless comum.
 
 ---
@@ -58,7 +58,7 @@ render leve o bastante para rodar em função serverless comum.
 
 - **Prós**: prepara terreno pra segmentação de foto real (Fase 2) sem re-arquitetar depois
 - **Contras**: custo mensal fixo desde o dia 1, complexidade operacional que o MVP vetor-only não precisa
-- **Descartado porque**: MVP não faz nada computacionalmente pesado; adicionar o worker fica fácil quando a Fase 2 (foto real) for decidida — não é retrabalho, é adição
+- **Descartado porque**: MVP não faz nada computacionalmente pesado; adicionar o worker fica fácil quando a Fase 2 (foto real) for decidida, não é retrabalho, é adição
 
 ### 3. Segmentação por IA (SAM ou equivalente) já na Fase 1, suportando foto real desde o início
 
@@ -72,15 +72,15 @@ render leve o bastante para rodar em função serverless comum.
 
 ### Positivas
 
-- MVP roda 100% em free tier (Vercel + Supabase) — sem custo de infra na fase de venda manual
+- MVP roda 100% em free tier (Vercel + Supabase), sem custo de infra na fase de venda manual
 - Motor de render simples (manipulação de SVG) é rápido de construir e fácil de testar
-- Mesma espinha dorsal dos outros projetos Kora (React+Vite+Supabase+Vercel) — reaproveita padrão de RLS, auth e deploy já validado
-- ~~Fabric.js permite reaproveitar o mesmo grafo de objetos no editor (client) e, se necessário, num render espelhado no servidor~~ — **não se concretizou**: o ADR-004 decidiu que o servidor usa `gerarVarianteDeCor` sobre o SVG canônico, sem grafo nenhum. Foi o que motivou o ADR-005
+- Mesma espinha dorsal dos outros projetos Kora (React+Vite+Supabase+Vercel), reaproveita padrão de RLS, auth e deploy já validado
+- ~~Fabric.js permite reaproveitar o mesmo grafo de objetos no editor (client) e, se necessário, num render espelhado no servidor~~, **não se concretizou**: o ADR-004 decidiu que o servidor usa `gerarVarianteDeCor` sobre o SVG canônico, sem grafo nenhum. Foi o que motivou o ADR-005
 
 ### Negativas / Trade-offs
 
 - Clientes com modelos apenas em foto real não são atendidos até a Fase 2
-- Escopo "os dois desde o início" (vetor + foto) do produto fica parcialmente adiado —
+- Escopo "os dois desde o início" (vetor + foto) do produto fica parcialmente adiado,
   documentado como decisão consciente, não esquecimento
 - Se a demanda por foto real chegar antes do previsto, precisa reabrir esta decisão via
   novo ADR (adicionar worker + modelo de segmentação)
@@ -89,10 +89,10 @@ render leve o bastante para rodar em função serverless comum.
 
 ## Referências
 
-- `docs/01_ARQUITETURA/overview.md` — como as peças se encaixam
-- `docs/00_VISAO/visao-produto.md` — problema e proposta de valor que motivam o escopo vetor-first
-- `memory/restrictions.md` — restrição de custo (bootstrap R$0) que influenciou a decisão
-- `docs/11_SEGURANCA/` — isolamento multi-tenant, requisito que vale para qualquer stack escolhida
+- `docs/01_ARQUITETURA/overview.md`, como as peças se encaixam
+- `docs/00_VISAO/visao-produto.md`, problema e proposta de valor que motivam o escopo vetor-first
+- `memory/restrictions.md`, restrição de custo (bootstrap R$0) que influenciou a decisão
+- `docs/11_SEGURANCA/`, isolamento multi-tenant, requisito que vale para qualquer stack escolhida
 
 ---
 

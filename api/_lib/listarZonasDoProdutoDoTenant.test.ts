@@ -1,11 +1,11 @@
 // A FORMA do pedido é o que este arquivo protege, no molde de
 // `gravarZonaNoBanco.test.ts`: qual tabela, quais campos, quais filtros e qual ordenação
-// foram enviados — não só o valor de retorno.
+// foram enviados, não só o valor de retorno.
 //
 // O defeito que estes testes existem para pegar não aparece na tela nem no log: uma
 // consulta sob `service_role` sem `.eq('tenant_id', ...)` devolve as zonas da marca
 // concorrente e responde 200. Um teste que só olhasse o retorno passaria, porque o cliente
-// falso devolveria o que lhe mandassem devolver — por isso o cliente falso daqui FILTRA de
+// falso devolveria o que lhe mandassem devolver, por isso o cliente falso daqui FILTRA de
 // verdade as linhas pelos filtros recebidos, e por isso há também uma guarda que lê o
 // próprio fonte.
 //
@@ -137,7 +137,7 @@ describe('a forma do pedido', () => {
   it('ordena por created_at ascendente', async () => {
     // Sem `order` o Postgres não promete ordem nenhuma, e duas chamadas idênticas podem
     // devolver a lista em ordens diferentes. `created_at` é a única ordenação estável do
-    // schema e é a mesma que o editor usa — as duas pontas veem a mesma ordem.
+    // schema e é a mesma que o editor usa, as duas pontas veem a mesma ordem.
     const { cliente, pedido } = clienteFalso({ linhas: LINHAS });
     await listarZonasDoProdutoDoTenant(cliente, 'prod-1', 'tenant-1');
 
@@ -158,7 +158,7 @@ describe('a forma do pedido', () => {
 describe('isolamento entre marcas concorrentes', () => {
   it('não devolve a zona de outro tenant, mesmo com o product_id dele em mãos', async () => {
     // O CONTRA-EXEMPLO QUE DÁ SENTIDO A ESTE MÓDULO: o par que o editor usa
-    // (`listarZonasDoProduto`, no front) NÃO manda filtro de tenant, de propósito — lá quem
+    // (`listarZonasDoProduto`, no front) NÃO manda filtro de tenant, de propósito, lá quem
     // recusa é a RLS. Aqui não há RLS, e sem o filtro esta chamada devolveria `#sola-da-
     // concorrente`. O arquivo do front não é importado nem lido aqui: `api/` não pode tocar
     // `src/features/` (`apiNaoImportaOFront.test.ts`).
@@ -206,7 +206,7 @@ describe('vazio e erro não são a mesma coisa', () => {
 
   it('erro do banco sobe e nunca vira lista vazia', async () => {
     // Devolver `[]` numa falha faria a API afirmar "este produto não tem zona marcada"
-    // sobre um produto inteiro mapeado — e o handler decidiria em cima da mentira.
+    // sobre um produto inteiro mapeado, e o handler decidiria em cima da mentira.
     const erroDoBanco = { code: '42501', message: 'permission denied for table product_zones' };
     const { cliente } = clienteFalso({ error: erroDoBanco });
 
@@ -221,7 +221,7 @@ describe('vazio e erro não são a mesma coisa', () => {
 describe('o retorno serve ao motor sem adaptador', () => {
   it('é atribuível a Zona[] de gerarVarianteDeCor (checagem de compilação)', async () => {
     // Se um dia o motor exigir mais um campo, ou este módulo parar de trazer um, o erro
-    // aparece aqui em `tsc` — não em produção, com a variante saindo sem uma zona.
+    // aparece aqui em `tsc`, não em produção, com a variante saindo sem uma zona.
     const { cliente } = clienteFalso({ linhas: LINHAS });
 
     const zonas: Zona[] = [...(await listarZonasDoProdutoDoTenant(cliente, 'prod-1', 'tenant-1'))];

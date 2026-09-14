@@ -1,12 +1,12 @@
 // O relatório do mapeamento: que zonas existem neste modelo, quantos elementos cada uma captura
 // HOJE no canônico, que cor está sendo testada, e o aviso quando duas dividem elemento. A
 // contagem fica em primeiro plano porque é a única chance de o time descobrir que marcou o lugar
-// errado ANTES de existir variante — depois disso o erro já virou calçado fabricado.
+// errado ANTES de existir variante, depois disso o erro já virou calçado fabricado.
 //
 // Só duas coisas aqui são `role="alert"`, e as duas quebram a GERAÇÃO, não a tela: zona que
 // captura 0 elementos (seletor gravado que não acha nada no canônico) e sobreposição, em que a
 // ordem das chaves do pedido decidiria a cor do elemento dividido (BUG-013). Modelo sem zona
-// nenhuma não é alerta — é catálogo vazio; hex pela metade também não, porque anunciar cada
+// nenhuma não é alerta, é catálogo vazio; hex pela metade também não, porque anunciar cada
 // tecla ensina o time a ignorar alerta justo onde ele custa caro.
 //
 // Burro e controlado, irmão de `FormularioDeNovaZona` e `ListaDeProdutos`: não busca nada, não
@@ -61,7 +61,7 @@ export function PainelDeZonas(props: PropsDoPainelDeZonas): ReactElement {
         </p>
       ))}
 
-      {/* Vazio é estado nomeado, com a próxima ação escrita — nunca silêncio. */}
+      {/* Vazio é estado nomeado, com a próxima ação escrita, nunca silêncio. */}
       {zonas.length === 0 ? (
         <p className="painel-zonas__vazio">
           Este modelo ainda não tem nenhuma zona mapeada. Clique numa parte do calçado para marcar
@@ -138,7 +138,7 @@ function ItemDeZona({ zona, emFoco, aoFocar, aoMudarCor }: PropsDoItemDeZona): R
         aria-describedby={zona.erroDaCor === null ? undefined : idDoErro}
         onChange={(evento) => aoMudarCor(zona.zone_key, evento.target.value)}
       />
-      {/* O valor digitado fica intacto — quem confirma a cor é a pessoa, não o painel. */}
+      {/* O valor digitado fica intacto, quem confirma a cor é a pessoa, não o painel. */}
       {zona.erroDaCor !== null && (
         <p className="painel-zonas__erro" id={idDoErro}>
           {zona.erroDaCor}

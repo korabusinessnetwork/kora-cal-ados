@@ -2,8 +2,8 @@
 // um ilhós numa zona já existente APAGAVA o `label` gravado.
 //
 // Como acontecia: o formulário volta vazio depois de salvar, e a tela mandava
-// `label: null` para `marcarZona`. `null` ali significa "apague esta coluna" — semântica
-// correta e documentada —, então o UPDATE limpava o rótulo que um colega tinha definido.
+// `label: null` para `marcarZona`. `null` ali significa "apague esta coluna", semântica
+// correta e documentada, então o UPDATE limpava o rótulo que um colega tinha definido.
 // Ninguém veria: a zona continua funcionando, só perde o nome legível.
 //
 // A distinção que conserta é entre "campo vazio porque não mexi" e "campo vazio porque quero
@@ -24,7 +24,7 @@ describe('campo vazio numa zona que já existe', () => {
     expect(preservarOuLimpar('   ', true)).toBeUndefined();
   });
 
-  it('em zona nova, vazio é ausência mesmo — não há nada a preservar', () => {
+  it('em zona nova, vazio é ausência mesmo, não há nada a preservar', () => {
     expect(preservarOuLimpar('', false)).toBeNull();
     expect(preservarOuLimpar('   ', false)).toBeNull();
   });
@@ -41,7 +41,7 @@ describe('campo vazio numa zona que já existe', () => {
 //
 // Clicar num elemento de gradiente que ainda não pertence a nenhuma zona mostrava
 // `A zona "esta zona" usa gradiente ou padrão (url(#brilho))…`. A frase é do motor e está
-// certa lá: na geração a zona existe e tem nome. No clique não há zona — e o texto se lê
+// certa lá: na geração a zona existe e tem nome. No clique não há zona, e o texto se lê
 // como se houvesse uma zona chamada "esta zona".
 //
 // Só aparece com o elemento SEM DONO: se ele já pertence a outra zona, a recusa de posse
@@ -73,7 +73,7 @@ describe('recusa de clique falada em cima do elemento, não da zona', () => {
 
   it('falha que não é do motor não vaza texto de exceção para a tela', () => {
     // `TypeError: Cannot read properties of null` na tela de quem marca zona não ajuda
-    // ninguém e assusta — mesma regra do BUG-016.
+    // ninguém e assusta, mesma regra do BUG-016.
     expect(motivoDaRecusaDeClique(new TypeError('Cannot read properties of null'))).toBe(
       'Esse elemento não aceita cor.',
     );

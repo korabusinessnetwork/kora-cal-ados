@@ -1,4 +1,4 @@
--- Kora Calçados (codinome) — migration inicial
+-- Kora Calçados (codinome), migration inicial
 -- Ver ADR-001 (stack) e ADR-002 (multi-tenant/RLS) em docs/08_DECISOES/
 -- Convenção Kora: migrations em YYYYMMDD_descricao.sql
 
@@ -33,7 +33,7 @@ create table products (
 );
 create index products_tenant_id_idx on products(tenant_id);
 
--- ── Zonas do produto (o "frame" endereçável — sola, cabedal, cadarço...) ─
+-- ── Zonas do produto (o "frame" endereçável, sola, cabedal, cadarço...) ─
 create table product_zones (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references products(id) on delete cascade,
@@ -48,7 +48,7 @@ create table product_zones (
 create index product_zones_tenant_id_idx on product_zones(tenant_id);
 create index product_zones_product_id_idx on product_zones(product_id);
 
--- ── Variantes geradas (cache opcional — API pode gerar on-the-fly também) ─
+-- ── Variantes geradas (cache opcional, API pode gerar on-the-fly também) ─
 create table variants (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references products(id) on delete cascade,
@@ -60,7 +60,7 @@ create table variants (
 create index variants_tenant_id_idx on variants(tenant_id);
 create index variants_product_id_idx on variants(product_id);
 
--- ── RLS — definition-of-done de toda tabela, sem exceção (ver ADR-002) ──
+-- ── RLS, definition-of-done de toda tabela, sem exceção (ver ADR-002) ──
 alter table tenants enable row level security;
 alter table tenant_members enable row level security;
 alter table products enable row level security;
@@ -98,6 +98,6 @@ create policy "membro so acessa variantes do proprio tenant"
   using (tenant_id in (select auth_tenant_ids()))
   with check (tenant_id in (select auth_tenant_ids()));
 
--- Nunca usar service_role no front — só em Edge Function/servidor.
+-- Nunca usar service_role no front, só em Edge Function/servidor.
 -- Teste de isolamento obrigatório antes de qualquer feature sensível ir pra produção
 -- (dois tenants, garantir que um não vê produto/zona/variante do outro).

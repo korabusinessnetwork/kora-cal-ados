@@ -1,6 +1,6 @@
-# src/lib — camada de serviços
+# src/lib, camada de serviços
 
-Todo acesso ao backend e toda lógica de domínio pura passam por aqui — nunca dentro de
+Todo acesso ao backend e toda lógica de domínio pura passam por aqui, nunca dentro de
 componente. O que não vive aqui: JSX, estado de UI, roteamento.
 
 | Pasta | O que vive lá |

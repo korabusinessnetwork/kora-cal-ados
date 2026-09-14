@@ -43,7 +43,7 @@ describe('lista de produtos', () => {
     expect(html).not.toContain('role="alert"');
   });
 
-  it('erro fala de falha e oferece ação — nunca finge catálogo vazio', () => {
+  it('erro fala de falha e oferece ação, nunca finge catálogo vazio', () => {
     const html = lista({ estado: 'erro', erro: 'timeout' });
 
     expect(html).toContain('role="alert"');
@@ -83,11 +83,11 @@ describe('visualização do produto', () => {
   it('mostra quantos elementos o editor vai poder marcar', () => {
     // O número sai da regra do motor (`expandirPintaveis`), não de `[id]`: contar ids
     // incluiria o `<linearGradient>` e as costuras `fill="none"`, que ninguém consegue
-    // marcar — a tela prometeria mais do que o editor entrega.
+    // marcar, a tela prometeria mais do que o editor entrega.
     expect(ver({})).toContain('21 elementos marcáveis');
   });
 
-  it('não repete a contagem de zonas — quem conta zona é o painel', () => {
+  it('não repete a contagem de zonas, quem conta zona é o painel', () => {
     // O painel do editor lista as zonas com a contagem de elementos de cada uma. Um segundo
     // número aqui seria outra fonte da mesma verdade, e as duas divergem no dia em que uma
     // delas deixar de ser atualizada.
@@ -107,7 +107,7 @@ describe('visualização do produto', () => {
 
   it('erro no download oferece nova tentativa sem sair do modelo (BUG-016)', () => {
     // A falha mais provável aqui é de rede, e rede volta. Sem botão, a única saída era
-    // voltar para a lista e reabrir o modelo — e quem já tinha elementos marcados no
+    // voltar para a lista e reabrir o modelo, e quem já tinha elementos marcados no
     // editor perdia a marcação no caminho.
     expect(ver({ estado: 'erro', erro: 'x' })).toContain('Tentar de novo');
   });
@@ -123,7 +123,7 @@ describe('visualização do produto', () => {
     // morava na folha. Qualquer `display` de autor em `.produto__area` vence o
     // `[hidden] { display: none }` do navegador, e a área continuava na tela durante o
     // carregando e o erro. Sem esta guarda, o estado nomeado volta a sumir no dia em que
-    // alguém mexer no layout — e nenhum teste de markup percebe.
+    // alguém mexer no layout, e nenhum teste de markup percebe.
     const folha = readFileSync(new URL('./produtos.css', import.meta.url), 'utf8').replace(
       /\/\*[\s\S]*?\*\//g,
       ' ',
@@ -132,13 +132,13 @@ describe('visualização do produto', () => {
     expect(folha).toMatch(/\.produto__area\[hidden\]\s*\{[^}]*display:\s*none/);
   });
 
-  it('não desenha o SVG por conta própria — quem desenha é o palco', () => {
+  it('não desenha o SVG por conta própria, quem desenha é o palco', () => {
     // Regressão do princípio nº1: enquanto esta tela injetava o canônico com `innerHTML`,
     // havia dois lugares desenhando o calçado, e só um deles passava por
     // `gerarVarianteDeCor`. O componente agora recebe o palco pronto e não conhece SVG.
     // Tira os comentários antes de olhar: o cabeçalho do arquivo cita `innerHTML` justamente
     // para contar por que ele saiu daqui. Isentar o arquivo inteiro seria mais fácil e
-    // esvaziaria a guarda — o que interessa é o código, não a explicação.
+    // esvaziaria a guarda, o que interessa é o código, não a explicação.
     const fonte = readFileSync(new URL('./VisualizacaoDoProduto.tsx', import.meta.url), 'utf8')
       .replace(/\/\*[\s\S]*?\*\//g, ' ')
       .replace(/\/\/.*$/gm, ' ');

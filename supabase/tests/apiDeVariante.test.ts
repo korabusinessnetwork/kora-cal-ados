@@ -1,11 +1,11 @@
 // O que este arquivo prova: que a API de variante entrega o calçado certo para a marca certa,
-// e nada para a marca errada — contra um Supabase de verdade, com o handler inteiro no
+// e nada para a marca errada, contra um Supabase de verdade, com o handler inteiro no
 // caminho, sem cliente falso em lugar nenhum.
 //
 // POR QUE ELE PRECISA DO BANCO REAL, e não é redundante com `api/v1/products/[productId]/
 // _variants.test.ts`: lá o cliente é falso, e cliente falso responde o que o teste mandou
 // responder. Ele prova que o handler PEDE a coisa certa. Só um banco de verdade prova que o
-// que volta é a coisa certa — que o `.eq('tenant_id', …)` de fato recorta a linha, que o
+// que volta é a coisa certa, que o `.eq('tenant_id', …)` de fato recorta a linha, que o
 // asset-base baixa do bucket privado com `service_role`, e que o `svg_selector` gravado
 // resolve no arquivo canônico que está lá dentro. Sob `service_role` não há RLS: o isolamento
 // é código nosso, e código nosso é o que erra.
@@ -36,7 +36,7 @@ const HOST = 'https://kora.test';
 
 const ID_QUE_NAO_EXISTE = '00000000-0000-4000-8000-000000000000';
 
-describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
+describe.skipIf(!temAmbiente)('API de variante, contra o banco real', () => {
   let cenario: Cenario;
   let chaves: ChavesDoCenario;
 
@@ -47,7 +47,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
   }, 120_000);
 
   afterAll(async () => {
-    // Zonas e chaves somem no cascade de `tenants`; o arquivo do Storage, não — `limpar` cuida.
+    // Zonas e chaves somem no cascade de `tenants`; o arquivo do Storage, não, `limpar` cuida.
     if (cenario) await limpar(cenario);
   }, 120_000);
 
@@ -65,7 +65,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
       // Sucesso é o ARTEFATO, não um envelope com o artefato dentro.
       //
       // NÃO se afirma aqui que o corpo COMEÇA com `<svg`, e a primeira versão deste teste
-      // afirmava — vermelho na primeira vez que rodou contra o banco. Um documento SVG
+      // afirmava, vermelho na primeira vez que rodou contra o banco. Um documento SVG
       // legítimo começa com declaração XML, com comentário ou com espaço em branco (o
       // asset-base do demo começa com um comentário do próprio arquivo, preservado pela
       // normalização). Prender a asserção aos primeiros bytes é prender o contrato ao
@@ -98,7 +98,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
 
     it('registra o uso da chave sem bloquear a resposta', async () => {
       // `registrarUsoDaChave` é fire-and-forget: a resposta não a espera. Por isso aqui há um
-      // laço curto de releitura em vez de uma leitura única — e por isso este teste NÃO
+      // laço curto de releitura em vez de uma leitura única, e por isso este teste NÃO
       // afirma quanto tempo ela leva. O módulo já documenta que em serverless a escrita pode
       // se perder de vez; num processo de teste, que não congela, ela chega.
       await chamar(cenario.produtoA, chaves.ativaDeA.chave, { sola: '#1F6F5C' });
@@ -110,7 +110,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
   });
 
   describe('a marca concorrente não alcança nada', () => {
-    it('a chave de B pedindo o produto de A recebe 404 — idêntico ao de um id inventado', async () => {
+    it('a chave de B pedindo o produto de A recebe 404, idêntico ao de um id inventado', async () => {
       // O requisito comercial inteiro em duas linhas. 403 confirmaria que o id existe, e
       // confirmar existência já é vazamento entre concorrentes (ADR-006 D3). Por isso a
       // comparação é entre as DUAS respostas, e não contra um literal: é assim que "idêntico"
@@ -137,7 +137,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
   describe('a chave', () => {
     it('revogada responde igual a uma chave inventada', async () => {
       // Se a revogada respondesse diferente, quem sonda saberia que aquele prefixo já existiu
-      // — que é o oráculo que o ADR-006 D1 fecha.
+      // que é o oráculo que o ADR-006 D1 fecha.
       const revogada = await chamar(cenario.produtoA, chaves.revogadaDeA.chave, {
         sola: '#C0392B',
       });
@@ -162,7 +162,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
     it('não abre o editor: ela não é credencial do Supabase', async () => {
       // A separação que sustenta o produto inteiro. Se a chave de API fosse aceita pelo
       // supabase-js, um cliente com chave de integração teria acesso de leitura ao banco pela
-      // porta do front — e o que a nossa função filtra deixaria de importar.
+      // porta do front, e o que a nossa função filtra deixaria de importar.
       const comChaveDaApi = createClient(process.env['SUPABASE_URL'] ?? '', chaves.ativaDeA.chave, {
         auth: { persistSession: false },
       });
@@ -174,7 +174,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
     });
   });
 
-  describe('erro do pedido × erro do dado do tenant — a distinção que a mensagem carrega', () => {
+  describe('erro do pedido × erro do dado do tenant, a distinção que a mensagem carrega', () => {
     it('zona que o produto não tem é 422, e a mensagem lista as que ele tem', async () => {
       const resposta = await chamar(cenario.produtoA, chaves.ativaDeA.chave, { bico: '#C0392B' });
       const { error } = await envelope(resposta);
@@ -185,7 +185,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
       expect(error.message).toContain('"sola"');
     });
 
-    it('mas o MESMO código vindo do motor é 409 — seletor gravado que não resolve', async () => {
+    it('mas o MESMO código vindo do motor é 409, seletor gravado que não resolve', async () => {
       // O par que o `docs/07_APIS/endpoints.md` chama de "único código ambíguo". A linha
       // existe em `product_zones`, então a pré-checagem deixa passar; quem recusa é o motor,
       // e aí a causa é dado do tenant, não pedido do integrador.
@@ -199,7 +199,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
       expect(error.message).toContain('editor de zonas');
     });
 
-    it('zona com gradiente é 409, e manda corrigir no editor — não no pedido', async () => {
+    it('zona com gradiente é 409, e manda corrigir no editor, não no pedido', async () => {
       const resposta = await chamar(cenario.produtoA, chaves.ativaDeA.chave, {
         detalhe: '#C0392B',
       });
@@ -211,7 +211,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
     });
 
     it('duas zonas no mesmo elemento é 409, e nenhuma cor é aplicada', async () => {
-      // BUG-013: sem esta recusa, qual cor vale seria decidido pela ordem do pedido — duas
+      // BUG-013: sem esta recusa, qual cor vale seria decidido pela ordem do pedido, duas
       // chamadas iguais poderiam devolver calçados diferentes.
       const resposta = await chamar(cenario.produtoA, chaves.ativaDeA.chave, {
         sola: '#C0392B',
@@ -255,7 +255,7 @@ describe.skipIf(!temAmbiente)('API de variante — contra o banco real', () => {
       expect((await envelope(resposta)).error.code).toBe('FORMATO_NAO_SUPORTADO');
     });
 
-    it('corpo vazio é 400 — 200 com o modelo original seria erro silencioso', async () => {
+    it('corpo vazio é 400, 200 com o modelo original seria erro silencioso', async () => {
       const resposta = await chamar(cenario.produtoA, chaves.ativaDeA.chave, {});
 
       expect(resposta.status).toBe(400);
@@ -307,7 +307,7 @@ function chaveInventada(): string {
   return `kora_test_deadbeef_${'k'.repeat(43)}`;
 }
 
-/** O canônico como ele está no bucket — a referência do "mudou só a sola". */
+/** O canônico como ele está no bucket, a referência do "mudou só a sola". */
 async function baixarCanonico(cenario: Cenario): Promise<string> {
   const { data, error } = await admin()
     .storage.from('assets-base')

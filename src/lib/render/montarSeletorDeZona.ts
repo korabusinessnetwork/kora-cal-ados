@@ -1,7 +1,7 @@
 // A ÚNICA fonte do formato de `product_zones.svg_selector` (ADR-005, decisão 2).
 //
 // Lista de ids exatos (`#zona-sola, #zona-sola-2`), nunca prefixo: `[id^="zona-sola"]`
-// capturaria uma zona futura `zona-sola-lateral` e pintaria o lugar errado sem avisar —
+// capturaria uma zona futura `zona-sola-lateral` e pintaria o lugar errado sem avisar,
 // o CLAUDE.md proíbe exatamente esse modo de falha.
 //
 // Ninguém monta essa string à mão em outro arquivo. Se o formato mudar, muda aqui.

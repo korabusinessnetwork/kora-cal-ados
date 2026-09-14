@@ -1,7 +1,7 @@
 // O que este arquivo protege não é "a função autentica": é que as recusas sejam
 // INDISTINGUÍVEIS entre si e que o `tenant_id` venha da linha da chave. As duas coisas são
 // invisíveis num teste que só olhe o caminho feliz, e as duas são o isolamento entre marcas
-// concorrentes (ADR-006 D3) — aqui não há RLS para consertar depois.
+// concorrentes (ADR-006 D3), aqui não há RLS para consertar depois.
 //
 // Por isso os testes afirmam a FORMA do pedido ao banco (tabela, campos, filtros) e comparam
 // as falhas UMA COM A OUTRA, nunca cada uma com uma string literal: escrever a mesma
@@ -19,7 +19,7 @@ import { FalhaDaApi } from './tiposDaApi';
 
 const ROTA = 'https://kora.example/api/v1/products/prod-1/variants';
 
-/** Uma chave real, gerada pelo mesmo módulo que a API usa — nada de literal montado à mão. */
+/** Uma chave real, gerada pelo mesmo módulo que a API usa, nada de literal montado à mão. */
 const CHAVE = gerarChaveDeApi('live');
 
 /** Outra chave real, para o caso "prefixo existe, segredo é de outra chave". */
@@ -241,7 +241,7 @@ describe('header ausente ou sem o esquema Bearer é CHAVE_AUSENTE', () => {
     expect(falha.codigo).toBe('CHAVE_AUSENTE');
   });
 
-  it('`bearer` minúsculo autentica — o esquema é case-insensitive por RFC', async () => {
+  it('`bearer` minúsculo autentica, o esquema é case-insensitive por RFC', async () => {
     // Recusar aqui seria bug nosso disfarçado de segurança: cliente HTTP que normaliza o
     // esquema é comum, e o integrador ficaria com um 401 que nenhuma doc explica.
     const { cliente } = clienteFalso({ data: linhaDaChave() });
@@ -279,7 +279,7 @@ describe('as quatro recusas por chave são indistinguíveis entre si', () => {
     expect(malformada.status).toBe(401);
   });
 
-  it('nenhuma delas ecoa a chave, o segredo ou o hash — nem na mensagem nem no stack', async () => {
+  it('nenhuma delas ecoa a chave, o segredo ou o hash, nem na mensagem nem no stack', async () => {
     const falhas = await Promise.all([
       recusaPorChaveMalformada(),
       recusaPorPrefixoInexistente(),
@@ -301,7 +301,7 @@ describe('as quatro recusas por chave são indistinguíveis entre si', () => {
 describe('a comparação de hash acontece mesmo quando o prefixo não existe', () => {
   it('prefixo inexistente ainda consulta o banco e ainda compara', async () => {
     // Se a função saísse por `return` ao ver `data: null`, o prefixo inexistente responderia
-    // mais rápido que o prefixo real com segredo errado — e essa diferença de tempo é o
+    // mais rápido que o prefixo real com segredo errado, e essa diferença de tempo é o
     // oráculo que a mensagem idêntica existe para fechar.
     const { cliente, pedido } = clienteFalso({ data: null });
     await capturarFalha(() => autenticarChaveDeApi(cliente, comChave(CHAVE.chave)));
@@ -332,7 +332,7 @@ describe('a consulta ao banco tem a forma certa', () => {
     expect(pedido.filtros).toEqual([['prefixo', CHAVE.prefixo]]);
   });
 
-  it('não escreve nada — `last_used_at` é fire-and-forget de outro módulo', async () => {
+  it('não escreve nada, `last_used_at` é fire-and-forget de outro módulo', async () => {
     // Uma escrita aqui bloquearia a geração da variante por causa de uma métrica.
     const { cliente, pedido } = clienteFalso({ data: linhaDaChave() });
     await autenticarChaveDeApi(cliente, comChave(CHAVE.chave));
@@ -353,7 +353,7 @@ describe('a consulta ao banco tem a forma certa', () => {
   });
 
   it('linha sem tenant_id utilizável é 500, não um escopo vazio', async () => {
-    // `tenantId: ''` abriria uma consulta sem escopo lá na frente — o vazamento inteiro.
+    // `tenantId: ''` abriria uma consulta sem escopo lá na frente, o vazamento inteiro.
     const { cliente } = clienteFalso({ data: linhaDaChave({ tenant_id: '  ' }) });
     const falha = await capturarFalha(() => autenticarChaveDeApi(cliente, comChave(CHAVE.chave)));
 
@@ -386,7 +386,7 @@ describe('sucesso', () => {
     expect(autenticada.idDaChave).toBe('chave-1');
   });
 
-  it('uma chave `test` autentica igual — o ambiente é do formato, não da autorização', async () => {
+  it('uma chave `test` autentica igual, o ambiente é do formato, não da autorização', async () => {
     const chaveDeTeste = gerarChaveDeApi('test');
     const { cliente } = clienteFalso({ data: linhaDaChave({ hash: chaveDeTeste.hash }) });
     const autenticada = await autenticarChaveDeApi(cliente, comChave(chaveDeTeste.chave));
@@ -399,7 +399,7 @@ describe('guarda de fonte', () => {
   const fonte = readFileSync(new URL('./autenticarChaveDeApi.ts', import.meta.url), 'utf8');
 
   /**
-   * O fonte SEM comentário — e é a diferença entre a guarda proteger e a guarda mentir.
+   * O fonte SEM comentário, e é a diferença entre a guarda proteger e a guarda mentir.
    *
    * Uma guarda escrita como `expect(fonte).toContain('timingSafeEqual')` fica verde quando
    * alguém apaga a chamada e deixa a palavra num comentário explicando o que a função fazia,

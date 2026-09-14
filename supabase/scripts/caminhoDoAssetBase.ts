@@ -3,7 +3,7 @@
 // O path não é decoração: as policies do bucket leem `storage.foldername(name)` e exigem
 // `tenants/<tenant_id>/…` para decidir quem pode ler o arquivo
 // (`20260812_correcao_rls_e_storage.sql`). Um path montado de outro jeito em outro arquivo
-// não daria erro — daria um objeto que a RLS considera de ninguém, invisível para o dono
+// não daria erro, daria um objeto que a RLS considera de ninguém, invisível para o dono
 // e para todo mundo.
 //
 // Quem lê o asset depois NÃO remonta este caminho: usa `products.base_asset_path`, que é
@@ -26,7 +26,7 @@ export function caminhoDoAssetBase(tenantId: string, productId: string): string 
 
 function exigirId(valor: string, nome: string): void {
   if (typeof valor !== 'string' || valor.trim() === '') {
-    throw new Error(`caminhoDoAssetBase: ${nome} vazio — o path resultante ficaria inválido.`);
+    throw new Error(`caminhoDoAssetBase: ${nome} vazio, o path resultante ficaria inválido.`);
   }
 
   if (valor.includes('/')) {

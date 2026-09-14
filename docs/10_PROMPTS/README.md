@@ -1,4 +1,4 @@
-# 10 — PROMPTS · Kora Calçados (codinome)
+# 10, PROMPTS · Kora Calçados (codinome)
 
 > Biblioteca de prompts/templates para agentes IA usados no projeto.
 
@@ -20,12 +20,12 @@
 
 ## Arquivos sugeridos
 
-- `agent-prompts.md` — prompts dos agentes do projeto (Jarvas, análise, etc.)
-- `jarvas-insights.md` — prompts para IA gerar insights de vendas, estoqueagem
-- `jarvas-alertas.md` — prompts para detectar anomalias, disparar alertas
-- `code-generation.md` — prompts para gerar migrations, testes, boilerplate
-- `templates.md` — templates reutilizáveis (ex: "resumir relatório de X")
-- `versionamento.md` — histórico de prompts, versão atual, performance
+- `agent-prompts.md`, prompts dos agentes do projeto (Jarvas, análise, etc.)
+- `jarvas-insights.md`, prompts para IA gerar insights de vendas, estoqueagem
+- `jarvas-alertas.md`, prompts para detectar anomalias, disparar alertas
+- `code-generation.md`, prompts para gerar migrations, testes, boilerplate
+- `templates.md`, templates reutilizáveis (ex: "resumir relatório de X")
+- `versionamento.md`, histórico de prompts, versão atual, performance
 
 ## Como preencher
 
@@ -37,6 +37,6 @@
 
 ## Ligações
 
-- `docs/03_REGRAS_DE_NEGOCIO/JARVAS.md` — regras que Jarvas implementa
-- `src/` — código que chama esses prompts
-- `01_ARQUITETURA/` — quais agentes IA rodam no projeto (ADR)
+- `docs/03_REGRAS_DE_NEGOCIO/JARVAS.md`, regras que Jarvas implementa
+- `src/`, código que chama esses prompts
+- `01_ARQUITETURA/`, quais agentes IA rodam no projeto (ADR)

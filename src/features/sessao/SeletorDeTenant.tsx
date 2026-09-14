@@ -4,7 +4,7 @@
 // produto da marca errada sem perceber e publicaria variante no catálogo de um
 // concorrente. Escolher é uma decisão do usuário, e o app espera por ela.
 //
-// Um tenant só? O contexto já entra direto — esta tela não aparece.
+// Um tenant só? O contexto já entra direto, esta tela não aparece.
 
 import type { TenantDoUsuario } from './carregarTenantsDoUsuario';
 

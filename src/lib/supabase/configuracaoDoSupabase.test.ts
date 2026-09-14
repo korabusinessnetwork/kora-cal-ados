@@ -1,5 +1,5 @@
 // A configuração é lida uma vez, no boot. Se ela aceitar valor errado em silêncio, o app
-// sobe apontando para o projeto errado — ou, no pior caso, com uma chave que ignora RLS.
+// sobe apontando para o projeto errado, ou, no pior caso, com uma chave que ignora RLS.
 
 import { describe, expect, it } from 'vitest';
 import { ConfiguracaoAusente, lerConfiguracaoDoSupabase } from './configuracaoDoSupabase';
@@ -23,7 +23,7 @@ describe('leitura da configuração', () => {
     ).toMatchObject({ url: URL_VALIDA });
   });
 
-  it('apara espaço em volta — copiar do painel costuma trazer', () => {
+  it('apara espaço em volta, copiar do painel costuma trazer', () => {
     expect(
       lerConfiguracaoDoSupabase({
         VITE_SUPABASE_URL: `  ${URL_VALIDA}  `,

@@ -1,7 +1,7 @@
 /* Estilo do esboço, separado do JSX (regra de white-label do CLAUDE.md).
    Os tokens abaixo são PROVISÓRIOS: docs/02_DESIGN_SYSTEM/ está vazio de propósito até a
    identidade visual existir. Quando existir, estes valores viram tokens de tema por
-   tenant — os nomes ficam, os valores mudam.
+   tenant, os nomes ficam, os valores mudam.
 
    Regra que não muda com o tema: nada de filtro, sombra ou overlay sobre o preview da
    variante. O que aparece ali é o pixel que a API devolve. */
@@ -142,7 +142,7 @@ body {
    O SELETOR É `.colunas .palco`, E NÃO `.palco`, por causa do `position`. `.palco` é classe
    GLOBAL e está declarada em dois arquivos: aqui e em `src/features/zonas/zonas.css:66`, onde a
    repetição é deliberada e documentada. As duas têm a mesma especificidade, media query não
-   acrescenta nenhuma, e quem vence é a última que o bundle escreve — que hoje é a do editor. A
+   acrescenta nenhuma, e quem vence é a última que o bundle escreve, que hoje é a do editor. A
    primeira versão deste item usou `.palco` e o `sticky` saiu sem efeito nenhum, sem erro nenhum
    para avisar: o `order` funcionou e o `position` continuou `relative`. Descendo de `.colunas`,
    que só existe no esboço, a regra ganha por especificidade em vez de por sorte na ordem, e o

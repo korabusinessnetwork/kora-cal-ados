@@ -1,4 +1,4 @@
-# src/lib/texto — frases que mais de uma tela escreve
+# src/lib/texto, frases que mais de uma tela escreve
 
 O que vive aqui: texto de interface que **mais de uma tela precisa escrever igual**. Nada de
 formatação de dado (isso fica junto do dado) e nada de JSX.

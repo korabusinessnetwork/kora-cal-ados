@@ -1,4 +1,4 @@
-// O produto de demonstração do esboço — o que viria de `products` + `product_zones`
+// O produto de demonstração do esboço, o que viria de `products` + `product_zones`
 // se o banco já estivesse ligado. Nada aqui é dado real de tenant.
 //
 // `?raw` traz o SVG como texto: o motor recebe string, nunca um <img> ou um nó do DOM.
@@ -24,7 +24,7 @@ export const produtoDemo = {
 
 // Os seletores saem de `montarSeletorDeZona`, e não de string escrita à mão, pelo mesmo
 // motivo do editor de verdade: `svg_selector` tem UMA fonte de formato (ADR-005, decisão 2).
-// Dado de demonstração que se monta por outro caminho vira o exemplo que alguém copia —
+// Dado de demonstração que se monta por outro caminho vira o exemplo que alguém copia,
 // e o formato do banco passa a ter duas fontes que podem divergir.
 //
 // Ordem = ordem de leitura do calçado (de baixo para cima), não ordem de desenho.
@@ -36,14 +36,14 @@ export const zonasDoProduto: ZonaDoProduto[] = [
   { zone_key: 'logo', rotulo: 'Logo', svg_selector: montarSeletorDeZona(['zona-logo']), corInicial: '#B23A2E' },
   // Zona = N elementos (BUG-002): os 4 cadarços nascem com o MESMO id no arquivo cru e é a
   // normalização que os desambigua em `zona-cadarco`, `-2`, `-3`, `-4`. Por isso a lista
-  // tem quatro ids: no canônico — o único arquivo que o editor e a API leem — cada um
+  // tem quatro ids: no canônico, o único arquivo que o editor e a API leem, cada um
   // endereça um path.
   //
   // Prefixo (`[id^="zona-cadarco"]`) é proibido pelo ADR-005: capturaria uma zona futura
   // `zona-cadarco-lateral` e pintaria o lugar errado em silêncio.
   //
   // Por que a mesma lista também funciona no arquivo CRU do comparativo, onde os ids ainda
-  // são iguais: em CSS `#zona-cadarco` é igualdade de atributo, não `getElementById` — ele
+  // são iguais: em CSS `#zona-cadarco` é igualdade de atributo, não `getElementById`, ele
   // casa TODOS os elementos com aquele id, e os outros três termos da lista não casam nada.
   // Os dois lados do comparativo continuam capturando os mesmos 4 paths; o que muda entre
   // eles é só a cor que sai (BUG-001), que é justamente o que o comparativo existe para

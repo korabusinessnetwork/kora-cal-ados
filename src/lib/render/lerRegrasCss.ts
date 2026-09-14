@@ -1,10 +1,10 @@
 // Leitor de CSS do próprio SVG. Existe porque o jsdom, ao parsear como
-// `image/svg+xml`, não monta `document.styleSheets` — sondado em 2026-08-12, devolve 0
+// `image/svg+xml`, não monta `document.styleSheets`, sondado em 2026-08-12, devolve 0
 // folhas. Então o bloco <style> precisa ser lido à mão antes de ser achatado em
 // atributo de apresentação (ADR-004).
 //
 // Postura deliberada: parser CONSERVADOR. O que ele não entende com certeza, ele
-// rejeita — melhor recusar o upload com relatório (decisão aprovada no ADR-004) do que
+// rejeita, melhor recusar o upload com relatório (decisão aprovada no ADR-004) do que
 // achatar errado e a cor divergir na produção.
 
 import { ErroDeVariante } from './erros';
@@ -21,7 +21,7 @@ export interface RegraCss {
   declaracoes: Declaracao[];
 }
 
-/** Lê `fill:#333; stroke:none` — serve tanto para corpo de regra quanto para atributo style. */
+/** Lê `fill:#333; stroke:none`, serve tanto para corpo de regra quanto para atributo style. */
 export function lerDeclaracoes(texto: string): Declaracao[] {
   const declaracoes: Declaracao[] = [];
 
@@ -49,7 +49,7 @@ export function lerDeclaracoes(texto: string): Declaracao[] {
 /**
  * Especificidade CSS achatada num número comparável (ids, classes, elementos).
  * Aproximação suficiente para SVG exportado por ferramenta de design, que usa
- * seletores simples — e por isso mesmo o parser rejeita o que fugir disso.
+ * seletores simples, e por isso mesmo o parser rejeita o que fugir disso.
  */
 export function calcularEspecificidade(seletor: string): number {
   const ids = (seletor.match(/#[\w-]+/g) ?? []).length;
@@ -61,7 +61,7 @@ export function calcularEspecificidade(seletor: string): number {
 
 /**
  * Converte o texto de um `<style>` em regras. `ordemInicial` mantém a ordem de origem
- * entre múltiplos blocos `<style>` — desempate quando a especificidade empata.
+ * entre múltiplos blocos `<style>`, desempate quando a especificidade empata.
  */
 export function lerRegrasCss(css: string, ordemInicial = 0): RegraCss[] {
   const semComentarios = css.replace(/\/\*[\s\S]*?\*\//g, '');

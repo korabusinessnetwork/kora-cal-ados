@@ -3,14 +3,14 @@
 //
 // Por que este teste existe separado dos testes de `src/`: lá o SVG é fixture e o banco é
 // dublê, então nada prova que o `svg_selector` que saiu do editor endereça o asset que a
-// API vai ler daqui a seis meses. Aqui prova — e é essa distância entre editor e geração
+// API vai ler daqui a seis meses. Aqui prova, e é essa distância entre editor e geração
 // que o princípio nº1 do CLAUDE.md proíbe existir.
 //
 // Os casos rodam EM ORDEM e compartilham a mesma zona de propósito: "marcar", "acrescentar
 // elemento", "dois marcando a mesma chave" e "apagar" são a mesma história, e quebrá-los em
 // cenários independentes esconderia justamente o que a `unique (product_id, zone_key)` faz.
 //
-// Sem ambiente Supabase configurado, PULA — nunca finge que passou.
+// Sem ambiente Supabase configurado, PULA, nunca finge que passou.
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { montarCenario, limpar, admin, temAmbiente, type Cenario } from './ambiente';
@@ -161,7 +161,7 @@ describe.skipIf(!temAmbiente)('editor de zonas contra o Supabase real', () => {
     });
     expect(inserida.error).not.toBeNull();
 
-    // RLS filtra, não acusa: lista vazia e erro nulo é o comportamento certo — um erro
+    // RLS filtra, não acusa: lista vazia e erro nulo é o comportamento certo, um erro
     // aqui já contaria ao concorrente que existe algo para ver.
     const lida = await cenario.clienteB
       .from('product_zones')
@@ -233,12 +233,12 @@ async function baixarAssetBase(cenario: Cenario): Promise<string> {
 }
 
 /**
- * Ids de elementos do asset que aceitam cor chapa — `path` com `fill` hex.
+ * Ids de elementos do asset que aceitam cor chapa, `path` com `fill` hex.
  *
  * Fica de fora o que não serve para o teste do caminho feliz e falharia por outro motivo:
  * `fill="none"` (contorno, recusado com `ZONA_NAO_RECOLORIVEL`) e `fill="url(...)"`
  * (gradiente, mesma recusa). `path` não tem descendente pintável, então cada id marcado
- * corresponde a exatamente um alvo — é o que torna o caso 2 uma igualdade exata.
+ * corresponde a exatamente um alvo, é o que torna o caso 2 uma igualdade exata.
  */
 function idsMarcaveis(svgCanonico: string, quantos: number): string[] {
   const documento = analisarSvg(svgCanonico);
@@ -259,7 +259,7 @@ function idsMarcaveis(svgCanonico: string, quantos: number): string[] {
   return ids;
 }
 
-/** A linha como ela está no banco AGORA — relida a cada caso, nunca guardada entre eles. */
+/** A linha como ela está no banco AGORA, relida a cada caso, nunca guardada entre eles. */
 async function zonaGravada(cenario: Cenario, zoneKey: string) {
   const zonas = await listarZonasDoProduto(cenario.clienteA, cenario.produtoA);
 

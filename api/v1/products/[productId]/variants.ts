@@ -1,8 +1,8 @@
-// `POST /api/v1/products/:productId/variants` — o handler HTTP. ORQUESTRA e NÃO DECIDE.
+// `POST /api/v1/products/:productId/variants`, o handler HTTP. ORQUESTRA e NÃO DECIDE.
 //
 // Toda decisão (status, mensagem, formato da resposta, o que é chave válida, o que é corpo
 // válido) mora em `api/_lib/`, onde cada uma tem teste próprio. Se este arquivo crescer, é
-// sinal de que uma regra escapou para o único lugar do fluxo sem teste dedicado — e o
+// sinal de que uma regra escapou para o único lugar do fluxo sem teste dedicado, e o
 // conserto é mover a regra para `_lib/`, não escrever mais um `if` aqui.
 //
 // A ASSINATURA É Web Handler (`export default { fetch }`), e não `(req, res)`: é a forma
@@ -25,7 +25,7 @@
 // bom para carga, e péssimo para vazamento de informação entre marcas concorrentes.
 
 // EFEITO COLATERAL, E TEM DE SER O PRIMEIRO IMPORT: registra o jsdom como DOM do motor.
-// Sem esta linha `analisarSvg` não tem adaptador e TODA requisição vira 500 — e isso não
+// Sem esta linha `analisarSvg` não tem adaptador e TODA requisição vira 500, e isso não
 // aparece em `tsc --noEmit` nem nos testes de `_lib/` (o vitest registra o adaptador por
 // `setupFiles`); aparece só em runtime, na primeira chamada de cliente. `_variants.test.ts`
 // tem uma guarda que lê este fonte e exige o import, com o caminho conferido em disco.
@@ -60,7 +60,7 @@ import { gerarVarianteDeCor } from '../../../../src/lib/render/gerarVarianteDeCo
  * e a Vercel chama `fetch(request)` com um argumento só, então a assinatura Web continua
  * exatamente a que `api/README.md` documenta. Foi preferido a um módulo com estado
  * (`definirCliente(...)`) porque estado de módulo sobrevive entre invocações no processo
- * reaproveitado do serverless — que é justamente o que `clienteDeServico.ts` existe para
+ * reaproveitado do serverless, que é justamente o que `clienteDeServico.ts` existe para
  * evitar, já que duas invocações seguidas são, por hipótese, de tenants concorrentes.
  *
  * Note que ele NÃO é um parâmetro com valor padrão (`= criarClienteDeServico()`): valor
@@ -81,7 +81,7 @@ export default {
     let prefixoDaChave: string | null = null;
 
     try {
-      // 1. Antes de QUALQUER trabalho — inclusive antes de construir cliente de banco.
+      // 1. Antes de QUALQUER trabalho, inclusive antes de construir cliente de banco.
       if (pedido.method !== 'POST') throw criarFalhaDeTransporte('METODO_NAO_PERMITIDO');
 
       const cliente = clienteInjetado ?? criarClienteDeServico();
@@ -94,7 +94,7 @@ export default {
       // Fire-and-forget, SEM `await` (`registrarUsoDaChave.ts`). Chamada aqui, e não no
       // sucesso: a chave FOI usada mesmo que o pedido termine em 404 ou 400, e `last_used_at`
       // que só avança em requisições bem-sucedidas esconderia exatamente o caso que o suporte
-      // precisa ver — chave viva sendo martelada com pedidos errados.
+      // precisa ver, chave viva sendo martelada com pedidos errados.
       registrarUsoDaChave(cliente, chave.idDaChave);
 
       // 3. Fecha a porta da concorrente ANTES de o corpo importar.
@@ -122,7 +122,7 @@ export default {
       const falha = traduzirParaFalhaDaApi(erro);
 
       // O RASTRO DO 500. `logDaRequisicao` não tem campo para mensagem de exceção (decisão de
-      // segurança dele) e `traduzirParaFalhaDaApi` troca a mensagem original por uma fixa —
+      // segurança dele) e `traduzirParaFalhaDaApi` troca a mensagem original por uma fixa,
       // então, sem esta linha, o detalhe de um 500 some para sempre e o defeito vira
       // impossível de investigar. Só no 5xx: nos 4xx a mensagem já está na resposta.
       if (falha.status >= 500) console.error(rastroDoErro(rota, erro));
@@ -131,7 +131,7 @@ export default {
       codigoDeErro = falha.codigo;
       return respostaDeErro(falha);
     } finally {
-      // UMA linha por requisição, sempre — inclusive nos caminhos de erro. No `finally`
+      // UMA linha por requisição, sempre, inclusive nos caminhos de erro. No `finally`
       // porque `return` dentro de `try`/`catch` passa por aqui antes de devolver, e porque
       // duas chamadas (uma em cada ramo) viram duas linhas no dia em que alguém acrescentar
       // um terceiro ramo e esquecer a segunda.
@@ -149,7 +149,7 @@ export default {
 
 /**
  * `Request.url` é absoluta por especificação, mas um `Request` montado à mão em teste pode
- * não ser — e uma exceção de parse aqui viraria 500 num caminho que nem chegou a começar.
+ * não ser, e uma exceção de parse aqui viraria 500 num caminho que nem chegou a começar.
  * Mesma base de reserva de `autenticarChaveDeApi.recusarCredencialNaQueryString`.
  */
 const BASE_DE_RESERVA = 'https://placeholder.invalid';
@@ -166,12 +166,12 @@ function caminhoDaRota(url: string): string {
 /**
  * De onde vem o `productId`: do CAMINHO da própria requisição.
  *
- * A Vercel roteia por sistema de arquivos — `api/v1/products/[productId]/variants.ts` **é**
- * a rota —, mas o Web Handler recebe só o `Request`: não existe um objeto de parâmetros de
+ * A Vercel roteia por sistema de arquivos, `api/v1/products/[productId]/variants.ts` **é**
+ * a rota, mas o Web Handler recebe só o `Request`: não existe um objeto de parâmetros de
  * rota para ler. Derivar do caminho é a leitura que não precisa de tabela de rotas em lugar
  * nenhum, e é por isso que o servidor local (`api/_local/`) concorda com a Vercel de graça:
  * os dois entregam a mesma URL, e a mesma função a lê. Uma tabela de rotas seria a segunda
- * fonte de verdade sobre onde a rota mora — o mesmo motivo de não existir `vercel.json`.
+ * fonte de verdade sobre onde a rota mora, o mesmo motivo de não existir `vercel.json`.
  *
  * Caminho inesperado, id vazio, barra final e `%` malformado devolvem `''`, que
  * `carregarProdutoDoTenant` recusa como 404 `PRODUTO_NAO_ENCONTRADO`. É de propósito que
@@ -202,7 +202,7 @@ function exigirFormatoSuportado(url: string): void {
   if (formato === null || formato === 'svg') return;
 
   // O valor é ecoado porque é o que torna a mensagem acionável, e cortado porque quem chama
-  // controla o tamanho dele — uma query string de um megabyte não vira uma resposta de um
+  // controla o tamanho dele, uma query string de um megabyte não vira uma resposta de um
   // megabyte. O JSON do envelope já escapa o conteúdo.
   const mostrado = formato.length > 40 ? `${formato.slice(0, 40)}…` : formato;
   throw criarFalhaDeTransporte(
@@ -215,7 +215,7 @@ function exigirFormatoSuportado(url: string): void {
  * A PRÉ-CHECAGEM que desambigua `ZONA_NAO_ENCONTRADA` (`docs/07_APIS/endpoints.md`).
  *
  * Feita aqui, com a lista de zonas do produto na mão, "pediu zona que este produto não tem"
- * é 422 e a mensagem nomeia as zonas que existem — a informação acionável. Depois dela, a
+ * é 422 e a mensagem nomeia as zonas que existem, a informação acionável. Depois dela, a
  * única forma de o MOTOR lançar o mesmo código é `svg_selector` gravado quebrado, que é dado
  * do tenant e sai como 409 pela tabela de `traduzirParaFalhaDaApi` (que devolve esta falha
  * intacta ao recebê-la, em vez de retraduzi-la para 409).
@@ -224,7 +224,7 @@ function exigirFormatoSuportado(url: string): void {
  * `api/_lib/traduzirParaFalhaDaApi.ts`, ao lado das duas tabelas, porque este é o par
  * código/status mais fácil de contradizer do projeto: o MESMO código vale 422 vindo daqui e
  * 409 vindo do motor. Com os dois no mesmo arquivo, quem mexer num vê o outro. O handler
- * contribui com a única parte que é dele — a mensagem, que nomeia as zonas que o produto tem.
+ * contribui com a única parte que é dele, a mensagem, que nomeia as zonas que o produto tem.
  */
 function exigirZonasConhecidas(
   cores: Record<string, string>,
@@ -273,7 +273,7 @@ function rastroDoErro(rota: string, erro: unknown): string {
         ? `${erro.name}: ${erro.message}\n${erro.stack ?? ''}`
         : `valor lançado que não é Error: ${String(erro)}`;
   } catch {
-    // `String(...)` lança para Symbol e para objeto com `toString` quebrado — e perder o log
+    // `String(...)` lança para Symbol e para objeto com `toString` quebrado, e perder o log
     // inteiro por causa disso deixaria o 500 sem rastro nenhum, que é o que isto evita.
     bruto = 'erro não legível como texto';
   }

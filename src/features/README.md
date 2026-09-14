@@ -1,4 +1,4 @@
-# src/features — o app por funcionalidade
+# src/features, o app por funcionalidade
 
 Cada pasta aqui é uma funcionalidade fechada: componentes, hooks e o acesso ao banco que
 só ela usa. O que é compartilhado por mais de uma feature sobe para `src/lib/`.
@@ -8,11 +8,11 @@ só ela usa. O que é compartilhado por mais de uma feature sobe para `src/lib/`
 | `AreaProtegida.tsx` | Não é pasta: é o ponto onde as três se juntam, atrás do login. Fica na raiz porque dentro de `sessao/` precisaria importar de `produtos/`, e essa seta é proibida abaixo. É ele que o `App.tsx` carrega por `import()` tardio, e é isso que mantém o `@supabase/supabase-js` fora do chunk principal |
 | `sessao/` | Quem entrou e em qual marca (tenant ativo). Nada protegido renderiza sem as duas coisas |
 | `produtos/` | Listar os modelos do tenant e abrir um deles, baixando o asset-base canônico do Storage |
-| `zonas/` | Marcar zona no calçado aberto e gravar em `product_zones` — o palco, o formulário e as regras que recusam mapeamento inválido |
+| `zonas/` | Marcar zona no calçado aberto e gravar em `product_zones`, o palco, o formulário e as regras que recusam mapeamento inválido |
 
 Regra de dependência: feature importa de `src/lib/`, e de outra feature **só na direção
 declarada abaixo**. Se duas precisarem da mesma coisa fora dessas setas, ela vira módulo em
-`src/lib/` — importar de vizinho à vontade cria o acoplamento que faz mudar uma tela quebrar
+`src/lib/`, importar de vizinho à vontade cria o acoplamento que faz mudar uma tela quebrar
 outra sem aviso.
 
 | Direção permitida | Por quê |
@@ -23,5 +23,5 @@ A seta é de mão única e a volta é proibida: `zonas/` nunca importa de `produ
 recebe o SVG canônico e os ids por props, e por isso continua testável sem rede e sem
 saber o que é um produto.
 
-Estilo fica em `<feature>.css`, separado do JSX (white-label — ver CLAUDE.md), e é
+Estilo fica em `<feature>.css`, separado do JSX (white-label, ver CLAUDE.md), e é
 importado uma vez em `src/main.tsx`.

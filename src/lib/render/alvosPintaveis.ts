@@ -28,7 +28,7 @@ export function expandirPintaveis(elementos: Element[]): Element[] {
 
 /**
  * Os alvos que a geração vai pintar. Gradiente/pattern aborta a variante inteira em vez
- * de virar cor chapa em silêncio (ADR-004, decisão 1) — achatar apagaria o volume do
+ * de virar cor chapa em silêncio (ADR-004, decisão 1), achatar apagaria o volume do
  * modelo sem ninguém pedir.
  */
 export function alvosPintaveis(elementos: Element[], zoneKey: string): Element[] {

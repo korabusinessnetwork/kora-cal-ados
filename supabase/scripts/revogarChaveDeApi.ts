@@ -21,7 +21,7 @@ Uso:
   npm run revogar-chave -- --prefixo 7f3ab902
 
 O prefixo são os 8 caracteres hexadecimais do meio da chave
-(kora_live_<prefixo>_<segredo>) — o único pedaço que fica em claro no banco e em log.
+(kora_live_<prefixo>_<segredo>), o único pedaço que fica em claro no banco e em log.
 `;
 
 /** 4 bytes em hex, como `gerarChaveDeApi` cunha. Validar antes de consultar. */

@@ -1,7 +1,7 @@
 // Duas zonas do mesmo produto que compartilham elemento são estado inválido.
 //
 // Por que isso importa: `gerarVarianteDeCor` pinta zona por zona, em sequência. Se duas
-// zonas pedidas dividem um elemento, a ÚLTIMA chave do JSON decide a cor dele — a ordem
+// zonas pedidas dividem um elemento, a ÚLTIMA chave do JSON decide a cor dele, a ordem
 // das chaves de um objeto passa a mandar no calçado, sem erro e sem aviso (BUG-013).
 //
 // Ninguém conseguia criar esse estado enquanto as zonas eram escritas à mão. O editor
@@ -14,14 +14,14 @@ import type { Zona } from './gerarVarianteDeCor';
 export interface Sobreposicao {
   zone_key_a: string;
   zone_key_b: string;
-  /** Quantos elementos as duas dividem — o número que o editor mostra ao time. */
+  /** Quantos elementos as duas dividem, o número que o editor mostra ao time. */
   elementos: number;
 }
 
 /**
  * Pares de zonas que dividem pelo menos um elemento pintável.
  * Seletor que não resolve nada não é sobreposição (é zona quebrada, e quem reclama disso
- * é `relatorioDeZonas`) — aqui um seletor inválido apenas não contribui com elemento.
+ * é `relatorioDeZonas`), aqui um seletor inválido apenas não contribui com elemento.
  */
 export function zonasSobrepostas(svgCanonico: string, zonas: Zona[]): Sobreposicao[] {
   const documento = analisarSvg(svgCanonico);

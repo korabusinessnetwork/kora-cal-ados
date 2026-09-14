@@ -4,7 +4,7 @@
 // A promessa deste arquivo é sobre **mudar**, não sobre crescer: renomear ou reaproveitar um
 // código quebra o cliente que compara com a string, então isso não acontece. Acrescentar um
 // código não quebra ninguém, e acontece sempre que aparece um conserto que os existentes não
-// ensinam — foi assim com os dois de modelo 3D (ADR-007) e com os quatro de composição
+// ensinam, foi assim com os dois de modelo 3D (ADR-007) e com os quatro de composição
 // (ADR-008). O que segura o acréscimo de virar 500 surpresa é o `Record<CodigoDeErro, ...>`
 // de `api/_lib/traduzirParaFalhaDaApi.ts`: código sem status é erro de compilação.
 //
@@ -31,7 +31,7 @@ export type CodigoDeErro =
   //
   // PECA_NAO_ENCONTRADA é o código do ADR-008 D1, e o mais importante dos quatro: é ele que
   // separa "a saída do modelo de linguagem vira escolha de arquivo" de uma vulnerabilidade.
-  // O modelo NUNCA inventa peça — id fora do catálogo é recusa, nunca um calçado com um
+  // O modelo NUNCA inventa peça, id fora do catálogo é recusa, nunca um calçado com um
   // buraco no lugar da sola.
   | 'PECA_NAO_ENCONTRADA'
   | 'COMPOSICAO_INVALIDA'
@@ -43,7 +43,7 @@ export type CodigoDeErro =
 
 /**
  * Erro de qualquer etapa do motor. Existe para que "a zona não foi aplicada" seja
- * sempre uma falha explícita, nunca um aviso no log — princípio nº1 do CLAUDE.md:
+ * sempre uma falha explícita, nunca um aviso no log, princípio nº1 do CLAUDE.md:
  * a cor que sai daqui vira calçado fabricado.
  */
 export class ErroDeVariante extends Error {

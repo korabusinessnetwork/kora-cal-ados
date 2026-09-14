@@ -1,4 +1,4 @@
-# 01 — ARQUITETURA · Kora Calçados (codinome)
+# 01, ARQUITETURA · Kora Calçados (codinome)
 
 > Visão técnica da plataforma: stack, componentes, infra e decisões de design.
 
@@ -20,11 +20,11 @@
 
 ## Arquivos sugeridos
 
-- `overview.md` — 1 página: stack, deployment, arquitetura em alto nível
-- `tech-stack.md` — justificativa de cada tecnologia principal
-- `infra.md` — ambientes, CI/CD, logging, monitoring
-- `diagramas/` — C4, ER, fluxos de dados (Mermaid/Excalidraw)
-- `padroes.md` — convenções, estrutura de pastas, naming
+- `overview.md`, 1 página: stack, deployment, arquitetura em alto nível
+- `tech-stack.md`, justificativa de cada tecnologia principal
+- `infra.md`, ambientes, CI/CD, logging, monitoring
+- `diagramas/`, C4, ER, fluxos de dados (Mermaid/Excalidraw)
+- `padroes.md`, convenções, estrutura de pastas, naming
 
 ## Como preencher
 
@@ -35,7 +35,7 @@
 
 ## Ligações
 
-- `08_DECISOES/` — ADRs que justificam escolhas maiores (ex: "Por que Supabase?")
-- `memory/restrictions.md` — restrições do projeto (custo, ferramentas, o que é adiado por padrão)
-- `memory/decisions.md` — índice das decisões e o que cada ADR proíbe no código
-- `04_MODELAGEM/` — schema de dados que você vai descrever em diagrama ER
+- `08_DECISOES/`, ADRs que justificam escolhas maiores (ex: "Por que Supabase?")
+- `memory/restrictions.md`, restrições do projeto (custo, ferramentas, o que é adiado por padrão)
+- `memory/decisions.md`, índice das decisões e o que cada ADR proíbe no código
+- `04_MODELAGEM/`, schema de dados que você vai descrever em diagrama ER

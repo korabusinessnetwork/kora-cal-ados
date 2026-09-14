@@ -1,9 +1,9 @@
-# ADR-005 — Editor de zonas em SVG DOM, e quem cunha o `id`
+# ADR-005, Editor de zonas em SVG DOM, e quem cunha o `id`
 
 **Status**: Aceito
 **Data**: 2026-09-05
 **Decisores**: Matheus Bonato
-**Supersede**: ADR-001 **parcialmente** — só a escolha de Fabric.js para o editor. Todo o
+**Supersede**: ADR-001 **parcialmente**, só a escolha de Fabric.js para o editor. Todo o
 resto do ADR-001 (React+Vite, Supabase, Vercel Functions, MVP vetor-only) continua vigente.
 **Supersedido por**: (nenhum)
 
@@ -19,7 +19,7 @@ render espelhado no servidor".
 O ADR-004, aceito no mesmo dia mas depois, decidiu que o servidor **não tem grafo nenhum**:
 `gerarVarianteDeCor` opera sobre o SVG canônico, e é o **mesmo módulo** no editor e na
 função serverless. Isso esvaziou as duas pernas da justificativa. Nenhum dos dois ADRs
-registra a tensão — este registra.
+registra a tensão, este registra.
 
 Enquanto isso, o esboço (`src/esboco/`, 2026-09-05) já resolveu seleção de zona e contorno
 com **SVG DOM puro**: `event.target.closest(svg_selector)` para o clique e uma camada
@@ -27,7 +27,7 @@ com **SVG DOM puro**: `event.target.closest(svg_selector)` para o clique e uma c
 verdade e funciona.
 
 Ao especificar a marcação de zona, apareceu um segundo problema, mais fundo:
-**`normalizarSvg` só renomeia `id` duplicado — nunca cria `id`**. O cliente-alvo declarado
+**`normalizarSvg` só renomeia `id` duplicado, nunca cria `id`**. O cliente-alvo declarado
 no próprio ADR-004 (export padrão de Illustrator) manda paths sem id semântico. No SVG de
 demo do projeto, os 8 ilhoses e a sombra não têm id e são **immarcáveis**. Sem resolver
 isso, o editor não marca zona no arquivo real de nenhum cliente.
@@ -36,18 +36,18 @@ isso, o editor não marca zona no arquivo real de nenhum cliente.
 
 ## Decisão
 
-### D1 — O editor manipula SVG no DOM. Fabric.js não entra no projeto
+### D1, O editor manipula SVG no DOM. Fabric.js não entra no projeto
 
 O asset-base canônico é inserido inline no DOM e o editor trabalha nele: hit-test com
 `closest()`, contorno em camada `<svg>` sobreposta, preview com `gerarVarianteDeCor`.
 
 O motivo é o princípio nº1, não preferência técnica. Importar o SVG para objetos Fabric e
-re-serializar cria uma **segunda representação do mesmo desenho** ao lado do canônico —
+re-serializar cria uma **segunda representação do mesmo desenho** ao lado do canônico,
 "duas implementações que podem divergir" é literalmente o que o `CLAUDE.md` proíbe. E o
 preview passaria a ser um canvas rasterizado, enquanto a API devolve SVG: o pixel do editor
 deixaria de ser o pixel da API por construção.
 
-### D2 — O `id` é cunhado na normalização, e `svg_selector` é lista de ids exatos
+### D2, O `id` é cunhado na normalização, e `svg_selector` é lista de ids exatos
 
 `normalizarSvg` passa a atribuir `id` a todo elemento pintável anônimo (`elemento-1`,
 `elemento-2`, … em ordem de documento), cunhando só nomes que não colidem com os ids já
@@ -56,7 +56,7 @@ presentes. Id que o designer escreveu é preservado; só o anônimo ganha nome s
 Consequência que é o ponto da decisão: **o asset-base canônico é imutável e o editor é
 somente-leitura sobre ele.** Marcar zona escreve uma linha em `product_zones` e nada mais.
 
-`svg_selector` passa a ser uma **lista de ids exatos** — `#zona-cadarco, #zona-cadarco-2` —
+`svg_selector` passa a ser uma **lista de ids exatos**, `#zona-cadarco, #zona-cadarco-2`,
 nunca um seletor de prefixo.
 
 ---
@@ -68,7 +68,7 @@ nunca um seletor de prefixo.
 - **Prós**: cumpre o ADR vigente sem escrever ADR novo; traz seleção, handles, zoom e pan prontos
 - **Contras**: segunda representação do desenho; preview vira canvas rasterizado; dependência
   nova de peso considerável; a justificativa original já não vale
-- **Descartado porque**: viola o princípio nº1 na estrutura, não na execução — e o que ele
+- **Descartado porque**: viola o princípio nº1 na estrutura, não na execução, e o que ele
   entregava de graça (zoom/pan/handles) é ~80 linhas neste caso de uso
 
 ### 2. O editor cunha o `id` ao marcar, gravando o SVG de volta no Storage
@@ -77,11 +77,11 @@ nunca um seletor de prefixo.
 - **Contras**: torna o asset-base **mutável**, e o Storage não tem escrita condicional (sem
   If-Match/ETag no `supabase-js`)
 - **Descartado porque**: concorrência silenciosa. Membro A marca `sola` e grava; membro B,
-  com a versão anterior em memória, marca `cabedal` e grava por cima — o `zona-sola` de A
+  com a versão anterior em memória, marca `cabedal` e grava por cima, o `zona-sola` de A
   some do arquivo, a linha de A em `product_zones` continua apontando pra ele e resolve 0
   elementos. Se B tiver cunhado o mesmo sufixo pra outro elemento, resolve pro **elemento
   errado** e a cor sai no lugar errado, calada. Além disso obrigaria a reimplementar
-  `desambiguarIds` no navegador — a segunda implementação de novo
+  `desambiguarIds` no navegador, a segunda implementação de novo
 
 ### 3. Seletor posicional (`svg > g:nth-of-type(2) > path:nth-of-type(5)`)
 
@@ -93,8 +93,8 @@ nunca um seletor de prefixo.
 
 - **Prós**: uma string curta cobre N elementos, e já funciona
 - **Contras**: uma zona futura `zona-cadarco-lateral` seria capturada pelo prefixo de
-  `zona-cadarco` — duas zonas dividindo elemento sem ninguém pedir
-- **Descartado porque**: mesmo modo de falha da alternativa 3, e o CLAUDE.md é explícito —
+  `zona-cadarco`, duas zonas dividindo elemento sem ninguém pedir
+- **Descartado porque**: mesmo modo de falha da alternativa 3, e o CLAUDE.md é explícito,
   "zona errada falha alto e visível, nunca aplica a cor silenciosamente no lugar errado"
 
 ---
@@ -116,10 +116,10 @@ nunca um seletor de prefixo.
 - **Os ids cunhados viram contrato implícito.** Se uma versão futura do normalizador mudar
   a ordem de cunhagem, todo `svg_selector` gravado repointa em silêncio. Mitigação
   obrigatória: o teste de integração baixa o asset do Storage e afirma
-  `normalizarSvg(baixado).svg === baixado` — normalizador incompatível fica vermelho antes
+  `normalizarSvg(baixado).svg === baixado`, normalizador incompatível fica vermelho antes
   de qualquer variante ser gerada
 - Zoom, pan e histórico de edição passam a ser código nosso
-- `svg_selector` fica mais longo e precisa ser reescrito quando a zona ganha elemento — o
+- `svg_selector` fica mais longo e precisa ser reescrito quando a zona ganha elemento, o
   editor é o dono dessa string, ninguém a digita à mão
 - Re-upload de asset-base (fora do escopo desta entrega) fica **mais** delicado, não menos:
   ids cunhados podem mudar entre dois uploads do mesmo arquivo se o desenho mudou. Precisa
@@ -129,11 +129,11 @@ nunca um seletor de prefixo.
 
 ## Referências
 
-- ADR-001 — a decisão parcialmente supersedida por esta
-- ADR-004 — contrato de zona e normalização; é o que esvaziou a justificativa do Fabric
-- `src/esboco/PreviewDaVariante.tsx` — o hit-test e o contorno que provaram a mecânica
-- `src/lib/render/normalizarSvg.ts` — onde a cunhagem de id passa a morar
-- `CLAUDE.md` — princípio nº1
+- ADR-001, a decisão parcialmente supersedida por esta
+- ADR-004, contrato de zona e normalização; é o que esvaziou a justificativa do Fabric
+- `src/esboco/PreviewDaVariante.tsx`, o hit-test e o contorno que provaram a mecânica
+- `src/lib/render/normalizarSvg.ts`, onde a cunhagem de id passa a morar
+- `CLAUDE.md`, princípio nº1
 
 ---
 
@@ -142,7 +142,7 @@ nunca um seletor de prefixo.
 - A política de id vive em **um** arquivo (`src/lib/render/idDeElemento.ts`): desambiguar
   duplicado, renomear id que não é seletor CSS seguro (SVG aceita `.` e `:` em id) e cunhar
   `elemento-N`. `normalizarSvg` delega
-- `montarSeletorDeZona` é a **única** fonte do formato de `svg_selector` — nada de montar a
+- `montarSeletorDeZona` é a **única** fonte do formato de `svg_selector`, nada de montar a
   string à mão em outro lugar
 - Antes de gravar em `product_zones`, `marcarZona` confere que o seletor montado resolve
   exatamente os elementos da marcação, e recusa a gravação se divergir

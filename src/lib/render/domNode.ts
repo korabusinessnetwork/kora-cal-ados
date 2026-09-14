@@ -4,12 +4,12 @@
 // Hoje é importado por `vite.config.ts` (setupFiles do vitest). A função serverless de
 // geração de variante também vai importar quando existir.
 //
-// O navegador NUNCA importa este arquivo — é o que mantém o jsdom fora do bundle do editor.
+// O navegador NUNCA importa este arquivo, é o que mantém o jsdom fora do bundle do editor.
 
 import { JSDOM } from 'jsdom';
 import { definirAdaptadorDeDom } from './dom';
 
-// jsdom serializa pelo objeto JSDOM, não pelo Document — este mapa faz a volta.
+// jsdom serializa pelo objeto JSDOM, não pelo Document, este mapa faz a volta.
 // WeakMap para o documento poder ser coletado normalmente.
 const origem = new WeakMap<Document, JSDOM>();
 

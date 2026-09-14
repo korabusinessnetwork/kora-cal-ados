@@ -1,7 +1,7 @@
 // A que tenants o usuário logado pertence, e com que papel.
 //
 // É a consulta que decide TUDO o que o app pode mostrar: sem tenant ativo, nenhuma tela
-// protegida renderiza. Por isso ela vive separada do contexto — dá para testar a forma do
+// protegida renderiza. Por isso ela vive separada do contexto, dá para testar a forma do
 // dado sem montar React.
 //
 // Campos explícitos, nunca `select *`: `tenants` carrega tema (white-label) e plano, e o
@@ -28,7 +28,7 @@ interface LinhaDeVinculo {
  * Tenants do usuário, em ordem alfabética estável.
  *
  * A RLS já restringe o resultado aos vínculos dele; o `eq('user_id')` está aqui para o
- * caso importar não depender só da policy — defesa em profundidade, e deixa a intenção
+ * caso importar não depender só da policy, defesa em profundidade, e deixa a intenção
  * legível para quem revisa.
  */
 export async function carregarTenantsDoUsuario(

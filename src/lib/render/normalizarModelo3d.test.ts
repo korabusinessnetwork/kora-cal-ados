@@ -1,6 +1,6 @@
 // Testes da normalização 3D. O defeito que quase todos protegem é o mesmo, e é silencioso:
 // pintar uma zona e a cor aparecer também em outra, com 200 na resposta. Por isso a asserção
-// que mais se repete aqui não é sobre o conteúdo do JSON, é sobre um invariante —
+// que mais se repete aqui não é sobre o conteúdo do JSON, é sobre um invariante,
 // `materiaisUsados` sem repetição.
 
 import { describe, expect, it } from 'vitest';
@@ -24,7 +24,7 @@ function lerDocumento(modelo: string): DocumentoLido {
   return JSON.parse(modelo) as DocumentoLido;
 }
 
-/** O código do `ErroDeVariante` que `executar` levanta — falha se não levantar nenhum. */
+/** O código do `ErroDeVariante` que `executar` levanta, falha se não levantar nenhum. */
 function codigoRecusado(executar: () => unknown): string {
   try {
     executar();
@@ -57,7 +57,7 @@ function materiaisDaZona(modelo: string, nome: string): number[] {
 }
 
 describe('material próprio por zona (ADR-007 D5)', () => {
-  it('separa material compartilhado entre duas malhas — o defeito silencioso da cor vazada', () => {
+  it('separa material compartilhado entre duas malhas, o defeito silencioso da cor vazada', () => {
     // Sem esta separação, pintar `sola` pintaria `cabedal` junto: em glTF é idiomático várias
     // malhas apontarem para o mesmo material, e o motor pinta material.
     const { modelo, relatorio } = normalizar({
@@ -72,7 +72,7 @@ describe('material próprio por zona (ADR-007 D5)', () => {
     expect(relatorio.materiaisDuplicados).toBe(1);
   });
 
-  it('o material duplicado sai com a MESMA cor do original — separar não é repintar', () => {
+  it('o material duplicado sai com a MESMA cor do original, separar não é repintar', () => {
     const { modelo } = normalizar({
       nos: [{ nome: 'sola', malha: 0 }, { nome: 'cabedal', malha: 1 }],
       malhas: [{ materiais: [0] }, { materiais: [0] }],
@@ -87,7 +87,7 @@ describe('material próprio por zona (ADR-007 D5)', () => {
     }
   });
 
-  it('primitiva sem material ganha um — zona sem material existe e não recebe cor', () => {
+  it('primitiva sem material ganha um, zona sem material existe e não recebe cor', () => {
     const { modelo, relatorio } = normalizar({
       nos: [{ nome: 'sola', malha: 0 }],
       malhas: [{ materiais: [null] }],
@@ -111,7 +111,7 @@ describe('material próprio por zona (ADR-007 D5)', () => {
 });
 
 describe('malha compartilhada entre nós', () => {
-  it('é separada — duplicar só o material não resolveria, o material mora na primitive', () => {
+  it('é separada, duplicar só o material não resolveria, o material mora na primitive', () => {
     const { modelo, relatorio } = normalizar({
       nos: [{ nome: 'sola-esquerda', malha: 0 }, { nome: 'sola-direita', malha: 0 }],
       malhas: [{ materiais: [0] }],
@@ -223,7 +223,7 @@ describe('nome no canônico (ADR-007 D4)', () => {
 
 describe('idempotência', () => {
   it('a segunda passada devolve o mesmo modelo e um relatório sem mudança nenhuma', () => {
-    // É a asserção que pega um cunhador que renumera a cada passada — o defeito que repointaria
+    // É a asserção que pega um cunhador que renumera a cada passada, o defeito que repointaria
     // todo seletor de zona já gravado, sem ninguém ver.
     const primeira = normalizar({
       nos: [{ nome: 'sola, externa', malha: 0 }, { malha: 0 }, { nome: 'malha-1', malha: 1 }],
@@ -254,7 +254,7 @@ describe('recusa explícita, nunca conserto silencioso', () => {
     expect(codigoRecusado(() => normalizarModelo3d('null'))).toBe('MODELO_3D_INVALIDO');
   });
 
-  it('glTF 1.0 é recusado — o formato do 1.0 é outro, normalizar seria adivinhar', () => {
+  it('glTF 1.0 é recusado, o formato do 1.0 é outro, normalizar seria adivinhar', () => {
     expect(
       codigoRecusado(() =>
         normalizar({ versao: '1.0', nos: [{ malha: 0 }], malhas: [{ materiais: [null] }] }),
@@ -266,7 +266,7 @@ describe('recusa explícita, nunca conserto silencioso', () => {
     expect(codigoRecusado(() => normalizar({ nos: [] }))).toBe('MODELO_3D_INVALIDO');
   });
 
-  it('documento em que nenhum nó tem malha é recusado — não há o que virar zona', () => {
+  it('documento em que nenhum nó tem malha é recusado, não há o que virar zona', () => {
     expect(codigoRecusado(() => normalizar({ nos: [{ nome: 'camera' }] }))).toBe(
       'MODELO_3D_INVALIDO',
     );
@@ -303,7 +303,7 @@ describe('recusa explícita, nunca conserto silencioso', () => {
     expect(mensagemRecusada(executar)).toContain('Draco');
   });
 
-  it('extensionsRequired vazio não recusa — array vazio é ausência, não exigência', () => {
+  it('extensionsRequired vazio não recusa, array vazio é ausência, não exigência', () => {
     expect(() =>
       normalizar({
         nos: [{ nome: 'sola', malha: 0 }],
@@ -317,7 +317,7 @@ describe('recusa explícita, nunca conserto silencioso', () => {
 describe('URI externa', () => {
   it('buffer apontando para arquivo externo é recusado, não remendado', () => {
     // Recusa e não remoção: tirar o `uri` deixaria o modelo sem geometria, e um canônico sem
-    // geometria é pior que arquivo rejeitado — passa no cadastro e falha no cliente.
+    // geometria é pior que arquivo rejeitado, passa no cadastro e falha no cliente.
     const executar = () =>
       normalizar({
         nos: [{ nome: 'sola', malha: 0 }],
@@ -341,7 +341,7 @@ describe('URI externa', () => {
     ).toBe('MODELO_3D_NAO_NORMALIZAVEL');
   });
 
-  it('buffer em data: URI passa — é o formato que o exportador embutido produz', () => {
+  it('buffer em data: URI passa, é o formato que o exportador embutido produz', () => {
     expect(() =>
       normalizar({
         nos: [{ nome: 'sola', malha: 0 }],
@@ -366,7 +366,7 @@ describe('textura: observada, não ignorada nem recusada', () => {
     expect(relatorio.malhasNaoRecoloriveis).toEqual(['logo']);
   });
 
-  it('continua apontando a textura na segunda passada — descreve o modelo, não a mudança', () => {
+  it('continua apontando a textura na segunda passada, descreve o modelo, não a mudança', () => {
     const primeira = normalizar({
       nos: [{ nome: 'logo', malha: 0 }],
       malhas: [{ materiais: [0] }],
@@ -378,7 +378,7 @@ describe('textura: observada, não ignorada nem recusada', () => {
 });
 
 describe('canônico e relatório', () => {
-  it('preserva campo que a normalização não entende — o que não conhecemos sai como entrou', () => {
+  it('preserva campo que a normalização não entende, o que não conhecemos sai como entrou', () => {
     const cru = lerDocumento(
       gltfDeTeste({ nos: [{ nome: 'sola', malha: 0 }], malhas: [{ materiais: [null] }] }),
     ) as Record<string, unknown>;

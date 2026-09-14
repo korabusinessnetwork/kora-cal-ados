@@ -2,18 +2,18 @@
 //
 // Por que ele existe: o handler tem assinatura Web (`export default { fetch(Request) }`,
 // ver `api/README.md`), e a unica forma de dirigir um handler assim hoje seria com deploy.
-// Este arquivo abre uma porta HTTP e entrega o mesmo handler ao `curl` — sem segunda
+// Este arquivo abre uma porta HTTP e entrega o mesmo handler ao `curl`, sem segunda
 // implementacao do handler, que e o que divergiria da que roda em producao.
 //
 // Por que ele carrega TypeScript pelo Vite: e o mesmo motivo de
-// `supabase/scripts/executar.mjs` — o handler importa `api/_lib/*` e `src/lib/render/*` com
+// `supabase/scripts/executar.mjs`, o handler importa `api/_lib/*` e `src/lib/render/*` com
 // imports sem extensao, que `moduleResolution: "bundler"` permite e o `node` cru nao
 // resolve (ERR_MODULE_NOT_FOUND). O Vite ja e dependencia do projeto e resolve isso em
 // tres linhas; tsx/vite-node seriam dependencia nova sem justificativa
 // (`memory/restrictions.md`).
 //
 // Uso: node api/_local/servidorLocal.mjs   (script `npm run api:local`)
-// O que ele NAO prova esta em `api/_local/README.md` — leia antes de concluir qualquer
+// O que ele NAO prova esta em `api/_local/README.md`, leia antes de concluir qualquer
 // coisa sobre a Vercel a partir do que sair daqui.
 
 import { createServer as criarServidorVite } from 'vite';
@@ -65,7 +65,7 @@ const SEGMENTO_DINAMICO = /^\[(\.\.\.)?(.+)\]$/;
 
 // Uma rota so: caminho do arquivo -> padrao de URL. Escrever uma tabela de rotas a mao
 // seria uma segunda definicao da rota, e ela divergiria da Vercel no dia em que alguem
-// renomeasse um diretorio — que e justamente o dia em que ninguem olharia para ca.
+// renomeasse um diretorio, que e justamente o dia em que ninguem olharia para ca.
 function montarRota(segmentos, arquivo) {
   const partesDoPadrao = [];
   const partesDoRotulo = [];
@@ -91,7 +91,7 @@ function montarRota(segmentos, arquivo) {
     ehArquivoDeTeste,
     rotulo: `/api/v1/${partesDoRotulo.join('/')}`,
     padrao: new RegExp(`^/api/v1/${partesDoPadrao.join('/')}/?$`),
-    // `ssrLoadModule` espera caminho relativo a raiz do Vite, com barra normal — inclusive
+    // `ssrLoadModule` espera caminho relativo a raiz do Vite, com barra normal, inclusive
     // no Windows, onde `path.sep` e `\` e quebraria a resolucao.
     caminhoDoModulo: `/${caminhoRelativo}`,
     caminhoRelativo,
@@ -106,7 +106,7 @@ async function varrerRotas(diretorio = DIRETORIO_DAS_ROTAS, segmentos = []) {
   try {
     entradas = await readdir(diretorio, { withFileTypes: true });
   } catch {
-    // `api/v1/` pode ainda nao existir. Nao e erro do servidor — e ausencia de handler, e
+    // `api/v1/` pode ainda nao existir. Nao e erro do servidor, e ausencia de handler, e
     // quem diz isso e a mensagem de subida / o 404.
     return [];
   }
@@ -179,7 +179,7 @@ async function escreverResposta(resposta, saida) {
   if (cookies.length > 0) saida.setHeader('set-cookie', cookies);
 
   // Bytes, nunca string: o SVG sai `charset=utf-8` e um acento reencodado pelo caminho
-  // seria mudanca silenciosa do arquivo entregue — a classe de defeito que o principio n1
+  // seria mudanca silenciosa do arquivo entregue, a classe de defeito que o principio n1
   // proibe. `content-length` e recalculado aqui pelo mesmo motivo.
   const corpo = Buffer.from(await resposta.arrayBuffer());
   saida.setHeader('content-length', String(corpo.length));
@@ -207,7 +207,7 @@ if (!Number.isInteger(porta) || porta < 1 || porta > 65535) {
 const vite = await criarServidorVite({
   root: RAIZ,
   // `middlewareMode` para o Vite nao abrir uma porta HTTP so para carregar modulo, e
-  // `ws: false` para nao abrir a porta 24678 do WebSocket de HMR — que nao serve a
+  // `ws: false` para nao abrir a porta 24678 do WebSocket de HMR, que nao serve a
   // ninguem aqui (nao ha navegador) e ainda faz a segunda instancia do servidor imprimir
   // um erro de porta ocupada que nao e o nosso. Sem `ws` o watcher continua vivo, que e o
   // que faz um handler corrigido responder sem reiniciar o servidor.
@@ -223,7 +223,7 @@ const servidorHttp = criarServidorHttp(async (requisicao, saida) => {
 
   if (!rota) {
     // Precisa ficar obvio que quem nao achou foi o roteador DAQUI, e nao a API respondendo
-    // PRODUTO_NAO_ENCONTRADO — confundir os dois manda alguem depurar o handler por causa
+    // PRODUTO_NAO_ENCONTRADO, confundir os dois manda alguem depurar o handler por causa
     // de um erro de digitacao na URL. Por isso este corpo nao usa o envelope da API.
     responderEmJson(saida, 404, {
       servidor_local: 'api/_local/servidorLocal.mjs',
@@ -329,7 +329,7 @@ servidorHttp.listen(porta, async () => {
     }
   }
 
-  // Presenca, nunca valor: imprimir chave — mesmo truncada — poe segredo no terminal e no
+  // Presenca, nunca valor: imprimir chave, mesmo truncada, poe segredo no terminal e no
   // historico de quem rodar isto.
   const faltando = VARIAVEIS_EXIGIDAS_PELA_API.filter((nome) => !process.env[nome]);
   console.log(
@@ -343,7 +343,7 @@ servidorHttp.listen(porta, async () => {
     console.log('[api-local] chamada autenticada responde 500. Ver .env.example.');
   }
 
-  // Exemplo sai de uma rota de verdade, nunca de um arquivo de teste co-locado — copiar um
+  // Exemplo sai de uma rota de verdade, nunca de um arquivo de teste co-locado, copiar um
   // curl que bate em `variants.test` custaria uma sessao de depuracao a quem colar.
   const rotaDeExemplo =
     (rotas.find((rota) => !rota.ehArquivoDeTeste) ?? rotas[0])?.rotulo ??

@@ -1,5 +1,5 @@
 // A política de nome é o que torna uma zona 3D endereçável. Um nome instável entre execuções
-// repointaria um seletor já gravado no banco — e a zona passaria a pintar outra peça sem
+// repointaria um seletor já gravado no banco, e a zona passaria a pintar outra peça sem
 // ninguém ver. Por isso os casos aqui são todos sobre ESTABILIDADE, não sobre estética.
 
 import { describe, expect, it } from 'vitest';
@@ -34,7 +34,7 @@ describe('nome que o modelador escreveu', () => {
     ]);
   });
 
-  it('nome com vírgula é convertido — vírgula parte a lista de nomes em dois endereços', () => {
+  it('nome com vírgula é convertido, vírgula parte a lista de nomes em dois endereços', () => {
     // Este é o modo de falha que a política existe para impedir: o seletor de zona é uma
     // LISTA de nomes; um nome que contenha o separador vira dois endereços errados.
     const { nomes, relatorio } = aplicar([{ name: 'sola, externa', mesh: 0 }], [0]);
@@ -68,7 +68,7 @@ describe('nome cunhado em nó anônimo', () => {
   });
 
   it('NÃO cunha em nó sem malha, nem gasta número com ele', () => {
-    // Cunhar numa junta de esqueleto deslocaria o nome de todas as malhas seguintes — e nome
+    // Cunhar numa junta de esqueleto deslocaria o nome de todas as malhas seguintes, e nome
     // deslocado repointa seletor já gravado.
     const { nomes, relatorio } = aplicar([{}, { mesh: 0 }, {}, { mesh: 1 }], [1, 3]);
 

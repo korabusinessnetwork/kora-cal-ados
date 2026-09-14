@@ -1,5 +1,5 @@
 // Fonte única do formato de `svg_selector`. Se este teste mudar, todo seletor já gravado
-// no banco muda de significado — é por isso que ele existe.
+// no banco muda de significado, é por isso que ele existe.
 
 import { describe, expect, it } from 'vitest';
 import { ErroDeVariante } from './erros';
@@ -16,7 +16,7 @@ describe('montar seletor de zona', () => {
     );
   });
 
-  it('NUNCA monta prefixo — id exato, sempre', () => {
+  it('NUNCA monta prefixo, id exato, sempre', () => {
     // `[id^="ilhos"]` capturaria uma zona futura `ilhos-lateral` e pintaria o lugar
     // errado em silêncio (ADR-005, decisão 2).
     const seletor = montarSeletorDeZona(['ilhos', 'ilhos-2']);

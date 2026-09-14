@@ -1,6 +1,6 @@
 // Estes testes existem por causa de um modo de falha que não aparece na tela: o editor
 // dizer "isto é a zona sola" enquanto a API pinta outra coisa. A prova principal é a
-// invariante do fim do arquivo — para todo elemento pintável do asset canônico REAL, a
+// invariante do fim do arquivo, para todo elemento pintável do asset canônico REAL, a
 // zona que `resolverZonaDoElemento` devolve é exatamente a que o seletor daquela zona
 // resolve. Se alguém trocar a regra de pertencimento por uma comparação mais barata
 // (`elemento.matches(seletor)`), essa invariante fica vermelha sobre o asset de verdade.
@@ -14,7 +14,7 @@ import { assetBaseCru } from '../../esboco/produtoDemo';
 import { resolverZonaDoElemento, mapaDeZonasPorElemento } from './resolverZonaDoElemento';
 import type { ZonaDoProduto } from './tiposDeZona';
 
-/** Linha de `product_zones` com seletor cru — só para o caso do seletor quebrado. */
+/** Linha de `product_zones` com seletor cru, só para o caso do seletor quebrado. */
 function zonaComSeletor(zoneKey: string, seletor: string): ZonaDoProduto {
   return {
     id: `linha-${zoneKey}`,
@@ -120,7 +120,7 @@ describe('mapaDeZonasPorElemento', () => {
 //
 // As zonas daqui são montadas com `montarSeletorDeZona`, nunca com string escrita à mão:
 // `svg_selector` é lista de ids exatos e tem uma fonte de formato só (ADR-005, decisão 2).
-// Elas também não são copiadas de `produtoDemo.ts` — a lista abaixo tem uma zona a mais
+// Elas também não são copiadas de `produtoDemo.ts`, a lista abaixo tem uma zona a mais
 // (`costura`), que existe só para provar a regra do `fill="none"` e nunca seria uma linha
 // de `product_zones` de verdade.
 //

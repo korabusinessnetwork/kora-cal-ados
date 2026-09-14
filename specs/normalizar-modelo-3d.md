@@ -1,4 +1,4 @@
-# Spec — `normalizarModelo3d`, a normalização de glTF
+# Spec, `normalizarModelo3d`, a normalização de glTF
 
 > Loop `/spec → /build → /review`. Aberto em 2026-09-09, no mesmo dia dos ADR-007 (calçado 3D
 > manipulável) e ADR-008 (calçado gerado sobre acervo de peças).
@@ -21,7 +21,7 @@ novo, este módulo continua valendo.
 
 ## 1. Escopo
 
-Uma função pura em Node — `normalizarModelo3d(gltfCru)` — que recebe um documento glTF 2.0 em
+Uma função pura em Node, `normalizarModelo3d(gltfCru)`, que recebe um documento glTF 2.0 em
 JSON e devolve **o modelo 3D canônico** mais um relatório do que mudou, ou **recusa** com
 código de erro explícito e mensagem que diz o que fazer.
 
@@ -35,7 +35,7 @@ forma, nomenclatura e estilo de teste.
 - **Acervo, composição, prompt** (ADR-008). Nada de tabela, coluna ou schema.
 - **Container binário `.glb`**, Draco, meshopt, quantização. Esta rodada opera sobre glTF em
   JSON; `.glb` é desempacotamento, e vira entrega própria se e quando um arquivo real exigir.
-- **Textura e imagem.** Peça com textura não é tratada nesta rodada — ver critério 11, que
+- **Textura e imagem.** Peça com textura não é tratada nesta rodada, ver critério 11, que
   decide o que fazer com ela em vez de ignorá-la em silêncio.
 - **Upload, Storage, script de provisionamento, coluna de tipo em `products`.** O módulo é
   puro; quem o chama vem depois.
@@ -46,13 +46,13 @@ forma, nomenclatura e estilo de teste.
 
 | Arquivo | O quê |
 |---|---|
-| `src/lib/render/normalizarModelo3d.ts` | **novo** — a função e o relatório |
-| `src/lib/render/normalizarModelo3d.test.ts` | **novo** — co-locado, sem rede |
-| `src/lib/render/nomeDeMalha.ts` | **novo** — a política de nome, análoga a `idDeElemento.ts` |
+| `src/lib/render/normalizarModelo3d.ts` | **novo**, a função e o relatório |
+| `src/lib/render/normalizarModelo3d.test.ts` | **novo**, co-locado, sem rede |
+| `src/lib/render/nomeDeMalha.ts` | **novo**, a política de nome, análoga a `idDeElemento.ts` |
 | `src/lib/render/nomeDeMalha.test.ts` | **novo** |
-| `src/lib/render/fixtures/` | **novo(s)** — construtor de glTF mínimo para os testes |
+| `src/lib/render/fixtures/` | **novo(s)**, construtor de glTF mínimo para os testes |
 | `src/lib/render/erros.ts` | dois códigos novos **acrescentados** à união; nenhum existente tocado |
-| `api/_lib/falhaDaApi.ts` + teste | mapear os códigos novos — ver critério 12, é obrigatório |
+| `api/_lib/falhaDaApi.ts` + teste | mapear os códigos novos, ver critério 12, é obrigatório |
 | `src/lib/render/README.md` | índice do diretório ganha as linhas novas |
 | `docs/03_REGRAS_DE_NEGOCIO/glossario.md` | uma linha: **modelo 3D canônico** (o termo não existe ainda) |
 
@@ -67,14 +67,14 @@ Cada um responde sim/não depois do build.
    `cunharIdsAusentes` faz hoje.
 3. **Colisão desambiguada.** Dois nós com o mesmo `name` viram `nome` e `nome-2`, no mesmo
    padrão de sufixo que o projeto já usa (`primeiroLivre` em `idDeElemento.ts`).
-4. **Nome seguro.** Nome com caractere que quebraria o armazenamento do seletor — vírgula em
-   primeiro lugar, já que o seletor é **lista** de nomes — é convertido, e a troca aparece no
+4. **Nome seguro.** Nome com caractere que quebraria o armazenamento do seletor, vírgula em
+   primeiro lugar, já que o seletor é **lista** de nomes, é convertido, e a troca aparece no
    relatório. Mesma política de `tornarSeguro`, adaptada.
 5. **Material próprio (ADR-007 D5).** Se duas malhas endereçáveis referenciam o mesmo
    material, o canônico tem **um material por malha**. Verificável: nenhum índice de material
    aparece duas vezes entre as malhas endereçáveis.
 6. **Malha compartilhada entre nós é separada.** Se dois nós referenciam o **mesmo** `mesh`,
-   duplicar só o material não resolve — o material mora na *primitive* do mesh, não no nó.
+   duplicar só o material não resolve, o material mora na *primitive* do mesh, não no nó.
    O canônico dá a cada nó endereçável o seu próprio `mesh`. **A duplicação não copia
    geometria**: o mesh novo reusa os mesmos `accessors`, mudando só o índice de material. O
    teste afirma que `buffers` e `accessors` não cresceram.
@@ -84,10 +84,10 @@ Cada um responde sim/não depois do build.
    próprio e que ambas são alcançadas pelo nome do nó.
 8. **Idempotência.** `normalizarModelo3d(normalizarModelo3d(x).modelo)` devolve um modelo
    igual ao da primeira passada, e um relatório **vazio**. É o que prova que o canônico é
-   ponto fixo — e é a asserção que pega um cunhador que renumera a cada passada.
+   ponto fixo, e é a asserção que pega um cunhador que renumera a cada passada.
 9. **Recusa explícita, nunca conserto silencioso.** Arquivo que não é glTF 2.0 válido levanta
    `MODELO_3D_INVALIDO`. Arquivo válido que o normalizador não consegue tornar canônico
-   levanta `MODELO_3D_NAO_NORMALIZAVEL`, com mensagem que **diz o que fazer** — no espírito da
+   levanta `MODELO_3D_NAO_NORMALIZAVEL`, com mensagem que **diz o que fazer**, no espírito da
    mensagem de `SVG_NAO_NORMALIZAVEL`, que ensina a exportar com Presentation Attributes.
    Nunca devolve um modelo meio-normalizado.
 10. **URI externa é recusada.** `buffer` ou `image` com `uri` que não seja `data:` levanta
@@ -95,17 +95,17 @@ Cada um responde sim/não depois do build.
     o arquivo do cliente não faz requisição para fora, e uma URI que some depois quebraria o
     produto em silêncio.
 11. **Textura decidida, não ignorada.** Malha cuja cor base vem de `baseColorTexture` **não**
-    pode virar cor chapa sem apagar o desenho — é o gêmeo tridimensional do
+    pode virar cor chapa sem apagar o desenho, é o gêmeo tridimensional do
     `ZONA_NAO_RECOLORIVEL` do gradiente. O build decide entre recusar o arquivo ou marcar a
     malha como não-recolorível no relatório, **escreve a decisão no código com o porquê**, e
     testa o caso. O que não é aceitável é a textura passar sem ninguém perceber.
 12. **Os códigos novos entram no transporte.** `api/_lib/falhaDaApi.ts` tem um teste que
-    **enumera os `CodigoDeErro`** e falha se algum ficar sem status — então acrescentar dois
+    **enumera os `CodigoDeErro`** e falha se algum ficar sem status, então acrescentar dois
     códigos quebra esse teste até serem mapeados. Ambos vão para **409**, junto de
     `SVG_INVALIDO`/`SVG_NAO_NORMALIZAVEL`: são "dado do tenant", e a mensagem manda corrigir o
     modelo, nunca o pedido. Nenhum código existente muda de valor ou de status.
 13. **Relatório completo.** A função devolve `{ modelo, relatorio }`, com o relatório contando
-    nomes renomeados (de→para), nomes atribuídos, materiais duplicados e malhas duplicadas —
+    nomes renomeados (de→para), nomes atribuídos, materiais duplicados e malhas duplicadas,
     espelhando `RelatorioDeNormalizacao`. É o que o provisionamento vai imprimir para quem
     subir uma peça.
 14. **Verificado por mutação.** Teste que passa de primeira é suspeito. No mínimo três
@@ -119,14 +119,14 @@ Cada um responde sim/não depois do build.
 
 - **Nó sem mesh** (nó só de transformação, junta de esqueleto, câmera, luz): **não** é
   endereçável, não ganha nome cunhado, e não entra no relatório. Cunhar nele gastaria números
-  de `malha-N` e deslocaria os nomes dos nós reais — o mesmo defeito que o comentário de
+  de `malha-N` e deslocaria os nomes dos nós reais, o mesmo defeito que o comentário de
   `cunharIdsAusentes` descreve para o SVG.
 - **Mesh sem material** (glTF permite: usa o material padrão): precisa ganhar material próprio
   para ser pintável, senão a zona existe e não recebe cor.
 - **Nó endereçável dentro de outro nó endereçável.** Em glTF a hierarquia é livre. Decidir e
   escrever: os dois são zonas independentes, ou o pai absorve o filho? (Em SVG o projeto já
   respondeu o análogo: a zona pinta o elemento marcado **e seus descendentes pintáveis**.)
-- **`name` duplicado entre um nó e outro que só será cunhado depois** — a ordem entre
+- **`name` duplicado entre um nó e outro que só será cunhado depois**, a ordem entre
   desambiguar e cunhar importa, exatamente como em `normalizarSvg`, onde sanitizar vem antes
   de `aplicarPoliticaDeId` para que elemento removido não consuma um `elemento-N`.
 - **glTF sem `scenes`/`nodes`**, arrays vazios, `meshes` ausente: recusa, não `undefined`
@@ -142,15 +142,15 @@ Os 15 critérios em "sim"; `npx tsc --noEmit` limpo; `npx vitest run` e `npm run
 verdes; as três mutações do critério 14 executadas, cada uma matando teste, e todas
 restauradas (`git status` limpo do que não é a entrega); nenhum `console.log` esquecido;
 nenhum TODO sem justificativa escrita; e as decisões dos critérios 11 e do edge case da
-hierarquia **escritas no código com o porquê**, não deixadas implícitas — porque um agente sem
+hierarquia **escritas no código com o porquê**, não deixadas implícitas, porque um agente sem
 memória da decisão as desfaz na sessão seguinte.
 
 Se a rodada achar defeito de produto, ele vira linha em `memory/bugs.md` e correção no mesmo
-commit — e o loop recomeça do `/review`.
+commit, e o loop recomeça do `/review`.
 
 ---
 
-## 7. Resultado da revisão — 2026-09-10
+## 7. Resultado da revisão, 2026-09-10
 
 **Aprovado sem ressalvas.** Os 15 critérios em "sim"; `npx tsc --noEmit` limpo; `npx vitest
 run` 576/576 (eram 536 antes da entrega, 38 casos novos nos dois arquivos de teste);
@@ -158,13 +158,13 @@ run` 576/576 (eram 536 antes da entrega, 38 casos novos nos dois arquivos de tes
 
 ### As três mutações do critério 14
 
-Cada uma aplicada isolada, com o resultado conferido e o arquivo restaurado — a igualdade do
+Cada uma aplicada isolada, com o resultado conferido e o arquivo restaurado, a igualdade do
 `md5sum` antes e depois é a prova de que voltou.
 
 | Mutação | O que quebrou |
 |---|---|
 | (a) não duplicar material compartilhado (`darMaterialProprioACadaPrimitiva` sempre segue em frente) | **5 testes**, entre eles o do relatório completo e o das duas primitivas do mesmo nó |
-| (b) cunhar `malha-N` sem checar colisão (o `while (vistos.has(...))` removido) | **2 testes**: "pula o número que o modelador já ocupou" e a **idempotência** — exatamente o par que o spec previu |
+| (b) cunhar `malha-N` sem checar colisão (o `while (vistos.has(...))` removido) | **2 testes**: "pula o número que o modelador já ocupou" e a **idempotência**, exatamente o par que o spec previu |
 | (c) duplicar malha clonando `accessors` em vez de reusá-los | **1 teste**: "a duplicação NÃO copia geometria" |
 
 **O que a mutação (c) ensinou, e que não estava no spec:** `git checkout --` não restaura
@@ -176,21 +176,21 @@ depois.
 ### Dois desvios do spec, os dois de nomenclatura de arquivo
 
 1. O spec diz `api/_lib/falhaDaApi.ts`; o arquivo real chama-se
-   **`api/_lib/traduzirParaFalhaDaApi.ts`** — o spec herdou o nome antigo do plano da Fase 2.
+   **`api/_lib/traduzirParaFalhaDaApi.ts`**, o spec herdou o nome antigo do plano da Fase 2.
    Nenhuma consequência além do nome: o teste que itera a tabela é o daquele arquivo.
-2. O spec previu **dois** lugares enumerando `CodigoDeErro`; existem **três** — o terceiro é
+2. O spec previu **dois** lugares enumerando `CodigoDeErro`; existem **três**, o terceiro é
    `src/esboco/PainelDaApi.tsx`, com o seu próprio `Readonly<Record<CodigoDeErro, ...>>`.
    Achado pelo `tsc`, não por leitura: `TS2739 ... is missing the following properties`. É
    precisamente o alarme que o `Record` foi escrito para ser, e ele funcionou.
 
 ### Decisões que o build tomou e escreveu no código
 
-- **Textura** (critério 11): **observar, não recusar** — a malha entra em
+- **Textura** (critério 11): **observar, não recusar**, a malha entra em
   `malhasNaoRecoloriveis` e o modelo passa. O porquê está no comentário do campo: é o gêmeo do
   gradiente, e `normalizarSvg` também não recusa; quem recusa é o motor na hora de pintar.
 - **Hierarquia** (edge case): nó endereçável dentro de outro são **duas zonas independentes**.
   O porquê está em `acharEnderecaveis`: em SVG o `fill` é herdado pela árvore, em glTF o
-  material mora na primitive e a cena não o herda — fazer o pai absorver o filho criaria uma
+  material mora na primitive e a cena não o herda, fazer o pai absorver o filho criaria uma
   zona que pinta pedaço do modelo que ela não lista.
 - **Material único por primitiva, mais rígido que o necessário**: duas primitivas do mesmo nó
   pertencem à mesma zona e poderiam compartilhar. Não compartilham, para o invariante caber em

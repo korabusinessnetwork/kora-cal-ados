@@ -7,16 +7,16 @@
 // `service_role` lê depois. São dois caminhos de privilégio diferentes sobre a mesma linha,
 // e até aqui nenhum teste atravessava os dois.
 //
-// Aqui a zona nasce pelo caminho de verdade — `marcarZona` (que chama `montarSeletorDeZona`)
+// Aqui a zona nasce pelo caminho de verdade, `marcarZona` (que chama `montarSeletorDeZona`)
 // seguido de `gravarZonaNoBanco`, com o **cliente autenticado do dono**, atravessando a RLS
 // exatamente como o navegador atravessa. Só depois a API é chamada. É o princípio nº1 do
 // `CLAUDE.md` escrito como asserção: "cor no editor = cor na API".
 //
 // O QUE ELE NÃO ALCANÇA, e está registrado em `api/_local/roteiroDePassada.md`: que o Chrome
-// resolva `#a, #b` nos mesmos elementos que o jsdom resolve. O risco é pequeno — o seletor é
+// resolva `#a, #b` nos mesmos elementos que o jsdom resolve. O risco é pequeno, o seletor é
 // lista de ids exatos, a forma mais simples que existe, e o editor **não cunha id** (ADR-005:
 // ele é somente-leitura sobre o canônico, e os ids nascem em `normalizarSvg` no
-// provisionamento) — mas não é zero, e não é código que o feche.
+// provisionamento), mas não é zero, e não é código que o feche.
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import '../../src/lib/render/domNode';
@@ -42,7 +42,7 @@ const CADARCOS = ['zona-cadarco', 'zona-cadarco-2', 'zona-cadarco-3', 'zona-cada
 const CABEDAL = 'zona-cabedal';
 const COLARINHO = 'zona-colarinho';
 
-describe.skipIf(!temAmbiente)('elo editor → API — a zona gravada é a zona pintada', () => {
+describe.skipIf(!temAmbiente)('elo editor → API, a zona gravada é a zona pintada', () => {
   let cenario: Cenario;
   let chaves: ChavesDoCenario;
   let canonico: string;
@@ -52,7 +52,7 @@ describe.skipIf(!temAmbiente)('elo editor → API — a zona gravada é a zona p
     chaves = await semearChavesDaApi(cenario);
     // Baixado pelo cliente do DONO, não por `admin()`: é o arquivo que o editor enxerga,
     // pela mesma policy de Storage. Se a RLS do bucket mudasse, o editor pararia de abrir o
-    // modelo e este teste pararia junto — que é o alarme certo.
+    // modelo e este teste pararia junto, que é o alarme certo.
     canonico = await baixarCanonicoComoODono(cenario);
   }, 120_000);
 
@@ -197,7 +197,7 @@ async function pedirVariante(
  * O `fill` do elemento com aquele `id`, lido do SVG devolvido.
  *
  * Por que por elemento e não por contagem de cor: contar `#C0392B` no documento inteiro
- * passaria mesmo se a cor tivesse ido parar no elemento errado — que é precisamente o modo
+ * passaria mesmo se a cor tivesse ido parar no elemento errado, que é precisamente o modo
  * de falha que o princípio nº1 proíbe.
  */
 function fillDoElemento(svg: string, id: string): string | null {
@@ -227,7 +227,7 @@ function idsQueMudaram(antes: string, depois: string): string[] {
   for (let i = 0; i < linhasAntes.length; i += 1) {
     if (linhasAntes[i] === linhasDepois[i]) continue;
     const id = /\sid="([^"]*)"/.exec(linhasDepois[i] ?? '')?.[1];
-    // Linha diferente sem id é mudança que ninguém consegue atribuir a uma zona — falha alto
+    // Linha diferente sem id é mudança que ninguém consegue atribuir a uma zona, falha alto
     // em vez de sumir da lista.
     if (id === undefined) {
       throw new Error(`A linha ${i + 1} mudou e não tem id: ${linhasDepois[i]}`);

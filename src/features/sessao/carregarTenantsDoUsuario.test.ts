@@ -1,6 +1,6 @@
 // A consulta que decide o que o app pode mostrar. Testada com um cliente falso: o que
 // importa aqui é a FORMA do pedido (campos explícitos, filtro por usuário) e a forma da
-// resposta — o isolamento de verdade é provado contra o banco real em
+// resposta, o isolamento de verdade é provado contra o banco real em
 // `supabase/tests/isolamento.test.ts`.
 
 import { describe, expect, it } from 'vitest';
@@ -62,7 +62,7 @@ describe('tenants do usuário', () => {
     ]);
   });
 
-  it('ordena por nome — a lista não pode mudar de ordem a cada carregamento', async () => {
+  it('ordena por nome, a lista não pode mudar de ordem a cada carregamento', async () => {
     // Ordem instável faria a pessoa clicar na marca errada por memória muscular.
     const { cliente } = clienteFalso({
       data: [vinculo('Zeta', 'membro'), vinculo('Alfa', 'owner'), vinculo('Meia', 'membro')],
@@ -88,7 +88,7 @@ describe('tenants do usuário', () => {
     expect(await carregarTenantsDoUsuario(cliente, 'u')).toHaveLength(1);
   });
 
-  it('erro do banco sobe — não vira lista vazia', async () => {
+  it('erro do banco sobe, não vira lista vazia', async () => {
     // Lista vazia por engano seria lida como "você não pertence a marca nenhuma": a
     // pessoa acharia que perdeu acesso quando o problema é de rede.
     const { cliente } = clienteFalso({ error: new Error('rede caiu') });

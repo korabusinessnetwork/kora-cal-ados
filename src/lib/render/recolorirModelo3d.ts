@@ -32,7 +32,7 @@ export interface Zona3d {
   malhas: string[];
 }
 
-/** `{ "sola": "#C0392B" }` — a mesma forma do caminho SVG, e o mesmo nome de propósito. */
+/** `{ "sola": "#C0392B" }`, a mesma forma do caminho SVG, e o mesmo nome de propósito. */
 export type CoresPorZona = Record<string, string>;
 
 /** O trabalho de uma zona, resolvido e conferido, antes de qualquer escrita. */

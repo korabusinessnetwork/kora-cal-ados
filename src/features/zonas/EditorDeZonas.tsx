@@ -1,5 +1,5 @@
 // O editor de zonas inteiro: palco, relatório e formulário. **Único lugar desta feature com
-// estado** — todos os componentes abaixo dele são burros e testáveis como função de props
+// estado**, todos os componentes abaixo dele são burros e testáveis como função de props
 // (mesmo padrão de `EsbocoDoEditor`).
 //
 // Ele recebe o SVG canônico e os ids por props e não conhece nem sessão nem produto: é o que
@@ -91,7 +91,7 @@ export function EditorDeZonas({
   }));
 
   // Os ids da zona destacada, para o palco contorná-los. Vêm do seletor gravado, lido pela
-  // mesma função que o acréscimo de elemento usa — o palco nunca recebe uma lista montada
+  // mesma função que o acréscimo de elemento usa, o palco nunca recebe uma lista montada
   // por outro caminho.
   const idsEmFoco = useMemo(() => {
     if (zoneKeyEmFoco === null) return [];
@@ -110,7 +110,7 @@ export function EditorDeZonas({
   const aoClicarElemento = useCallback(
     (id: string, zoneKeyExistente: string | null) => {
       // Prevenção de erro > mensagem de erro: elemento de outra zona nem chega a entrar na
-      // marcação. `marcarZona` recusaria depois, mas só na hora de salvar — e o time teria
+      // marcação. `marcarZona` recusaria depois, mas só na hora de salvar, e o time teria
       // marcado meia dúzia de elementos antes de descobrir.
       if (zoneKeyExistente !== null && zoneKeyExistente !== chave) {
         setRecusa(
@@ -231,7 +231,7 @@ export function EditorDeZonas({
           aoMudarRotulo={(valor) => {
             setRotulo(valor);
             // Sugere a chave enquanto ninguém a editou à mão: `zone_key` vira contrato com o
-            // cliente da API, então quem confirma é o time — mas redigitar o slug a cada zona
+            // cliente da API, então quem confirma é o time, mas redigitar o slug a cada zona
             // é o atrito que faz gente inventar chave ruim.
             setZoneKey((atual) =>
               atual === '' || atual === sugerirZoneKey(rotulo) ? sugerirZoneKey(valor) : atual,
@@ -290,7 +290,7 @@ export function mensagemDeZonaGravada(
 
 /**
  * O motor exige uma `zone_key` para compor a mensagem dele, e no clique ainda não há zona.
- * Este nome nunca chega à tela — `motivoDaRecusaDeClique` reescreve a frase (BUG-017);
+ * Este nome nunca chega à tela, `motivoDaRecusaDeClique` reescreve a frase (BUG-017);
  * ele existe só para satisfazer a assinatura de `alvosPintaveis`.
  */
 const NOME_PROVISORIO = 'esta zona';
@@ -300,7 +300,7 @@ const NOME_PROVISORIO = 'esta zona';
  *
  * A frase do motor ("A zona X usa gradiente…") é a certa na geração, onde a zona existe e
  * tem nome. No clique não há zona nenhuma, e ela saía como `A zona "esta zona" usa
- * gradiente…` — que se lê como se houvesse uma zona chamada "esta zona" (BUG-017).
+ * gradiente…`, que se lê como se houvesse uma zona chamada "esta zona" (BUG-017).
  *
  * A DECISÃO continua sendo só do motor: só se chega aqui porque `alvosPintaveis` recusou.
  * O que muda é o sujeito da frase, e nada mais.

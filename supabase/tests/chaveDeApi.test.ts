@@ -2,8 +2,8 @@
 // das marcas sem que nem o dono dela consiga ler o hash, sem que ninguém consiga apagar
 // uma linha, e sem que uma marca alcance a chave da concorrente.
 //
-// Nada disto é verificável com cliente falso. As três regras são do POSTGRES — duas são
-// privilégio de coluna e uma é ausência de policy —, e privilégio não existe em mock: um
+// Nada disto é verificável com cliente falso. As três regras são do POSTGRES, duas são
+// privilégio de coluna e uma é ausência de policy, e privilégio não existe em mock: um
 // teste unitário com cliente falso passaria igual num banco onde o `revoke` nunca rodou.
 // Por isso este arquivo só roda contra um projeto Supabase real e, sem ambiente, PULA em
 // vez de passar em falso.
@@ -25,7 +25,7 @@ import {
 /** As colunas que um owner PODE ler. `hash` está fora, e é o ponto do arquivo. */
 const CAMPOS_PERMITIDOS = 'id, tenant_id, prefixo, label, created_by, created_at, revoked_at';
 
-describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de coluna', () => {
+describe.skipIf(!temAmbiente)('tenant_api_keys, isolamento e privilégio de coluna', () => {
   let cenario: Cenario;
   let chaves: ChavesDoCenario;
 
@@ -54,7 +54,7 @@ describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de c
     it('e falha ao pedir o hash, mesmo sendo dono da linha', async () => {
       // Esta é a regra que policy nenhuma implementaria: RLS filtra LINHA, não COLUNA.
       // Sem o privilégio de coluna, o owner leria o hash de todas as chaves do próprio
-      // tenant pelo PostgREST — e hash vazado é ataque offline contra a credencial que
+      // tenant pelo PostgREST, e hash vazado é ataque offline contra a credencial que
       // atende o cliente.
       const { data, error } = await cenario.clienteA.from('tenant_api_keys').select('prefixo, hash');
 
@@ -62,7 +62,7 @@ describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de c
       expect(data).toBeNull();
     });
 
-    it('e `select *` falha pelo mesmo motivo — o que é desejado', async () => {
+    it('e `select *` falha pelo mesmo motivo, o que é desejado', async () => {
       // Consequência aceita de propósito: o CLAUDE.md já proíbe `select *` em tabela
       // sensível, então esta tabela apenas passa a cobrar a regra em vez de confiar nela.
       const { data, error } = await cenario.clienteA.from('tenant_api_keys').select('*');
@@ -73,7 +73,7 @@ describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de c
   });
 
   describe('quem enxerga a chave', () => {
-    it('membro do tenant não vê chave nenhuma — só owner', async () => {
+    it('membro do tenant não vê chave nenhuma, só owner', async () => {
       // ADR-006 D4: a chave é a credencial comercial da marca, e quem responde por ela é
       // quem responde pelo contrato. Aqui não há erro, há conjunto vazio: a policy filtra
       // linha, e para o membro nenhuma linha passa.
@@ -129,7 +129,7 @@ describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de c
     ])('e não consegue escrever em `%s`', async (_coluna, alteracao) => {
       // Trocar o `hash` seria substituir o segredo de uma chave viva; trocar o `tenant_id`
       // seria empurrar a credencial para outra marca. Nenhuma das duas é barrada por
-      // policy — as duas são barradas por não haver privilégio de coluna.
+      // policy, as duas são barradas por não haver privilégio de coluna.
       const { error } = await cenario.clienteA
         .from('tenant_api_keys')
         .update(alteracao)
@@ -140,7 +140,7 @@ describe.skipIf(!temAmbiente)('tenant_api_keys — isolamento e privilégio de c
 
     it('e não consegue apagar a linha, nem sendo owner', async () => {
       // ADR-006 D4: chave apagada leva embora a resposta para "quem estava usando isto
-      // quando aconteceu". Há DUAS travas somadas — `authenticated` não tem o privilégio
+      // quando aconteceu". Há DUAS travas somadas, `authenticated` não tem o privilégio
       // de delete, e não existe policy que o permitisse se tivesse. Por isso o esperado
       // aqui é ERRO, e não "zero linhas": a primeira trava responde antes da segunda.
       const { error } = await cenario.clienteA

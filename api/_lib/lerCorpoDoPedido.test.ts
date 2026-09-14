@@ -42,7 +42,7 @@ function corpoDe(bytes: number): string {
   return `{${pares.join(',')}}`;
 }
 
-describe('lerCorpoDoPedido — caminho feliz', () => {
+describe('lerCorpoDoPedido, caminho feliz', () => {
   it('devolve o JSON parseado', async () => {
     const pedido = pedidoCom('{"sola":"#C0392B","cabedal":"#111111"}');
 
@@ -63,7 +63,7 @@ describe('lerCorpoDoPedido — caminho feliz', () => {
   it('caractere multibyte PARTIDO entre dois pedaços sobrevive', async () => {
     // `TextDecoder` sem `stream: true` viraria `�` quando um caractere multibyte ficasse
     // partido entre dois pedaços, e o dano apareceria como `zone_key` que não casa com nenhuma
-    // zona do produto — ou seja, como zona inexistente, longe da causa.
+    // zona do produto, ou seja, como zona inexistente, longe da causa.
     //
     // O corte é FORÇADO no meio do `ç`, e tem de ser: um corpo pequeno chega num pedaço só, e
     // aí a ausência de `stream: true` não aparece. A primeira versão deste teste usava um corpo
@@ -99,7 +99,7 @@ describe('lerCorpoDoPedido — caminho feliz', () => {
   });
 });
 
-describe('lerCorpoDoPedido — teto de bytes', () => {
+describe('lerCorpoDoPedido, teto de bytes', () => {
   it('recusa pelo `content-length` sem chegar a consumir o corpo', async () => {
     // O atalho barato: o cabeçalho anuncia mais que o teto e a recusa sai antes da leitura.
     //
@@ -181,7 +181,7 @@ describe('lerCorpoDoPedido — teto de bytes', () => {
   });
 });
 
-describe('lerCorpoDoPedido — corpo que não é JSON', () => {
+describe('lerCorpoDoPedido, corpo que não é JSON', () => {
   it('corpo malformado é CORPO_INVALIDO 400, e não 500', async () => {
     // `SyntaxError` cru sairia como 500 pelo caminho genérico do handler, dizendo ao integrador
     // que o defeito é nosso quando é o JSON dele.

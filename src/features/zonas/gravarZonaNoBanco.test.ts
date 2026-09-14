@@ -1,7 +1,7 @@
 // A FORMA do pedido é o que este arquivo protege. Uma gravação de zona errada não dá
 // erro na tela: ela sobrescreve em silêncio o mapeamento de um colega, e ninguém
 // descobre até a API gerar a variante com a cor no lugar errado. Por isso os testes
-// afirmam qual operação foi enviada, com quais campos e com quais filtros — não só o
+// afirmam qual operação foi enviada, com quais campos e com quais filtros, não só o
 // valor de retorno.
 //
 // Sem rede: cliente Supabase falso montado à mão, como em
@@ -94,7 +94,7 @@ async function capturarFalha(acao: () => Promise<unknown>): Promise<Error> {
 
 describe('gravar zona nova', () => {
   it('é INSERT, com tenant_id explícito', async () => {
-    // `tenant_id` é `not null` e a RLS só decide se o INSERT passa — ela não preenche a
+    // `tenant_id` é `not null` e a RLS só decide se o INSERT passa, ela não preenche a
     // coluna. Sem este campo a gravação falha, ou pior, grava linha órfã.
     const { cliente, pedido } = clienteFalso({ data: LINHA_GRAVADA });
     await gravarZonaNoBanco(cliente, {
@@ -131,7 +131,7 @@ describe('gravar zona nova', () => {
 
   it('devolve a linha gravada, com o id que o banco gerou', async () => {
     // Sem o id de volta, a próxima edição da mesma zona seria outro INSERT e bateria na
-    // unique — a tela precisa saber que aquela zona agora existe.
+    // unique, a tela precisa saber que aquela zona agora existe.
     const { cliente } = clienteFalso({ data: LINHA_GRAVADA });
     const gravada = await gravarZonaNoBanco(cliente, {
       tenantId: 'tenant-1',
@@ -268,7 +268,7 @@ describe('recusa antes de tocar o banco', () => {
   });
 
   it('zona sem elemento marcado não vira linha vazia', async () => {
-    // `svg_selector` vazio geraria variante sem recolorir nada — falha silenciosa na API.
+    // `svg_selector` vazio geraria variante sem recolorir nada, falha silenciosa na API.
     const { cliente, pedido } = clienteFalso({ data: LINHA_GRAVADA });
 
     await expect(

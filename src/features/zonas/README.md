@@ -1,22 +1,22 @@
-# src/features/zonas — marcar zona no calçado
+# src/features/zonas, marcar zona no calçado
 
 O que vive aqui: **clicar numa parte do calçado, dar um nome a ela e gravar a linha em
-`product_zones`** — o mapeamento que a API de variante consome depois. O que **não** vive
+`product_zones`**, o mapeamento que a API de variante consome depois. O que **não** vive
 aqui: listar produtos e baixar o asset-base (isso é `src/features/produtos/`), e as regras
 de SVG/cor em si (isso é `src/lib/render/`, importado, nunca reimplementado).
 
 Desde a Etapa 5 o editor é um componente só: `EditorDeZonas.tsx` monta palco, painel e
-formulário, e é o **único arquivo desta feature com estado** — `PalcoDeMarcacao`,
+formulário, e é o **único arquivo desta feature com estado**, `PalcoDeMarcacao`,
 `PainelDeZonas` e `FormularioDeNovaZona` continuam apresentacionais e testáveis como função
 de props. `produtos/VisualizacaoDoProduto.tsx` só entrega a área onde ele é montado; a grade
 de duas colunas (palco à esquerda, lateral à direita) mora em `zonas.css`, não em
-`produtos.css` — duas folhas medindo a mesma tela é empate decidido pela ordem de import.
+`produtos.css`, duas folhas medindo a mesma tela é empate decidido pela ordem de import.
 
 | Arquivo | Papel |
 |---|---|
 | `tiposDeZona.ts` | `ZonaDoProduto` (a linha de `product_zones`) e `ZonaParaGravar` (a linha + **como** gravar). Definição única: uma zona atravessa banco, motor e tela |
 | `marcarZona.ts` | **Puro.** (canônico, zonas atuais, `zone_key`, ids marcados) → `ZonaParaGravar`, ou `ErroDeVariante`. Recusa elemento inexistente, `fill="none"` e sobreposição com outra zona. Exporta também `idsDoSeletor` (`"#a, #b"` → `['a','b']`) |
-| `resolverZonaDoElemento.ts` | **Puro.** Elemento → `zone_key` a que ele já pertence, pelo mesmo caminho que o motor usa para pintar. Exporta também `mapaDeZonasPorElemento` (documento inteiro → mapa), que **nenhuma tela usa hoje** — ela existe como contraprova nos testes: o mapa e a resolução elemento a elemento têm de responder a mesma coisa |
+| `resolverZonaDoElemento.ts` | **Puro.** Elemento → `zone_key` a que ele já pertence, pelo mesmo caminho que o motor usa para pintar. Exporta também `mapaDeZonasPorElemento` (documento inteiro → mapa), que **nenhuma tela usa hoje**, ela existe como contraprova nos testes: o mapa e a resolução elemento a elemento têm de responder a mesma coisa |
 | `listarZonasDoProduto.ts` | As zonas gravadas do produto: campos explícitos, `.order('created_at')`. Erro sobe, nunca vira lista vazia |
 | `gravarZonaNoBanco.ts` | INSERT **ou** UPDATE por `idExistente`, nunca `upsert`. Traduz `23505` e `PGRST116` para frase acionável; o objeto cru do Supabase não sai daqui |
 | `marcacaoEmCurso.ts` | **Puro.** `alternarId` / `desfazerUltimo` sobre a lista de ids clicados. A regra mora fora do hook para ser testável sem testing-library |
@@ -36,16 +36,16 @@ Os `*.test.ts` / `*.test.tsx` ficam co-locados, ao lado do arquivo que provam.
 
 O canônico do Storage é **imutável** e esta feature é somente-leitura sobre ele: marcar
 zona escreve uma linha em `product_zones` e **nada** no SVG. Nenhum arquivo daqui importa
-`normalizarSvg` — quem normaliza é o provisionamento, uma vez, no upload.
+`normalizarSvg`, quem normaliza é o provisionamento, uma vez, no upload.
 
 O motivo é concorrência, não elegância: o Storage não tem escrita condicional (sem
 If-Match/ETag no `supabase-js`). Se o editor escrevesse `id` ao marcar, dois membros
-marcando ao mesmo tempo se sobrescreveriam — o id de um sumiria do arquivo enquanto o
+marcando ao mesmo tempo se sobrescreveriam, o id de um sumiria do arquivo enquanto o
 `svg_selector` dele continuaria no banco, resolvendo 0 elementos ou, pior, o errado.
 
 Consequência: **o id nasce na normalização**. Todo pintável já chega ao editor
 endereçável (`elemento-N` quando o arquivo do cliente não trouxe id). Elemento clicado sem
-id não vira zona — `PalcoDeMarcacao` ignora o clique em vez de cunhar um id na hora.
+id não vira zona, `PalcoDeMarcacao` ignora o clique em vez de cunhar um id na hora.
 
 ## `svg_selector` é lista de ids exatos, nunca prefixo
 
@@ -54,7 +54,7 @@ Formato: `#zona-cadarco, #zona-cadarco-2`. Quem monta essa string é **só**
 `idsDoSeletor`. Nunca concatene à mão.
 
 Prefixo (`[id^="zona-cadarco"]`) é proibido: capturaria uma zona futura
-`zona-cadarco-lateral` e pintaria o lugar errado **em silêncio** — o modo de falha que o
+`zona-cadarco-lateral` e pintaria o lugar errado **em silêncio**, o modo de falha que o
 princípio nº1 existe para impedir. Seletor gravado que não seja lista de ids exatos faz
 `idsDoSeletor` recusar alto, pedindo remarcação, em vez de adivinhar o que ele captura.
 
@@ -66,12 +66,12 @@ A restrição do banco é o que manda no desenho desta feature.
   existente**, nunca um segundo INSERT. Por isso `marcarZona` devolve `idExistente`, e
   `gravarZonaNoBanco` tem dois caminhos separados.
 - **`upsert` cego é proibido.** Ele é mais curto e apagaria em silêncio o mapeamento que
-  um colega acabou de gravar — INSERT e UPDATE significam coisas diferentes, e a diferença
+  um colega acabou de gravar, INSERT e UPDATE significam coisas diferentes, e a diferença
   é *quem some*. `gravarZonaNoBanco.test.ts` lê o próprio fonte e falha se essa chamada
   única voltar numa refatoração; comentário sozinho não segura a regra.
 - Duas pessoas criando a mesma `zone_key` esbarram na unique e voltam com Postgres
   **`23505`**. Isso é o comportamento **certo** (a segunda gravação seria destrutiva), então
-  ele é traduzido, não contornado: *"essa zona já foi marcada — recarregue"*.
+  ele é traduzido, não contornado: *"essa zona já foi marcada, recarregue"*.
 - O UPDATE nunca mexe em `zone_key` nem em `product_id`: `zone_key` é chave pública da
   API, e renomeá-la quebraria a integração de um cliente que já a usa.
 
@@ -79,7 +79,7 @@ A restrição do banco é o que manda no desenho desta feature.
 
 `PalcoDeMarcacao` passa o canônico pelo **mesmo motor da API**, inclusive quando não há cor
 pedida. Pintar por `fill` de classe seria mais simples e mostraria uma cor que a API não
-produz — e a divergência apareceria com o calçado já fabricado. É o princípio nº1 inteiro:
+produz, e a divergência apareceria com o calçado já fabricado. É o princípio nº1 inteiro:
 *cor no editor = cor na API*. `PalcoDeMarcacao.test.tsx` compara o markup do palco, byte a
 byte, com a saída de `gerarVarianteDeCor`.
 
@@ -93,7 +93,7 @@ o canônico **cru** e o alerta com o código do erro. Nunca "quase certo".
 
 ## O que a Etapa 5 tirou do banco e pôs na tela
 
-Três coisas existiam só em `product_zones` e agora são visíveis antes de existir variante —
+Três coisas existiam só em `product_zones` e agora são visíveis antes de existir variante,
 conferência, não relatório: quem descobre o erro aqui ainda pode remarcar; quem descobre
 depois descobre pelo calçado fabricado.
 
@@ -104,16 +104,16 @@ depois descobre pelo calçado fabricado.
   painel diz isso na linha, alto.
 - **Sobreposição.** `zonasSobrepostas(canônico, zonas)` acha zonas que dividem elemento. O
   editor recusa criar uma, mas mapeamento antigo do banco pode ter; enquanto existir, gerar
-  variante pedindo cor para as duas **falha inteiro** (BUG-013) — quem decidiria a cor do
+  variante pedindo cor para as duas **falha inteiro** (BUG-013), quem decidiria a cor do
   elemento dividido seria a ordem das chaves no pedido. Por isso o aviso vem antes da lista,
   não depois de a pessoa escolher as cores.
-- **Preview de cor.** Trocar a cor no painel repassa o canônico por `gerarVarianteDeCor` —
+- **Preview de cor.** Trocar a cor no painel repassa o canônico por `gerarVarianteDeCor`,
   o mesmo motor da API, nunca `fill` de classe. Uma zona que não aceita cor chapa (gradiente)
   faz o palco mostrar o erro e o canônico cru, em vez de pintar "quase certo".
 
 O painel também **destaca no palco** a zona em foco: é uma segunda camada de contorno
 (`palco__contorno--foco`), que se distingue da marcação em curso pelo traço (tracejado ×
-contínuo), não pela cor — separar por matiz morreria no primeiro tenant que trocasse a
+contínuo), não pela cor, separar por matiz morreria no primeiro tenant que trocasse a
 paleta. Como toda camada de realce, ela não encosta no desenho: sem filtro, sem sombra, sem
 `opacity`.
 
@@ -123,23 +123,23 @@ Está em `coresDoPreview.ts`, e é a pergunta que volta em toda refatoração.
 
 A pessoa digita `#`, `#C`, `#C0`… e **cada tecla dispara um render**. Se o texto cru fosse
 direto para `gerarVarianteDeCor`, o motor lançaria `COR_INVALIDA` a cada tecla: o calçado
-sumiria durante a digitação e o painel acusaria um erro que ninguém cometeu ainda — a pessoa
+sumiria durante a digitação e o painel acusaria um erro que ninguém cometeu ainda, a pessoa
 só não terminou de digitar. Então:
 
 - **Cor em edição** é o texto do campo, guardado como foi digitado. O painel nunca conserta
   o que a pessoa escreveu.
-- **Cor válida** é só o que `validarCor` aceita, já em `#RRGGBB` maiúsculo — é isso, e só
+- **Cor válida** é só o que `validarCor` aceita, já em `#RRGGBB` maiúsculo, é isso, e só
   isso, que vai para o motor. Zona sendo digitada não participa do pedido, e por isso não
   impede as outras de continuarem pintadas.
 - **Rascunho** (`#` seguido de até 5 dígitos hex) não vira erro; qualquer outra coisa vira na
   hora, porque nenhuma tecla a mais transforma `vermelho` ou `#GGG` em cor.
 
 O que **não** muda: quem decide o que é um hex continua sendo `validarCor`, o mesmo validador
-da API. Aqui só se decide *quando ainda é cedo para reclamar* — nunca o que é uma cor.
+da API. Aqui só se decide *quando ainda é cedo para reclamar*, nunca o que é uma cor.
 
 ## Fora de escopo desta entrega (registrado, não esquecido)
 
-Do plano aprovado — decisões conscientes, não pendências esquecidas:
+Do plano aprovado, decisões conscientes, não pendências esquecidas:
 
 - **Upload de SVG pelo navegador**, UI de recusa e re-upload. Re-upload é o caso que quebra
   o modelo de asset imutável (exige remapear zonas) e merece decisão própria.

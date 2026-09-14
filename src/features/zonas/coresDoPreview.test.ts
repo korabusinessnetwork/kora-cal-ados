@@ -12,7 +12,7 @@ describe('cores do preview', () => {
     });
 
     it('expande o hex curto para a forma longa (#f00 → #FF0000)', () => {
-      // A expansão é de `validarCor` — o preview não pode ter a sua própria, senão a cor
+      // A expansão é de `validarCor`, o preview não pode ter a sua própria, senão a cor
       // do editor deixa de ser byte a byte a cor da API (princípio nº1).
       expect(coresValidas({ cabedal: '#f00' })).toEqual({ cabedal: '#FF0000' });
     });
@@ -21,7 +21,7 @@ describe('cores do preview', () => {
       expect(coresValidas({ sola: '  #C0392B  ' })).toEqual({ sola: '#C0392B' });
     });
 
-    it('rascunho incompleto não entra no pedido — é o que segura o palco durante a digitação', () => {
+    it('rascunho incompleto não entra no pedido, é o que segura o palco durante a digitação', () => {
       for (const rascunho of ['#', '#C', '#C0', '#C039', '#C0392']) {
         expect(coresValidas({ sola: rascunho })).toEqual({});
       }
@@ -39,7 +39,7 @@ describe('cores do preview', () => {
   });
 
   describe('erros de cor', () => {
-    it('rascunho incompleto não vira erro — a pessoa só não terminou de digitar', () => {
+    it('rascunho incompleto não vira erro, a pessoa só não terminou de digitar', () => {
       for (const rascunho of ['#', '#C', '#C0', '#C039', '#C0392']) {
         expect(errosDeCor({ sola: rascunho })).toEqual({});
       }
@@ -71,7 +71,7 @@ describe('cores do preview', () => {
       expect(Object.keys(errosDeCor({ sola: 'C0392B' }))).toEqual(['sola']);
     });
 
-    it('hex longo demais vira erro — digitar mais não conserta', () => {
+    it('hex longo demais vira erro, digitar mais não conserta', () => {
       expect(Object.keys(errosDeCor({ sola: '#C0392BB' }))).toEqual(['sola']);
     });
   });
@@ -79,7 +79,7 @@ describe('cores do preview', () => {
   describe('várias zonas ao mesmo tempo', () => {
     it('as válidas continuam sendo entregues enquanto outra está sendo digitada', () => {
       // O palco não pode parar de pintar a sola porque alguém começou a digitar a cor do
-      // cabedal — esse é o comportamento que faz o editor parecer quebrado.
+      // cabedal, esse é o comportamento que faz o editor parecer quebrado.
       const emEdicao = { sola: '#c0392b', cabedal: '#C0', bico: 'vermelho', forro: '' };
 
       expect(coresValidas(emEdicao)).toEqual({ sola: '#C0392B' });

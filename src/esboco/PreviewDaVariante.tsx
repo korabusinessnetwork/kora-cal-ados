@@ -1,7 +1,7 @@
 // Palco do esboço: mostra a variante e deixa clicar direto no calçado para escolher zona.
 //
 // Duas regras do design system valem aqui (docs/02_DESIGN_SYSTEM/README.md, itens 6 e 7):
-// o preview da cor não pode sofrer filtro, overlay ou sombra do tema — o que aparece é o
+// o preview da cor não pode sofrer filtro, overlay ou sombra do tema, o que aparece é o
 // pixel que a API devolve. Por isso o contorno de seleção é desenhado num <svg> separado
 // por cima, com `fill="none"`, em vez de alterar o elemento da zona.
 
@@ -62,7 +62,7 @@ export function PreviewDaVariante({
     const clicado = evento.target as Element;
 
     // `closest` com o mesmo seletor da zona: o editor resolve a zona exatamente como o
-    // motor resolve — se divergisse, clicar numa parte pintaria outra (princípio nº1).
+    // motor resolve, se divergisse, clicar numa parte pintaria outra (princípio nº1).
     for (const zona of zonas) {
       if (clicado.closest(zona.svg_selector)) {
         aoSelecionarZona(zona.zone_key);

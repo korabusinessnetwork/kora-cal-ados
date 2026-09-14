@@ -10,7 +10,7 @@ const valida = () => ({
   pecas: [{ peca_id: 'sola-lisa' }, { peca_id: 'cabedal-mesh' }],
 });
 
-/** O código do erro lançado, ou `null` se não lançou — deixa a asserção ler como frase. */
+/** O código do erro lançado, ou `null` se não lançou, deixa a asserção ler como frase. */
 function codigoAoValidar(composicao: unknown, catalogo = acervoDeTeste()): string | null {
   try {
     validarComposicao(composicao, catalogo);
@@ -30,7 +30,7 @@ function mensagemAoValidar(composicao: unknown, catalogo = acervoDeTeste()): str
   }
 }
 
-describe('validarComposicao — o caminho feliz', () => {
+describe('validarComposicao, o caminho feliz', () => {
   it('aceita a composição mínima da forma, com só as categorias obrigatórias', () => {
     const resultado = validarComposicao(valida(), acervoDeTeste());
 
@@ -60,7 +60,7 @@ describe('validarComposicao — o caminho feliz', () => {
   });
 });
 
-describe('validarComposicao — a peça vem do catálogo, e é isso que faz dele um guarda', () => {
+describe('validarComposicao, a peça vem do catálogo, e é isso que faz dele um guarda', () => {
   it('a saída carrega O MESMO objeto do catálogo, nunca o id que veio na entrada', () => {
     // O critério de segurança do ADR-008 D1: quem consome não tem em mãos a string que o
     // modelo de linguagem escreveu, então não tem como transformá-la em caminho de arquivo.
@@ -81,7 +81,7 @@ describe('validarComposicao — a peça vem do catálogo, e é isso que faz dele
   it('id sintaticamente impecável e ausente do catálogo é recusado igual', () => {
     // A validação é por PERTENCIMENTO, nunca por formato. Uma checagem de regex aceitaria
     // este id, que segue exatamente o padrão dos que existem, e o modelo de linguagem produz
-    // ids plausíveis o tempo todo — é justamente o modo de falha esperado dele.
+    // ids plausíveis o tempo todo, é justamente o modo de falha esperado dele.
     const composicao = {
       forma_id: FORMA_TENIS,
       pecas: [{ peca_id: 'sola-corrida-04' }, { peca_id: 'cabedal-mesh' }],
@@ -110,9 +110,9 @@ describe('validarComposicao — a peça vem do catálogo, e é isso que faz dele
   });
 });
 
-describe('validarComposicao — encaixe entre peças (ADR-008 D4)', () => {
+describe('validarComposicao, encaixe entre peças (ADR-008 D4)', () => {
   it('peça de outra forma é FORMAS_MISTURADAS, não PECA_NAO_ENCONTRADA', () => {
-    // O id existe e está certo. O conserto é outro — "escolha peças que encaixam" manda
+    // O id existe e está certo. O conserto é outro, "escolha peças que encaixam" manda
     // procurar num lugar diferente de "corrija o id".
     const composicao = {
       forma_id: FORMA_TENIS,
@@ -137,7 +137,7 @@ describe('validarComposicao — encaixe entre peças (ADR-008 D4)', () => {
   });
 });
 
-describe('validarComposicao — uma peça por categoria', () => {
+describe('validarComposicao, uma peça por categoria', () => {
   it('categoria repetida é recusa, e é por isso que "pecas" é lista e não objeto', () => {
     // Num `Record<categoria, escolha>` esta composição seria indetectável: `JSON.parse`
     // descarta a chave duplicada e fica com a última, em silêncio. Seria o BUG-013 outra vez,
@@ -191,7 +191,7 @@ describe('validarComposicao — uma peça por categoria', () => {
   });
 });
 
-describe('validarComposicao — a cor passa pelo validador que já existe', () => {
+describe('validarComposicao, a cor passa pelo validador que já existe', () => {
   it('cor ausente é válida: a peça mantém a cor própria', () => {
     expect(validarComposicao(valida(), acervoDeTeste()).pecas[0]?.cor).toBeUndefined();
   });
@@ -238,7 +238,7 @@ describe('validarComposicao — a cor passa pelo validador que já existe', () =
   });
 });
 
-describe('validarComposicao — parâmetros (ADR-008 D7)', () => {
+describe('validarComposicao, parâmetros (ADR-008 D7)', () => {
   it('parâmetro ausente recebe o padrão declarado pela peça, e ele aparece na saída', () => {
     const resultado = validarComposicao(valida(), acervoDeTeste());
 
@@ -291,7 +291,7 @@ describe('validarComposicao — parâmetros (ADR-008 D7)', () => {
   it.each([
     ['mínimo', 10],
     ['máximo', 40],
-  ])('o %s da faixa é aceito — a faixa é fechada nas duas pontas', (_ponta, espessura) => {
+  ])('o %s da faixa é aceito, a faixa é fechada nas duas pontas', (_ponta, espessura) => {
     const composicao = {
       forma_id: FORMA_TENIS,
       pecas: [{ peca_id: 'sola-lisa', parametros: { espessura } }, { peca_id: 'cabedal-mesh' }],
@@ -322,7 +322,7 @@ describe('validarComposicao — parâmetros (ADR-008 D7)', () => {
     // O nome do bloco não promete POR ONDE cada um é barrado, e isso é deliberado: a mutação
     // mostrou que só o `NaN` depende da checagem de número. `Infinity` é pego pela faixa
     // (`Infinity > 40`), e um nome dizendo "não passa por número" afirmaria dele uma proteção
-    // que ele não tem — o caso sumiria junto se a faixa saísse, sem ninguém notar.
+    // que ele não tem, o caso sumiria junto se a faixa saísse, sem ninguém notar.
     const composicao = {
       forma_id: FORMA_TENIS,
       pecas: [{ peca_id: 'sola-lisa', parametros: { espessura } }, { peca_id: 'cabedal-mesh' }],
@@ -334,7 +334,7 @@ describe('validarComposicao — parâmetros (ADR-008 D7)', () => {
   it('NaN só é barrado pela checagem de número: nenhuma comparação de faixa o pega', () => {
     // Este é o caso que a checagem de número existe para pegar, e o único. `NaN < 10` e
     // `NaN > 40` são os DOIS falsos, então sem ela o valor entraria na composição e viraria
-    // uma transformação NaN no palco — peça invisível, sem erro nenhum.
+    // uma transformação NaN no palco, peça invisível, sem erro nenhum.
     const semFaixaUtil = acervoDeTeste();
     const composicao = {
       forma_id: FORMA_TENIS,
@@ -363,7 +363,7 @@ describe('validarComposicao — parâmetros (ADR-008 D7)', () => {
   });
 
   it('parâmetro que a peça não declara é recusado, nunca ignorado', () => {
-    // Ignorar em silêncio faria "sola mais robusta" não ter efeito nenhum sem ninguém saber —
+    // Ignorar em silêncio faria "sola mais robusta" não ter efeito nenhum sem ninguém saber,
     // o defeito mais caro possível num produto cujo princípio nº1 é o que se vê ser o que sai.
     const composicao = {
       forma_id: FORMA_TENIS,
@@ -403,7 +403,7 @@ describe('validarComposicao — parâmetros (ADR-008 D7)', () => {
   });
 });
 
-describe('validarComposicao — a estrutura da entrada é não confiável', () => {
+describe('validarComposicao, a estrutura da entrada é não confiável', () => {
   it.each([
     ['null', null],
     ['texto', '{"forma_id":"x"}'],
@@ -438,7 +438,7 @@ describe('validarComposicao — a estrutura da entrada é não confiável', () =
   });
 });
 
-describe('validarComposicao — pureza e não destruição', () => {
+describe('validarComposicao, pureza e não destruição', () => {
   it('não modifica o catálogo recebido', () => {
     const catalogo = acervoDeTeste();
     const antes = JSON.stringify(catalogo);

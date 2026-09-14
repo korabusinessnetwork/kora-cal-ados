@@ -1,4 +1,4 @@
-# 04 — MODELAGEM · Kora Calçados (codinome)
+# 04, MODELAGEM · Kora Calçados (codinome)
 
 > Estrutura de dados: entities, relationships, schema. Single source of truth do banco.
 
@@ -20,12 +20,12 @@
 
 ## Arquivos sugeridos
 
-- `entities.md` — lista de tabelas com descrição, campos, tipos
-- `relationships.md` — diagrama e documentação de FKs e cardinalidades
-- `database-schema.md` — DDL organizado, com comentários
-- `migrations.md` — histórico e convenção de nomes (ex: 2026-01-15_create_users.sql)
-- `diagramas/er.md` — diagrama ER (Mermaid ou similar)
-- `multi-tenancy.md` — estratégia RLS, como garantir isolamento
+- `entities.md`, lista de tabelas com descrição, campos, tipos
+- `relationships.md`, diagrama e documentação de FKs e cardinalidades
+- `database-schema.md`, DDL organizado, com comentários
+- `migrations.md`, histórico e convenção de nomes (ex: 2026-01-15_create_users.sql)
+- `diagramas/er.md`, diagrama ER (Mermaid ou similar)
+- `multi-tenancy.md`, estratégia RLS, como garantir isolamento
 
 ## Como preencher
 
@@ -37,7 +37,7 @@
 
 ## Ligações
 
-- `supabase/schema.sql` — schema real (fonte de verdade técnica)
-- `supabase/migrations/` — histórico de mudanças
-- `02_DESIGN_SYSTEM/` — padrões visuais que refletem estrutura (ex: fields)
-- `03_REGRAS_DE_NEGOCIO/` — o que as regras esperam da modelagem
+- `supabase/schema.sql`, schema real (fonte de verdade técnica)
+- `supabase/migrations/`, histórico de mudanças
+- `02_DESIGN_SYSTEM/`, padrões visuais que refletem estrutura (ex: fields)
+- `03_REGRAS_DE_NEGOCIO/`, o que as regras esperam da modelagem

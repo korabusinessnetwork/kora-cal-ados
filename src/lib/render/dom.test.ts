@@ -2,11 +2,11 @@
 //
 // O resto da suíte roda o motor com o jsdom registrado à mão (setupFiles → domNode.ts),
 // que é o caminho do Node: função serverless e testes. Este arquivo cobre o OUTRO
-// caminho, o do navegador — `DOMParser`/`XMLSerializer` globais, sem registro nenhum.
+// caminho, o do navegador, `DOMParser`/`XMLSerializer` globais, sem registro nenhum.
 //
 // Existe porque "mesmo motor nos dois lados" é o princípio nº1 do CLAUDE.md, e uma
 // afirmação dessas sem teste é só uma intenção: se o caminho do navegador quebrasse, o
-// editor mostraria uma cor e a API entregaria outra — exatamente o que não pode acontecer.
+// editor mostraria uma cor e a API entregaria outra, exatamente o que não pode acontecer.
 //
 // `vi.resetModules()` é o que zera o adaptador já registrado pelo setup; sem isso o jsdom
 // registrado venceria e o teste passaria testando o caminho errado.

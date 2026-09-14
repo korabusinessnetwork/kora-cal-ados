@@ -1,4 +1,4 @@
-# src/lib/copia — levar texto da tela para a área de transferência
+# src/lib/copia, levar texto da tela para a área de transferência
 
 O que vive aqui: a mecânica de copiar, que é a mesma em qualquer tela, e o diagnóstico da falha,
 que também é. Nada de JSX, e nada de frase que fale do que está sendo copiado.

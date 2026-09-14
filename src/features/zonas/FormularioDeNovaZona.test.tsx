@@ -1,6 +1,6 @@
 // O que este formulário precisa provar não é "renderiza": é que estado inválido NÃO chega
 // ao banco e que a pessoa lê o motivo na tela. Cada teste abaixo protege uma regra em que
-// errar custa caro — `zone_key` é contrato público da API, e cor errada vira calçado
+// errar custa caro, `zone_key` é contrato público da API, e cor errada vira calçado
 // fabricado errado (princípio nº1 do CLAUDE.md).
 
 import { describe, expect, it } from 'vitest';
@@ -106,7 +106,7 @@ describe('formulário de nova zona', () => {
     expect(formulario()).toContain('no JSON da API');
   });
 
-  it('zona existente muda o texto do botão para acréscimo — UPDATE, não INSERT', () => {
+  it('zona existente muda o texto do botão para acréscimo, UPDATE, não INSERT', () => {
     // A diferença entre "acrescenta elementos" e "cria outra zona" precisa ser vista
     // antes do clique: `unique (product_id, zone_key)` não perdoa depois.
     const nova = formulario({ zonaExistente: false });
@@ -127,7 +127,7 @@ describe('formulário de nova zona', () => {
   });
 
   it('erro do banco aparece como alerta com o texto recebido', () => {
-    const html = formulario({ erro: 'Essa zona já foi marcada — recarregue.' });
+    const html = formulario({ erro: 'Essa zona já foi marcada, recarregue.' });
 
     expect(html).toContain('role="alert"');
     expect(html).toContain('Essa zona já foi marcada');
@@ -148,7 +148,7 @@ describe('formulário de nova zona', () => {
     }
   });
 
-  it('não renderiza nome de marca — o produto é white-label', () => {
+  it('não renderiza nome de marca, o produto é white-label', () => {
     // Identidade vem do tenant; nome de cliente no JSX vaza um tenant para outro.
     const html = formulario({ rotulo: 'Cadarço lateral', erro: 'x', quantidadeMarcada: 0 });
 

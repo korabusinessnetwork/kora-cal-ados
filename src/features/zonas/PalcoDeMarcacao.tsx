@@ -1,14 +1,14 @@
-// O palco do editor: o calçado na tela, clicável. Apresentacional — recebe o canônico, a
+// O palco do editor: o calçado na tela, clicável. Apresentacional, recebe o canônico, a
 // marcação em curso e a zona em foco já resolvidos, não busca nada e não guarda estado.
 //
 // Quatro decisões moram aqui, cada uma barrando um modo de falha específico:
 //
-// 1. O desenho sai SEMPRE de `gerarVarianteDeCor`, nunca de CSS — mesmo sem cor pedida.
+// 1. O desenho sai SEMPRE de `gerarVarianteDeCor`, nunca de CSS, mesmo sem cor pedida.
 //    Se o palco pintasse por `fill` de classe, o editor mostraria uma cor que a API não
 //    produz, e a divergência só apareceria com o calçado já fabricado (princípio nº1).
 // 2. O clique sobe por `closest('[id]')` porque em SVG o alvo do evento é sempre a folha
 //    (o `<path>` de dentro do `<g>`), e o endereçável é o ancestral com id.
-// 3. O contorno dos ids marcados vive numa CAMADA separada: regra 6 do design system —
+// 3. O contorno dos ids marcados vive numa CAMADA separada: regra 6 do design system,
 //    o palco não recebe filtro, sombra nem overlay sobre o desenho, porque o que aparece
 //    ali é o pixel que a API devolve. Realçar não pode alterar um byte do desenho.
 // 4. Marcação em curso e zona em foco são DUAS camadas, não uma com duas classes: elas
@@ -84,7 +84,7 @@ export function PalcoDeMarcacao({
       )}
 
       {/* `dangerouslySetInnerHTML` por dois motivos: é seguro porque o arquivo é o
-          CANÔNICO — `normalizarSvg` já removeu <script>, handlers `on*` e referência
+          CANÔNICO, `normalizarSvg` já removeu <script>, handlers `on*` e referência
           externa antes de ele subir ao Storage; e é ele, não `useEffect` + `innerHTML`,
           porque o markup precisa existir no HTML renderizado para o teste conseguir
           compará-lo byte a byte com a saída de `gerarVarianteDeCor`. */}
@@ -97,7 +97,7 @@ export function PalcoDeMarcacao({
       {/* O foco vem ANTES da marcação em curso porque em SVG/HTML quem é declarado depois
           pinta por cima: "onde já está mapeado" é pano de fundo, "o que estou marcando
           agora" é o que a pessoa está manipulando. Um id que esteja nas DUAS listas
-          aparece nas duas camadas — a sobreposição é intencional, não um bug a esconder:
+          aparece nas duas camadas, a sobreposição é intencional, não um bug a esconder:
           o elemento está sendo acrescentado à zona que está em foco, e as duas leituras
           são verdadeiras ao mesmo tempo. Quem decide como isso fica (qual traço vence, se
           um é tracejado, se há transparência) é o `zonas.css`, nunca este arquivo. */}
@@ -113,7 +113,7 @@ export function PalcoDeMarcacao({
  *
  * Sem `viewBox` no canônico a camada é OMITIDA: chutar um alinharia o contorno com o
  * desenho por acaso, e contorno no lugar errado é marcação no lugar errado. Lista vazia
- * também não vira `<svg>` nenhum — um elemento vazio na árvore só serve para atrapalhar
+ * também não vira `<svg>` nenhum, um elemento vazio na árvore só serve para atrapalhar
  * quem inspeciona o palco procurando o que está realçado.
  */
 function camadaDeContorno(
@@ -139,7 +139,7 @@ interface DesenhoDoPalco {
   erro: { mensagem: string; codigo: string } | null;
 }
 
-/** O mesmo motor da API, sempre — inclusive quando não há cor pedida. */
+/** O mesmo motor da API, sempre, inclusive quando não há cor pedida. */
 function desenharPeloMotor(
   svgCanonico: string,
   zonas: ZonaDoProduto[],

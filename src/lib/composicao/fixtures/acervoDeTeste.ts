@@ -3,7 +3,7 @@
 // É o gêmeo de `src/lib/render/fixtures/gltfDeTeste.ts`, e existe pela mesma razão que aquele:
 // a validação compara identificadores e nunca carrega geometria, então ela é inteiramente
 // testável sem as ~15 peças reais que o ADR-008 diz serem o gargalo do produto. Nenhuma peça
-// aqui aponta para arquivo nenhum — não há campo de caminho, de propósito.
+// aqui aponta para arquivo nenhum, não há campo de caminho, de propósito.
 //
 // O acervo tem DUAS formas porque uma só não conseguiria provar o `FORMAS_MISTURADAS`, que é
 // a recusa do ADR-008 D4.

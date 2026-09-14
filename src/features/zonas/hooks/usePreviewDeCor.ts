@@ -9,14 +9,14 @@ import { coresValidas, definirCor, errosDeCor } from '../coresDoPreview';
 import type { CoresEmEdicao } from '../coresDoPreview';
 import type { CoresPorZona } from '../../../lib/render/gerarVarianteDeCor';
 
-/** Identidade estável para o estado zerado — devolver `{}` novo a cada render refaria os
+/** Identidade estável para o estado zerado, devolver `{}` novo a cada render refaria os
  *  `useMemo` e mandaria o SVG inteiro de volta ao motor sem nada ter mudado. */
 const SEM_CORES: CoresEmEdicao = {};
 
 export interface PreviewDeCor {
   /** O texto cru de cada campo, como está sendo digitado. */
   emEdicao: CoresEmEdicao;
-  /** Só as válidas — é o que o palco manda para `gerarVarianteDeCor`. */
+  /** Só as válidas, é o que o palco manda para `gerarVarianteDeCor`. */
   cores: CoresPorZona;
   erros: Record<string, string>;
   definir(zoneKey: string, valor: string): void;
@@ -27,7 +27,7 @@ export interface PreviewDeCor {
 
 /**
  * `productId` existe para o preview ser descartado ao trocar de modelo: cor de um calçado
- * sobrando na tela de outro é o tipo de erro que ninguém percebe — a `zone_key` `sola`
+ * sobrando na tela de outro é o tipo de erro que ninguém percebe, a `zone_key` `sola`
  * existe nos dois modelos, então a cor antiga pinta em silêncio o produto novo.
  */
 export function usePreviewDeCor(productId: string): PreviewDeCor {

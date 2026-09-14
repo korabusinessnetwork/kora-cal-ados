@@ -1,7 +1,7 @@
 // Motor de render (ADR-004). Recebe o asset-base CANÔNICO (já passado por
 // normalizarSvg) e aplica as cores pedidas nas zonas.
 //
-// Este módulo é importado tanto pelo editor quanto pela função serverless — nunca
+// Este módulo é importado tanto pelo editor quanto pela função serverless, nunca
 // existem duas implementações. É o que sustenta "cor no editor = cor na API".
 
 import { alvosPintaveis } from './alvosPintaveis';
@@ -15,13 +15,13 @@ export interface Zona {
   svg_selector: string;
 }
 
-/** `{ "sola": "#C0392B" }` — chave é `zone_key` do glossário, nunca id de elemento SVG. */
+/** `{ "sola": "#C0392B" }`, chave é `zone_key` do glossário, nunca id de elemento SVG. */
 export type CoresPorZona = Record<string, string>;
 
 /**
  * Devolve o SVG com as zonas pedidas recoloridas.
  * Lança em vez de devolver "quase certo": zona ausente, cor inválida ou zona que não
- * aceita cor chapa viram erro com código — nunca 200 silencioso.
+ * aceita cor chapa viram erro com código, nunca 200 silencioso.
  */
 export function gerarVarianteDeCor(
   svgCanonico: string,
@@ -57,7 +57,7 @@ export function gerarVarianteDeCor(
 
 /**
  * Quantos elementos cada zona captura hoje. O editor mostra isso no cadastro do produto
- * para o time conferir o mapeamento ANTES de existir variante — prevenção de erro vale
+ * para o time conferir o mapeamento ANTES de existir variante, prevenção de erro vale
  * mais que mensagem de erro (CLAUDE.md).
  */
 export function relatorioDeZonas(
@@ -72,7 +72,7 @@ export function relatorioDeZonas(
   }));
 }
 
-/** Encontra a zona pelo `zone_key` e resolve o seletor — ambos falham alto. */
+/** Encontra a zona pelo `zone_key` e resolve o seletor, ambos falham alto. */
 function resolverZona(documento: Document, zonas: Zona[], zoneKey: string): Element[] {
   const zona = zonas.find((candidata) => candidata.zone_key === zoneKey);
 
@@ -108,7 +108,7 @@ function buscar(documento: Document, seletor: string, zoneKey: string): Element[
 
 /**
  * Duas zonas pedidas que dividem um elemento fazem a ÚLTIMA chave do JSON decidir a cor
- * dele — ordem de chave mandando no calçado, sem erro (BUG-013). Recusa o pedido inteiro:
+ * dele, ordem de chave mandando no calçado, sem erro (BUG-013). Recusa o pedido inteiro:
  * variante sai inteira ou não sai.
  */
 function recusarSobreposicao(trabalho: Array<{ zoneKey: string; alvos: Element[] }>): void {

@@ -18,7 +18,7 @@ export async function listarZonasDoProduto(
 ): Promise<ZonaDoProduto[]> {
   if (!productId.trim()) {
     // Falha antes da rede: `eq('product_id', '')` volta lista vazia, e lista vazia aqui
-    // significa "este produto não tem zona" — uma afirmação, não um engano de chamada.
+    // significa "este produto não tem zona", uma afirmação, não um engano de chamada.
     throw new Error('Não dá para listar zonas sem o id do produto.');
   }
 
@@ -28,7 +28,7 @@ export async function listarZonasDoProduto(
     .eq('product_id', productId)
     // Não existe coluna de ordem no schema; `created_at` é a única ordenação estável que
     // ele oferece. Sem `order`, o Postgres não promete ordem nenhuma e a lista de zonas
-    // embaralha a cada carga — quem marca zona clica por memória de posição.
+    // embaralha a cada carga, quem marca zona clica por memória de posição.
     .order('created_at', { ascending: true });
 
   // Erro sobe: devolver `[]` aqui seria a tela dizer "nenhuma zona marcada" sobre um

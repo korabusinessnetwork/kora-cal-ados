@@ -1,7 +1,7 @@
 // Prende o CONTRATO que este painel mostra, e não a sua aparência.
 //
 // Por que ele existe: `PainelDaApi.tsx` exibiu por semanas um contrato que nunca foi
-// decidido — rota `POST /api/produtos/:id/variantes`, corpo `{zone_colors, format}` e um
+// decidido, rota `POST /api/produtos/:id/variantes`, corpo `{zone_colors, format}` e um
 // sucesso envelopado com `variante_id` e `svg_url`. Nada reclamou: a suíte estava verde, o
 // esboço abria, e a única forma de descobrir era alguém comparar a tela com
 // `docs/07_APIS/endpoints.md` linha a linha. Este arquivo é essa comparação, automatizada.
@@ -29,7 +29,7 @@ const cores = { sola: '#2E2E33', cabedal: '#2B4C7E' };
 
 /**
  * Devolve o texto de um dos blocos `<pre>` do painel, já sem tags e com as entidades
- * desfeitas — `renderToStaticMarkup` escapa as aspas do JSON como `&quot;`, e asserção
+ * desfeitas, `renderToStaticMarkup` escapa as aspas do JSON como `&quot;`, e asserção
  * sobre `&quot;error&quot;` não se parece com o contrato que a pessoa quer conferir.
  *
  * Tag some antes das entidades: assim `&lt;svg` vira `<svg` sem ser confundido com marcação.
@@ -52,7 +52,7 @@ function renderizar(erro: ErroDeVariante | null): string {
   );
 }
 
-describe('painel da API — a requisição mostrada', () => {
+describe('painel da API, a requisição mostrada', () => {
   const requisicao = () => blocoDe(renderizar(null), 'codigo--requisicao');
 
   it('mostra a rota do contrato: POST /api/v1/products/:productId/variants', () => {
@@ -83,7 +83,7 @@ describe('painel da API — a requisição mostrada', () => {
   });
 });
 
-describe('painel da API — sucesso é o artefato, não o envelope', () => {
+describe('painel da API, sucesso é o artefato, não o envelope', () => {
   const sucesso = () => blocoDe(renderizar(null), 'codigo--ok');
 
   it('mostra o corpo do 200 como SVG cru, com o Content-Type de SVG', () => {
@@ -101,7 +101,7 @@ describe('painel da API — sucesso é o artefato, não o envelope', () => {
   });
 });
 
-describe('painel da API — erro é o envelope de respostaDaApi.ts', () => {
+describe('painel da API, erro é o envelope de respostaDaApi.ts', () => {
   const envelope = (erro: ErroDeVariante) => blocoDe(renderizar(erro), 'codigo--erro');
 
   it('usa "error" aninhado com code e message, nunca a chave plana "erro"', () => {
@@ -129,7 +129,7 @@ describe('painel da API — erro é o envelope de respostaDaApi.ts', () => {
   });
 });
 
-describe('painel da API — o que já funcionava continua', () => {
+describe('painel da API, o que já funcionava continua', () => {
   it('mostra o relatório de normalização, inclusive os ids cunhados', () => {
     const markup = renderToStaticMarkup(
       <PainelDaApi

@@ -1,12 +1,12 @@
 // Varredura de `src/`: nada que vai para o bundle do navegador pode tocar a service_role.
 //
 // Existe como teste, e não como revisão de código, porque é a falha mais cara possível do
-// projeto e a mais fácil de introduzir sem querer — um `import` de `supabase/tests/`
+// projeto e a mais fácil de introduzir sem querer, um `import` de `supabase/tests/`
 // "só para reusar o helper" bastaria. A service_role ignora RLS: no navegador ela
 // entregaria o banco inteiro, incluindo os tenants concorrentes, a qualquer visitante.
 //
 // A checagem é textual de propósito: pega o caso mesmo quando o código não é executado
-// por nenhum outro teste. Comentários são descontados — explicar por que a service_role
+// por nenhum outro teste. Comentários são descontados, explicar por que a service_role
 // é proibida é justamente o que os READMEs e comentários deste projeto devem fazer.
 
 import { readFileSync, readdirSync } from 'node:fs';
@@ -78,7 +78,7 @@ describe('a service_role nunca chega ao navegador', () => {
     // Antes o compilador recusava; agora aceita, e quem segura isto é esta varredura.
     //
     // O front lê ambiente por `import.meta.env.VITE_*`. Um `process.env` em `src/` vira
-    // `undefined` no navegador — falha silenciosa, sem erro nenhum — ou, se algum bundler
+    // `undefined` no navegador, falha silenciosa, sem erro nenhum, ou, se algum bundler
     // o substituir, embute no bundle uma variável sem prefixo `VITE_`, ou seja, uma que
     // nunca foi pensada como pública. É por aí que a service_role entraria sem a palavra
     // `service_role` aparecer em lugar nenhum.

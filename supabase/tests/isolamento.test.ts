@@ -1,9 +1,9 @@
-// Teste de isolamento entre tenants — o gate que `docs/11_SEGURANCA/multi-tenancy-rls.md`
+// Teste de isolamento entre tenants, o gate que `docs/11_SEGURANCA/multi-tenancy-rls.md`
 // exige antes de qualquer release. Aqui a promessa central do produto vira asserção:
 // marca concorrente nunca vê coleção não lançada da outra.
 //
 // Precisa de um ambiente Supabase real (SUPABASE_URL, SUPABASE_ANON_KEY,
-// SUPABASE_SERVICE_ROLE_KEY). Sem eles, PULA — nunca finge que passou.
+// SUPABASE_SERVICE_ROLE_KEY). Sem eles, PULA, nunca finge que passou.
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { montarCenario, limpar, anonimo, temAmbiente, type Cenario } from './ambiente';
@@ -26,7 +26,7 @@ describe.skipIf(!temAmbiente)('isolamento entre tenants', () => {
       .from('tenant_members')
       .select('tenant_id, papel');
 
-    // 42P17 = infinite recursion detected in policy — é o defeito que esta migration corrige.
+    // 42P17 = infinite recursion detected in policy, é o defeito que esta migration corrige.
     expect(error?.code).not.toBe('42P17');
     expect(error).toBeNull();
     expect(data?.every((linha) => linha.tenant_id === cenario.tenantA)).toBe(true);
@@ -84,7 +84,7 @@ describe.skipIf(!temAmbiente)('isolamento entre tenants', () => {
   it('canário: o normalizador de hoje é compatível com o asset já gravado', async () => {
     // Se a ordem de cunhagem de id mudar numa versão futura, todo `svg_selector` gravado
     // repointa em silêncio. Este teste fica vermelho ANTES de qualquer variante sair
-    // errada — é a rede de segurança que a decisão 2 do ADR-005 exige.
+    // errada, é a rede de segurança que a decisão 2 do ADR-005 exige.
     const { data } = await cenario.clienteA.storage
       .from('assets-base')
       .createSignedUrl(cenario.assetDoProdutoA, 300);

@@ -4,7 +4,7 @@
 // como função pura de props, sem rede (mesmo padrão de `useProdutos`).
 //
 // `salvando` e `erroAoGravar` são separados de `estado` e `erro` de propósito: falhar ao
-// gravar não pode apagar da tela a lista que já carregou — a pessoa perderia de vista o
+// gravar não pode apagar da tela a lista que já carregou, a pessoa perderia de vista o
 // que já estava marcado justo no momento em que precisa decidir se tenta de novo.
 //
 // `tenantId` chega por parâmetro e NÃO de `sessao/`: a regra de dependência de
@@ -134,7 +134,7 @@ export function useZonasDoProduto(
       });
 
     // Trocar de produto com requisição em voo não pode deixar a zona do produto anterior
-    // aparecer no novo — seria marcar em cima do desenho errado. A etiqueta acima já impediria a
+    // aparecer no novo, seria marcar em cima do desenho errado. A etiqueta acima já impediria a
     // exibição; o `vivo` impede antes disso, que a resposta morta chegue a mexer no estado.
     return () => {
       vivo = false;
@@ -179,7 +179,7 @@ export function useZonasDoProduto(
 
       // Relê do banco em vez de emendar a linha devolvida na lista local: não existe
       // `updated_at`, então não há lock otimista, e a releitura é a mitigação registrada
-      // no plano para o last-write-wins — quem gravou vê imediatamente o que o colega
+      // no plano para o last-write-wins, quem gravou vê imediatamente o que o colega
       // mudou em outra zona no meio tempo.
       try {
         const atuais = await listarZonasDoProduto(doBanco, alvo);

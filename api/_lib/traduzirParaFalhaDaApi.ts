@@ -1,15 +1,15 @@
 // A ÚNICA ponte entre o erro do motor (`ErroDeVariante`, que não sabe o que é HTTP) e o erro
-// de transporte (`FalhaDaApi`, que carrega status) — e por isso a única dona da tabela de
+// de transporte (`FalhaDaApi`, que carrega status), e por isso a única dona da tabela de
 // `docs/07_APIS/endpoints.md`.
 //
 // Por que a tabela mora num arquivo só: se cada ponto de lançamento decidisse o próprio
 // status, o mesmo código sairia 409 num lugar e 500 noutro, e a tabela do doc deixaria de ser
-// verdade sem ninguém perceber. Aqui, código do motor sem status é erro de compilação — o
-// `Record<CodigoDeErro, ...>` exige a chave —, nunca um 500 que um cliente descobre em
+// verdade sem ninguém perceber. Aqui, código do motor sem status é erro de compilação, o
+// `Record<CodigoDeErro, ...>` exige a chave, nunca um 500 que um cliente descobre em
 // produção.
 //
 // A tabela é lida de `docs/07_APIS/endpoints.md` e não é reescrita em prosa aqui: duplicata
-// diverge. O que fica escrito aqui é só o que o doc não consegue impor — o porquê de cada
+// diverge. O que fica escrito aqui é só o que o doc não consegue impor, o porquê de cada
 // escolha que um agente futuro poderia desfazer achando que simplifica.
 
 import { ErroDeVariante, type CodigoDeErro } from '../../src/lib/render/erros';
@@ -31,7 +31,7 @@ export const MENSAGEM_DE_FALHA_INTERNA =
 
 /**
  * O acréscimo que transforma um erro escrito para nós num erro útil para quem integra. A
- * mensagem do motor fala de seletor, normalização e elemento — vocabulário interno sobre o
+ * mensagem do motor fala de seletor, normalização e elemento, vocabulário interno sobre o
  * qual o desenvolvedor do outro lado não tem como agir. Isto diz quem corrige, e onde.
  */
 const ORIENTACAO_DE_DADO_DO_TENANT =
@@ -39,7 +39,7 @@ const ORIENTACAO_DE_DADO_DO_TENANT =
 
 /**
  * Todos os códigos do motor. Exportada porque o teste itera esta tabela em vez de manter uma
- * lista própria dos códigos — lista paralela envelhece em silêncio, esta não pode. (A
+ * lista própria dos códigos, lista paralela envelhece em silêncio, esta não pode. (A
  * contagem não é escrita aqui de propósito: já foram "7" até o ADR-007 acrescentar os dois
  * de modelo 3D, e um número em comentário é a primeira coisa que fica velha.)
  */
@@ -50,7 +50,7 @@ export const STATUS_POR_CODIGO_DO_MOTOR: Readonly<Record<CodigoDeErro, EntradaDa
   // caso, e ele nunca passa por aqui: o handler pré-checa as zone_key pedidas contra as zonas
   // do produto e levanta ele mesmo uma `FalhaDaApi` 422 (com a lista das zonas que existem)
   // ANTES de chamar o motor. Depois dessa pré-checagem, a única forma de o motor lançar este
-  // código é seletor gravado quebrado — que é dado do tenant, não pedido do integrador.
+  // código é seletor gravado quebrado, que é dado do tenant, não pedido do integrador.
   ZONA_NAO_ENCONTRADA: { status: 409, familia: 'dado do tenant' },
   ZONA_NAO_RECOLORIVEL: { status: 409, familia: 'dado do tenant' },
   ZONAS_SOBREPOSTAS: { status: 409, familia: 'dado do tenant' },
@@ -58,7 +58,7 @@ export const STATUS_POR_CODIGO_DO_MOTOR: Readonly<Record<CodigoDeErro, EntradaDa
   SVG_NAO_NORMALIZAVEL: { status: 409, familia: 'dado do tenant' },
   // Gêmeos 3D dos dois acima, e pela mesma razão em 409: o pedido do integrador está certo,
   // e o que precisa de correção é o modelo gravado do tenant. Hoje eles não têm como chegar
-  // até aqui — a normalização roda no provisionamento, não na requisição —, e mesmo assim
+  // até aqui, a normalização roda no provisionamento, não na requisição, e mesmo assim
   // entram na tabela: `Record<CodigoDeErro, ...>` exige a chave, e um código do motor sem
   // status é exatamente o 500 surpresa que este arquivo existe para impedir.
   MODELO_3D_INVALIDO: { status: 409, familia: 'dado do tenant' },
@@ -123,7 +123,7 @@ export const TRANSPORTE_POR_CODIGO: Readonly<Record<CodigoDeTransporte, EntradaD
 
 /**
  * A mensagem do motor é NOSSA e é a parte acionável (nomeia a zona, a cor, o seletor), então
- * é segura de repassar. O que falta nela é quem corrige — e só o 409 precisa do acréscimo: as
+ * é segura de repassar. O que falta nela é quem corrige, e só o 409 precisa do acréscimo: as
  * mensagens de 422 já dizem exatamente o que mudar no pedido, e emendar "corrija o pedido"
  * nelas seria ruído.
  */
@@ -150,7 +150,7 @@ export function criarFalhaDeTransporte(codigo: CodigoDeTransporte, mensagem?: st
  *
  * O código é do motor, então não cabe em `TRANSPORTE_POR_CODIGO`; e `STATUS_POR_CODIGO_DO_MOTOR`
  * mapeia esse mesmo código para 409 de propósito, porque vindo do motor ele significa outra
- * coisa (seletor gravado quebrado). Os dois status são certos, para origens diferentes — é o
+ * coisa (seletor gravado quebrado). Os dois status são certos, para origens diferentes, é o
  * caso ambíguo que o doc descreve, e que o handler resolve pré-checando as `zone_key` pedidas
  * contra as zonas do produto ANTES de chamar o motor.
  *
@@ -171,7 +171,7 @@ export function criarFalhaDeZonaDesconhecida(mensagem: string): FalhaDaApi {
 const STATUS_DA_PRE_CHECAGEM_DE_ZONA = 422;
 
 export function traduzirParaFalhaDaApi(erro: unknown): FalhaDaApi {
-  // Já traduzida: sai igual. Retraduzir perderia o status já decidido — é o caso do 422 de
+  // Já traduzida: sai igual. Retraduzir perderia o status já decidido, é o caso do 422 de
   // `ZONA_NAO_ENCONTRADA` da pré-checagem, que aqui viraria 409 e mandaria o integrador
   // procurar defeito no dado do tenant quando o defeito é a zone_key que ele pediu.
   if (erro instanceof FalhaDaApi) return erro;
@@ -186,7 +186,7 @@ export function traduzirParaFalhaDaApi(erro: unknown): FalhaDaApi {
     }
   }
 
-  // Qualquer outra coisa — `Error` genérico, string lançada, `undefined`. A mensagem original
+  // Qualquer outra coisa, `Error` genérico, string lançada, `undefined`. A mensagem original
   // NÃO entra na resposta: mensagem de exceção carrega caminho de arquivo, nome de coluna e
   // às vezes trecho de credencial, e quem lê esta resposta é o sistema de outra marca. É
   // regra de segurança do CLAUDE.md, não estilo.

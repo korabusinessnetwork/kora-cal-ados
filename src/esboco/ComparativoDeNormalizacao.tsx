@@ -1,7 +1,7 @@
 // Antes/depois do ADR-004, lado a lado: a MESMA chamada de `gerarVarianteDeCor`, uma
 // sobre o arquivo cru e outra sobre o asset-base canônico.
 //
-// No cru, sola, cabedal, cadarço e logo não mudam de cor — a regra `.st-*` do bloco
+// No cru, sola, cabedal, cadarço e logo não mudam de cor, a regra `.st-*` do bloco
 // <style> vence o atributo `fill` que o motor escreve. É o BUG-001 visível, e é o motivo
 // de a normalização existir. Sem ele o esboço parece "só uma tela bonita".
 //

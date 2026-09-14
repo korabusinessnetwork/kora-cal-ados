@@ -1,4 +1,4 @@
-# 06 — COMPONENTES · Kora Calçados (codinome)
+# 06, COMPONENTES · Kora Calçados (codinome)
 
 > Catálogo vivo de componentes UI em atomic design. Um lugar, uma versão.
 
@@ -21,12 +21,12 @@
 
 ## Arquivos sugeridos
 
-- `atoms.md` — botão, input, label, icon, badge (+ screenshots)
-- `molecules.md` — formgroup, card, modal, toast, badge-group
-- `organisms.md` — tabela, navbar, sidebar, form complexa
-- `templates.md` — página de listagem, página de detalhe, modal workflow
-- `estados.md` — loading, error, success, disabled, focus
-- `ACCESSIBILITY.md` — checklist: keyboard, screenreader, contrast
+- `atoms.md`, botão, input, label, icon, badge (+ screenshots)
+- `molecules.md`, formgroup, card, modal, toast, badge-group
+- `organisms.md`, tabela, navbar, sidebar, form complexa
+- `templates.md`, página de listagem, página de detalhe, modal workflow
+- `estados.md`, loading, error, success, disabled, focus
+- `ACCESSIBILITY.md`, checklist: keyboard, screenreader, contrast
 
 ## Como preencher
 
@@ -39,6 +39,6 @@
 
 ## Ligações
 
-- `02_DESIGN_SYSTEM/` — tokens, cores, tipografia
-- `src/components/` — código real dos componentes
-- CLAUDE.md — regra: CSS separado do JSX (decisão 018)
+- `02_DESIGN_SYSTEM/`, tokens, cores, tipografia
+- `src/components/`, código real dos componentes
+- CLAUDE.md, regra: CSS separado do JSX (decisão 018)

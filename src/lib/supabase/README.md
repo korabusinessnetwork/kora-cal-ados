@@ -1,4 +1,4 @@
-# src/lib/supabase — acesso ao Supabase pelo navegador
+# src/lib/supabase, acesso ao Supabase pelo navegador
 
 O que vive aqui: **como o front se conecta**. O que **não** vive aqui: consulta de
 domínio (isso mora na feature que precisa dela, ex.: `src/features/sessao/`).
@@ -13,14 +13,14 @@ Entrada: `clienteSupabase()`.
 ## Um cliente só
 
 Cada `createClient` monta o próprio listener de auth e a própria cópia da sessão. Dois
-clientes divergem no refresh do token — um acha que está logado, o outro não — e o sintoma
+clientes divergem no refresh do token, um acha que está logado, o outro não, e o sintoma
 aparece como "sumiu meu login ao trocar de tela", caríssimo de diagnosticar.
 
 ## Nunca a service_role
 
 A anon key é feita para ir ao navegador: ela não dá acesso a nada sozinha, porque quem
 decide o que cada usuário lê é a **RLS** (`docs/11_SEGURANCA/multi-tenancy-rls.md`). A
-service_role é o oposto — ignora RLS por definição — e no bundle entregaria os dados de
+service_role é o oposto, ignora RLS por definição, e no bundle entregaria os dados de
 todos os tenants, incluindo os concorrentes, a qualquer visitante do DevTools.
 
 `configuracaoDoSupabase.ts` **recusa explicitamente** uma chave cujo `role` seja
@@ -28,7 +28,7 @@ todos os tenants, incluindo os concorrentes, a qualquer visitante do DevTools.
 (formato `sb_publishable_…`) passa: quem valida a chave de verdade é o servidor.
 
 Código que precisa de service_role (provisionamento, testes de isolamento) vive em
-`supabase/`, fora de `src/` — nada em `src/` vai para o servidor.
+`supabase/`, fora de `src/`, nada em `src/` vai para o servidor.
 
 ## Configuração ausente derruba o app de propósito
 

@@ -1,5 +1,5 @@
 // Lista de zonas do produto. Mostra quantos elementos cada seletor captura HOJE, antes
-// de existir variante — conferir o mapeamento é prevenção de erro, que o CLAUDE.md põe
+// de existir variante, conferir o mapeamento é prevenção de erro, que o CLAUDE.md põe
 // acima de mensagem de erro. É `relatorioDeZonas` do motor, não uma contagem paralela.
 
 import { useState } from 'react';
@@ -142,7 +142,7 @@ function EditorDeCor({
             style={{ background: atalho.hex }}
             // O mesmo texto nos dois: `aria-label` é o nome acessível e `title` é a legenda do
             // mouse. Antes só havia `title` com o hex cru, que vira nome acessível de último
-            // recurso — ou seja, o leitor de tela soletrava o hex e o mouse não via legenda alguma.
+            // recurso, ou seja, o leitor de tela soletrava o hex e o mouse não via legenda alguma.
             aria-label={`${atalho.nome} (${atalho.hex})`}
             title={`${atalho.nome} (${atalho.hex})`}
             onClick={() => {

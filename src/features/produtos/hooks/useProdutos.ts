@@ -1,5 +1,5 @@
 // Carrega os produtos do tenant ativo e expõe os quatro estados obrigatórios
-// (carregando / erro / vazio / sucesso — CLAUDE.md).
+// (carregando / erro / vazio / sucesso, CLAUDE.md).
 //
 // O estado vive num hook e não no componente para a lista poder ser testada como função
 // pura de props, sem rede.

@@ -36,7 +36,7 @@ describe('lerTelaDaUrl', () => {
     expect(lerTelaDaUrl('?tela=%20PALCO3D%20')).toBe('palco3d');
   });
 
-  it('cai na área protegida diante de valor desconhecido — o padrão é o lado seguro', () => {
+  it('cai na área protegida diante de valor desconhecido, o padrão é o lado seguro', () => {
     expect(lerTelaDaUrl('?tela=admin')).toBe('app');
     expect(lerTelaDaUrl('?tela=')).toBe('app');
     expect(lerTelaDaUrl('?tenant=outro&tela=produtos')).toBe('app');
@@ -48,7 +48,7 @@ describe('lerTelaDaUrl', () => {
 
   it('não deixa a URL escolher a área protegida por atalho: "app" também passa pelo portão', () => {
     // Assertion de contraprova: `?tela=app` devolve exatamente o mesmo que URL vazia.
-    // Não existe valor de query que pule login — o que a query escolhe é só o esboço.
+    // Não existe valor de query que pule login, o que a query escolhe é só o esboço.
     expect(lerTelaDaUrl('?tela=app')).toBe(lerTelaDaUrl(''));
   });
 });

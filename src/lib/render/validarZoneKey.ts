@@ -1,5 +1,5 @@
 // `zone_key` é a chave PÚBLICA da API: o cliente manda `{"sola": "#C0392B"}`.
-// Por isso ela é slug estável — acento e espaço viram problema de encoding em URL, JSON
+// Por isso ela é slug estável, acento e espaço viram problema de encoding em URL, JSON
 // de cliente e log, e "Cadarço" nunca deve virar duas chaves diferentes por causa disso.
 
 import { ErroDeVariante } from './erros';
@@ -7,7 +7,7 @@ import { ErroDeVariante } from './erros';
 const ZONE_KEY = /^[a-z][a-z0-9-]*$/;
 const LIMITE = 40;
 
-/** Aceita a chave ou explica o que corrigir — nunca conserta calado. */
+/** Aceita a chave ou explica o que corrigir, nunca conserta calado. */
 export function validarZoneKey(valor: unknown): string {
   if (typeof valor !== 'string' || valor.trim() === '') {
     throw new ErroDeVariante('ZONE_KEY_INVALIDA', 'A zona precisa de uma chave (zone_key).');

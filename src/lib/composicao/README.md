@@ -1,6 +1,6 @@
-# src/lib/composicao — o modo gerado
+# src/lib/composicao, o modo gerado
 
-O que vive aqui: a **composição** (ADR-008 D2), que é o que define um calçado gerado — quais
+O que vive aqui: a **composição** (ADR-008 D2), que é o que define um calçado gerado, quais
 peças do acervo, em que cor, com que parâmetros. É JSON de algumas linhas, nunca um arquivo 3D.
 
 O que **não** vive aqui: geometria, three.js, palco, acesso ao Supabase, HTTP, UI, e a chamada
@@ -16,8 +16,8 @@ glTF.
 | `gerarComposicaoPorPrompt.ts` | Prompt vira composição (T09): confere o prompt, chama o modelo de linguagem injetado e passa a resposta pelo guarda. Define `ModeloDeLinguagem` | prompt + forma + catálogo + modelo → composição validada |
 | `lerRespostaDoModelo.ts` | Tira o JSON do texto que o modelo respondeu, sem conferir a composição | texto → `unknown` |
 | `modeloDeLinguagemDeProva.ts` | O gerador de prova (D12): modelo de linguagem falso, sem IA e sem rede, que entende palavras-chave e só escolhe peças do catálogo que recebeu | pedido ao modelo → texto de composição |
-| `tiposDaComposicao.ts` | O vocabulário do modo gerado em tipos. Nenhum comportamento | — |
-| `fixtures/acervoDeTeste.ts` | Catálogo escrito à mão, com duas formas. O gêmeo de `render/fixtures/gltfDeTeste.ts` | — |
+| `tiposDaComposicao.ts` | O vocabulário do modo gerado em tipos. Nenhum comportamento | - |
+| `fixtures/acervoDeTeste.ts` | Catálogo escrito à mão, com duas formas. O gêmeo de `render/fixtures/gltfDeTeste.ts` | - |
 
 ## O catálogo que existe fora dos testes
 
@@ -50,7 +50,7 @@ Duas regras saem daí, e elas mandam no desenho inteiro:
 
 1. **Pertencimento, nunca formato.** Um id é válido porque **está** no catálogo, jamais porque
    se parece com um id. `sola-corrida-04` é sintaticamente impecável e é recusado se não
-   existir — e ids plausíveis são justamente o modo de falha esperado de um modelo de linguagem.
+   existir, e ids plausíveis são justamente o modo de falha esperado de um modelo de linguagem.
 2. **A saída carrega a peça do catálogo, não o id da entrada.** Quem recebe uma
    `ComposicaoValidada` não tem em mãos a string que o modelo escreveu, então não tem como
    transformá-la em caminho de arquivo. O guarda não confere e devolve: ele **troca**.
@@ -59,7 +59,7 @@ Duas regras saem daí, e elas mandam no desenho inteiro:
 
 Um `Record<categoria, escolha>` seria mais curto de escrever e tornaria "sola duas vezes"
 **indetectável**: `JSON.parse` descarta a chave duplicada em silêncio e fica com a última. Seria
-a última chave do JSON decidindo o calçado sozinha, sem erro e com 200 na resposta — o BUG-013
+a última chave do JSON decidindo o calçado sozinha, sem erro e com 200 na resposta, o BUG-013
 por um terceiro caminho, depois do `fill` do SVG e do material compartilhado do glTF.
 
 Em lista, a repetição é visível e vira `COMPOSICAO_INVALIDA`.
@@ -84,7 +84,7 @@ consequências que estão no código e não em convenção:
 | `PARAMETRO_INVALIDO` | Fora da faixa, não numérico, ou não declarado pela peça |
 | `COR_INVALIDA` / `ZONE_KEY_INVALIDA` | Vindos dos validadores do motor, sem reimplementação |
 
-Todos são 422 na API — a composição vem no corpo do pedido, então quem corrige é quem enviou.
+Todos são 422 na API, a composição vem no corpo do pedido, então quem corrige é quem enviou.
 A tabela mora em `docs/07_APIS/endpoints.md`.
 
 ## O empilhamento lê a geometria, nunca uma altura declarada
@@ -118,7 +118,7 @@ declarou anatomia continua montando exatamente como antes.
 - **A lista de categorias vem da forma**, e não há lista fixa no código: chinelo não tem
   cadarço, e uma lista fixa transformaria isso em recusa permanente.
 - Os parâmetros são **validados** aqui e **aplicados** no palco (ADR-008 D7). Enquanto o palco
-  não existir, nada consome os números — e é por isso que a faixa é conferida aqui, onde há
+  não existir, nada consome os números, e é por isso que a faixa é conferida aqui, onde há
   quem recuse, e não lá, onde só haveria o que desenhar.
 
 ## A ordem da montagem não é livre

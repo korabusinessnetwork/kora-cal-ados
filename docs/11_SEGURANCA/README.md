@@ -1,8 +1,8 @@
-# 11 — SEGURANÇA · Kora Calçados (codinome)
+# 11, SEGURANÇA · Kora Calçados (codinome)
 
 > Plano de segurança versionado: ameaças, secrets, RLS, compliance, resposta a incidentes.
 
-**Nota**: Esta é a pasta de PLANO DE SEGURANÇA do projeto — design decisions, policies, checklists. Código de segurança (autenticação, validação, sanitização) vive em `src/`.
+**Nota**: Esta é a pasta de PLANO DE SEGURANÇA do projeto, design decisions, policies, checklists. Código de segurança (autenticação, validação, sanitização) vive em `src/`.
 
 ## O que vive aqui
 
@@ -26,25 +26,25 @@
 
 | Arquivo | Conteúdo |
 |---|---|
-| `multi-tenancy-rls.md` | Modelo de ameaças, controles obrigatórios, checklist de release, plano de incidente — **documento principal** |
+| `multi-tenancy-rls.md` | Modelo de ameaças, controles obrigatórios, checklist de release, plano de incidente, **documento principal** |
 | `proposta-correcao-rls.md` | Histórico da decisão que corrigiu a recursão da policy, o onboarding travado e a ausência de policy de Storage (BUG-006..009). Implementada em `supabase/migrations/20260812_correcao_rls_e_storage.sql`, **aplicada e provada em 2026-09-05** pelo teste de isolamento (8/8) |
 
-O teste que prova o isolamento vive em `supabase/tests/` — pula quando não há ambiente
+O teste que prova o isolamento vive em `supabase/tests/`, pula quando não há ambiente
 Supabase configurado, para nunca passar em falso.
 
-**A RLS não cobre tudo — e o buraco é conhecido, não acidental.** Hoje todo acesso a dado
+**A RLS não cobre tudo, e o buraco é conhecido, não acidental.** Hoje todo acesso a dado
 passa pelo Postgres com o JWT do usuário, então a RLS é o isolamento. A **API de variante**
 (ADR-006, ainda não implementada) muda isso: ela autentica por **chave de API do tenant** e
 consulta com `service_role`, que bypassa a RLS. A partir dela, o isolamento entre marcas
-concorrentes é responsabilidade da função — `tenant_id` vem sempre da chave, nunca do
+concorrentes é responsabilidade da função, `tenant_id` vem sempre da chave, nunca do
 chamador. Quem for construir essa função lê `docs/07_APIS/autenticacao.md` **antes** do
 primeiro `select`.
 
-Ainda não escritos (só criar quando houver conteúdo real — arquivo vazio confunde agente):
+Ainda não escritos (só criar quando houver conteúdo real, arquivo vazio confunde agente):
 `gestao-secrets.md`, `checklist-release.md` (hoje embutido em `multi-tenancy-rls.md`),
 `auditoria-logs.md`.
 
-Política de senhas e 2FA ficam por conta do Supabase Auth nesta fase — não há
+Política de senhas e 2FA ficam por conta do Supabase Auth nesta fase, não há
 autenticação própria a documentar.
 
 ## Como preencher
@@ -58,7 +58,7 @@ autenticação própria a documentar.
 
 ## Ligações
 
-- `memory/restrictions.md` — restrições legais/regulatórias do projeto
-- `07_APIS/` — endpoints que precisam de autenticação/autorização
-- CLAUDE.md — regras de segurança (nunca hardcodar secrets, logar dados sensíveis, etc.)
-- `references/seguranca.md` — templates/checklists reutilizáveis da skill
+- `memory/restrictions.md`, restrições legais/regulatórias do projeto
+- `07_APIS/`, endpoints que precisam de autenticação/autorização
+- CLAUDE.md, regras de segurança (nunca hardcodar secrets, logar dados sensíveis, etc.)
+- `references/seguranca.md`, templates/checklists reutilizáveis da skill

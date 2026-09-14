@@ -6,7 +6,7 @@
 //   sob RLS. A validação o trata como verdade.
 // - **composição** (`Composicao`, `EscolhaDePeca`) é entrada NÃO CONFIÁVEL: ou veio da
 //   resposta de um modelo de linguagem, ou veio do corpo de um pedido. Por isso
-//   `validarComposicao` a recebe como `unknown` e nunca como `Composicao` — declarar o tipo
+//   `validarComposicao` a recebe como `unknown` e nunca como `Composicao`, declarar o tipo
 //   na entrada seria afirmar exatamente o que está por verificar.
 //
 // Campos de dado em snake_case porque atravessam banco e API, como `zone_key` e
@@ -31,7 +31,7 @@ export interface ParametroDePeca {
  * Um item do acervo: **uma** sola específica, **um** cabedal específico.
  *
  * `categoria` é o papel que a peça cumpre, e no produto gerado ela É a `zone_key` da zona
- * correspondente (ADR-008 D3: cada peça é uma zona). Não é analogia — é o mesmo texto, no
+ * correspondente (ADR-008 D3: cada peça é uma zona). Não é analogia, é o mesmo texto, no
  * mesmo campo público, e por isso ela passa por `validarZoneKey`.
  */
 export interface PecaDoAcervo {
@@ -84,7 +84,7 @@ export interface CatalogoDoAcervo {
  * Uma escolha da composição: qual peça, em que cor, com que parâmetros.
  *
  * **Não carrega a categoria de propósito.** A peça já sabe a sua, e um segundo campo dizendo
- * a mesma coisa é um campo que pode discordar — a composição diria `cadarco` apontando para
+ * a mesma coisa é um campo que pode discordar, a composição diria `cadarco` apontando para
  * uma sola, e alguém teria que decidir qual dos dois vale. Campo redundante que pode divergir
  * é a família de defeito que este projeto persegue desde o BUG-013.
  */
@@ -101,7 +101,7 @@ export interface EscolhaDePeca {
  * `pecas` é uma **lista** e não um objeto com chave por categoria. A razão é a única decisão
  * de forma que importa aqui: num objeto, categoria repetida é indetectável, porque
  * `JSON.parse` descarta a chave duplicada em silêncio e fica com a última. Seria a última
- * chave do JSON decidindo a cor do calçado sem ninguém ver — o BUG-013 por um terceiro
+ * chave do JSON decidindo a cor do calçado sem ninguém ver, o BUG-013 por um terceiro
  * caminho. Em lista, `sola` duas vezes é visível e vira recusa.
  */
 export interface Composicao {
@@ -121,13 +121,13 @@ export interface PecaValidada {
   /** Vem da peça do catálogo. Repetido aqui porque é a `zone_key` da zona gerada. */
   categoria: string;
   peca: PecaDoAcervo;
-  /** Já em `#RRGGBB` maiúsculo quando presente — `validarCor` expande a forma curta. */
+  /** Já em `#RRGGBB` maiúsculo quando presente, `validarCor` expande a forma curta. */
   cor?: string;
   /** Sempre completo: parâmetro não mencionado entra com o `padrao` declarado pela peça. */
   parametros: Record<string, number>;
 }
 
-/** A composição inteira, resolvida. Sai assim ou não sai — a validação não devolve meio. */
+/** A composição inteira, resolvida. Sai assim ou não sai, a validação não devolve meio. */
 export interface ComposicaoValidada {
   forma: Forma;
   pecas: PecaValidada[];

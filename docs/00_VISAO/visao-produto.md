@@ -1,7 +1,7 @@
-# Visão de Produto — Kora Calçados (codinome)
+# Visão de Produto, Kora Calçados (codinome)
 
 > Versão condensada para consulta rápida. Profundidade completa (personas, tom de voz,
-> manifesto) vive em `memory/identity.md` — este arquivo é o resumo "1 página".
+> manifesto) vive em `memory/identity.md`, este arquivo é o resumo "1 página".
 
 ## O que é
 
@@ -19,7 +19,7 @@ Não escala, atrasa o catálogo, e cada edição manual é um ponto de inconsist
 ## Proposta de valor
 
 Marca a zona uma vez, gera quantas variantes precisar via API. Editor visual (setup) +
-motor de geração (escala) desde o dia 1 — não é só uma ferramenta de design, é um
+motor de geração (escala) desde o dia 1, não é só uma ferramenta de design, é um
 pipeline de produção de catálogo.
 
 ## North Star
@@ -45,4 +45,4 @@ camada consumidor-final nesta fase). Ver personas completas em `memory/identity.
 ## Atualizações
 
 - Registrar aqui a data e o motivo sempre que a proposta de valor mudar de rumo.
-- **2026-08-12** — versão inicial, gerada na fundação do projeto (intake conduzido via chat).
+- **2026-08-12**, versão inicial, gerada na fundação do projeto (intake conduzido via chat).

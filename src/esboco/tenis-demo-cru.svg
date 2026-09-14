@@ -21,7 +21,7 @@
     .st-logo    { fill: #B23A2E; }
   </style>
 
-  <script>/* fixture: simula export com script embutido — normalizarSvg remove */</script>
+  <script>/* fixture: simula export com script embutido, normalizarSvg remove */</script>
 
   <defs>
     <linearGradient id="brilho" x1="0" y1="0" x2="1" y2="1">

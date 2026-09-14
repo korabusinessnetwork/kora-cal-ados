@@ -1,9 +1,9 @@
-// Semeia, no produto de demonstração, dois estados que o EDITOR SE RECUSA A CRIAR — e que o
+// Semeia, no produto de demonstração, dois estados que o EDITOR SE RECUSA A CRIAR, e que o
 // banco pode ter mesmo assim: uma zona de gradiente e um par de zonas sobrepostas.
 //
 // Por que isso precisa existir: desde a Etapa 4 o editor recusa no clique tanto o elemento
 // que não aceita cor chapa quanto o elemento que já pertence a outra zona. Ótimo para quem
-// marca — e péssimo para verificar os caminhos de falha, que passariam a ser inalcançáveis
+// marca, e péssimo para verificar os caminhos de falha, que passariam a ser inalcançáveis
 // pela tela. Só que eles continuam alcançáveis na vida real: mapeamento gravado antes desta
 // regra, importação futura, correção manual no banco. Se a tela reagir mal a isso, ninguém
 // descobre, porque ninguém consegue produzir o estado clicando.

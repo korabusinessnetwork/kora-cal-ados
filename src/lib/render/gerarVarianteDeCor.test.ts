@@ -12,7 +12,7 @@ import { ErroDeVariante } from './erros';
 const NOVA = '#FF0000';
 const ZONA_SOLA: Zona[] = [{ zone_key: 'sola', svg_selector: '#zona-sola' }];
 
-/** Sobe o arquivo e gera a variante — o caminho que o cliente percorre de verdade. */
+/** Sobe o arquivo e gera a variante, o caminho que o cliente percorre de verdade. */
 function subirEGerar(svgCru: string, zonas: Zona[], cores: Record<string, string>): string {
   return gerarVarianteDeCor(normalizarSvg(svgCru).svg, zonas, cores);
 }
@@ -73,7 +73,7 @@ describe('zona é conjunto de elementos, não um id (BUG-002)', () => {
     // O seletor é a lista de ids exatos que o editor gravaria depois da desambiguação, e
     // não `[id^="zona-sola"]`: o ADR-005 proíbe prefixo porque ele pegaria de brinde uma
     // zona futura `zona-sola-lateral`. Escrever o padrão proibido aqui, no teste do motor,
-    // é como ele volta — é deste arquivo que se copia exemplo de `svg_selector`.
+    // é como ele volta, é deste arquivo que se copia exemplo de `svg_selector`.
     const zonas: Zona[] = [{ zone_key: 'sola', svg_selector: '#zona-sola, #zona-sola-2' }];
     const saida = gerarVarianteDeCor(canonico, zonas, { sola: NOVA });
 
@@ -108,7 +108,7 @@ describe('falha alto, nunca em silêncio (BUG-003 e BUG-005)', () => {
   });
 
   it('seletor que não é CSS válido vira erro com código, não exceção crua do DOM', () => {
-    // O motor resolve `svg_selector` como CSS, seja ele qual for — não conhece "formato de
+    // O motor resolve `svg_selector` como CSS, seja ele qual for, não conhece "formato de
     // zona". Quem garante que o gravado é lista de ids exatos é `montarSeletorDeZona`
     // (ADR-005), e por isso nenhum teste daqui usa prefixo como exemplo: seria ensinar o
     // padrão proibido para provar uma indiferença que este caso já prova.
@@ -210,7 +210,7 @@ describe('relatório de zonas (prevenção no cadastro)', () => {
 
 describe('zonas sobrepostas são recusadas (BUG-013)', () => {
   // Sem isso, a ORDEM DAS CHAVES do JSON decide a cor: o motor pinta zona por zona, em
-  // sequência, e a última chave sobrescreve o elemento compartilhado — sem erro e sem
+  // sequência, e a última chave sobrescreve o elemento compartilhado, sem erro e sem
   // aviso. É o princípio nº 1 violado em silêncio.
   const svgCru = `<svg xmlns="http://www.w3.org/2000/svg"><g id="zona-cabedal"><rect id="zona-lingueta" fill="#333333"/></g><rect id="zona-sola" fill="#555555"/></svg>`;
   const sobrepostas: Zona[] = [
@@ -224,7 +224,7 @@ describe('zonas sobrepostas são recusadas (BUG-013)', () => {
     );
   });
 
-  it('a ordem das chaves não muda o resultado — recusa nos dois sentidos', () => {
+  it('a ordem das chaves não muda o resultado, recusa nos dois sentidos', () => {
     // Se o motor pintasse, estes dois pedidos dariam calçados DIFERENTES com o mesmo dado.
     expect(() => subirEGerar(svgCru, sobrepostas, { lingueta: '#0000FF', cabedal: NOVA })).toThrow(
       ErroDeVariante,

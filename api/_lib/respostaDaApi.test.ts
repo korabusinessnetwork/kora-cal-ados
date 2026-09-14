@@ -16,10 +16,10 @@ import { FalhaDaApi } from './tiposDaApi';
 const SVG_DIFICIL =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">\n' +
   '  <path id="sola" fill="#C0392B" d="M0 0 L10 10"/>\n' +
-  '  <text x="1" y="2">Coleção — cabedal &amp; solado ção 中文 "aspas"</text>\n' +
+  '  <text x="1" y="2">Coleção, cabedal &amp; solado ção 中文 "aspas"</text>\n' +
   '</svg>\n';
 
-describe('respostaDeSucesso — o SVG sai cru, e é o princípio nº1 que está em jogo', () => {
+describe('respostaDeSucesso, o SVG sai cru, e é o princípio nº1 que está em jogo', () => {
   it('devolve 200 com o SVG byte a byte igual ao que entrou', async () => {
     const resposta = respostaDeSucesso(SVG_DIFICIL);
 
@@ -42,12 +42,12 @@ describe('respostaDeSucesso — o SVG sai cru, e é o princípio nº1 que está 
     const resposta = respostaDeSucesso(SVG_DIFICIL);
     expect(resposta.headers.get('content-type')).toBe('image/svg+xml; charset=utf-8');
     // Sem isto, um CDN no meio do caminho serve variante velha depois de a zona ser
-    // remarcada — o mesmo calçado errado, num lugar onde ninguém olha.
+    // remarcada, o mesmo calçado errado, num lugar onde ninguém olha.
     expect(resposta.headers.get('cache-control')).toBe('no-store');
   });
 });
 
-describe('respostaDeErro — o envelope do contrato, e só ele', () => {
+describe('respostaDeErro, o envelope do contrato, e só ele', () => {
   const RELOGIO_FIXO = () => new Date('2026-09-08T10:30:00.000Z');
 
   it('usa o status da falha e devolve JSON parseável', async () => {

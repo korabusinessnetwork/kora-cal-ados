@@ -6,7 +6,7 @@
 // gerado.
 //
 // Todas as primitivas apontam para o MESMO accessor de propósito: é isso que torna verificável
-// a promessa de que duplicar malha não copia geometria — se `accessors` crescer, o teste vê.
+// a promessa de que duplicar malha não copia geometria, se `accessors` crescer, o teste vê.
 
 interface DescricaoDeNo {
   nome?: string;
@@ -21,7 +21,7 @@ interface DescricaoDeMalha {
 
 interface DescricaoDeMaterial {
   cor?: [number, number, number, number];
-  /** Cor base vinda de textura — o gêmeo do gradiente do SVG. */
+  /** Cor base vinda de textura, o gêmeo do gradiente do SVG. */
   textura?: boolean;
 }
 

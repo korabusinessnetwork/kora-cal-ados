@@ -3,7 +3,7 @@
 // A regra central deste arquivo é uma subtração: os 7 códigos do motor
 // (`src/lib/render/erros.ts`) NÃO entram aqui e não são editados lá. Aquele arquivo declara
 // que "mudar um código quebra cliente, então não muda", e ele é importado pelo editor
-// também — um código de transporte acrescentado lá viraria um estado impossível na tela
+// também, um código de transporte acrescentado lá viraria um estado impossível na tela
 // ("cor inválida" faz sentido no editor; "chave ausente", não).
 //
 // Então o vocabulário da API é a UNIÃO de dois conjuntos com donos diferentes:
@@ -28,7 +28,7 @@ export type CodigoDeTransporte =
 export type CodigoDeRespostaDaApi = CodigoDeErro | CodigoDeTransporte;
 
 /**
- * A falha já traduzida para HTTP — código, status e mensagem de tela.
+ * A falha já traduzida para HTTP, código, status e mensagem de tela.
  *
  * Carrega o `status` em vez de deixar o handler decidir: se a decisão de status ficasse no
  * ponto onde a falha é lançada, o mesmo código sairia como 409 num lugar e 500 noutro, e a
@@ -41,7 +41,7 @@ export class FalhaDaApi extends Error {
   readonly status: number;
 
   /**
-   * Cabeçalhos que o status exige — hoje só `Allow: POST` no 405. Um 405 sem `Allow` é o
+   * Cabeçalhos que o status exige, hoje só `Allow: POST` no 405. Um 405 sem `Allow` é o
    * tipo de detalhe que nenhum teste de unidade sente falta e que cliente HTTP bem escrito
    * usa para se corrigir sozinho.
    */

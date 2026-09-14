@@ -298,7 +298,7 @@ olhar: o que não tem teste no caminho crítico do editor, e o que acontece quan
 infraestrutura falha por baixo. O método foi o de sempre, sondar em vez de supor, e duas suspeitas
 morreram na sonda, registradas abaixo em "o que eu achei que era defeito e não era".
 
-### A27 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx:267` — **FEITO na rodada 3**
+### A27 | eixo: produto | onde: `src/palco3d/TelaDaComposicao.tsx:267`, **FEITO na rodada 3**
 
 - **hoje:** o configurador escolhe cor SÓ pelo seletor do sistema operacional. O único campo é um
   `<input type="color">`, e o hex ao lado é um `<code>`, texto morto. Não existe onde digitar
@@ -312,7 +312,7 @@ morreram na sonda, registradas abaixo em "o que eu achei que era defeito e não 
   como fazer entrar a cor certa.
 - valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A26 | eixo: qualidade | onde: `src/features/zonas/hooks/useMarcacaoDeZona.ts:37` e `usePreviewDeCor.ts:43` — **FEITO na rodada 3**
+### A26 | eixo: qualidade | onde: `src/features/zonas/hooks/useMarcacaoDeZona.ts:37` e `usePreviewDeCor.ts:43`, **FEITO na rodada 3**
 
 - **hoje:** os dois hooks descartam o estado quando o `productId` muda, e esse descarte é a única
   coisa que impede a marcação de um modelo de ser gravada em outro e a cor de um calçado de pintar
@@ -327,7 +327,7 @@ morreram na sonda, registradas abaixo em "o que eu achei que era defeito e não 
   com sonda (`ContextoDeSessao.test.tsx`), sem testing-library e sem `vi.mock`.
 - valor: 4 | esforço: 2 | risco: 1 | **score: 4**
 
-### A29 | eixo: qualidade | onde: `src/lib/render/lerRegrasCss.ts:52` — **FEITO na rodada 3**
+### A29 | eixo: qualidade | onde: `src/lib/render/lerRegrasCss.ts:52`, **FEITO na rodada 3**
 
 - **hoje:** `calcularEspecificidade` decide qual regra CSS ganha quando duas pintam o mesmo
   elemento, e é ela que define a cor do canônico que vai para o Storage. Os testes cobrem id contra
@@ -342,7 +342,7 @@ morreram na sonda, registradas abaixo em "o que eu achei que era defeito e não 
   está descoberta.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A30 | eixo: ux | onde: `src/palco3d/palco3d.css` (`.palco3d__colunas`) — **FEITO na rodada 3**
+### A30 | eixo: ux | onde: `src/palco3d/palco3d.css` (`.palco3d__colunas`), **FEITO na rodada 3**
 
 - **hoje:** em 375 px, na tela da composição, o palco 3D começa a **1158 px** do topo, numa página
   de 2116 px. Quem troca a cor de uma peça mexe num controle lá em cima e o calçado está três telas
@@ -353,7 +353,7 @@ morreram na sonda, registradas abaixo em "o que eu achei que era defeito e não 
   `scrollHeight` do documento, nas duas telas do palco.
 - valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 
-### A28 | eixo: robustez | onde: `src/palco3d/PalcoDeModelo3d.tsx:236` — **FEITO na rodada 3**
+### A28 | eixo: robustez | onde: `src/palco3d/PalcoDeModelo3d.tsx:236`, **FEITO na rodada 3**
 
 - **hoje:** não há escuta de `webglcontextlost`. Contexto WebGL se perde na vida real: reset de
   driver, troca de GPU em notebook híbrido, contextos demais abertos. Quando acontece, o painel
@@ -386,7 +386,7 @@ que ninguém escolheu é um anel que ninguém garante em outro navegador, não p
 foco sumir.
 valor: 2 | esforço: 2 | risco: 1 | **score: 0**
 
-### A33 | eixo: qualidade | o baseline pisca vermelho sozinho — **FEITO na rodada 3**
+### A33 | eixo: qualidade | o baseline pisca vermelho sozinho, **FEITO na rodada 3**
 
 `testes-de-navegador/corNaTela.test.ts > trocar a cor de uma zona muda só aquela peça` reprovou
 sozinho, sem ninguém ter tocado no código, com **"a sola não ficou vermelha: expected undefined to
@@ -1186,7 +1186,7 @@ valor: 3 | esforço: 1 | risco: 1 | **score: 3**
 ### A62 | eixo: qualidade | onde: 23 textos em `src/` e `api/` (JSX e mensagens de erro)
 
 **hoje:** a regra de escrita do dono proíbe travessão em texto em português, e 23 linhas de código
-que NÃO são comentário têm travessão. Entre elas a frase da tela de login ("O acesso é por marca —
+que NÃO são comentário têm travessão. Entre elas a frase da tela de login ("O acesso é por marca,
 você só enxerga..."), a ajuda do painel de zonas do esboço, três mensagens do formulário de zona e
 mensagens de erro da API e do motor, que chegam a quem integra. Nenhuma guarda impede um novo.
 
@@ -1194,7 +1194,7 @@ mensagens de erro da API e do motor, que chegam a quem integra. Nenhuma guarda i
 varredura reprova travessão em literal de texto e em texto de JSX de `src/` e `api/`, deixando
 comentário de fora, porque comentário não é lido por quem usa.
 
-**evidência:** `grep` de "—" fora de linhas de comentário, 23 ocorrências.
+**evidência:** `grep` de "travessão" fora de linhas de comentário, 23 ocorrências.
 
 valor: 3 | esforço: 2 | risco: 1 | **score: 2**
 

@@ -1,9 +1,9 @@
-# ADR-008 — Calçado gerado por prompt sobre **acervo de peças**, e por que a zona nasce pronta
+# ADR-008, Calçado gerado por prompt sobre **acervo de peças**, e por que a zona nasce pronta
 
-**Status**: Aceito — **implementação bloqueada no acervo** (ver "O gargalo mudou de lugar")
+**Status**: Aceito, **implementação bloqueada no acervo** (ver "O gargalo mudou de lugar")
 **Data**: 2026-09-09
 **Decisores**: Matheus Bonato
-**Supersede**: ADR-001 **parcialmente** — o "MVP sem componente de IA" deixa de valer para o
+**Supersede**: ADR-001 **parcialmente**, o "MVP sem componente de IA" deixa de valer para o
 modo generativo. Nada do ADR-001 muda para produto SVG. Não supersede o ADR-007: **completa**
 ele, respondendo a pergunta que o deixou bloqueado ("de onde vem o modelo 3D?").
 **Supersedido por**: (nenhum)
@@ -16,7 +16,7 @@ Em 2026-09-09, depois de o ADR-007 registrar a escolha por 3D, o dono descreveu 
 que ele quer, e ele não é o produto que a documentação descreve:
 
 > O designer de calçado entra sem nada na mão. Escreve um prompt e o sistema **gera** um
-> calçado — tênis, chinelo, o que for. Não gostou: escreve prompts **por parte** ("sola mais
+> calçado, tênis, chinelo, o que for. Não gostou: escreve prompts **por parte** ("sola mais
 > robusta", "cadarço encerado preto"). Gira o modelo com o mouse, vê todas as partes, e edita
 > cada uma individualmente.
 
@@ -31,15 +31,15 @@ de ontem construiria outro produto.
 Quando o designer escreve *"sola mais robusta"*, o que muda: a **aparência** da sola, ou a
 **forma** dela? Três respostas possíveis foram postas ao dono, e ele escolheu a do meio:
 
-1. só aparência (cor, material, textura) — barato, e não é o que ele quer;
-2. **a forma, escolhida de um acervo de peças** — ← **escolhida**;
-3. a forma gerada do zero por IA de 3D — o que ele descreveu ao pé da letra.
+1. só aparência (cor, material, textura), barato, e não é o que ele quer;
+2. **a forma, escolhida de um acervo de peças**, ← **escolhida**;
+3. a forma gerada do zero por IA de 3D, o que ele descreveu ao pé da letra.
 
 A rota 3 é a fronteira, e vale registrar por quê, porque é o motivo de este ADR existir. Gerar
 um calçado 3D inteiro por prompt já funciona razoavelmente hoje. O problema é que a saída vem
 como **uma malha fundida**, com textura assada por cima: sem "sola", sem "cadarço", sem
 "cabedal" separados. E sem partes separadas não há clicar numa parte, não há editar uma parte,
-e não há zona — ou seja, some metade do produto. Regenerar só a sola de modo que ela continue
+e não há zona, ou seja, some metade do produto. Regenerar só a sola de modo que ela continue
 encaixando no resto é mais difícil ainda.
 
 **A separação em partes é o problema central deste produto, não um detalhe de implementação.**
@@ -49,9 +49,9 @@ A rota 2 o resolve por construção, em vez de apostar que a tecnologia o resolv
 
 ## Decisão
 
-### D1 — Existe um **acervo de peças**, e a IA **escolhe e estiliza**; nunca esculpe
+### D1, Existe um **acervo de peças**, e a IA **escolhe e estiliza**; nunca esculpe
 
-O sistema mantém um acervo de peças de calçado em glTF — solas, entressolas, cabedais,
+O sistema mantém um acervo de peças de calçado em glTF, solas, entressolas, cabedais,
 cadarços, línguas, ilhoses, contrafortes, biqueiras, logos. Cada peça é modelada uma vez,
 normalizada uma vez (ADR-007 D4/D5: nome próprio, material próprio) e reusada em qualquer
 número de produtos.
@@ -63,11 +63,11 @@ devolve quais usar; ele **nunca inventa uma peça**.
 Isto tem uma consequência de segurança que é o motivo de a decisão ser esta e não outra: a
 saída do modelo é **validada contra o acervo** antes de qualquer coisa. Id de peça que não
 existe é **recusa explícita**, nunca um calçado com um buraco no lugar da sola. É a mesma
-regra que o projeto já aplica em toda parte — "zona não aplicada é erro, nunca aviso"
-(ADR-004) — agora aplicada à saída de um modelo generativo, que é justamente o componente do
+regra que o projeto já aplica em toda parte, "zona não aplicada é erro, nunca aviso"
+(ADR-004), agora aplicada à saída de um modelo generativo, que é justamente o componente do
 sistema em que não se pode confiar por construção.
 
-### D2 — O calçado gerado é uma **composição**: dado pequeno, não geometria
+### D2, O calçado gerado é uma **composição**: dado pequeno, não geometria
 
 Uma composição é a lista de peças escolhidas (uma por categoria) mais a cor/material de cada
 uma. É JSON de algumas linhas. **Não é um arquivo 3D**: o 3D é montado a partir dela, no
@@ -77,17 +77,17 @@ Isto é o análogo exato do que o projeto já faz: hoje uma variante é `zone_co
 canônico, e não um SVG guardado. Amanhã um calçado gerado é uma composição sobre o acervo, e
 não uma malha guardada. As propriedades que vêm de graça:
 
-- **gerar é barato** — uma chamada de modelo de linguagem que devolve algumas linhas de JSON.
+- **gerar é barato**, uma chamada de modelo de linguagem que devolve algumas linhas de JSON.
   Sem GPU, sem processo longo, sem fila, sem binário nativo. `memory/restrictions.md` continua
   valendo quase inteiro;
-- **reprodutível** — a mesma composição sempre monta o mesmo calçado. Um calçado gerado pode
+- **reprodutível**, a mesma composição sempre monta o mesmo calçado. Um calçado gerado pode
   ser aberto de novo daqui a um ano;
-- **diffável** — "o que mudou entre esta versão e a anterior" é uma linha de JSON, não uma
+- **diffável**, "o que mudou entre esta versão e a anterior" é uma linha de JSON, não uma
   comparação de malhas. Editar uma parte é trocar um campo;
-- **leve de guardar e de mandar** — o acervo é pesado e é o mesmo para todo mundo; o que é por
+- **leve de guardar e de mandar**, o acervo é pesado e é o mesmo para todo mundo; o que é por
   produto é minúsculo.
 
-### D3 — **Cada peça é uma zona.** A etapa de marcar zona desaparece no produto gerado
+### D3, **Cada peça é uma zona.** A etapa de marcar zona desaparece no produto gerado
 
 Este é o ganho que quase compensa o resto do custo sozinho.
 
@@ -103,10 +103,10 @@ composição. Clicar numa peça para editá-la é raycast direto (ADR-007 D4).
 O editor de marcação **continua existindo inteiro** para produto SVG trazido pela marca. Ele
 não é jogado fora; ele deixa de ser obrigatório.
 
-### D4 — O acervo é organizado por **forma**, e peça só combina com peça da mesma forma
+### D4, O acervo é organizado por **forma**, e peça só combina com peça da mesma forma
 
 Peças precisam encaixar. Uma sola só serve num cabedal se as duas foram modeladas sobre a
-mesma **forma** — o molde do pé, que na indústria calçadista é literalmente o que define se
+mesma **forma**, o molde do pé, que na indústria calçadista é literalmente o que define se
 duas peças casam.
 
 Portanto o acervo não é "um monte de solas": é um conjunto de formas, e cada forma tem suas
@@ -115,24 +115,24 @@ estado inválido, recusado na validação de D1.
 
 Isto é a restrição real de crescimento do acervo, e é melhor escrevê-la agora: **cada forma
 nova multiplica o trabalho de modelagem**. Uma forma de tênis não serve para chinelo. "Qualquer
-sapato" — o que o dono pediu — é, em termos de acervo, uma forma por família de calçado.
+sapato", o que o dono pediu, é, em termos de acervo, uma forma por família de calçado.
 
-### D5 — Os dois modos **convivem**, como o ADR-007 já decidiu para SVG × 3D
+### D5, Os dois modos **convivem**, como o ADR-007 já decidiu para SVG × 3D
 
-Um produto é **trazido** (a marca sobe o SVG dela, o time marca zonas, a API escala — tudo o
+Um produto é **trazido** (a marca sobe o SVG dela, o time marca zonas, a API escala, tudo o
 que já existe e está testado) **ou gerado** (composição sobre o acervo). Nenhum produto
 existente é migrado, nenhuma linha do motor atual é tocada, e a Fase 1 continua vendável
 enquanto o modo generativo amadurece.
 
 A coluna de tipo em `products` que o ADR-007 D6 já previa passa a distinguir três coisas, não
-duas — e essa é decisão de schema, para a spec, não para aqui.
+duas, e essa é decisão de schema, para a spec, não para aqui.
 
-### D6 — Acervo base é da Kora; acervo do tenant é **privado**, sob RLS
+### D6, Acervo base é da Kora; acervo do tenant é **privado**, sob RLS
 
 O acervo tem duas camadas:
 
-- **acervo base** — modelado ou licenciado pela Kora, visível a todos os tenants;
-- **acervo do tenant** — peças que a própria marca sobe, visíveis **só** a ela.
+- **acervo base**, modelado ou licenciado pela Kora, visível a todos os tenants;
+- **acervo do tenant**, peças que a própria marca sobe, visíveis **só** a ela.
 
 A segunda camada não é um extra: sem ela, a marca que subir sua sola proprietária a estaria
 entregando ao concorrente que usa o mesmo sistema. `memory/identity.md` chama isolamento entre
@@ -140,11 +140,11 @@ tenants concorrentes de "inegociável", e `restrictions.md` o marca CRÍTICA. To
 acervo nasce com RLS, e a peça de um tenant nunca aparece no catálogo que vai para o modelo de
 linguagem de outro.
 
-### D7 — Variação paramétrica é o que impede o acervo de parecer LEGO
+### D7, Variação paramétrica é o que impede o acervo de parecer LEGO
 
 Peças discretas produzem combinações discretas, e um designer percebe isso na terceira
-tentativa. A saída é dar a cada peça alguns **parâmetros contínuos** — altura da entressola,
-espessura da sola, largura da biqueira — aplicados como transformação, não como malha nova.
+tentativa. A saída é dar a cada peça alguns **parâmetros contínuos**, altura da entressola,
+espessura da sola, largura da biqueira, aplicados como transformação, não como malha nova.
 
 Com isso "sola mais robusta" não precisa achar outra sola no acervo: pode ser a mesma peça com
 o parâmetro de espessura mais alto. Um acervo pequeno passa a cobrir um espaço grande, e é
@@ -156,19 +156,19 @@ Os parâmetros entram na composição como números, mantendo D2 inteiro.
 
 ## Alternativas Consideradas
 
-### 1. Text-to-3D de verdade — gerar a malha do calçado por prompt
+### 1. Text-to-3D de verdade, gerar a malha do calçado por prompt
 
 - **Prós**: é literalmente o que foi pedido; silhueta genuinamente nova, sem teto de acervo
 - **Contras**: a saída é malha fundida com textura assada. Separar em partes semânticas
   ("isto é a sola") é pesquisa recente e não confiável em produção; regenerar uma peça que
   continue encaixando é mais difícil ainda. Custo por geração, latência de minutos, e
-  dependência de serviço pago — os três contra `restrictions.md`
+  dependência de serviço pago, os três contra `restrictions.md`
 - **Descartado porque**: **o dono escolheu a rota do acervo.** E registrado aqui inteiro porque
   D2 é uma abstração sobre *de onde vem a geometria*: no dia em que a separação em partes for
   confiável, uma peça gerada entra na composição no lugar de uma peça do acervo **sem mudar o
   editor, as zonas ou a API**. Esta decisão não fecha aquela porta; constrói o corredor até ela
 
-### 2. Só aparência — a forma vem da geração inicial e nunca muda
+### 2. Só aparência, a forma vem da geração inicial e nunca muda
 
 - **Prós**: o mais barato de todos; construível em cima do ADR-007 sem nada novo
 - **Contras**: "sola mais robusta" viraria "sola vermelha". O designer descobre o teto no
@@ -199,8 +199,8 @@ Os parâmetros entram na composição como números, mantendo D2 inteiro.
 
 ### Positivas
 
-- **A zona nasce pronta** (D3). O passo mais trabalhoso do produto atual — marcar zona
-  clicando, com todas as suas recusas e o BUG-013/BUG-014 em volta — simplesmente não existe no
+- **A zona nasce pronta** (D3). O passo mais trabalhoso do produto atual, marcar zona
+  clicando, com todas as suas recusas e o BUG-013/BUG-014 em volta, simplesmente não existe no
   modo gerado
 - **Sobreposição de zonas fica impossível por construção** no modo gerado: duas peças nunca
   compartilham malha. Um erro de estado inteiro deixa de ser alcançável
@@ -232,34 +232,34 @@ Os parâmetros entram na composição como números, mantendo D2 inteiro.
 ## O gargalo mudou de lugar: agora é o acervo
 
 O ADR-007 ficou bloqueado em "não existe um glTF neste projeto". Este ADR responde de onde ele
-vem — e move o bloqueio para um lugar diferente, que precisa ser dito com todas as letras:
+vem, e move o bloqueio para um lugar diferente, que precisa ser dito com todas as letras:
 
 **A dificuldade deste produto deixou de ser técnica e passou a ser de acervo.** Nenhuma linha
 de código aqui é difícil. O que é difícil é ter, para **uma** forma de tênis, um conjunto de
 peças que encaixam entre si, cada uma com nome próprio, material próprio e um punhado de
-parâmetros — modeladas ou licenciadas.
+parâmetros, modeladas ou licenciadas.
 
 A recomendação, que é a menor coisa capaz de provar o produto inteiro: **uma forma de tênis,
 com cerca de 3 opções por categoria** (3 solas, 3 cabedais, 3 cadarços, 3 línguas, e o resto
 fixo). São ~15 peças. Isso já dá centenas de combinações com D7, é suficiente para o designer
 sentir se o produto funciona, e é o análogo exato do papel que o `tenis-demo.svg` cumpre hoje.
 
-Enquanto essas peças não existirem, o modo gerado não pode ser construído com honestidade —
+Enquanto essas peças não existirem, o modo gerado não pode ser construído com honestidade,
 pelo mesmo motivo que o ADR-007 registrou: seria um motor que nunca viu o combustível.
 
 ---
 
 ## Referências
 
-- `docs/08_DECISOES/adr-007-modelo-3d-manipulavel.md` — glTF, modo cor chapa, zona como lista de
+- `docs/08_DECISOES/adr-007-modelo-3d-manipulavel.md`, glTF, modo cor chapa, zona como lista de
   nomes de malha, material separado no provisionamento. Este ADR **depende** dele inteiro
-- `docs/08_DECISOES/adr-001-stack-e-motor-de-render.md` — o "MVP sem IA" que este ADR supera no
+- `docs/08_DECISOES/adr-001-stack-e-motor-de-render.md`, o "MVP sem IA" que este ADR supera no
   modo generativo
-- `docs/08_DECISOES/adr-002-multi-tenant-white-label.md` — a regra que D6 aplica ao acervo
-- `docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md` — "zona não aplicada é
+- `docs/08_DECISOES/adr-002-multi-tenant-white-label.md`, a regra que D6 aplica ao acervo
+- `docs/08_DECISOES/adr-004-contrato-de-zona-e-normalizacao-de-svg.md`, "zona não aplicada é
   erro, nunca aviso", que D1 estende à saída do modelo de linguagem
-- `memory/identity.md` — a identidade que este ADR obriga a reescrever
-- `memory/restrictions.md` — a proibição de GPU/processo longo, que D2 preserva
+- `memory/identity.md`, a identidade que este ADR obriga a reescrever
+- `memory/restrictions.md`, a proibição de GPU/processo longo, que D2 preserva
 
 ---
 

@@ -2,7 +2,7 @@
 //
 // `tenant_id` explícito mesmo com RLS: a policy já limita o resultado aos tenants do
 // usuário, mas quem pertence a DUAS marcas veria as duas listas misturadas sem este
-// filtro — e é exatamente esse usuário que a Etapa 2 passou a existir para servir.
+// filtro, e é exatamente esse usuário que a Etapa 2 passou a existir para servir.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 

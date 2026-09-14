@@ -1,5 +1,5 @@
 // A tela de produtos: a lista, ou o modelo aberto com o editor de zonas dentro.
-// O estado daqui é só "qual produto está aberto" — o estado do editor mora em
+// O estado daqui é só "qual produto está aberto", o estado do editor mora em
 // `EditorDeZonas`, na feature de zonas, que é quem entende de zona.
 
 import { useMemo, useState } from 'react';
@@ -32,7 +32,7 @@ export function TelaDeProdutos({ tenantId }: { tenantId: string }) {
 }
 
 /**
- * Componente à parte porque `useAssetBase` só pode ser chamado quando há produto aberto —
+ * Componente à parte porque `useAssetBase` só pode ser chamado quando há produto aberto,
  * hook não pode ficar atrás de um `if`.
  */
 function ProdutoAberto({

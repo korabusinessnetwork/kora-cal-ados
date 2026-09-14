@@ -1,6 +1,6 @@
 // Ponto de entrada do app. Monta o `App`, que decide entre a área protegida (sessão +
 // tenant) e as telas sem banco (o esboço do motor e o palco 3D). O CSS entra aqui, uma vez, para nenhum componente
-// importar estilo — a separação que o white-label exige (CLAUDE.md).
+// importar estilo, a separação que o white-label exige (CLAUDE.md).
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

@@ -3,14 +3,14 @@
 -- inteiro sem reconstruir migration por migration.
 --
 -- Resultante de:
---   20260812_schema_inicial.sql         — tabelas + RLS inicial            (APLICADA)
---   20260812_correcao_rls_e_storage.sql — recursão, papéis e Storage       (APLICADA)
---   20260908_chave_de_api_por_tenant.sql — tenant_api_keys (ADR-006)   (NÃO APLICADA)
+--   20260812_schema_inicial.sql        , tabelas + RLS inicial            (APLICADA)
+--   20260812_correcao_rls_e_storage.sql, recursão, papéis e Storage       (APLICADA)
+--   20260908_chave_de_api_por_tenant.sql, tenant_api_keys (ADR-006)   (NÃO APLICADA)
 --
 -- As duas de agosto estão APLICADAS num projeto Supabase real desde 2026-09-05, provado
 -- por supabase/tests/isolamento.test.ts rodando 8/8 verde contra ele (BUG-006..009
 -- fechados). A de 2026-09-08 é a única deste snapshot que ainda NÃO foi executada em
--- banco nenhum — está escrita e revisada, não aplicada; as consultas de conferência que
+-- banco nenhum, está escrita e revisada, não aplicada; as consultas de conferência que
 -- provam as regras dela estão no fim do próprio arquivo da migration.
 -- Ao rodar uma migration nova, atualize este snapshot no mesmo commit.
 
@@ -19,10 +19,10 @@
 -- tenant_members   (id, tenant_id, user_id, papel owner|membro, created_at)
 -- products         (id, tenant_id, nome, base_asset_path, created_at)
 -- product_zones    (id, product_id, tenant_id, zone_key, svg_selector, label, cor_default,
---                   created_at)   — `created_at` é a única ordenação estável desta tabela
+--                   created_at)  , `created_at` é a única ordenação estável desta tabela
 -- variants         (id, product_id, tenant_id, zone_colors jsonb, rendered_path, created_at)
 -- tenant_api_keys  (id, tenant_id, prefixo único, hash, label, created_by, created_at,
---                   last_used_at, revoked_at)   — chave de API do tenant, ADR-006
+--                   last_used_at, revoked_at)  , chave de API do tenant, ADR-006
 --
 -- DDL completo: 20260812_schema_inicial.sql, 20260908_chave_de_api_por_tenant.sql e
 -- 20260912_indice_em_chave_estrangeira.sql
@@ -59,16 +59,16 @@
 --
 -- | Tabela          | select            | insert        | update          | delete |
 -- |-----------------|-------------------|---------------|-----------------|--------|
--- | tenants         | membro            | (service_role)| owner           | —      |
--- | tenant_members  | membro            | owner         | —               | owner  |
+-- | tenants         | membro            | (service_role)| owner           |,      |
+-- | tenant_members  | membro            | owner         |,               | owner  |
 -- | products        | membro            | membro        | membro          | owner  |
 -- | product_zones   | membro            | membro        | membro          | owner  |
--- | variants        | membro            | membro        | —               | owner  |
--- | tenant_api_keys | owner, sem `hash` | (service_role)| owner, só `revoked_at` | — |
+-- | variants        | membro            | membro        |,               | owner  |
+-- | tenant_api_keys | owner, sem `hash` | (service_role)| owner, só `revoked_at` | - |
 --
 -- tenant_api_keys é a única tabela onde policy não basta: RLS filtra linha, não coluna.
 -- A coluna `hash` fica fora do `grant select`, então `select *` nela dá permission denied
--- para `authenticated` — desejado, e coerente com a proibição de `select *` em tabela
+-- para `authenticated`, desejado, e coerente com a proibição de `select *` em tabela
 -- sensível (CLAUDE.md). `update` é privilégio de coluna em `revoked_at` só: revogar é
 -- preencher a data, nunca apagar a linha (ADR-006 D4), e por isso não há delete nenhum.
 --
@@ -77,4 +77,4 @@
 --
 -- Criação de tenant e criação de chave de API são provisionadas por script com
 -- service_role na Fase 1 (venda manual).
--- service_role nunca no front — só em servidor/função.
+-- service_role nunca no front, só em servidor/função.

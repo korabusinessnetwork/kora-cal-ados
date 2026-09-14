@@ -71,7 +71,7 @@ describe('listar zonas do produto', () => {
 
   it('recusa id vazio ANTES da rede', async () => {
     // `eq('product_id', '')` volta lista vazia, e lista vazia aqui significa "este produto não
-    // tem zona nenhuma" — uma afirmação sobre o produto, não um engano de chamada. O editor
+    // tem zona nenhuma", uma afirmação sobre o produto, não um engano de chamada. O editor
     // mostraria "nenhuma zona mapeada" sobre um modelo inteiro mapeado.
     const { cliente, pedido } = clienteFalso({ data: [] });
 

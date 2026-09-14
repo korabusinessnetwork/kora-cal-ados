@@ -4,17 +4,17 @@
 // mesmas, porque o problema é o mesmo.
 //   1. todo nome é seguro para o formato em que o seletor de zona é guardado
 //   2. todo nome é único no documento
-//   3. todo nó endereçável TEM nome — o que veio anônimo ganha `malha-N`
+//   3. todo nó endereçável TEM nome, o que veio anônimo ganha `malha-N`
 //
 // A garantia 3 é o que torna a zona possível: exportador de 3D manda nó sem nome com a mesma
 // frequência com que o Illustrator manda path sem id, e sem nome não existe zona endereçável.
-// Quem cunha é a normalização, nunca o editor — pela mesma razão do ADR-005: se o editor
+// Quem cunha é a normalização, nunca o editor, pela mesma razão do ADR-005: se o editor
 // regravasse o modelo, dois membros marcando ao mesmo tempo sobrescreveriam o mapeamento um
 // do outro em silêncio.
 //
 // Por que a garantia 1 existe se aqui não há CSS: o seletor de zona 3D é uma **lista** de
 // nomes exatos (ADR-007 D4). Lista implica separador, e um nome que contenha o separador
-// parte a lista em dois endereços errados — o mesmo modo de falha que `#a.b` teria no SVG,
+// parte a lista em dois endereços errados, o mesmo modo de falha que `#a.b` teria no SVG,
 // por outro caminho. Ser conservador aqui custa um hífen no nome e evita uma zona que aponta
 // para o lugar errado sem ninguém ver.
 
@@ -25,15 +25,15 @@ export interface RelatorioDeNome {
   nomesAtribuidos: string[];
 }
 
-/** Sem vírgula, sem espaço, sem aspas — o que sobrevive a qualquer formato de lista. */
+/** Sem vírgula, sem espaço, sem aspas, o que sobrevive a qualquer formato de lista. */
 const NOME_SEGURO = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 
 /**
  * Aplica as três garantias sobre `nos`, no lugar.
  *
  * `enderecaveis` são os índices dos nós que precisam de nome. Os demais **também** entram na
- * desambiguação quando já têm nome — um nó de transformação chamado `sola` ocuparia o nome
- * que uma malha vai querer —, mas nunca ganham nome cunhado.
+ * desambiguação quando já têm nome, um nó de transformação chamado `sola` ocuparia o nome
+ * que uma malha vai querer, mas nunca ganham nome cunhado.
  */
 export function aplicarPoliticaDeNome(
   nos: NoDoGltf[],
@@ -43,7 +43,7 @@ export function aplicarPoliticaDeNome(
   const vistos = new Set<string>();
 
   // Passada 1: quem já tem nome. Ordem do array é a ordem de documento, e é ela que decide
-  // quem fica com o nome original numa colisão — estável entre execuções, que é o que impede
+  // quem fica com o nome original numa colisão, estável entre execuções, que é o que impede
   // o seletor gravado no banco de repontar depois de uma renormalização.
   for (const no of nos) {
     const nome = no.name;
@@ -68,7 +68,7 @@ export function aplicarPoliticaDeNome(
  *
  * Só nó endereçável entra na contagem. Cunhar em nó sem malha (junta de esqueleto, grupo de
  * transformação, câmera) gastaria números de `malha-N` e deslocaria o nome de todas as malhas
- * seguintes — e nome deslocado repointaria um seletor de zona já gravado. É o mesmo cuidado
+ * seguintes, e nome deslocado repointaria um seletor de zona já gravado. É o mesmo cuidado
  * que `cunharIdsAusentes` documenta para o SVG, pelo lado oposto: lá se cunha em `fill="none"`
  * de propósito para a numeração não depender da cor; aqui se recusa a cunhar no que não é
  * malha para a numeração não depender da estrutura de cena.
@@ -110,7 +110,7 @@ function tornarSeguro(nome: string): string {
   return /^[A-Za-z_]/.test(limpo) ? limpo : `malha-${limpo}`;
 }
 
-/** `nome`, `nome-2`, `nome-3`… — o mesmo sufixo que `idDeElemento.ts` já usa. */
+/** `nome`, `nome-2`, `nome-3`…, o mesmo sufixo que `idDeElemento.ts` já usa. */
 function primeiroLivre(desejado: string, vistos: Set<string>): string {
   if (!vistos.has(desejado)) return desejado;
 

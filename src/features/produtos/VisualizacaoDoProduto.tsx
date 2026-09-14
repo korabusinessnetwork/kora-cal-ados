@@ -2,7 +2,7 @@
 // zonas entra.
 //
 // Ela não desenha o calçado e não conhece zona. Quem desenha é `PalcoDeMarcacao`, dentro de
-// `EditorDeZonas`, passando o arquivo por `gerarVarianteDeCor` — o mesmo motor da API. Até a
+// `EditorDeZonas`, passando o arquivo por `gerarVarianteDeCor`, o mesmo motor da API. Até a
 // Etapa 3 esta tela injetava o canônico ela mesma; com o editor ao lado seriam dois lugares
 // desenhando o mesmo calçado e só um passando pelo motor, que é o princípio nº1 quebrado.
 //
@@ -15,7 +15,7 @@ export interface PropsDaVisualizacaoDoProduto {
   nome: string;
   estado: 'carregando' | 'erro' | 'pronto';
   erro: string | null;
-  /** Quantos elementos aceitam cor — exatamente o que o editor pode marcar. */
+  /** Quantos elementos aceitam cor, exatamente o que o editor pode marcar. */
   elementosMarcaveis: number | null;
   /** O editor de zonas montado. Quantas zonas existem é assunto do painel, dentro dele. */
   editor: ReactNode;

@@ -1,6 +1,6 @@
-# 09 — BACKLOG · Kora Calçados (codinome)
+# 09, BACKLOG · Kora Calçados (codinome)
 
-> Features, bugs, MVP, runbooks, handoffs — tudo que está por fazer ou orientar.
+> Features, bugs, MVP, runbooks, handoffs, tudo que está por fazer ou orientar.
 
 ## O que vive aqui
 
@@ -20,12 +20,12 @@
 
 ## Arquivos sugeridos
 
-- `features.md` — features planejadas, prioridade, esforço estimado, dono
-- `bugs.md` — bugs conhecidos, status (aberto/em andamento/fechado), severity
-- `mvp.md` — escopo de lançamento, o que entra/não entra v1
-- `runbook-deploy.md` — procedimento passo-a-passo de deploy
-- `runbook-incident.md` — como responder a incidente, escalação
-- `handoff-para-equipe.md` — documentação técnica para transferência
+- `features.md`, features planejadas, prioridade, esforço estimado, dono
+- `bugs.md`, bugs conhecidos, status (aberto/em andamento/fechado), severity
+- `mvp.md`, escopo de lançamento, o que entra/não entra v1
+- `runbook-deploy.md`, procedimento passo-a-passo de deploy
+- `runbook-incident.md`, como responder a incidente, escalação
+- `handoff-para-equipe.md`, documentação técnica para transferência
 
 ## Como preencher
 
@@ -34,10 +34,10 @@
 3. **Bugs nunca morrem em silêncio**: registra, marca severidade/prioridade
 4. **Runbooks salvam vidas**: procedimentos críticos, documentados, testados
 5. **Dívida técnica é legítima**: registra, marca como "tech debt", prioriza
-6. **Nada zumbi**: conteúdo vivo ou marcado obsoleto/posposto — zero ambiguidade
+6. **Nada zumbi**: conteúdo vivo ou marcado obsoleto/posposto, zero ambiguidade
 
 ## Ligações
 
-- Ferramenta de gestão (GitHub Issues, Jira, Linear) — puxe dados daqui pro backlog
-- `memory/roadmap.md` — roadmap de produto (visão 3–6 meses)
-- `05_FLUXOS/` — fluxos que features implementam
+- Ferramenta de gestão (GitHub Issues, Jira, Linear), puxe dados daqui pro backlog
+- `memory/roadmap.md`, roadmap de produto (visão 3–6 meses)
+- `05_FLUXOS/`, fluxos que features implementam

@@ -2,12 +2,12 @@
 // tem retorno): a FORMA do pedido enviado ao banco, e o fato de que nenhuma falha escapa.
 //
 // A forma importa porque um filtro errado aqui não dá erro na tela: `.eq('prefixo', …)` no
-// lugar de `.eq('id', …)` continuaria "funcionando" — o prefixo é único hoje — e passaria a
+// lugar de `.eq('id', …)` continuaria "funcionando", o prefixo é único hoje, e passaria a
 // depender de um dado que veio pelo header da requisição. Por isso os testes afirmam tabela,
 // operação, campos e filtros, no molde de `src/features/zonas/gravarZonaNoBanco.test.ts`.
 //
 // O engolir-tudo importa porque esta escrita roda DEPOIS de a variante já ter sido gerada.
-// Qualquer exceção que escape daqui transforma um 200 pronto em 500 — e, no caso da promessa
+// Qualquer exceção que escape daqui transforma um 200 pronto em 500, e, no caso da promessa
 // rejeitada, derruba o processo inteiro, levando junto a requisição seguinte, que é de outro
 // tenant. Sem rede em nenhum teste: cliente falso montado à mão.
 
@@ -22,7 +22,7 @@ interface PedidoObservado {
   filtros: Array<[string, unknown]>;
 }
 
-/** O que o `.eq()` final devolve — é aí que o módulo decide se observou a promessa ou não. */
+/** O que o `.eq()` final devolve, é aí que o módulo decide se observou a promessa ou não. */
 type RespostaDoPedido = unknown;
 
 function clienteFalso(resposta: RespostaDoPedido) {
@@ -89,7 +89,7 @@ describe('a forma do pedido enviado ao banco', () => {
 
   it('escreve só `last_used_at`, e nenhuma outra coluna junto', async () => {
     // Um campo a mais neste update é uma coluna sobrescrita por engano numa escrita que
-    // ninguém observa — `revoked_at` aqui reviveria uma chave revogada, em silêncio.
+    // ninguém observa, `revoked_at` aqui reviveria uma chave revogada, em silêncio.
     const { cliente, pedido } = clienteFalso(RESPOSTA_OK);
 
     registrarUsoDaChave(cliente, 'chave-1');
@@ -162,18 +162,18 @@ describe('nenhuma falha escapa para o handler', () => {
   });
 });
 
-describe('a promessa rejeitada é observada — o teste mais importante deste arquivo', () => {
+describe('a promessa rejeitada é observada, o teste mais importante deste arquivo', () => {
   // O QUE ESTES DOIS TESTES PROVAM, E O QUE NÃO PROVAM.
   //
   // Provam (1) que o módulo encadeia um tratador na promessa devolvida pelo cliente, e (2)
   // que o Node, ao fim do ciclo, não classificou aquela rejeição como `unhandledRejection`.
   // Em processo sem tratador global instalado, essa classificação é exatamente o que derruba
-  // o processo em Node — é o modo de falha que se quer impedir.
+  // o processo em Node, é o modo de falha que se quer impedir.
   //
   // NÃO provam que o processo morreria sem o tratamento: o próprio vitest instala um ouvinte
   // de `unhandledRejection`, então aqui a queda nunca aconteceria de verdade. O que se
   // observa é a CLASSIFICAÇÃO do Node, que é o gatilho da queda, não a queda em si. Para
-  // provar a queda seria preciso subir um processo Node separado — custo alto para observar
+  // provar a queda seria preciso subir um processo Node separado, custo alto para observar
   // um comportamento que é do runtime, não deste módulo.
 
   it('encadeia um tratador na promessa devolvida pelo cliente', async () => {
@@ -239,7 +239,7 @@ describe('a assinatura que impede o `await` acidental', () => {
 describe('o aviso de falha nunca carrega credencial', () => {
   it('registra o id da linha e a causa, jamais chave, segredo ou hash', async () => {
     // O `id` é uuid da linha e pode aparecer (CLAUDE.md proíbe logar dado sensível, e uuid de
-    // linha não é). Nada mais da chave entra nesta função — por construção, não por cuidado.
+    // linha não é). Nada mais da chave entra nesta função, por construção, não por cuidado.
     const { avisos, avisar } = coletorDeAvisos();
     const { cliente } = clienteFalso(
       Promise.resolve({ data: null, error: { code: '08006', message: 'connection failure' } }),

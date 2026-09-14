@@ -1,7 +1,7 @@
 // Barra fixa de toda tela protegida: em que marca você está e como sair.
 //
 // O nome do tenant fica sempre visível de propósito. Quem trabalha para duas marcas
-// precisa saber, sem clicar em nada, de quem é o catálogo aberto — a alternativa é
+// precisa saber, sem clicar em nada, de quem é o catálogo aberto, a alternativa é
 // descobrir depois de salvar no lugar errado.
 
 import { useSessao } from './useSessao';

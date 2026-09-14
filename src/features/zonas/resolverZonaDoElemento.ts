@@ -1,7 +1,7 @@
 // O caminho inverso do seletor: dado um elemento do SVG, a qual zona ele pertence hoje?
 //
 // Por que existe: o palco precisa dizer "isso já é a zona sola" ANTES de o time marcar de
-// novo, e o contorno precisa saber o que pintar. O perigo é sutil — se a regra de
+// novo, e o contorno precisa saber o que pintar. O perigo é sutil, se a regra de
 // pertencimento daqui divergir da que `gerarVarianteDeCor` usa para pintar, o editor
 // mostra uma zona e a API pinta outra, e o princípio nº1 quebra exatamente onde ninguém
 // olha. Por isso a resolução passa pelo MESMO caminho do motor: `querySelectorAll` do
@@ -18,7 +18,7 @@ export function resolverZonaDoElemento(
 ): string | null {
   const documento = elemento.ownerDocument;
 
-  // `ownerDocument` só é null quando o nó é o próprio Document — nó sem dono não tem
+  // `ownerDocument` só é null quando o nó é o próprio Document, nó sem dono não tem
   // documento onde resolver seletor. Responder "não marcado" é honesto; chutar uma zona
   // pintaria o contorno em cima de um elemento que ninguém marcou.
   if (!documento) return null;
@@ -33,7 +33,7 @@ export function resolverZonaDoElemento(
 /**
  * Todos os elementos do documento que já pertencem a alguma zona → `zone_key`.
  *
- * **Nenhuma tela chama isto hoje** — o palco resolve elemento a elemento, no clique, que é
+ * **Nenhuma tela chama isto hoje**, o palco resolve elemento a elemento, no clique, que é
  * barato porque acontece uma vez por clique. O que a mantém no arquivo é o papel de
  * contraprova: ela compartilha a expansão com `resolverZonaDoElemento`, e o teste exige que
  * as duas respondam a mesma coisa para todo elemento do asset real. Se alguém trocar a
@@ -58,7 +58,7 @@ export function mapaDeZonasPorElemento(
 }
 
 /**
- * Os elementos que a zona captura hoje — a expansão única que as duas funções acima
+ * Os elementos que a zona captura hoje, a expansão única que as duas funções acima
  * compartilham.
  *
  * Sobreposição já é recusada na marcação, então no máximo uma zona casa com um elemento.
@@ -67,7 +67,7 @@ export function mapaDeZonasPorElemento(
  * Quem denuncia o estado inválido é `zonasSobrepostas` / `relatorioDeZonas`, não aqui.
  *
  * Seletor inválido não lança: apenas não contribui com elemento, igual a
- * `zonasSobrepostas.ts`. Resolver "que zona é esta" é leitura de tela — derrubar o palco
+ * `zonasSobrepostas.ts`. Resolver "que zona é esta" é leitura de tela, derrubar o palco
  * inteiro por causa de uma linha quebrada do banco esconderia as zonas que estão certas.
  */
 function alvosDaZona(documento: Document, zona: ZonaDoProduto): Element[] {

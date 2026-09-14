@@ -1,5 +1,5 @@
 /* Estilo das telas de sessão, separado do JSX (regra de white-label do CLAUDE.md).
-   Reusa os tokens declarados em `src/esboco/esboco.css` — quando o design system existir,
+   Reusa os tokens declarados em `src/esboco/esboco.css`, quando o design system existir,
    os valores viram tema por tenant e estes seletores continuam valendo. */
 
 .login,

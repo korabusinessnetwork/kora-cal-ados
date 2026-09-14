@@ -1,5 +1,5 @@
 // O que estes testes protegem: que gerador e validador não divirjam. Se divergirem, toda
-// chave já emitida para de autenticar de uma vez — e o cliente vê a integração cair sem
+// chave já emitida para de autenticar de uma vez, e o cliente vê a integração cair sem
 // que ninguém tenha "mudado" nada. É o defeito mais caro que este módulo pode ter, então
 // o round-trip vem primeiro e é o teste mais importante do arquivo.
 
@@ -45,10 +45,10 @@ describe('gerarChaveDeApi + interpretarChaveDeApi (round-trip)', () => {
   });
 });
 
-describe('segredo com `_` dentro — o modo de falha intermitente', () => {
+describe('segredo com `_` dentro, o modo de falha intermitente', () => {
   // O alfabeto base64url inclui `_`, que é também o separador do formato. Um validador
   // escrito como `split('_')` exigindo 4 partes recusaria cerca de metade das chaves,
-  // sorteadas — passaria em qualquer teste feito com uma chave só e quebraria em produção
+  // sorteadas, passaria em qualquer teste feito com uma chave só e quebraria em produção
   // sem padrão visível. Estes dois testes existem para essa leitura nunca voltar.
   it('lê de volta 200 chaves geradas, e pelo menos uma delas tem `_` no segredo', () => {
     const geradas = Array.from({ length: 200 }, () => gerarChaveDeApi('live'));
@@ -60,7 +60,7 @@ describe('segredo com `_` dentro — o modo de falha intermitente', () => {
     }
 
     // Canário: se o formato do segredo mudar para um alfabeto sem `_` (hex, por exemplo),
-    // esta expectativa cai e avisa que o teste acima parou de exercitar o caso difícil —
+    // esta expectativa cai e avisa que o teste acima parou de exercitar o caso difícil,
     // em vez de continuar verde sem testar nada.
     const comUnderscore = geradas.filter(
       (g) => (interpretarChaveDeApi(g.chave)?.segredo ?? '').includes('_'),
@@ -86,7 +86,7 @@ describe('interpretarChaveDeApi recusa', () => {
   it.each([
     ['string vazia', ''],
     ['só o produto', 'kora'],
-    ['três pedaços — falta o segredo', `kora_live_7f3ab902`],
+    ['três pedaços, falta o segredo', `kora_live_7f3ab902`],
     ['produto errado', `stripe_live_7f3ab902_${segredo}`],
     ['ambiente desconhecido', `kora_prod_7f3ab902_${segredo}`],
     ['ambiente em caixa alta', `kora_LIVE_7f3ab902_${segredo}`],
@@ -107,7 +107,7 @@ describe('interpretarChaveDeApi recusa', () => {
     ['undefined', undefined],
     ['número', 12345],
     ['objeto', { chave: `kora_live_7f3ab902_${segredo}` }],
-  ])('recusa %s sem lançar — entrada de rede vira 401, não exceção', (_caso, entrada) => {
+  ])('recusa %s sem lançar, entrada de rede vira 401, não exceção', (_caso, entrada) => {
     expect(() => interpretarChaveDeApi(entrada)).not.toThrow();
     expect(interpretarChaveDeApi(entrada)).toBeNull();
   });

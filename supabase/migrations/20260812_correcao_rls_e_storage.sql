@@ -1,4 +1,4 @@
--- Kora Calçados — correção de RLS, papéis e Storage
+-- Kora Calçados, correção de RLS, papéis e Storage
 -- Fecha BUG-006 (recursão), BUG-007 (sem caminho de escrita), BUG-008 (Storage sem
 -- policy) e BUG-009 (papel decorativo). Contexto e alternativas em
 -- docs/11_SEGURANCA/proposta-correcao-rls.md.
@@ -8,7 +8,7 @@
 -- URL assinada de asset com 300s.
 --
 -- APLICADA em 2026-09-05, no projeto Supabase real. Provado por
--- `supabase/tests/isolamento.test.ts` rodando 8/8 verde contra ele — que é exatamente o
+-- `supabase/tests/isolamento.test.ts` rodando 8/8 verde contra ele, que é exatamente o
 -- que fecha BUG-006..009.
 --
 -- Este bloco dizia "AINDA NÃO FOI EXECUTADO em nenhum banco" até 2026-09-08, quatro dias
@@ -20,7 +20,7 @@
 
 -- ── 1. Helpers sem recursão ─────────────────────────────────────────────
 -- security definer: a função roda com os privilégios do dono, então o select interno
--- NÃO reaplica a RLS de tenant_members — que chama esta mesma função. Sem isso,
+-- NÃO reaplica a RLS de tenant_members, que chama esta mesma função. Sem isso,
 -- Postgres aborta com 42P17 (infinite recursion detected in policy).
 -- search_path fixo: security definer sem search_path é vetor de escalonamento.
 create or replace function auth_tenant_ids()
@@ -92,7 +92,7 @@ create policy "membro edita produto do proprio tenant"
   using (tenant_id in (select auth_tenant_ids()))
   with check (tenant_id in (select auth_tenant_ids()));
 
--- Apagar produto destrói o mapeamento de zonas do time inteiro — só owner.
+-- Apagar produto destrói o mapeamento de zonas do time inteiro, só owner.
 create policy "owner apaga produto"
   on products for delete to authenticated
   using (tenant_id in (select auth_owner_tenant_ids()));
@@ -128,7 +128,7 @@ create policy "owner apaga variante"
   on variants for delete to authenticated
   using (tenant_id in (select auth_owner_tenant_ids()));
 
--- ── 8. Storage — bucket privado particionado por tenant ─────────────────
+-- ── 8. Storage, bucket privado particionado por tenant ─────────────────
 -- Path canônico: tenants/{tenant_id}/products/{product_id}/base.svg
 -- storage.foldername(name) => {tenants, <tenant_id>, products, <product_id>}
 --
@@ -136,7 +136,7 @@ create policy "owner apaga variante"
 -- em vez de estourar erro de cast.
 --
 -- O SRF aparece dentro de FROM (não `auth_tenant_ids()::text` no SELECT) porque
--- Postgres só aceita função que retorna conjunto no topo do SELECT — com um cast em
+-- Postgres só aceita função que retorna conjunto no topo do SELECT, com um cast em
 -- volta, o comando falha.
 insert into storage.buckets (id, name, public)
 values ('assets-base', 'assets-base', false)

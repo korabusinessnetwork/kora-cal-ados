@@ -1,4 +1,4 @@
-/* Estilo do editor de zonas, separado do JSX (white-label — CLAUDE.md). Só tokens:
+/* Estilo do editor de zonas, separado do JSX (white-label, CLAUDE.md). Só tokens:
    nenhuma cor de marca mora aqui, porque o tema vem do tenant e dois concorrentes usam
    a mesma tela.
 
@@ -6,17 +6,17 @@
 
    1. O DESENHO NÃO RECEBE FILTRO, SOMBRA, `opacity` NEM OVERLAY (design system, itens 6
       e 7). O que aparece no palco é o pixel que a API devolve. Se o CSS clarear o
-      calçado em 5%, o time aprova uma cor e o cliente recebe outra — e ninguém descobre
+      calçado em 5%, o time aprova uma cor e o cliente recebe outra, e ninguém descobre
       pelo código, só pela devolução do pedido. Por isso o realce de seleção é uma CAMADA
       por cima (`.palco__contorno`), nunca uma mudança no elemento da zona.
    2. O contorno não pode roubar o clique de quem está embaixo (`pointer-events: none`):
       clicar no realce da zona sola precisa continuar sendo clicar na sola.
    3. Estado desabilitado se anuncia pelo cursor e pela borda, NUNCA por filtro sobre o
-      calçado — ver regra 1: "não dá para clicar agora" não pode custar fidelidade de cor.
+      calçado, ver regra 1: "não dá para clicar agora" não pode custar fidelidade de cor.
 
    O fundo claro do palco (#f4f4f2) repete o de `produtos.css`/`esboco.css` de propósito
    e NÃO é token de tema: é papel neutro para a arte do cliente. Um tenant de marca escura
-   pintaria o fundo atrás do calçado e mudaria a cor percebida da variante — o mesmo
+   pintaria o fundo atrás do calçado e mudaria a cor percebida da variante, o mesmo
    defeito da regra 1, por outro caminho. Vira `--cor-palco-fundo` quando
    `docs/02_DESIGN_SYSTEM/` existir; o nome muda, a decisão não. */
 
@@ -62,7 +62,7 @@
    Desde a Etapa 5 a moldura do palco no editor (papel claro, borda, raio, respiro) mora
    SÓ aqui: `.produto__palco` deixou de existir, e com ela a regra que neutralizava esta
    caixa para não somar duas bordas e dois paddings. Se a moldura voltar a ser declarada
-   em outro arquivo, a neutralização volta a ser necessária — foi assim que ela nasceu. */
+   em outro arquivo, a neutralização volta a ser necessária, foi assim que ela nasceu. */
 .palco {
   position: relative;
   padding: 24px;
@@ -126,10 +126,10 @@
 /* O modificador entra no grupo, e não só como classe extra do bloco, para a camada de
    foco continuar sobre o desenho mesmo se o componente algum dia render só
    `palco__contorno--foco`. Camada de realce fora de posição é traço apontando para o
-   elemento errado — o modo de falha que o princípio nº1 existe para impedir. */
+   elemento errado, o modo de falha que o princípio nº1 existe para impedir. */
 .palco > .palco__contorno--foco {
   /* Mesma célula do desenho e `inset: 0`: a caixa do contorno passa a ser EXATAMENTE a
-     caixa do desenho — é isso que faz o traço cair em cima do elemento certo, e não a
+     caixa do desenho, é isso que faz o traço cair em cima do elemento certo, e não a
      alguns pixels dele. (Filho absoluto de um grid usa a própria célula como bloco
      contêiner; o `position: relative` do `.palco` é o que fecha essa conta.)
      Absoluto também tira o contorno do dimensionamento da célula: no fluxo, um `<svg>`
@@ -142,7 +142,7 @@
   pointer-events: none;
 }
 
-/* O realce é STROKE, nunca fill: preencher a cópia esconderia a cor real da zona — que é
+/* O realce é STROKE, nunca fill: preencher a cópia esconderia a cor real da zona, que é
    justamente o que o time está aprovando na tela. */
 .palco__contorno use,
 .palco__contorno--foco use {
@@ -157,11 +157,11 @@
 /* Segunda camada: a zona em FOCO no painel (a pessoa passou o mouse ou selecionou a
    linha), que pode aparecer ao mesmo tempo que a marcação em curso.
    As duas se distinguem por TRAÇO, não por cor: tracejado largo × contínuo fino. Separar
-   por matiz — verde de foco, azul de marcação — morreria no primeiro tenant que trocasse
+   por matiz, verde de foco, azul de marcação, morreria no primeiro tenant que trocasse
    a paleta, e num tema de baixo contraste as duas camadas viram a mesma linha colorida.
    O padrão do traço não depende de token nenhum, então sobrevive a qualquer marca.
    Mesmas garantias da primeira camada: `pointer-events: none` e `inset: 0` (herdados do
-   grupo acima), `fill: none` aqui, e ZERO filtro, sombra ou opacidade sobre o desenho —
+   grupo acima), `fill: none` aqui, e ZERO filtro, sombra ou opacidade sobre o desenho,
    realçar não pode alterar um byte do que a API devolve (regra 1 do topo do arquivo). */
 .palco__contorno--foco use {
   stroke-width: 3;
@@ -173,7 +173,7 @@
 
 /* ── Palco desabilitado ────────────────────────────────────────────────────
    Sem `filter`, sem `opacity` e sem véu sobre o desenho (regra 3). O sinal é a borda
-   tracejada e o cursor — o calçado continua mostrando a cor exata da API. */
+   tracejada e o cursor, o calçado continua mostrando a cor exata da API. */
 .palco--desabilitado {
   /* `outline` e não `border`: a borda do palco pode ser neutralizada por quem o embute
      (era o caso de `.produto__palco` até a Etapa 5), e o aviso de "não dá para clicar" não
@@ -222,11 +222,11 @@
 }
 .zona-form__campo input:disabled { opacity: 0.55; }
 /* `aria-invalid` em vez de uma classe extra: o mesmo atributo que o leitor de tela usa é
-   o que pinta a borda — não dá para a tela ficar vermelha sem o campo estar inválido. */
+   o que pinta a borda, não dá para a tela ficar vermelha sem o campo estar inválido. */
 .zona-form__campo input[aria-invalid='true'] { border-color: var(--cor-erro); }
 
 /* `zone_key` e `cor_default` em monoespaçado: os dois são valores literais que viajam
-   para a API, e `#C0392B` ou `ilhos-2` em fonte de texto confundem 0/O e 1/l — um
+   para a API, e `#C0392B` ou `ilhos-2` em fonte de texto confundem 0/O e 1/l, um
    caractere errado aqui vira cor errada, ou zona que a integração do cliente não acha. */
 .zona-form__campo input[name='cor_default'],
 .zona-form__campo input[name='zone_key'] {
@@ -240,7 +240,7 @@
   line-height: 1.5;
   color: var(--cor-texto-fraco);
 }
-/* O `<code>` da ajuda mostra o JSON da API e a sugestão de `zone_key` — texto que a
+/* O `<code>` da ajuda mostra o JSON da API e a sugestão de `zone_key`, texto que a
    pessoa vai COPIAR. Monoespaçado é o que deixa `-` e `_` distinguíveis na cópia. */
 .zona-form__ajuda code {
   font-family: var(--fonte-mono);
@@ -274,7 +274,7 @@
 }
 
 /* Quantos elementos entram nesta zona agora. É o número que o time confere antes de
-   gravar — marcar os 8 ilhoses precisa aparecer como 8 —, então ele fica com a cor de
+   gravar, marcar os 8 ilhoses precisa aparecer como 8, então ele fica com a cor de
    texto cheia, não a fraca de ajuda: é informação de conferência, não legenda. */
 .zona-form__contagem {
   margin: 0;
@@ -317,7 +317,7 @@
 
 /* ── Estados compartilhados da feature ─────────────────────────────────────
    Carregando e vazio usam o mesmo desenho (borda tracejada, texto fraco) porque os dois
-   dizem "não há zona na tela agora" — o que muda é a frase, e é a frase que a pessoa lê.
+   dizem "não há zona na tela agora", o que muda é a frase, e é a frase que a pessoa lê.
    Nenhum dos dois é silencioso: sumir com a caixa deixaria a tela igual à de sucesso. */
 .zonas__aviso {
   margin: 0;
@@ -330,7 +330,7 @@
 }
 
 /* Usado das duas formas: direto no `<p role="alert">` (palco e formulário) e como caixa
-   com botão de "tentar de novo". Por isso `margin: 0` mora na própria classe — no `<p>`
+   com botão de "tentar de novo". Por isso `margin: 0` mora na própria classe, no `<p>`
    a margem padrão do navegador ainda vale e empurraria o alerta para cima do desenho. */
 .zonas__erro {
   margin: 0;
@@ -382,7 +382,7 @@
 }
 
 /* Vazio tem o mesmo desenho de `.zonas__aviso` (tracejado, texto fraco) porque diz a mesma
-   coisa — "não há zona aqui" —, mas é caixa própria: `.zonas__aviso` é do palco e da lista
+   coisa, "não há zona aqui", mas é caixa própria: `.zonas__aviso` é do palco e da lista
    de fora do cartão, e reaproveitá-la aqui prenderia o respiro dos dois no mesmo valor. */
 .painel-zonas__vazio {
   margin: 0;
@@ -395,7 +395,7 @@
 }
 
 /* Sem `max-height` e sem rolagem interna, de propósito: com 15 zonas a lista fica longa e
-   a tentação é encaixotá-la, mas zona fora da vista é zona não conferida — e conferir a
+   a tentação é encaixotá-la, mas zona fora da vista é zona não conferida, e conferir a
    contagem antes de existir variante é a razão de este painel existir. A página rola; o
    painel não esconde linha. */
 .painel-zonas__lista {
@@ -422,7 +422,7 @@
   border-radius: 8px;
 }
 
-/* O item em foco se anuncia por DOIS canais independentes: a marca lateral (forma — a
+/* O item em foco se anuncia por DOIS canais independentes: a marca lateral (forma, a
    barra aparece onde antes não havia nada) e o peso do texto, abaixo. Só cor não serve:
    o tema é do tenant e nada garante que o acento dele contraste com a superfície dele.
    Se a paleta engolir a barra, o negrito ainda diz qual linha está destacada no palco. */
@@ -464,7 +464,7 @@
   font-weight: 600;
 }
 
-/* A chave da API tem tratamento de CÓDIGO — monoespaçada, em cápsula, sobre o fundo do
+/* A chave da API tem tratamento de CÓDIGO, monoespaçada, em cápsula, sobre o fundo do
    app. Ela é literal: vai ser copiada para o JSON do pedido, e em fonte de texto `ilhos-1`
    e `ilhos-l` são o mesmo desenho. Rótulo legível e chave técnica não podem parecer a
    mesma coisa; quem confundir os dois manda o rótulo para a API e recebe zona inexistente. */
@@ -489,12 +489,12 @@
   min-width: 0;
   font-size: 13px;
   color: var(--cor-texto);
-  /* `label` é texto livre do cliente — pode vir com uma palavra sem fim. */
+  /* `label` é texto livre do cliente, pode vir com uma palavra sem fim. */
   overflow-wrap: anywhere;
 }
 
 /* Cor de texto cheia, não a fraca de legenda: é o número que o time confere para saber se
-   marcou os 8 ilhoses ou 7 — mesma decisão de `.zona-form__contagem`. */
+   marcou os 8 ilhoses ou 7, mesma decisão de `.zona-form__contagem`. */
 .painel-zonas__contagem {
   grid-column: 2;
   grid-row: 1;
@@ -512,7 +512,7 @@
 
 /* Campo de cor monoespaçado pelo mesmo motivo da chave: `#C0392B` é literal que viaja para
    a API, e um `0`/`O` trocado vira cor errada no calçado. Largura curta porque o conteúdo
-   tem 7 caracteres — campo largo demais sugere que cabe outra coisa ali. */
+   tem 7 caracteres, campo largo demais sugere que cabe outra coisa ali. */
 .painel-zonas__cor {
   width: 100%;
   max-width: 130px;
@@ -528,7 +528,7 @@
 .painel-zonas__cor[aria-invalid='true'] { border-color: var(--cor-erro); }
 
 /* Erro da linha: texto, não caixa. Some 15 zonas e a caixa vermelha por zona viraria uma
-   parede que ninguém lê — o alerta que grita é o de sobreposição, abaixo, que trava a
+   parede que ninguém lê, o alerta que grita é o de sobreposição, abaixo, que trava a
    geração inteira. Este aqui é local e a pessoa corrige na linha em que está. */
 .painel-zonas__erro {
   margin: 0;
@@ -540,7 +540,7 @@
 
 /* Sobreposição é estado INVÁLIDO do mapeamento, não aviso: enquanto existir, gerar
    variante pedindo cor para as duas zonas falha inteiro (BUG-013). Usa os mesmos tokens de
-   erro de `.zonas__erro` e `.zona-form__erro` — vermelho novo aqui faria a tela ter dois
+   erro de `.zonas__erro` e `.zona-form__erro`, vermelho novo aqui faria a tela ter dois
    vermelhos de gravidades diferentes, e aí nenhum dos dois significa nada. */
 .painel-zonas__sobreposicao {
   margin: 0;

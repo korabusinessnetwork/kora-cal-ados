@@ -2,7 +2,7 @@
 //
 // Na Fase 1 a venda é manual e não existe tela de cadastro (decisão registrada em
 // `docs/11_SEGURANCA/proposta-correcao-rls.md`): a policy de INSERT em `tenants` é
-// service_role. Por isso este arquivo vive em `supabase/`, NUNCA em `src/` — nada aqui
+// service_role. Por isso este arquivo vive em `supabase/`, NUNCA em `src/`, nada aqui
 // pode chegar ao bundle do navegador.
 //
 // O SVG é normalizado ANTES de subir, pelo mesmo `normalizarSvg` que o editor e a API
@@ -33,7 +33,7 @@ Uso:
     --produto "Runner 2026" [--svg caminho/do/arquivo.svg]
 
 A senha é obrigatória e escolhida por quem provisiona: o script não inventa nem imprime
-credencial (CLAUDE.md — nunca logar dado sensível).
+credencial (CLAUDE.md, nunca logar dado sensível).
 `;
 
 await principal();
@@ -163,7 +163,7 @@ async function criarTenant(admin: SupabaseClient, args: Argumentos): Promise<str
   return data.id as string;
 }
 
-/** Cria o usuário, ou reaproveita o que já existe — a mesma pessoa pode ter duas marcas. */
+/** Cria o usuário, ou reaproveita o que já existe, a mesma pessoa pode ter duas marcas. */
 async function garantirOwner(
   admin: SupabaseClient,
   args: Argumentos,

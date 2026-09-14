@@ -1,6 +1,6 @@
 // Prende o que o comparativo AFIRMA. Ele existe para provar o BUG-001 lado a lado; se os
 // dois lados não receberem o mesmo pedido de cor, as imagens saem iguais e o painel vira
-// decoração — foi exatamente o defeito encontrado ao abrir a página no navegador.
+// decoração, foi exatamente o defeito encontrado ao abrir a página no navegador.
 //
 // `renderToStaticMarkup` em vez de testing-library: o que precisa ser verificado é o
 // `src` que sai no HTML, e isso não justifica uma dependência nova.
@@ -40,7 +40,7 @@ describe('comparativo de normalização', () => {
     for (const svg of svgs) expect(svg).toContain(AZUL);
   });
 
-  it('só o lado canônico realmente muda de cor — o cru continua preso ao CSS (BUG-001)', () => {
+  it('só o lado canônico realmente muda de cor, o cru continua preso ao CSS (BUG-001)', () => {
     const cores = { ...coresIniciais(), cabedal: AZUL };
     const [cru, canonicoPintado] = svgsRenderizados(
       renderToStaticMarkup(<ComparativoDeNormalizacao cores={cores} svgCanonico={canonico} />),

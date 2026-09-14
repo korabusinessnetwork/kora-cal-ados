@@ -1,6 +1,6 @@
 // De onde o front tira URL e chave do Supabase. Existe separado do cliente porque a
 // pergunta "o ambiente está configurado?" precisa ter resposta ANTES de qualquer tela
-// tentar renderizar — e porque só assim dá para testar a validação sem abrir conexão.
+// tentar renderizar, e porque só assim dá para testar a validação sem abrir conexão.
 //
 // Nada de valor padrão nem de fallback silencioso: app apontando para o projeto errado
 // é pior que app que não sobe. Sem as duas variáveis, a mensagem diz exatamente o que
@@ -48,7 +48,7 @@ export function lerConfiguracaoDoSupabase(
   if (faltando.length > 0) throw new ConfiguracaoAusente(faltando);
 
   // A service_role dá acesso total ignorando RLS. Ela no bundle do navegador entregaria
-  // o banco inteiro — inclusive os dados dos tenants concorrentes — para qualquer um que
+  // o banco inteiro, inclusive os dados dos tenants concorrentes, para qualquer um que
   // abrisse o DevTools. Barrar aqui é barato e o erro é claro; descobrir depois, não.
   if (papelDaChave(anonKey) === 'service_role') {
     throw new Error(
@@ -61,7 +61,7 @@ export function lerConfiguracaoDoSupabase(
   return { url, anonKey };
 }
 
-/** Lê o campo `role` do JWT sem validar assinatura — serve só para recusar a chave errada. */
+/** Lê o campo `role` do JWT sem validar assinatura, serve só para recusar a chave errada. */
 function papelDaChave(chave: string): string | null {
   const corpo = chave.split('.')[1];
   if (!corpo) return null;

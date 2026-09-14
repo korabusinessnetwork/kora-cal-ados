@@ -3,7 +3,7 @@
 // Por que isto é um módulo próprio e não duas funções soltas onde forem usadas: o gerador
 // (script de criação) e o validador (função serverless) rodam em processos diferentes,
 // meses diferentes, e são escritos por agentes diferentes. Se divergirem em um caractere,
-// TODA chave já emitida deixa de autenticar — e a integração do cliente cai sem que nada
+// TODA chave já emitida deixa de autenticar, e a integração do cliente cai sem que nada
 // tenha sido "mudado". Um arquivo, um round-trip testado, nenhuma segunda leitura do
 // formato em lugar nenhum.
 //
@@ -46,7 +46,7 @@ const SEGREDO_VALIDO = new RegExp(`^[A-Za-z0-9_-]{${CARACTERES_DO_SEGREDO}}$`);
 
 /** O que a criação devolve: a chave para mostrar uma vez, e as duas colunas para gravar. */
 export interface ChaveGerada {
-  /** A chave inteira. Só existe neste objeto e no que for impresso — nunca é gravada. */
+  /** A chave inteira. Só existe neste objeto e no que for impresso, nunca é gravada. */
   readonly chave: string;
   readonly ambiente: AmbienteDaChave;
   /** Coluna `prefixo`, em claro. */
@@ -68,12 +68,12 @@ export interface ChaveInterpretada {
  * Serve a `autenticarChaveDeApi`: quando o prefixo não existe no banco, a comparação é
  * feita **mesmo assim**, contra este valor. Sem isso, prefixo inexistente responderia mais
  * rápido que prefixo real com segredo errado, e essa diferença de tempo é um oráculo que
- * diz ao atacante quando ele acertou um prefixo — exatamente o que o ADR-006 quer negar ao
+ * diz ao atacante quando ele acertou um prefixo, exatamente o que o ADR-006 quer negar ao
  * mandar chave revogada e chave inventada responderem igual.
  */
 export const HASH_QUE_NUNCA_CONFERE = '0'.repeat(64);
 
-/** SHA-256 do segredo, em hex. É isto — e só isto — que a coluna `hash` guarda. */
+/** SHA-256 do segredo, em hex. É isto, e só isto, que a coluna `hash` guarda. */
 export function hashDoSegredo(segredo: string): string {
   return createHash('sha256').update(segredo, 'utf8').digest('hex');
 }
@@ -93,19 +93,19 @@ export function gerarChaveDeApi(ambiente: AmbienteDaChave): ChaveGerada {
 
 /**
  * Lê uma chave recebida. Devolve `null` para qualquer coisa que não seja exatamente o
- * formato — nunca lança: quem chama está tratando entrada de rede, e entrada de rede
+ * formato, nunca lança: quem chama está tratando entrada de rede, e entrada de rede
  * malformada é resposta 401, não exceção.
  *
  * **A separação NÃO é `split('_')` em quatro partes**, e este é o ponto do arquivo que mais
  * merece atenção. O alfabeto base64url inclui o próprio `_`, então um segredo legítimo pode
  * conter underscores e produzir cinco, seis ou dez pedaços. Um validador que exigisse
- * "quatro partes" recusaria por volta de uma chave em cada três — de forma intermitente,
+ * "quatro partes" recusaria por volta de uma chave em cada três, de forma intermitente,
  * dependendo de sorte no sorteio, que é o pior modo de falha possível: passa em todo teste
  * escrito à mão e quebra em produção sem padrão visível.
  *
  * Por isso a leitura é posicional: os três primeiros separadores delimitam produto,
  * ambiente e prefixo, e **todo o resto é o segredo**. A ambiguidade some porque o segredo
- * tem tamanho e alfabeto exatos — a estrutura fica determinada mesmo com `_` dentro dele.
+ * tem tamanho e alfabeto exatos, a estrutura fica determinada mesmo com `_` dentro dele.
  */
 export function interpretarChaveDeApi(chave: unknown): ChaveInterpretada | null {
   if (typeof chave !== 'string') return null;

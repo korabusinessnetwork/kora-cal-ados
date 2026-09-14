@@ -1,7 +1,7 @@
 // Provisionamento do cenário do teste de isolamento: dois tenants concorrentes, três
 // usuários. Fica separado das asserções para o teste em si ler como especificação.
 //
-// Usa service_role — por isso vive em supabase/tests/, nunca em src/ (que vai pro
+// Usa service_role, por isso vive em supabase/tests/, nunca em src/ (que vai pro
 // bundle do navegador).
 
 import { readFileSync } from 'node:fs';
@@ -16,7 +16,7 @@ const URL = process.env.SUPABASE_URL ?? '';
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
 const ANON = process.env.SUPABASE_ANON_KEY ?? '';
 
-/** Sem ambiente configurado o teste é pulado, não falha — ver README de supabase/tests/. */
+/** Sem ambiente configurado o teste é pulado, não falha, ver README de supabase/tests/. */
 export const temAmbiente = Boolean(URL && SERVICE_ROLE && ANON);
 
 export const admin = () => createClient(URL, SERVICE_ROLE, { auth: { persistSession: false } });
@@ -26,11 +26,11 @@ export interface Cenario {
   tenantA: string;
   tenantB: string;
   produtoA: string;
-  /** Caminho do asset-base do produto A no Storage — existe de verdade no bucket. */
+  /** Caminho do asset-base do produto A no Storage, existe de verdade no bucket. */
   assetDoProdutoA: string;
   /** owner do tenant A */
   clienteA: SupabaseClient;
-  /** owner do tenant B — a marca concorrente */
+  /** owner do tenant B, a marca concorrente */
   clienteB: SupabaseClient;
   /** membro (não-owner) do tenant A */
   clienteMembroA: SupabaseClient;
@@ -76,7 +76,7 @@ export async function montarCenario(): Promise<Cenario> {
 
   // O produto nasce com um asset-base REAL no Storage. Antes isto era um caminho
   // inventado: o teste de isolamento provava a policy do banco, mas nunca provava que
-  // um concorrente não consegue baixar o arquivo — não havia arquivo para baixar.
+  // um concorrente não consegue baixar o arquivo, não havia arquivo para baixar.
   const productId = crypto.randomUUID();
   const caminhoDoAsset = caminhoDoAssetBase(tenantA, productId);
   const canonico = normalizarSvg(
@@ -132,11 +132,11 @@ export async function limpar(cenario: Cenario): Promise<void> {
 // Semeadura opcional: chaves de API e zonas
 //
 // Nenhuma das duas entra em `montarCenario`. O cenário é compartilhado por quatro arquivos
-// de teste, e um deles (`editorDeZonas.test.ts`) começa contando as zonas do produto —
+// de teste, e um deles (`editorDeZonas.test.ts`) começa contando as zonas do produto,
 // semear por padrão faria a contagem dele mentir. Quem precisa, pede.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Uma chave semeada. `chave` é o texto em claro — só existe aqui e no header do teste. */
+/** Uma chave semeada. `chave` é o texto em claro, só existe aqui e no header do teste. */
 export interface ChaveSemeada {
   readonly id: string;
   readonly prefixo: string;
@@ -155,7 +155,7 @@ export interface ChavesDoCenario {
  *
  * As chaves saem de `gerarChaveDeApi`, e não de string à mão, porque assim o teste também
  * exerce o formato de verdade contra o banco: comprimento do prefixo, comprimento do hash e
- * a unicidade do prefixo. O segredo em claro fica só no objeto devolvido — o que chega à
+ * a unicidade do prefixo. O segredo em claro fica só no objeto devolvido, o que chega à
  * tabela é `prefixo` e `hash`, que é exatamente o que a Etapa 2 promete.
  */
 export async function semearChavesDaApi(cenario: Cenario): Promise<ChavesDoCenario> {
@@ -187,7 +187,7 @@ export async function semearChavesDaApi(cenario: Cenario): Promise<ChavesDoCenar
 /**
  * As `zone_key` que o teste da API usa, com o que cada uma existe para provar.
  *
- * Os seletores saem de `montarSeletorDeZona`, nunca de string escrita à mão — mesma regra do
+ * Os seletores saem de `montarSeletorDeZona`, nunca de string escrita à mão, mesma regra do
  * editor e do produto de demonstração (ADR-005, decisão 2): `svg_selector` tem UMA fonte de
  * formato. Dado de teste montado por outro caminho vira o exemplo que alguém copia.
  */
@@ -197,7 +197,7 @@ export const ZONAS_DO_TESTE_DA_API = {
   cabedal: 'zona-cabedal',
   /** Pintada com gradiente no asset-base: o motor recusa com ZONA_NAO_RECOLORIVEL (409). */
   detalhe: 'zona-detalhe',
-  /** Seletor que não resolve nada no canônico: ZONA_NAO_ENCONTRADA vinda do MOTOR, 409 — e
+  /** Seletor que não resolve nada no canônico: ZONA_NAO_ENCONTRADA vinda do MOTOR, 409, e
    *  não o 422 da pré-checagem, porque a linha existe. É o par que desambigua o código. */
   quebrada: 'zona-que-nao-existe-no-arquivo',
   /** Mesmo elemento da `sola`: pedir as duas juntas dá ZONAS_SOBREPOSTAS (409). */

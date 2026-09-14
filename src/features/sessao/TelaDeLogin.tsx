@@ -1,4 +1,4 @@
-// Entrada do app. Puramente apresentacional — recebe estado e callback, não chama
+// Entrada do app. Puramente apresentacional, recebe estado e callback, não chama
 // Supabase. É o que permite testar os quatro estados obrigatórios (CLAUDE.md) com
 // `renderToStaticMarkup`, sem rede e sem testing-library.
 

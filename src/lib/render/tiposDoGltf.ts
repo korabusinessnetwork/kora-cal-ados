@@ -1,4 +1,4 @@
-// O subconjunto de glTF 2.0 que a normalização precisa enxergar — e só ele.
+// O subconjunto de glTF 2.0 que a normalização precisa enxergar, e só ele.
 //
 // Por que tipos próprios em vez de uma dependência de tipos de glTF: o normalizador toca
 // quatro arrays (`nodes`, `meshes`, `materials`, mais `buffers`/`images` para recusar URI
@@ -7,7 +7,7 @@
 // se perde a extensão que ninguém mapeou. Daí o `[campo: string]: unknown` em cada interface:
 // ele não é preguiça, é a promessa de que o que não entendemos sai como entrou.
 
-/** Uma primitive é a unidade que carrega material — e por isso a unidade que precisa separar. */
+/** Uma primitive é a unidade que carrega material, e por isso a unidade que precisa separar. */
 export interface PrimitivaDoGltf {
   material?: number;
   /** `{ POSITION: 0, NORMAL: 1 }`: nome do atributo para índice de acessor. */
@@ -23,7 +23,7 @@ export interface MalhaDoGltf {
 }
 
 /**
- * Nó da cena. **Endereçável** é o que tem `mesh` — ver `ehEnderecavel` em `normalizarModelo3d`.
+ * Nó da cena. **Endereçável** é o que tem `mesh`, ver `ehEnderecavel` em `normalizarModelo3d`.
  *
  * A transformação aparece aqui porque três módulos precisam dela e por motivos opostos:
  * `deslocarModelo3d` escreve em `translation`, `medidaDoModelo3d` lê `translation` e `scale`
@@ -86,7 +86,7 @@ export interface MaterialDoGltf {
   [campo: string]: unknown;
 }
 
-/** Recurso que pode apontar para fora do arquivo — é o que a recusa de URI externa examina. */
+/** Recurso que pode apontar para fora do arquivo, é o que a recusa de URI externa examina. */
 export interface RecursoComUri {
   uri?: string;
   [campo: string]: unknown;

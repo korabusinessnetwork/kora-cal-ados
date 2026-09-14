@@ -4,7 +4,7 @@
 // vaza para a concorrência. O acesso é por URL assinada, curta, emitida pelo Supabase
 // só se a RLS reconhecer o usuário como membro do tenant dono do path.
 //
-// O caminho vem de `products.base_asset_path` — o que foi gravado de fato. Remontá-lo a
+// O caminho vem de `products.base_asset_path`, o que foi gravado de fato. Remontá-lo a
 // partir dos ids parece equivalente e não é: bastaria o formato mudar uma vez para o
 // front pedir um objeto que não existe, ou pior, o objeto de outro produto.
 
@@ -39,7 +39,7 @@ export async function baixarAssetBase(
     // servidor traz `status` (403, 404…); a de rede não traz nada além da mensagem que o
     // navegador escreveu, em inglês. Classificar por texto quebraria com a locale, e é
     // como `Failed to fetch` continuava chegando à tela mesmo depois da primeira correção
-    // do BUG-016 — a rede caía ANTES do `fetch` deste arquivo, aqui dentro do supabase-js.
+    // do BUG-016, a rede caía ANTES do `fetch` deste arquivo, aqui dentro do supabase-js.
     const status = (error as { status?: number }).status;
 
     throw new Error(
@@ -55,7 +55,7 @@ export async function baixarAssetBase(
   try {
     resposta = await fetch(data.signedUrl);
   } catch {
-    // `fetch` REJEITA — não devolve `!ok` — quando a rede cai, o DNS falha ou o pedido é
+    // `fetch` REJEITA, não devolve `!ok`, quando a rede cai, o DNS falha ou o pedido é
     // bloqueado. O tratamento abaixo nunca cobriu esse caminho, e o `TypeError: Failed to
     // fetch` do navegador ia inteiro para a tela, em inglês, sem dizer o que fazer
     // (BUG-016). É justamente o caso mais provável dos dois.
@@ -74,7 +74,7 @@ export async function baixarAssetBase(
 
   // Download que dá certo e traz nada é a pior das falhas possíveis aqui, porque ela não parece
   // falha: `estado` virava `pronto`, `VisualizacaoDoProduto` revelava a área, e o editor se
-  // recusava a montar sem `svg` — a pessoa ficava olhando um painel branco, sem erro e sem o
+  // recusava a montar sem `svg`, a pessoa ficava olhando um painel branco, sem erro e sem o
   // botão de tentar de novo, que só aparece no estado de erro. É exatamente o defeito silencioso
   // que o princípio nº1 persegue, e é barato de acontecer: objeto de 0 byte no bucket, upload
   // truncado, ou uma página de erro guardada no lugar do desenho.

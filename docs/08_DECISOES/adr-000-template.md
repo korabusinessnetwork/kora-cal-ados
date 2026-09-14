@@ -1,4 +1,4 @@
-# ADR-NNN — TÍTULO DESCRITIVO
+# ADR-NNN, TÍTULO DESCRITIVO
 
 **Status**: Proposto | Aceito | Supersedido  
 **Data**: AAAA-MM-DD  
@@ -81,9 +81,9 @@ Liste alternativas avaliadas e por que foram descartadas.
 
 - [Supabase Docs](https://supabase.com/docs)
 - [PostgreSQL RLS](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
-- [ADR-001 — Autenticação: Clerk vs Auth0](./adr-001-autenticacao.md) — depende desta decisão
-- `docs/04_MODELAGEM/multi-tenancy.md` — como RLS isolará tenants
-- `memory/restrictions.md` — restrições de custo que influenciaram decisão
+- [ADR-001, Autenticação: Clerk vs Auth0](./adr-001-autenticacao.md), depende desta decisão
+- `docs/04_MODELAGEM/multi-tenancy.md`, como RLS isolará tenants
+- `memory/restrictions.md`, restrições de custo que influenciaram decisão
 
 ---
 
@@ -104,5 +104,5 @@ Liste alternativas avaliadas e por que foram descartadas.
 4. Submeta para revisão (pull request, discussão de time)
 5. Quando aceita, mude Status para "Aceito"
 6. Se depois for supersedida, crie novo ADR e linkee ambos com "Supersede"/"Supersedido por"
-7. Nunca delete ADRs antigos — marca como histórico
+7. Nunca delete ADRs antigos, marca como histórico
 

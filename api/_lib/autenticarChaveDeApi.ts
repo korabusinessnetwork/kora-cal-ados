@@ -1,14 +1,14 @@
 // `Request` → `tenant_id`, ou 401. É o ponto único do ADR-006 D3, e a única razão de ele
 // existir é que daqui para a frente o Postgres para de proteger: a consulta seguinte roda com
 // `service_role`, que bypassa a RLS. O `tenant_id` que sai desta função é o escopo inteiro do
-// resto da requisição — se ele vier errado, o handler entrega o produto da marca concorrente
+// resto da requisição, se ele vier errado, o handler entrega o produto da marca concorrente
 // e o código parecerá correto (`api/README.md`).
 //
 // POR QUE A FUNÇÃO RECEBE O `Request` INTEIRO, E NÃO SÓ OS HEADERS. Porque uma das regras do
 // contrato não é sobre o header: chave em query string é **recusada**
 // (`docs/07_APIS/endpoints.md`, `docs/07_APIS/autenticacao.md`), e essa regra só pode existir
 // aqui dentro se este módulo enxergar a URL. Recebendo só os headers, a recusa teria de morar
-// no handler — e regra de credencial escrita num segundo lugar é a regra que se esquece de
+// no handler, e regra de credencial escrita num segundo lugar é a regra que se esquece de
 // escrever na terceira rota, ou que se escreve num ramo que um `return` anterior nunca
 // alcança. Uma porta de entrada, uma verificação. (É o inverso deliberado de
 // `logDaRequisicao.ts`, que recusa o `Request` justamente para a chave nunca entrar no escopo
@@ -74,7 +74,7 @@ const PARAMETROS_DE_CREDENCIAL: ReadonlySet<string> = new Set([
  * A segunda metade da recusa, e a que a lista de nomes não cobre: `?x=kora_live_...`.
  *
  * Uma lista de nomes só recusa o que já se imaginou; um integrador criativo manda a chave em
- * `?k=`, `?auth=` ou `?cred=` e passaria. O que não muda é o **valor** — a chave começa por
+ * `?k=`, `?auth=` ou `?cred=` e passaria. O que não muda é o **valor**, a chave começa por
  * `kora_live_`/`kora_test_` porque o formato é nosso (`formatoDaChaveDeApi.ts`). Então o
  * valor é o que se examina, sob qualquer nome. Falso positivo aqui é inofensivo: o único
  * parâmetro que a rota aceita é `format=svg`, e nenhum valor legítimo dele contém `kora_live_`.
@@ -89,7 +89,7 @@ interface LinhaDaChave {
 }
 
 /**
- * Autentica a requisição e devolve o escopo dela. Lança `FalhaDaApi` — nunca devolve `null`,
+ * Autentica a requisição e devolve o escopo dela. Lança `FalhaDaApi`, nunca devolve `null`,
  * porque um retorno nulo seria checável com `if` e esquecível sem `if`.
  *
  * As quatro recusas por chave (malformada, prefixo inexistente, segredo errado e revogada)
@@ -110,7 +110,7 @@ export async function autenticarChaveDeApi(
 
   const chave = interpretarChaveDeApi(bruta);
 
-  // Chave malformada não consulta o banco — não há prefixo para consultar —, mas também não
+  // Chave malformada não consulta o banco, não há prefixo para consultar, mas também não
   // sai por um `throw` próprio: ela desce até a MESMA linha de recusa das outras três. O
   // tempo dela é distinguível, e isso é aceitável: o formato da chave é público (está no doc
   // da API), então saber que o formato estava errado não conta nada a quem sonda.
@@ -118,7 +118,7 @@ export async function autenticarChaveDeApi(
 
   // A COMPARAÇÃO ACONTECE SEMPRE, inclusive quando não há linha. Um `return` antecipado aqui
   // faria o prefixo inexistente responder mais rápido que o prefixo real com segredo errado,
-  // e essa diferença é um oráculo que diz ao atacante quando ele acertou um prefixo — o
+  // e essa diferença é um oráculo que diz ao atacante quando ele acertou um prefixo, o
   // mesmo oráculo que a mensagem idêntica existe para fechar.
   const hashRecebido = hashDoSegredo(chave?.segredo ?? '');
   const hashArmazenado =
@@ -134,7 +134,7 @@ export async function autenticarChaveDeApi(
 
   // Linha autenticada mas sem escopo utilizável é defeito nosso, não credencial errada: as
   // duas colunas são `not null` no schema. Devolver `tenantId: ''` daqui abriria uma consulta
-  // sem escopo lá na frente — que é exatamente o vazamento que este módulo existe para negar.
+  // sem escopo lá na frente, que é exatamente o vazamento que este módulo existe para negar.
   if (naoEhTextoUtil(linha.tenant_id) || naoEhTextoUtil(linha.id)) {
     throw criarFalhaDeTransporte('FALHA_INTERNA');
   }
@@ -143,13 +143,13 @@ export async function autenticarChaveDeApi(
 }
 
 /**
- * Recusa antes de qualquer leitura de credencial. `CHAVE_AUSENTE` — e não `CHAVE_INVALIDA` —
+ * Recusa antes de qualquer leitura de credencial. `CHAVE_AUSENTE`, e não `CHAVE_INVALIDA`,
  * porque é o que o contrato escreve em três lugares (`docs/07_APIS/endpoints.md`, tabela de
  * códigos e seção "Autenticação"; `docs/07_APIS/autenticacao.md`), e a mensagem desse código
  * é justamente a instrução que falta a quem errou assim: "envie em Authorization: Bearer".
  *
  * A URL é parseada com base de reserva porque `Request.url` é absoluta por especificação, mas
- * um `Request` montado à mão em teste pode não ser — e falhar a checagem por causa disso
+ * um `Request` montado à mão em teste pode não ser, e falhar a checagem por causa disso
  * abriria a porta que ela fecha.
  */
 function recusarCredencialNaQueryString(url: string): void {
@@ -164,12 +164,12 @@ function recusarCredencialNaQueryString(url: string): void {
 
 /**
  * Erro do banco NÃO é 401. Um Postgres fora do ar respondendo "chave inválida" mandaria o
- * integrador rotacionar uma chave que está correta — e ele passaria o incidente inteiro
+ * integrador rotacionar uma chave que está correta, e ele passaria o incidente inteiro
  * caçando o defeito no lado dele.
  *
  * Por que `criarFalhaDeTransporte('FALHA_INTERNA')` e não "deixar o erro subir": supabase-js
  * devolve o erro como **valor** (`{ data, error }`), não o lança. Não existe erro subindo
- * sozinho — existe um `error` que, se fosse ignorado, deixaria `data` nulo e cairia na recusa
+ * sozinho, existe um `error` que, se fosse ignorado, deixaria `data` nulo e cairia na recusa
  * de chave logo abaixo. Ou seja, o caminho "natural" é exatamente o defeito. O detalhe do
  * Postgres fica fora da `FalhaDaApi` de propósito: a resposta vai para o sistema de outra
  * marca, e mensagem de exceção carrega nome de coluna e caminho de arquivo.
@@ -189,7 +189,7 @@ async function buscarLinhaDaChave(
 }
 
 /**
- * `timingSafeEqual` LANÇA quando os buffers têm tamanhos diferentes — e uma exceção aqui
+ * `timingSafeEqual` LANÇA quando os buffers têm tamanhos diferentes, e uma exceção aqui
  * viraria 500 onde o contrato promete 401, além de o próprio lançamento denunciar, pelo
  * tempo, que os tamanhos diferiam. Por isso o tamanho é conferido antes, e o hash lido do
  * banco já chega normalizado para 64 caracteres por `HASH_QUE_NUNCA_CONFERE`: na prática os
